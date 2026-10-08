@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .models import BoutState, GripState, Side
+from .prevention import prevent_negative_effect
 
 
 TRACK_MIN = -3
@@ -91,10 +92,16 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
 
     defending_side = state.opponent_side(side)
     if _has_temporary(state, defending_side, "Hold Position"):
-        state.log(
-            f"Hold Position prevents {state.fighter(side).wrestler.name} from gaining Push."
-        )
-        return
+        if not prevent_negative_effect(
+            state,
+            side,
+            source="Hold Position",
+            description="prevent Push gain",
+        ):
+            state.log(
+                f"Hold Position prevents {state.fighter(side).wrestler.name} from gaining Push."
+            )
+            return
 
     for instance in state.fighter(defending_side).temporary_zone:
         instance.opponent_gained_push_while_active = True
