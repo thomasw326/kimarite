@@ -40,10 +40,12 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
 
     if kind == "momentum":
         state.momentum = clamped
+        state.fighter(side).gained_momentum_this_turn = True
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Momentum.")
         next_kind = "push"
     else:
         state.position = clamped
+        state.fighter(side).gained_push_this_turn = True
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Push.")
         next_kind = "momentum"
 
@@ -83,6 +85,9 @@ def gain_position(state: BoutState, side: Side, amount: int) -> None:
 
 
 def lose_position(state: BoutState, side: Side, amount: int) -> None:
+    if amount < 0:
+        raise ValueError("amount must be non-negative")
+    state.fighter(side).lost_position_this_turn = amount > 0
     gain_position(state, state.opponent_side(side), amount)
 
 
@@ -132,6 +137,7 @@ def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None 
         current = int(getattr(fighter, attr))
         if current > 0:
             setattr(fighter, attr, GripState(current - 1))
+            state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
 
 
 def total_grip(state: BoutState, side: Side) -> int:
