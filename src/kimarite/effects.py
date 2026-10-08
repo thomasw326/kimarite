@@ -56,17 +56,37 @@ class EffectContext:
 ExchangeEffect = Callable[[BoutState, Side, Card, EffectContext], None]
 
 
+def lose_to_empty_draw(state: BoutState, side: Side) -> bool:
+    fighter = state.fighter(side)
+    if fighter.draw_pile:
+        return False
+    state.log(
+        f"{fighter.wrestler.name} attempts to draw from an empty Draw Pile."
+    )
+    state.declare_winner(state.opponent_side(side), "Exhaustion")
+    return True
+
+
 def draw_one(state: BoutState, side: Side) -> Card | None:
     fighter = state.fighter(side)
-    if not fighter.draw_pile:
-        state.log(
-            f"{fighter.wrestler.name} cannot draw because the Draw Pile is empty."
-        )
+    if lose_to_empty_draw(state, side):
         return None
     card = fighter.draw_pile.pop(0)
     fighter.hand.append(card)
     state.log(f"{fighter.wrestler.name} draws {card.name}.")
     return card
+
+
+def draw_from_look(
+    state: BoutState,
+    side: Side,
+    *,
+    look: int,
+    keep: int = 1,
+) -> list[Card]:
+    if lose_to_empty_draw(state, side):
+        return []
+    return ai_look_keep(state.fighter(side), look, keep)
 
 
 def add_play(state: BoutState, side: Side, amount: int = 1) -> None:
@@ -197,7 +217,7 @@ def _stare_down(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     look = 1 + tachiai_comparisons_won(context, side)
-    ai_look_keep(state.fighter(side), look, 1)
+    draw_from_look(state, side, look=look, keep=1)
 
 
 def _belt_slap(
@@ -271,7 +291,7 @@ def _give_ground(
 ) -> None:
     gain_momentum(state, side, 1)
     lose_position(state, side, 1)
-    ai_look_keep(state.fighter(side), 2, 1)
+    draw_from_look(state, side, look=2, keep=1)
 
 
 
