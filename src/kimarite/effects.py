@@ -247,15 +247,10 @@ def _belt_slap(
 
 def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     grip = effective_total_grip(state, side, consume_prevention=True)
-    if grip == 1:
-        gain_push(state, side, 1)
-    elif grip == 2:
-        gain_push(state, side, 2)
-    elif grip == 3:
-        gain_push(state, side, 3)
-    elif grip >= 4:
-        gain_push(state, side, 3)
-        gain_momentum(state, side, 1)
+    amount = min(grip, 3)
+    if amount > 0:
+        gain_push(state, side, amount)
+        gain_momentum(state, side, amount)
 
 
 def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
