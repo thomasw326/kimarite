@@ -113,8 +113,6 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0 or state.winner is not None:
         return
 
-    _break_sidestep_from_push(state, side)
-
     defending_side = state.opponent_side(side)
     if _has_temporary(state, defending_side, "Hold Position"):
         if not prevent_negative_effect(
@@ -127,6 +125,9 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
                 f"Hold Position prevents {state.fighter(side).wrestler.name} from gaining Push."
             )
             return
+
+    # Sidestep only breaks after Push has survived prevention/suppression.
+    _break_sidestep_from_push(state, side)
 
     for instance in state.fighter(defending_side).temporary_zone:
         instance.opponent_gained_push_while_active = True
