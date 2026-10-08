@@ -6,7 +6,7 @@ on:
       bouts_per_orientation:
         description: "Bouts per matchup orientation"
         required: false
-        default: "3"
+        default: "10"
   push:
     paths:
       - ".github/workflows/balance-difficulty-zero.yml"
@@ -22,7 +22,7 @@ jobs:
       - run: python -m pip install -e .
       - name: Run original-15 Difficulty 0 round robin
         run: |
-          python scripts/balance_smoke.py             --roster original             --difficulty 0             --bouts-per-orientation "${{ github.event.inputs.bouts_per_orientation || '3' }}"             --output-dir balance_difficulty_zero
+          python scripts/balance_smoke.py             --roster original             --difficulty 0             --bouts-per-orientation "${{ github.event.inputs.bouts_per_orientation || '10' }}"             --output-dir balance_difficulty_zero
       - uses: actions/upload-artifact@v4
         with:
           name: balance-difficulty-zero
