@@ -119,6 +119,8 @@ def tachiai_comparisons_won(context: EffectContext, side: Side) -> int:
 
 
 def _oshi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_push(state, side, 1)
+    add_play(state, side)
     draw_one(state, side)
     if state.winner is not None:
         return
