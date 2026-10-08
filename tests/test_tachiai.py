@@ -1,10 +1,12 @@
-from kimarite.models import Card, Side, Stat, Wrestler
+from kimarite.models import BoutState, FighterState, Card, Side, Stat, Wrestler
 from kimarite.tachiai import (
     compare_tachiai,
     first_exchange_side,
     push_from_power_advantage,
     spirit_rewards,
     technique_access,
+    technique_thresholds,
+    apply_tachiai_power_push,
 )
 
 
@@ -36,11 +38,38 @@ def test_power_advantage_scaling():
 
 def test_technique_access_scaling():
     assert technique_access(0) == (2, 2)
-    assert technique_access(1) == (3, 2)
-    assert technique_access(2) == (4, 3)
+    assert technique_access(1) == (3, 3)
     assert technique_access(3) == (5, 3)
     assert technique_access(4) == (6, 4)
-    assert technique_access(6) == (8, 5)
+    assert technique_access(6) == (8, 4)
+    assert technique_access(7) == (9, 5)
+    assert technique_access(10) == (12, 6)
+    assert [technique_thresholds(x) for x in range(0, 11)] == [
+        0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4
+    ]
+
+
+def test_technique_push_resistance_example():
+    blank = Card(99, "Blank")
+    a = Wrestler("A", 9, 3, 5, blank, blank, blank)
+    b = Wrestler("B", 3, 9, 5, blank, blank, blank)
+    comparison = compare_tachiai(a, b)
+    state = BoutState(FighterState(a), FighterState(b))
+    winner, push = apply_tachiai_power_push(state, comparison)
+    assert winner is Side.A
+    assert push == 1
+    assert state.position == 1
+
+
+def test_technique_resistance_never_reverses_push():
+    blank = Card(99, "Blank")
+    a = Wrestler("A", 3, 7, 5, blank, blank, blank)
+    b = Wrestler("B", 2, 2, 5, blank, blank, blank)
+    comparison = compare_tachiai(a, b)
+    state = BoutState(FighterState(a), FighterState(b))
+    _, push = apply_tachiai_power_push(state, comparison)
+    assert push == 1
+    assert state.position == 1
 
 
 def test_spirit_reward_scaling():
