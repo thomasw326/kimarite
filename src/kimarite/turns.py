@@ -104,6 +104,7 @@ def reset_turn_events(state: BoutState, side: Side) -> None:
     fighter = state.fighter(side)
     fighter.plays_remaining = 2
     fighter.cards_played_this_turn = 0
+    fighter.played_this_turn.clear()
     fighter.lost_position_this_turn = False
     fighter.opponent_grip_reduced_this_turn = False
     fighter.gained_push_this_turn = False
