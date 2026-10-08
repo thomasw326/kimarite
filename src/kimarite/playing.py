@@ -6,6 +6,7 @@ from .effects import (
     TEMPORARY_CARD_NAMES,
     resolve_exchange_effect,
 )
+from .kimarite_effects import resolve_kimarite_play_effect
 from .models import BoutState, Card, Side
 
 
@@ -32,6 +33,12 @@ def play_card(
 
     if card.is_kimarite:
         fighter.kimarite_zone.append(card)
+        resolve_kimarite_play_effect(
+            state,
+            side,
+            card,
+            context or EffectContext(),
+        )
         return
 
     resolve_exchange_effect(
