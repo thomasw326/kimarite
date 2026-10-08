@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from .models import Card, Stat, Wrestler
 
 
+# Current shuffled AI-vs-AI pool snapshot. IDs match Goldfish Data.
 CARD_POOL: tuple[Card, ...] = (
     Card(1, "Oshi", 1, 0, 0),
     Card(2, "Oshi", 1, 0, 0),
@@ -54,17 +55,44 @@ CARD_POOL: tuple[Card, ...] = (
 )
 
 
+# Starting Kimarite are game definitions, not necessarily present in the
+# current 45-card shuffled pool snapshot. Synthetic IDs are engine-only.
+STARTING_KIMARITE: tuple[Card, ...] = (
+    Card(1001, "Katasukashi", 0, 3, 0, True),
+    Card(1002, "Hikiotoshi", 0, 1, 2, True),
+    Card(1003, "Tottari", 0, 1, 2, True),
+    Card(1004, "Yorikiri", 1, 1, 1, True),
+    Card(1005, "Uwatenage", 0, 2, 1, True),
+    Card(1006, "Hatakikomi", 1, 0, 2, True),
+    Card(1007, "Tsukiotoshi", 0, 0, 3, True),
+    Card(1008, "Tsukitaoshi", 1, 0, 2, True),
+    Card(1009, "Oshidashi", 3, 0, 0, True),
+    Card(1010, "Oshitaoshi", 3, 0, 0, True),
+    Card(1011, "Tsuridashi", 2, 1, 0, True),
+    Card(1012, "Kotenage", 1, 2, 0, True),
+    Card(1013, "Abisetaoshi", 3, 0, 0, True),
+    Card(1014, "Yoritaoshi", 2, 1, 0, True),
+    Card(1015, "Tsukidashi", 1, 0, 2, True),
+)
+
+
 def card_by_id(card_id: int) -> Card:
-    for card in CARD_POOL:
+    for card in (*CARD_POOL, *STARTING_KIMARITE):
         if card.card_id == card_id:
             return card
     raise KeyError(card_id)
 
 
-def card_by_name(name: str) -> Card:
-    for card in CARD_POOL:
-        if card.name == name:
-            return card
+def card_by_name(name: str, *, prefer_starting_kimarite: bool = False) -> Card:
+    groups = (
+        (STARTING_KIMARITE, CARD_POOL)
+        if prefer_starting_kimarite
+        else (CARD_POOL, STARTING_KIMARITE)
+    )
+    for group in groups:
+        for card in group:
+            if card.name == name:
+                return card
     raise KeyError(name)
 
 
@@ -88,7 +116,10 @@ class WrestlerTemplate:
             base_power=self.base_power,
             base_technique=self.base_technique,
             base_spirit=self.base_spirit,
-            starting_kimarite=card_by_name(self.starting_kimarite),
+            starting_kimarite=card_by_name(
+                self.starting_kimarite,
+                prefer_starting_kimarite=True,
+            ),
             prepared_tachiai_card=card_by_name(self.prepared_tachiai_card),
             top_of_deck_card=card_by_name(self.top_of_deck_card),
             primary=self.primary,
