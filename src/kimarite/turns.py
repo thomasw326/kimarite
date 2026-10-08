@@ -9,21 +9,12 @@ from .selection import ai_look_keep
 from .tachiai import TachiaiComparison, spirit_rewards, technique_access
 
 
-class MultipleKimariteChoiceRequired(RuntimeError):
-    def __init__(self, side: Side, cards: list[Card]) -> None:
-        self.side = side
-        self.cards = cards
-        super().__init__(
-            f"Multiple Kimarite satisfied for {side.value}: "
-            + ", ".join(card.name for card in cards)
-        )
-
-
 class TemporaryResolutionRequired(RuntimeError):
     pass
 
 
 TemporaryStartResolver = Callable[[BoutState, Side], None]
+KimariteChoiceResolver = Callable[[BoutState, Side, list[Card]], Card]
 
 
 def prepare_exchange_deck(state: BoutState, side: Side) -> None:
@@ -119,14 +110,30 @@ def reset_turn_events(state: BoutState, side: Side) -> None:
     fighter.gained_momentum_this_turn = False
 
 
-def check_kimarite_zone(state: BoutState, side: Side) -> Card | None:
+def check_kimarite_zone(
+    state: BoutState,
+    side: Side,
+    *,
+    choose_kimarite: KimariteChoiceResolver | None = None,
+) -> Card | None:
+    """Resolve a Kimarite win.
+
+    Satisfied cards are returned in Kimarite Zone order, so the default is the
+    earliest-played satisfied Kimarite. A chooser may override that selection
+    when a later reward layer determines the alternatives have meaningfully
+    different win rewards.
+    """
     cards = satisfied_kimarite(state, side)
     if not cards:
         return None
-    if len(cards) > 1:
-        raise MultipleKimariteChoiceRequired(side, cards)
 
-    card = cards[0]
+    if choose_kimarite is None or len(cards) == 1:
+        card = cards[0]
+    else:
+        card = choose_kimarite(state, side, cards)
+        if card not in cards:
+            raise ValueError("Kimarite chooser must return one of the satisfied cards.")
+
     state.declare_winner(side, card.name)
     return card
 
@@ -137,6 +144,7 @@ def start_exchange_turn(
     comparison: TachiaiComparison,
     *,
     resolve_temporary_start: TemporaryStartResolver | None = None,
+    choose_kimarite: KimariteChoiceResolver | None = None,
 ) -> list[Card]:
     """Run the fixed start-of-turn sequence through card access.
 
@@ -161,7 +169,7 @@ def start_exchange_turn(
         if state.winner is not None:
             return []
 
-    check_kimarite_zone(state, side)
+    check_kimarite_zone(state, side, choose_kimarite=choose_kimarite)
     if state.winner is not None:
         return []
 
@@ -181,9 +189,14 @@ def start_exchange_turn(
     return resolve_turn_card_access(state, side, comparison)
 
 
-def end_exchange_turn(state: BoutState, side: Side) -> Side | None:
+def end_exchange_turn(
+    state: BoutState,
+    side: Side,
+    *,
+    choose_kimarite: KimariteChoiceResolver | None = None,
+) -> Side | None:
     """Check Kimarite, then schedule the next wrestler."""
-    check_kimarite_zone(state, side)
+    check_kimarite_zone(state, side, choose_kimarite=choose_kimarite)
     if state.winner is not None:
         return None
 
