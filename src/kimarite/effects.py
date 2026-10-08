@@ -578,6 +578,23 @@ def _ottsuke(state: BoutState, side: Side, card: Card, context: EffectContext) -
     gain_momentum(state, side, 1)
     gain_push(state, side, 1)
 
+
+def _morozashi(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    fighter = state.fighter(side)
+    if fighter.left_grip is GripState.NONE and fighter.right_grip is GripState.NONE:
+        raise IllegalPlay("Morozashi requires at least one Level 1 Grip.")
+    if fighter.left_grip is GripState.DEEP or fighter.right_grip is GripState.DEEP:
+        raise IllegalPlay("Morozashi requires an existing Level 1 Grip, not only Deep Grip.")
+
+    if fighter.left_grip is GripState.NONE:
+        establish_grip(state, side, "left")
+    elif fighter.right_grip is GripState.NONE:
+        establish_grip(state, side, "right")
+
+    add_temporary(state, side, card, phase="exchange")
+
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Oshi": _oshi,
     "Tsuki": _tsuki,
@@ -610,6 +627,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Regain Balance": _regain_balance,
     "Use the Tawara": _use_the_tawara,
     "Kannuki": _kannuki,
+    "Morozashi": _morozashi,
     "Give Ground": _give_ground,
 }
 
@@ -634,7 +652,6 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
 UNIMPLEMENTED_TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
         "Sidestep",
-        "Morozashi",
     }
 )
 
