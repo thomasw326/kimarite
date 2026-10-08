@@ -400,6 +400,19 @@ def live_kimarite_progress(state: BoutState, side: Side) -> float:
     return values[0] + (values[1] * 0.15 if len(values) > 1 else 0.0)
 
 
+def next_turn_kimarite_state(state: BoutState, side: Side) -> BoutState:
+    """Clone state with that wrestler's turn-local flags reset."""
+    trial = deepcopy(state)
+    fighter = trial.fighter(side)
+    fighter.cards_played_this_turn = 0
+    fighter.played_this_turn.clear()
+    fighter.lost_position_this_turn = False
+    fighter.opponent_grip_reduced_this_turn = False
+    fighter.gained_push_this_turn = False
+    fighter.gained_momentum_this_turn = False
+    return trial
+
+
 def score_state(state: BoutState, side: Side) -> float:
     if state.winner is side:
         return 1_000_000.0
@@ -420,18 +433,22 @@ def score_state(state: BoutState, side: Side) -> float:
     score += fighter.plays_remaining * 0.5
 
     own_progress = live_kimarite_progress(state, side)
+    opponent_side = state.opponent_side(side)
+    opponent_future = next_turn_kimarite_state(state, opponent_side)
     opponent_progress = live_kimarite_progress(
-        state,
-        state.opponent_side(side),
+        opponent_future,
+        opponent_side,
     )
     score += own_progress * 75
     score -= opponent_progress * 55
 
-    # A satisfied Kimarite at the current check is effectively decisive.
+    # A satisfied own Kimarite is decisive at this turn's check. Opponent
+    # threat is evaluated after clearing turn-local conditions that will reset
+    # before their next start-of-turn check.
     try:
         if satisfied_kimarite(state, side):
             score += 100_000
-        if satisfied_kimarite(state, state.opponent_side(side)):
+        if satisfied_kimarite(opponent_future, opponent_side):
             score -= 5_000
     except KeyError:
         pass
