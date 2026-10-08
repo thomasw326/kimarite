@@ -54,7 +54,7 @@ def test_shiko_stomp_prepared_card_starts_in_temporary_and_persists():
     bout = create_prepared_bout(
         BoutConfig(
             FighterConfig("Hoshoryu", 13, ranking=1),
-            FighterConfig("Asakoryu", 14, ranking=2),
+            FighterConfig("Hoshoryu", 14, ranking=2),
         )
     )
     state = bout.state
