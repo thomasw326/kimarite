@@ -86,9 +86,34 @@ def lose_momentum(state: BoutState, side: Side, amount: int) -> None:
     gain_momentum(state, state.opponent_side(side), amount)
 
 
+def _break_sidestep_from_push(state: BoutState, side: Side) -> None:
+    """A Push against Side-by-Side breaks Sidestep before that Push resolves."""
+    owner = state.side_by_side_owner
+    if owner is None or owner is side:
+        return
+
+    distance = state.side_by_side_distance
+    state.position = state.sign(side) * distance
+    state.side_by_side_owner = None
+    state.side_by_side_distance = 0
+
+    fighter = state.fighter(owner)
+    for instance in list(fighter.temporary_zone):
+        if instance.card.name == "Sidestep":
+            fighter.temporary_zone.remove(instance)
+            fighter.discard_pile.append(instance.card)
+            state.log(
+                f"{state.fighter(side).wrestler.name}'s Push breaks Sidestep; "
+                f"{state.fighter(side).wrestler.name} takes the favorable orientation."
+            )
+            break
+
+
 def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0 or state.winner is not None:
         return
+
+    _break_sidestep_from_push(state, side)
 
     defending_side = state.opponent_side(side)
     if _has_temporary(state, defending_side, "Hold Position"):
