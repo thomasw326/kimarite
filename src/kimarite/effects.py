@@ -216,6 +216,12 @@ def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -
     add_temporary(state, side, card, phase="exchange")
 
 
+def _shikiri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_momentum(state, side, 1)
+    if tachiai_advantage(context, side, Stat.TECHNIQUE) >= 3:
+        gain_push(state, side, 1)
+
+
 def _salt_throw(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
@@ -659,6 +665,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Attempt Deep Outside Grip": _attempt_deep_outside,
     "Attempt Deep Inside Grip": _attempt_deep_inside,
     "Salt Throw": _salt_throw,
+    "Shikiri": _shikiri,
     "Stare Down": _stare_down,
     "Power Water": _power_water,
     "Belt Slap": _belt_slap,
