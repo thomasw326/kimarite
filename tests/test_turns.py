@@ -87,3 +87,48 @@ def test_spirit_advantage_six_gives_momentum_and_queues_bonus_turn():
     assert reward == (1, 1)
     assert bout.momentum == 1
     assert bout.fighter_a.bonus_turns_queued == 1
+
+
+def test_spirit_momentum_resolves_before_start_kimarite_check():
+    kimarite = Card(5000, "Yorikiri", power=1, technique=1, spirit=1, is_kimarite=True)
+    prepared_a = Card(5001, "Prepared A", spirit=3)
+    prepared_b = Card(5002, "Prepared B")
+    top = Card(5003, "Top")
+    a = Wrestler("A", 0, 0, 0, kimarite, prepared_a, top)
+    b = Wrestler("B", 0, 0, 0, Card(5004, "Tsukitaoshi", is_kimarite=True), prepared_b, top)
+
+    fighter_a = FighterState(
+        a,
+        draw_pile=[Card(1, "One"), Card(2, "Two")],
+        kimarite_zone=[kimarite],
+    )
+    fighter_a.left_grip = __import__("kimarite.models", fromlist=["GripState"]).GripState.GRIP
+    fighter_a.right_grip = __import__("kimarite.models", fromlist=["GripState"]).GripState.GRIP
+    bout = BoutState(fighter_a, FighterState(b, draw_pile=[Card(3, "Three")]))
+    bout.position = 2
+    comparison = compare_tachiai(a, b)
+
+    from kimarite.turns import start_exchange_turn
+    start_exchange_turn(bout, Side.A, comparison)
+
+    assert bout.momentum == 1
+    assert bout.winner is Side.A
+    assert bout.win_method == "Yorikiri"
+    assert bout.fighter_a.hand == []
+
+
+def test_spirit_bonus_turn_is_taken_before_opponent_turn():
+    a = make_wrestler("A", 0, 6, Stat.SPIRIT, Stat.POWER)
+    b = make_wrestler("B", 0, 0, Stat.SPIRIT, Stat.POWER)
+    bout = BoutState(
+        FighterState(a, draw_pile=[Card(i, str(i)) for i in range(1, 7)]),
+        FighterState(b, draw_pile=[Card(i, str(i)) for i in range(10, 16)]),
+    )
+    comparison = compare_tachiai(a, b)
+
+    from kimarite.turns import end_exchange_turn, start_exchange_turn
+    start_exchange_turn(bout, Side.A, comparison)
+    next_side = end_exchange_turn(bout, Side.A)
+
+    assert next_side is Side.A
+    assert bout.fighter_a.bonus_turns_queued == 0
