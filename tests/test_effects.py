@@ -19,14 +19,14 @@ def bout_with_hand(cards):
     )
 
 
-def test_oshi_draws_and_discards_without_push_or_play():
+def test_oshi_push_play_draw_and_discard():
     oshi = card_by_name("Oshi")
     bout = bout_with_hand([oshi])
 
     play_card(bout, Side.A, oshi)
 
-    assert bout.position == 0
-    assert bout.fighter_a.plays_remaining == 1
+    assert bout.position == 1
+    assert bout.fighter_a.plays_remaining == 2
     assert bout.fighter_a.cards_played_this_turn == 1
     assert bout.fighter_a.hand == []
     assert [c.name for c in bout.fighter_a.discard_pile] == ["Draw A", "Oshi"]
@@ -42,9 +42,9 @@ def test_tsuppari_chains_after_oshi():
     play_card(bout, Side.A, tsuppari)
 
     assert bout.momentum == 1
-    assert bout.position == 1
+    assert bout.position == 2
     assert [c.name for c in bout.fighter_a.played_this_turn] == ["Oshi", "Tsuppari"]
-    assert bout.fighter_a.plays_remaining == 1
+    assert bout.fighter_a.plays_remaining == 2
 
 
 def test_tsuki_requires_choice_only_when_both_opposing_grips_exist():
