@@ -15,3 +15,32 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e ".[dev]"
       - run: pytest -q
+
+  big-test:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/personality-first-ai'
+    needs: pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        batch_id: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Execute seeded round robin
+        run: |
+          python scripts/big_test.py \
+            --batch-id ${{ matrix.batch_id }} \
+            --repetitions 1 \
+            --output-dir "big_test_artifacts/batch_${{ matrix.batch_id }}"
+      - name: Save batch data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: big-test-108-batch-${{ matrix.batch_id }}
+          path: big_test_artifacts/
