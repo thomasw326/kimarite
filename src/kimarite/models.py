@@ -102,6 +102,7 @@ class BoutState:
     turn_number: int = 0
     winner: Side | None = None
     win_method: str | None = None
+    win_source: str | None = None
     card_plays: list[tuple[Side, str]] = field(default_factory=list)
     kimarite_removals: list[tuple[Side, str]] = field(default_factory=list)
     temporary_outcomes: list[tuple[Side, str, str]] = field(default_factory=list)
