@@ -71,8 +71,7 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
             )
             return
 
-        method = "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi"
-        state.declare_winner(side, method)
+        state.declare_winner(side, "Ringout")
         return
 
     _resolve_shared_track_gain(state, side, excess, next_kind)

@@ -52,6 +52,14 @@ CARD_POOL: tuple[Card, ...] = (
     Card(43, "Give Ground", 1, 0, 2),
     Card(44, "Uwatenage", 0, 2, 1, True),
     Card(45, "Hatakikomi", 1, 0, 2, True),
+    Card(46, "Katasukashi", 0, 3, 0, True),
+    Card(47, "Hikiotoshi", 0, 1, 2, True),
+    Card(48, "Tottari", 0, 1, 2, True),
+    Card(49, "Tsukiotoshi", 0, 0, 3, True),
+    Card(50, "Tsukitaoshi", 1, 0, 2, True),
+    Card(51, "Tsuridashi", 2, 1, 0, True),
+    Card(52, "Kotenage", 1, 2, 0, True),
+    Card(53, "Abisetaoshi", 3, 0, 0, True),
 )
 
 

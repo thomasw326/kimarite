@@ -23,6 +23,7 @@ class BoutRecord:
     completed: bool
     winner: str | None
     win_method: str | None
+    win_source: str | None
     turns: int
     cards_played_a: tuple[str, ...]
     cards_played_b: tuple[str, ...]
@@ -129,6 +130,7 @@ def run_series(
                 completed=result.completed,
                 winner=winner,
                 win_method=state.win_method,
+                win_source=state.win_source,
                 turns=result.turns,
                 cards_played_a=tuple(
                     name for side, name in state.card_plays if side is Side.A

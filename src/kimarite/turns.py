@@ -148,6 +148,7 @@ def check_kimarite_zone(
     if card.name in grip_win_cards and grip_benefits_suppressed(state, side):
         effective_total_grip(state, side, consume_prevention=True)
 
+    state.win_source = "kimarite_zone"
     state.declare_winner(side, card.name)
     return card
 

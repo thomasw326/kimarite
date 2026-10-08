@@ -25,7 +25,6 @@ def build_seeded_deck(
     """
     excluded_ids = excluded_ids or set()
     reserved_names = {
-        wrestler.starting_kimarite.name,
         wrestler.prepared_tachiai_card.name,
         wrestler.top_of_deck_card.name,
     }

@@ -35,7 +35,7 @@ def test_push_overflow_converts_to_momentum():
     assert bout.winner is None
 
 
-def test_overflow_loop_without_grip_is_oshidashi():
+def test_overflow_loop_without_grip_is_ringout():
     bout = state()
     bout.position = 3
     bout.momentum = 3
@@ -43,10 +43,10 @@ def test_overflow_loop_without_grip_is_oshidashi():
     gain_push(bout, Side.A, 1)
 
     assert bout.winner is Side.A
-    assert bout.win_method == "Oshidashi"
+    assert bout.win_method == "Ringout"
 
 
-def test_overflow_loop_with_grip_is_yorikiri():
+def test_overflow_loop_with_grip_is_also_ringout():
     bout = state()
     bout.position = 3
     bout.momentum = 3
@@ -55,7 +55,7 @@ def test_overflow_loop_with_grip_is_yorikiri():
     gain_momentum(bout, Side.A, 1)
 
     assert bout.winner is Side.A
-    assert bout.win_method == "Yorikiri"
+    assert bout.win_method == "Ringout"
 
 
 def test_shared_tracks_are_symmetric_for_side_b():
