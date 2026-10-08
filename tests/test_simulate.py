@@ -27,11 +27,12 @@ def test_known_fujinokawa_tochinoshin_case_completes_autonomously():
 
 
 def test_known_manual_fujinokawa_tochinoshin_case_is_documented():
-    """Keep this seed as a regression fixture without forcing the old manual winner.
+    """Keep this seed as a deterministic regression fixture.
 
-    The current AI finds an Ottsuke line that removes Tochinoshin's starting
-    Tsuridashi. Whether starting Kimarite are removable is a pending design
-    ruling, so the fixture currently verifies deterministic completion only.
+    Starting Kimarite are fair game for Exchange interaction, so the AI's
+    Ottsuke removal of Tochinoshin's starting Tsuridashi is rules-legal.
+    This fixture verifies deterministic completion without forcing the earlier
+    manual winner, which used a different legal choice.
     """
     result = run_bout(
         BoutConfig(
