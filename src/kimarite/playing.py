@@ -1,0 +1,38 @@
+from __future__ import annotations
+
+from .effects import EffectContext, IllegalPlay, resolve_exchange_effect
+from .models import BoutState, Card, Side
+
+
+def play_card(
+    state: BoutState,
+    side: Side,
+    card: Card,
+    *,
+    context: EffectContext | None = None,
+) -> None:
+    fighter = state.fighter(side)
+    if state.winner is not None:
+        raise IllegalPlay("The bout is already over.")
+    if card not in fighter.hand:
+        raise IllegalPlay(f"{card.name} is not in {fighter.wrestler.name}'s hand.")
+    if fighter.plays_remaining <= 0:
+        raise IllegalPlay(f"{fighter.wrestler.name} has no Plays remaining.")
+
+    fighter.hand.remove(card)
+    fighter.plays_remaining -= 1
+    fighter.cards_played_this_turn += 1
+    fighter.played_this_turn.append(card)
+    state.log(f"{fighter.wrestler.name} plays {card.name}.")
+
+    if card.is_kimarite:
+        fighter.kimarite_zone.append(card)
+        return
+
+    resolve_exchange_effect(
+        state,
+        side,
+        card,
+        context or EffectContext(),
+    )
+    fighter.discard_pile.append(card)
