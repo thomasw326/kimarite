@@ -17,7 +17,7 @@ jobs:
       - run: pytest -q
 
   big-test:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/personality-first-ai'
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 14
     needs: pytest
     runs-on: ubuntu-latest
     timeout-minutes: 360
