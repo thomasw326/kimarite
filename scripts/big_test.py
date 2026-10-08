@@ -26,6 +26,16 @@ STAT_BUILDS = (
 )
 ORDERS = tuple(permutations(Stat))
 
+# Only cards with implemented prepared-Tachiai effects are eligible for this
+# role. All other assignment and deck choices remain stat-agnostic.
+PREPARED_TACHIAI_NAMES = frozenset({
+    "Headlong Charge", "Shiko Stomp", "Nodowa", "Harite",
+    "Gain Left Grip", "Gain Right Grip", "Salt Throw", "Tsuppari",
+    "Stare Down", "Power Water", "Belt Slap", "Hold Position",
+    "Immovable", "Henka", "Get Underneath", "Sidestep", "Give Ground",
+})
+
+
 
 def roster():
     return [
@@ -40,7 +50,9 @@ def make_fighter(config, rng, ranking):
     kimarite = rng.choice(STARTING_KIMARITE)
     # Card assignment and shuffle are deliberately agnostic to wrestler statistics.
     pool = [card for card in CARD_POOL if card.name != kimarite.name]
-    tachiai = rng.choice(pool)
+    tachiai = rng.choice([
+        card for card in pool if card.name in PREPARED_TACHIAI_NAMES
+    ])
     pool = [card for card in pool if card.card_id != tachiai.card_id]
     top_card = rng.choice(pool)
     pool = [card for card in pool if card.card_id != top_card.card_id]
