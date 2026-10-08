@@ -74,3 +74,16 @@ def test_tachiai_total_power_capped_at_eight_after_starting_cards():
     assert result.power_advantage_a == 8
     assert result.wrestler_a.technique == 2
     assert result.wrestler_a.spirit == 3
+
+
+def test_tachiai_caps_technique_and_spirit_after_starting_cards():
+    kimarite = Card(301, "High Technique", power=0, technique=3, spirit=2, is_kimarite=True)
+    prepared = Card(302, "High Spirit", power=0, technique=2, spirit=4)
+    blank = Card(303, "Blank")
+    strong = Wrestler("Strong", 1, 5, 5, kimarite, prepared, blank)
+    weak = Wrestler("Weak", 0, 0, 0, blank, blank, blank)
+    result = compare_tachiai(strong, weak)
+    assert result.wrestler_a.technique == 8
+    assert result.wrestler_a.spirit == 8
+    assert result.technique_advantage_a == 8
+    assert result.spirit_advantage_a == 8
