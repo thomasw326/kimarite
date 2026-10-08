@@ -27,10 +27,18 @@ def test_tochinoshin_seed_911132_matches_ai_vs_ai_sheet():
 
     assert [(c.card_id, c.name) for c in deck[:7]] == [
         (37, "Morozashi"),
+        (52, "Kotenage"),
         (7, "Headlong Charge"),
         (14, "Attempt Two-Handed Grip"),
+        (47, "Hikiotoshi"),
         (38, "Yorikiri"),
         (9, "Harite"),
-        (35, "Shikiri"),
-        (4, "Tsuki"),
     ]
+
+
+def test_all_fifteen_kimarite_are_in_every_unexcluded_ai_pool():
+    from kimarite.catalog import STARTING_KIMARITE
+    names = {card.name for card in STARTING_KIMARITE}
+    for wrestler in ORIGINAL_WRESTLERS.values():
+        deck = build_seeded_deck(wrestler.build(), 317)
+        assert names <= {card.name for card in deck}
