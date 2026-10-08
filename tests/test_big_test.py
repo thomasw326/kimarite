@@ -112,3 +112,37 @@ def test_kimarite_victory_records_specific_copy():
     selected = check_kimarite_zone(state, Side.A)
     if selected is not None:
         assert state.winning_kimarite_card_id == selected.card_id
+
+
+def test_reporting_smoke_produces_consistent_csvs(tmp_path, monkeypatch):
+    import csv
+    import json
+    import sys
+    from scripts.big_test import main
+    monkeypatch.setattr(sys, "argv", [
+        "big_test.py", "--max-pairs", "2", "--output-dir", str(tmp_path),
+        "--max-turns", "40",
+    ])
+    main()
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    with (tmp_path / "bouts.csv").open(newline="") as f:
+        bouts = list(csv.DictReader(f))
+    with (tmp_path / "stat_advantages.csv").open(newline="") as f:
+        stats = list(csv.DictReader(f))
+    with (tmp_path / "kimarite_finishes_by_origin.csv").open(newline="") as f:
+        finishes = list(csv.DictReader(f))
+    with (tmp_path / "card_play_by_origin.csv").open(newline="") as f:
+        plays = list(csv.DictReader(f))
+    assert summary["planned_bouts"] == 4
+    assert len(bouts) == 4
+    assert all(len(row) == 24 for row in bouts)
+    assert sum(int(row["bouts"]) for row in stats) == 6 * summary["completed"]
+    assert sum(int(row["finishes"]) for row in finishes) == sum(
+        n for k, n in summary["win_conditions"].items() if k.startswith("kimarite:")
+    )
+    assert set(row["origin"] for row in finishes) <= {
+        "starting_kimarite", "prepared_tachiai", "top_of_deck", "shuffled_remainder"
+    }
+    assert set(row["origin"] for row in plays) <= {
+        "prepared_tachiai", "top_of_deck", "shuffled_remainder"
+    }
