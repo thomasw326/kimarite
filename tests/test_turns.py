@@ -132,3 +132,55 @@ def test_spirit_bonus_turn_is_taken_before_opponent_turn():
 
     assert next_side is Side.A
     assert bout.fighter_a.bonus_turns_queued == 0
+
+
+def test_multiple_satisfied_kimarite_default_to_earliest_played():
+    from kimarite.models import GripState
+    from kimarite.turns import check_kimarite_zone
+
+    yorikiri = Card(6001, "Yorikiri", is_kimarite=True)
+    oshidashi = Card(6002, "Oshidashi", is_kimarite=True)
+    blank = Card(6003, "Blank")
+    a = Wrestler("A", 5, 0, 0, yorikiri, blank, blank)
+    b = Wrestler("B", 0, 0, 0, Card(6004, "Tsukitaoshi", is_kimarite=True), blank, blank)
+    bout = BoutState(
+        FighterState(a, kimarite_zone=[yorikiri, oshidashi], power=8),
+        FighterState(b, power=0),
+    )
+    bout.fighter_a.left_grip = GripState.GRIP
+    bout.fighter_a.right_grip = GripState.GRIP
+    bout.momentum = 1
+    bout.position = 2
+
+    chosen = check_kimarite_zone(bout, Side.A)
+
+    assert chosen is yorikiri
+    assert bout.win_method == "Yorikiri"
+
+
+def test_kimarite_chooser_can_override_earliest_for_reward_choice():
+    from kimarite.models import GripState
+    from kimarite.turns import check_kimarite_zone
+
+    yorikiri = Card(6101, "Yorikiri", is_kimarite=True)
+    oshidashi = Card(6102, "Oshidashi", is_kimarite=True)
+    blank = Card(6103, "Blank")
+    a = Wrestler("A", 5, 0, 0, yorikiri, blank, blank)
+    b = Wrestler("B", 0, 0, 0, Card(6104, "Tsukitaoshi", is_kimarite=True), blank, blank)
+    bout = BoutState(
+        FighterState(a, kimarite_zone=[yorikiri, oshidashi], power=8),
+        FighterState(b, power=0),
+    )
+    bout.fighter_a.left_grip = GripState.GRIP
+    bout.fighter_a.right_grip = GripState.GRIP
+    bout.momentum = 1
+    bout.position = 2
+
+    chosen = check_kimarite_zone(
+        bout,
+        Side.A,
+        choose_kimarite=lambda state, side, cards: cards[1],
+    )
+
+    assert chosen is oshidashi
+    assert bout.win_method == "Oshidashi"
