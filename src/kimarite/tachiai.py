@@ -85,7 +85,7 @@ def technique_access(advantage: int) -> tuple[int, int]:
     """Return (cards looked at, cards kept) for first-turn Technique access."""
     if advantage <= 0:
         return (2, 2)
-    return (2 + advantage, 2 + advantage // 3)
+    return (2 + advantage, 2 + advantage // 2)
 
 
 def spirit_rewards(advantage: int) -> tuple[int, int]:
