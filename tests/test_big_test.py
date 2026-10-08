@@ -146,3 +146,18 @@ def test_reporting_smoke_produces_consistent_csvs(tmp_path, monkeypatch):
     assert set(row["origin"] for row in plays) <= {
         "prepared_tachiai", "top_of_deck", "shuffled_remainder"
     }
+    # Verify the new per-origin/stat reports survive batch aggregation.
+    from scripts.combine_big_test import main as combine_main
+    combined = tmp_path / "combined"
+    monkeypatch.setattr(sys, "argv", [
+        "combine_big_test.py", str(tmp_path), "--output-dir", str(combined),
+    ])
+    combine_main()
+    with (combined / "stat_advantages.csv").open(newline="") as f:
+        aggregated = list(csv.DictReader(f))
+    with (combined / "kimarite_finishes_by_origin.csv").open(newline="") as f:
+        combined_finishes = list(csv.DictReader(f))
+    assert sum(int(row["bouts"]) for row in aggregated) == 6 * summary["completed"]
+    assert sum(int(row["finishes"]) for row in combined_finishes) == sum(
+        int(row["finishes"]) for row in finishes
+    )
