@@ -207,6 +207,7 @@ def exclusion_key(wrestler_name: str, card: Card) -> tuple:
         no_grip_or_push = (
             name not in GRIP_UTILITY
             and PUSH_AMOUNT.get(name, 0) == 0
+            and name not in PROVIDES_POWER
         )
         if no_grip_or_push:
             return (1, card.technique + card.power, *_generic_tail(card))
