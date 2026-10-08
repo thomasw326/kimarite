@@ -1,0 +1,30 @@
+name: balance-smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      bouts_per_orientation:
+        description: "Bouts per matchup orientation"
+        required: false
+        default: "1"
+  push:
+    paths:
+      - "scripts/balance_smoke.py"
+      - ".github/workflows/balance-smoke.yml"
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run round robin
+        run: |
+          python scripts/balance_smoke.py             --bouts-per-orientation "${{ github.event.inputs.bouts_per_orientation || '1' }}"             --output-dir balance_artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: balance-smoke
+          path: balance_artifacts/
