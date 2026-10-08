@@ -186,6 +186,121 @@ def _context_for_card(
 
 
 
+
+def _context_variant(base: EffectContext, **updates: object) -> EffectContext:
+    choices = dict(base.choices or {})
+    choices.update(updates)
+    return EffectContext(comparison=base.comparison, choices=choices)
+
+
+def _contexts_for_card(
+    state: BoutState,
+    side: Side,
+    card: Card,
+    comparison: TachiaiComparison,
+) -> list[EffectContext]:
+    """Return meaningful deterministic choice variants for one card."""
+    base = _context_for_card(state, side, card, comparison)
+    opponent = state.opponent(side)
+    fighter = state.fighter(side)
+
+    if card.name == "Tsuki":
+        grips = []
+        if opponent.left_grip is not GripState.NONE:
+            grips.append("left")
+        if opponent.right_grip is not GripState.NONE:
+            grips.append("right")
+        if len(grips) > 1:
+            return [_context_variant(base, grip=grip) for grip in grips]
+
+    if card.name == "Use the Tawara":
+        return [
+            _context_variant(base, lose_position_for_power=False),
+            _context_variant(base, lose_position_for_power=True),
+        ]
+
+    if card.name == "Pull":
+        variants = [_context_variant(base, pay_pull_cost=False)]
+        if fighter.discard_pile:
+            best_index = _best_discard_index(state, side)
+            variants.append(
+                _context_variant(
+                    base,
+                    pay_pull_cost=True,
+                    discard_index=best_index,
+                )
+            )
+        return variants
+
+    if card.name in {"Nodowa", "Read the Move"} and opponent.temporary_zone:
+        return [
+            _context_variant(base, temporary_index=index)
+            for index in range(len(opponent.temporary_zone))
+        ]
+
+    if card.name == "Ottsuke":
+        variants: list[EffectContext] = []
+
+        grips = []
+        if opponent.left_grip is not GripState.NONE:
+            grips.append("left")
+        if opponent.right_grip is not GripState.NONE:
+            grips.append("right")
+        variants.extend(
+            _context_variant(base, mode="reduce_grip", grip=grip)
+            for grip in grips
+        )
+
+        temp_targets = [
+            instance
+            for instance in opponent.temporary_zone
+            if instance.card.name in {
+                "Attempt Two-Handed Grip",
+                "Attempt Deep Outside Grip",
+                "Attempt Deep Inside Grip",
+                "Kannuki",
+                "Morozashi",
+            }
+        ]
+        kimarite_targets = [
+            target
+            for target in opponent.kimarite_zone
+            if target.name in {
+                "Yorikiri", "Yoritaoshi", "Katasukashi", "Tottari",
+                "Uwatenage", "Hikiotoshi", "Tsuridashi", "Kotenage",
+                "Abisetaoshi",
+            }
+        ]
+        total_targets = len(temp_targets) + len(kimarite_targets)
+        variants.extend(
+            _context_variant(
+                base,
+                mode="remove_card",
+                card_target=index,
+            )
+            for index in range(total_targets)
+        )
+
+        if variants:
+            return variants
+
+    if card.name in {"Katasukashi", "Hikiotoshi", "Hatakikomi", "Tsukiotoshi"}:
+        return [
+            _context_variant(base, use_optional=False),
+            _context_variant(base, use_optional=True),
+        ]
+
+    if card.name == "Kotenage" and effective_total_grip(
+        state, state.opponent_side(side)
+    ) == 0:
+        return [
+            _context_variant(base, cycle_if_no_grip=False),
+            _context_variant(base, cycle_if_no_grip=True),
+        ]
+
+    return [base]
+
+
 def _at_least(value: int, target: int) -> float:
     if target <= 0:
         return 1.0
@@ -334,15 +449,30 @@ def candidate_plays(
         if card.name in UNSUPPORTED_AI_CARDS:
             continue
 
-        trial = deepcopy(state)
-        trial_card = next(c for c in trial.fighter(side).hand if c.card_id == card.card_id)
-        context = _context_for_card(trial, side, trial_card, comparison)
-        try:
-            play_card(trial, side, trial_card, context=context)
-        except (IllegalPlay, ChoiceRequired, NotImplementedError, KeyError, ValueError):
-            continue
+        for context in _contexts_for_card(state, side, card, comparison):
+            trial = deepcopy(state)
+            trial_card = next(
+                c for c in trial.fighter(side).hand
+                if c.card_id == card.card_id
+            )
+            try:
+                play_card(trial, side, trial_card, context=context)
+            except (
+                IllegalPlay,
+                ChoiceRequired,
+                NotImplementedError,
+                KeyError,
+                ValueError,
+            ):
+                continue
 
-        plays.append(AIPlay(card=card, context=context, score=score_state(trial, side)))
+            plays.append(
+                AIPlay(
+                    card=card,
+                    context=context,
+                    score=score_state(trial, side),
+                )
+            )
 
     return plays
 
@@ -388,10 +518,10 @@ def play_ai_turn(
         if choice is None:
             break
 
-        # Rebuild context against the live state; indices can shift after prior plays.
-        live_context = _context_for_card(state, side, choice.card, comparison)
+        # Candidate generation used the current live state, so the selected
+        # context is valid for this immediate play.
         try:
-            play_card(state, side, choice.card, context=live_context)
+            play_card(state, side, choice.card, context=choice.context)
         except (IllegalPlay, ChoiceRequired, NotImplementedError, KeyError, ValueError):
             break
         played.append(choice.card.name)
