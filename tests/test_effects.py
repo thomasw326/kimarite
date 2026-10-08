@@ -122,13 +122,14 @@ def test_ottsuke_removes_grip_temporary_and_rewards_momentum_push():
     assert bout.position == 1
 
 
-def test_draw_effect_with_empty_draw_pile_is_a_no_op_not_immediate_loss():
+def test_draw_effect_with_empty_draw_pile_is_immediate_exhaustion_loss():
     tsuki = card_by_name("Tsuki")
     bout = bout_with_hand([tsuki])
     bout.fighter_a.draw_pile = []
 
     play_card(bout, Side.A, tsuki)
 
-    assert bout.winner is None
+    assert bout.winner is Side.B
+    assert bout.win_method == "Exhaustion"
     assert bout.fighter_a.hand == []
-    assert any("cannot draw" in entry for entry in bout.event_log)
+    assert any("attempts to draw" in entry for entry in bout.event_log)
