@@ -172,6 +172,8 @@ def main() -> None:
             "cards_played_b",
             "kimarite_removals_a",
             "kimarite_removals_b",
+            "temporary_outcomes_a",
+            "temporary_outcomes_b",
             "power_advantage_a",
             "technique_advantage_a",
             "spirit_advantage_a",
@@ -196,6 +198,8 @@ def main() -> None:
                 "|".join(record.cards_played_b),
                 "|".join(record.kimarite_removals_a),
                 "|".join(record.kimarite_removals_b),
+                "|".join(f"{name}:{outcome}" for name, outcome in record.temporary_outcomes_a),
+                "|".join(f"{name}:{outcome}" for name, outcome in record.temporary_outcomes_b),
                 record.power_advantage_a,
                 record.technique_advantage_a,
                 record.spirit_advantage_a,
@@ -225,6 +229,15 @@ def main() -> None:
             sum(values) / len(values) if values else 0.0
         )
 
+    temporary_outcomes = Counter(
+        f"{name}:{outcome}"
+        for record in records
+        for name, outcome in (
+            *record.temporary_outcomes_a,
+            *record.temporary_outcomes_b,
+        )
+    )
+
     kimarite_removals = Counter(
         removed
         for record in records
@@ -250,6 +263,7 @@ def main() -> None:
         "winning_card_uses": summary.winning_card_uses,
         "card_play_win_diagnostics": card_play_win_diagnostics(records),
         "kimarite_removals": dict(kimarite_removals),
+        "temporary_outcomes": dict(temporary_outcomes),
         "average_opening_kimarite_progress": opening_progress,
         "win_phase_counts": dict(phase_wins),
         "tachiai_forceout_rate": (
