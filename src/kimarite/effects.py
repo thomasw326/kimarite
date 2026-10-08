@@ -601,6 +601,7 @@ def _ottsuke(state: BoutState, side: Side, card: Card, context: EffectContext) -
         target = kimarite_targets[target_index]
         opponent.kimarite_zone.remove(target)
         opponent.discard_pile.append(target)
+        state.kimarite_removals.append((side, target.name))
         state.log(f"Ottsuke removes {target.name} from the opponent Kimarite Zone.")
 
     gain_momentum(state, side, 1)
