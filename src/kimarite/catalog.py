@@ -29,6 +29,8 @@ CARD_POOL: tuple[Card, ...] = (
     Card(20, "Power Water", 1, 2, 2),
     Card(21, "Belt Slap", 3, 0, 2),
     Card(22, "Tsuri", 1, 3, 0),
+    Card(46, "Tsuri", 1, 3, 0),
+    Card(47, "Tsuri", 1, 3, 0),
     Card(23, "Yori", 1, 2, 1),
     Card(24, "Gaburi", 1, 2, 1),
     Card(25, "Ottsuke", 1, 2, 1),
