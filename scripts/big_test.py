@@ -55,6 +55,16 @@ def make_fighter(config, rng, ranking):
                         kimarite_zone=[kimarite])
 
 
+def card_origin(wrestler, card_id):
+    if card_id == wrestler.starting_kimarite.card_id:
+        return "starting_kimarite"
+    if card_id == wrestler.prepared_tachiai_card.card_id:
+        return "prepared_tachiai"
+    if card_id == wrestler.top_of_deck_card.card_id:
+        return "top_of_deck"
+    return "shuffled_remainder"
+
+
 def run_one(a, b, seed, max_turns):
     rng = random.Random(seed)
     state = BoutState(make_fighter(a, rng, 1), make_fighter(b, rng, 2))
@@ -114,10 +124,19 @@ def main():
     outcomes = Counter()
     assignments = defaultdict(Counter)
     cohorts = defaultdict(Counter)
+    advantage_results = defaultdict(Counter)
+    kimarite_origins = defaultdict(Counter)
+    played_origins = defaultdict(Counter)
 
     with (output / "bouts.csv").open("w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(("batch_id", "a", "b", "seed", "winner", "method", "win_category", "winner_grip", "turns", "error", "a_stats", "b_stats", "a_priorities", "b_priorities", "a_kimarite", "a_start_card", "a_top_card", "b_kimarite", "b_start_card", "b_top_card"))
+        writer.writerow(("batch_id", "a", "b", "seed", "winner", "method",
+                         "win_category", "winning_card_origin", "winner_grip",
+                         "turns", "error", "a_stats", "a_priorities", "a_kimarite",
+                         "a_start_card", "a_top_card", "b_stats", "b_priorities",
+                         "b_kimarite", "b_start_card", "b_top_card",
+                         "power_advantage_a", "technique_advantage_a",
+                         "spirit_advantage_a"))
         for repeat in range(args.repetitions):
             for pair_idx, (i, j) in enumerate(combinations(range(108), 2)):
                 for orientation, (left, right) in enumerate(((i, j), (j, i))):
@@ -141,6 +160,16 @@ def main():
                         category = "other:" + (state.win_method or "unknown")
                     outcomes[category] += 1
                     wa, wb = state.fighter_a.wrestler, state.fighter_b.wrestler
+                    comparison = compare_tachiai(wa, wb)
+                    winning_card_origin = ""
+                    if state.win_source == "kimarite" and winner is not None:
+                        winning_id = state.winning_kimarite_card_id
+                        if winning_id is None:
+                            raise AssertionError("Winning Kimarite has no card ID")
+                        winning_card_origin = card_origin(
+                            state.fighter(winner).wrestler, winning_id
+                        )
+                        kimarite_origins[(state.win_method, winning_card_origin)]["wins"] += 1
                     def metadata(w):
                         return (
                             "/".join(map(str, (w.base_power, w.base_technique, w.base_spirit))),
@@ -152,9 +181,13 @@ def main():
                     writer.writerow((args.batch_id, a[0], b[0], seed,
                                      state.fighter(winner).wrestler.name if winner else "",
                                      state.win_method or "", category,
+                                     winning_card_origin,
                                      winner_grip if winner is not None else "",
                                      state.turn_number, error or "",
-                                     *metadata(wa), *metadata(wb)))
+                                     *metadata(wa), *metadata(wb),
+                                     comparison.power_advantage_a,
+                                     comparison.technique_advantage_a,
+                                     comparison.spirit_advantage_a))
                     if state.winner is None:
                         continue
                     for side, config in ((Side.A, a), (Side.B, b)):
@@ -168,7 +201,26 @@ def main():
                         ), ("priority", *(x.value for x in priority))):
                             cohorts[group]["bouts"] += 1
                             cohorts[group]["wins"] += int(won)
+                        for stat in (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT):
+                            adv = comparison.advantage_for(side, stat)
+                            advantage_results[(stat.value, adv)]["bouts"] += 1
+                            advantage_results[(stat.value, adv)]["wins"] += int(won)
                         wrestler = state.fighter(side).wrestler
+                        played_ids = {
+                            cid for owner, cid in state.card_play_ids if owner is side
+                        }
+                        lookup = {
+                            c.card_id: c for c in (
+                                wrestler.starting_kimarite,
+                                wrestler.prepared_tachiai_card,
+                                wrestler.top_of_deck_card, *CARD_POOL
+                            )
+                        }
+                        for cid in played_ids:
+                            card = lookup[cid]
+                            key = (card.name, card_origin(wrestler, cid))
+                            played_origins[key]["bouts"] += 1
+                            played_origins[key]["wins"] += int(won)
                         for role, card in (
                             ("designated_kimarite", wrestler.starting_kimarite),
                             ("starting_card", wrestler.prepared_tachiai_card),
@@ -184,6 +236,26 @@ def main():
                                 key = (card, kind, slot, stat.value)
                                 cards[key]["bouts"] += 1
                                 cards[key]["wins"] += int(won)
+
+    with (output / "kimarite_finishes_by_origin.csv").open("w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(("kimarite", "origin", "finishes"))
+        for (card, origin), count in sorted(kimarite_origins.items()):
+            writer.writerow((card, origin, count["wins"]))
+    with (output / "card_play_by_origin.csv").open("w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(("card", "origin", "bouts_played", "wins", "win_rate"))
+        for (card, origin), count in sorted(played_origins.items()):
+            n = count["bouts"]
+            writer.writerow((card, origin, n, count["wins"],
+                             count["wins"] / n if n else ""))
+    with (output / "stat_advantages.csv").open("w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(("stat", "signed_advantage", "bouts", "wins", "win_rate"))
+        for (stat, advantage), count in sorted(advantage_results.items()):
+            n = count["bouts"]
+            writer.writerow((stat, advantage, n, count["wins"],
+                             count["wins"] / n if n else ""))
 
     with (output / "wrestlers.csv").open("w", newline="") as file:
         writer = csv.writer(file)
@@ -225,6 +297,10 @@ def main():
         "completed": errors["completed"],
         "errors": dict(errors),
         "win_conditions": dict(outcomes),
+        "kimarite_finishes_by_origin": {
+            f"{card}|{origin}": count["wins"]
+            for (card, origin), count in sorted(kimarite_origins.items())
+        },
         "repetitions": args.repetitions,
         "seed": args.seed,
         "max_turns": args.max_turns,
@@ -233,6 +309,11 @@ def main():
     assert sum(outcomes.values()) == args.repetitions * 108 * 107
     assert sum(errors.values()) == args.repetitions * 108 * 107
     assert sum(bouts.values()) == 2 * errors["completed"]
+    assert sum(c["bouts"] for c in advantage_results.values()) == 6 * errors["completed"]
+    assert sum(c["wins"] for c in kimarite_origins.values()) == sum(
+        count for category, count in outcomes.items()
+        if category.startswith("kimarite:")
+    )
     assert not any(key.startswith("other:") for key in outcomes), outcomes
     (output / "summary.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
