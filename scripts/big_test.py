@@ -7,7 +7,7 @@ import json
 import random
 import time
 from collections import Counter, defaultdict
-from itertools import combinations, permutations
+from itertools import permutations
 from pathlib import Path
 
 from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
@@ -105,13 +105,28 @@ def run_one(a, b, seed, max_turns, *, neutral_opening_position=False):
     return state, available, played, error
 
 
+def round_robin_pairs(config_count: int, seed: int):
+    """Every round pairs every config once; all opponents occur exactly once."""
+    if config_count < 2 or config_count % 2:
+        raise ValueError("Round-robin requires an even number of configurations")
+    players = list(range(config_count))
+    random.Random(seed).shuffle(players)
+    pairs = []
+    for _ in range(config_count - 1):
+        for index in range(config_count // 2):
+            pairs.append((players[index], players[-1 - index]))
+        # Circle method: hold the first player fixed and rotate the rest.
+        players = [players[0], players[-1], *players[1:-1]]
+    return pairs
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--repetitions", type=int, default=1,
                         help="Mirrored bouts per distinct pairing, per repetition")
     parser.add_argument("--max-turns", type=int, default=100)
     parser.add_argument("--max-pairs", type=int, default=None,
-                        help="Optional limited pairs for a reporting smoke test")
+                        help="Number of unique round-robin pairs (3000 pairs = 6000 mirrored bouts)")
     parser.add_argument("--output-dir", default="big_test_artifacts")
     parser.add_argument("--seed", type=int, default=20261008)
     parser.add_argument("--batch-id", type=int, default=0)
@@ -128,7 +143,9 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     configs = roster()
     assert len(configs) == 108
-    planned_bouts = args.repetitions * min(5778, args.max_pairs or 5778) * 2
+    schedule = round_robin_pairs(len(configs), args.seed)
+    selected_pairs = schedule[:args.max_pairs]
+    planned_bouts = args.repetitions * len(selected_pairs) * 2
     bouts = Counter()
     wins = Counter()
     cards = defaultdict(lambda: Counter())
@@ -154,9 +171,7 @@ def main():
                          "power_advantage_a", "technique_advantage_a",
                          "spirit_advantage_a"))
         for repeat in range(args.repetitions):
-            for pair_idx, (i, j) in enumerate(combinations(range(108), 2)):
-                if args.max_pairs is not None and pair_idx >= args.max_pairs:
-                    break
+            for pair_idx, (i, j) in enumerate(selected_pairs):
                 for orientation, (left, right) in enumerate(((i, j), (j, i))):
                     seed = args.seed + args.batch_id * 1_000_000_000 + repeat * 20000 + pair_idx * 2 + orientation
                     a, b = configs[left], configs[right]
@@ -352,6 +367,8 @@ def main():
         "planned_bouts": planned_bouts,
         "completed": errors["completed"],
         "neutral_opening_position": args.neutral_opening_position,
+        "pairing_method": "balanced_round_robin",
+        "unique_pairs_per_repetition": len(selected_pairs),
         "errors": dict(errors),
         "win_conditions": dict(outcomes),
         "card_activity": {
