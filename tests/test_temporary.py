@@ -120,3 +120,17 @@ def test_opponent_push_breaks_sidestep_before_push_resolves():
     assert card in bout.fighter_a.discard_pile
     # Retained distance 2 becomes favorable to B, then B's Push moves to -3.
     assert bout.position == -3
+
+
+def test_prevented_push_does_not_break_sidestep():
+    sidestep = card_by_name("Sidestep")
+    hold = card_by_name("Hold Position")
+    bout = bout_with_hand([sidestep, hold])
+
+    play_card(bout, Side.A, sidestep)
+    play_card(bout, Side.A, hold)
+    gain_push(bout, Side.B, 1)
+
+    assert bout.side_by_side_owner is Side.A
+    assert any(x.card.name == "Sidestep" for x in bout.fighter_a.temporary_zone)
+    assert bout.position == 0
