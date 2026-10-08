@@ -6,6 +6,7 @@ from typing import Any, Callable
 from .models import BoutState, Card, GripState, Side, Stat
 from .prevention import prevent_negative_effect
 from .rules import (
+    effective_total_grip,
     establish_grip,
     gain_momentum,
     gain_position,
@@ -207,7 +208,7 @@ def _belt_slap(
 
 
 def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    grip = state.fighter(side).total_grip
+    grip = effective_total_grip(state, side)
     if grip == 1:
         gain_push(state, side, 1)
     elif grip == 2:
@@ -220,16 +221,16 @@ def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 
 def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    if state.fighter(side).total_grip < 1:
-        raise IllegalPlay("Yori requires at least 1 Grip.")
+    if effective_total_grip(state, side) < 1:
+        raise IllegalPlay("Yori requires at least 1 usable Grip.")
     position = state.position * state.sign(side)
     if position > 0:
         gain_momentum(state, side, min(position, 3))
 
 
 def _gaburi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    if state.fighter(side).total_grip < 1:
-        raise IllegalPlay("Gaburi requires at least 1 Grip.")
+    if effective_total_grip(state, side) < 1:
+        raise IllegalPlay("Gaburi requires at least 1 usable Grip.")
     momentum = state.momentum * state.sign(side)
     if momentum > 0:
         gain_push(state, side, min(momentum, 3))
