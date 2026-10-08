@@ -4,7 +4,7 @@ from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, dr
 from .kimarite import power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
-from .rules import effective_total_grip, establish_grip, gain_momentum, gain_position, gain_power, reduce_grip
+from .rules import effective_total_grip, establish_grip, gain_grip, gain_momentum, gain_position, gain_power, lose_momentum, reduce_grip
 from .selection import ai_look_keep
 
 
@@ -36,8 +36,8 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     opponent_side = state.opponent_side(side)
 
     if card.name == "Yorikiri":
-        if effective_total_grip(state, side, consume_prevention=True) >= 1:
-            gain_position(state, side, 1)
+        if relative_position(state, side) >= 0:
+            gain_grip(state, side)
 
     elif card.name == "Oshidashi":
         if power_advantage(state, side) >= 2:
@@ -52,8 +52,8 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
             gain_power(state, side, 1)
 
     elif card.name == "Yoritaoshi":
-        if relative_position(state, side) >= 1:
-            gain_power(state, side, 1)
+        if relative_position(state, side) >= 0:
+            gain_grip(state, side)
 
     elif card.name == "Katasukashi":
         if _optional(context, "use_optional", card):
@@ -85,7 +85,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         state.log(f"{fighter.wrestler.name} discards {target.name} from the opponent deck.")
 
     elif card.name == "Uwatenage":
-        if relative_momentum(state, side) >= 1:
+        if relative_momentum(state, side) >= 0:
             establish_grip(state, side, "left")
 
     elif card.name == "Hatakikomi":
@@ -107,8 +107,10 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
 
     elif card.name == "Hikiotoshi":
         if _optional(context, "use_optional", card):
-            gain_momentum(state, opponent_side, 1)
-            draw_from_look(state, side, look=2, keep=1, required_draws=2)
+            lose_momentum(state, side, 1)
+            draw_one(state, side)
+            if state.winner is None:
+                gain_grip(state, side)
 
     elif card.name == "Tsukitaoshi":
         if relative_momentum(state, side) >= 1:
@@ -148,8 +150,10 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 fighter.discard_pile.append(discarded)
 
     elif card.name == "Abisetaoshi":
-        if fighter.power >= 6:
-            gain_momentum(state, side, 1)
+        if fighter.power >= 5:
+            gain_grip(state, side)
+        if effective_total_grip(state, side) >= 1:
+            gain_power(state, side, 1)
 
     else:
         raise KeyError(f"No Kimarite play effect registered for {card.name!r}.")

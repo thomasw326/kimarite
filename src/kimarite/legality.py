@@ -12,9 +12,6 @@ def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
     if card not in fighter.hand or fighter.plays_remaining <= 0:
         return False
 
-    if card.name in {"Yori", "Gaburi"}:
-        return effective_total_grip(state, side) >= 1
-
     if card.name == "Morozashi":
         return (
             (fighter.left_grip is GripState.GRIP and fighter.right_grip is GripState.NONE)

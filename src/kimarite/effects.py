@@ -13,6 +13,7 @@ from .rules import (
     gain_power,
     gain_push,
     improve_grip,
+    gain_grip,
     lose_momentum,
     lose_position,
     lose_power,
@@ -180,10 +181,7 @@ def _gain_left_grip(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
-    if fighter.left_grip is GripState.NONE:
-        establish_grip(state, side, "left")
-    else:
-        gain_momentum(state, side, 1)
+    improve_grip(state, side, "left")
     add_temporary(state, side, card, phase="exchange")
 
 
@@ -191,10 +189,7 @@ def _gain_right_grip(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
-    if fighter.right_grip is GripState.NONE:
-        establish_grip(state, side, "right")
-    else:
-        gain_push(state, side, 1)
+    improve_grip(state, side, "right")
     add_temporary(state, side, card, phase="exchange")
 
 
@@ -260,7 +255,8 @@ def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if effective_total_grip(state, side, consume_prevention=True) < 1:
-        raise IllegalPlay("Yori requires at least 1 usable Grip.")
+        gain_grip(state, side)
+        return
     position = state.position * state.sign(side)
     if position > 0:
         gain_momentum(state, side, min(position, 3))
@@ -268,7 +264,8 @@ def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> N
 
 def _gaburi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if effective_total_grip(state, side, consume_prevention=True) < 1:
-        raise IllegalPlay("Gaburi requires at least 1 usable Grip.")
+        gain_grip(state, side)
+        return
     momentum = state.momentum * state.sign(side)
     if momentum > 0:
         gain_push(state, side, min(momentum, 3))

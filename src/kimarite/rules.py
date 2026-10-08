@@ -300,3 +300,12 @@ def _record_grip_peak(state: BoutState, side: Side) -> None:
         state.peak_grip_a = max(state.peak_grip_a, grip)
     else:
         state.peak_grip_b = max(state.peak_grip_b, grip)
+
+
+def gain_grip(state: BoutState, side: Side) -> None:
+    """Gain one level on either hand, favoring the less-developed hand."""
+    fighter = state.fighter(side)
+    if fighter.left_grip is GripState.DEEP and fighter.right_grip is GripState.DEEP:
+        return
+    hand = "left" if fighter.left_grip <= fighter.right_grip else "right"
+    improve_grip(state, side, hand)
