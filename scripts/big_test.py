@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 import random
+import time
 from collections import Counter, defaultdict
 from itertools import combinations, permutations
 from pathlib import Path
@@ -138,6 +139,7 @@ def main():
     advantage_results = defaultdict(Counter)
     kimarite_origins = defaultdict(Counter)
     played_origins = defaultdict(Counter)
+    started_at = time.monotonic()
     actual_plays = Counter()
     opening_uses = Counter()
     finish_events = Counter()
@@ -163,6 +165,16 @@ def main():
                         neutral_opening_position=args.neutral_opening_position,
                     )
                     errors[error or "completed"] += 1
+                    processed = sum(errors.values())
+                    if processed % 500 == 0 or processed == planned_bouts:
+                        elapsed = time.monotonic() - started_at
+                        remaining = elapsed * (planned_bouts - processed) / processed
+                        print(
+                            f"{processed:,}/{planned_bouts:,} bouts "
+                            f"({100 * processed / planned_bouts:.1f}%) "
+                            f"elapsed {elapsed:.0f}s, ETA {remaining:.0f}s",
+                            flush=True,
+                        )
                     winner = state.winner
                     winner_grip = state.fighter(winner).total_grip if winner else None
                     if winner is None:
