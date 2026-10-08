@@ -131,6 +131,7 @@ def apply_tachiai_push(
     if target > 3 or target < -3:
         state.position = 3 if side is Side.A else -3
         method = "Yorikiri" if state.fighter(side).total_grip > 0 else "Oshidashi"
+        state.win_source = "ringout"
         state.declare_winner(side, method)
         return amount
 
