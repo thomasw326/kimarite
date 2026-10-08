@@ -141,3 +141,120 @@ def deterministic_seed_pairs(
         (start_a + index, start_b + index)
         for index in range(count)
     ]
+
+
+@dataclass(frozen=True)
+class Standing:
+    wrestler: str
+    bouts: int
+    completed_bouts: int
+    wins: int
+    losses: int
+    win_rate: float
+
+
+def run_round_robin(
+    wrestler_names: Iterable[str],
+    *,
+    bouts_per_orientation: int = 1,
+    exclusions_by_wrestler: dict[str, frozenset[int]] | None = None,
+    max_turns: int = 100,
+    seed_start: int = 1,
+) -> list[BoutRecord]:
+    names = list(wrestler_names)
+    if len(set(names)) != len(names):
+        raise ValueError("wrestler_names must be unique")
+    if bouts_per_orientation < 1:
+        raise ValueError("bouts_per_orientation must be at least 1")
+
+    exclusions_by_wrestler = exclusions_by_wrestler or {}
+    records: list[BoutRecord] = []
+    seed_cursor = seed_start
+
+    for i, wrestler_a in enumerate(names):
+        for wrestler_b in names[i + 1:]:
+            for _ in range(bouts_per_orientation):
+                seed_a = seed_cursor
+                seed_b = seed_cursor + 100_000
+                seed_cursor += 1
+
+                records.extend(
+                    run_series(
+                        wrestler_a,
+                        wrestler_b,
+                        [(seed_a, seed_b)],
+                        exclusions_a=exclusions_by_wrestler.get(
+                            wrestler_a, frozenset()
+                        ),
+                        exclusions_b=exclusions_by_wrestler.get(
+                            wrestler_b, frozenset()
+                        ),
+                        ranking_a=1,
+                        ranking_b=2,
+                        max_turns=max_turns,
+                    )
+                )
+
+                # Mirror the matchup so Side/ranking tie-breaks are balanced
+                # across the aggregate rather than favoring the first name.
+                records.extend(
+                    run_series(
+                        wrestler_b,
+                        wrestler_a,
+                        [(seed_b, seed_a)],
+                        exclusions_a=exclusions_by_wrestler.get(
+                            wrestler_b, frozenset()
+                        ),
+                        exclusions_b=exclusions_by_wrestler.get(
+                            wrestler_a, frozenset()
+                        ),
+                        ranking_a=1,
+                        ranking_b=2,
+                        max_turns=max_turns,
+                    )
+                )
+
+    return records
+
+
+def standings(records: list[BoutRecord]) -> list[Standing]:
+    wrestlers = sorted(
+        {
+            name
+            for record in records
+            for name in (record.wrestler_a, record.wrestler_b)
+        }
+    )
+    rows: list[Standing] = []
+
+    for wrestler in wrestlers:
+        relevant = [
+            record
+            for record in records
+            if wrestler in {record.wrestler_a, record.wrestler_b}
+        ]
+        completed = [record for record in relevant if record.completed]
+        wins = sum(record.winner == wrestler for record in completed)
+        losses = sum(
+            record.winner is not None and record.winner != wrestler
+            for record in completed
+        )
+        rows.append(
+            Standing(
+                wrestler=wrestler,
+                bouts=len(relevant),
+                completed_bouts=len(completed),
+                wins=wins,
+                losses=losses,
+                win_rate=(wins / len(completed)) if completed else 0.0,
+            )
+        )
+
+    return sorted(
+        rows,
+        key=lambda row: (
+            -row.win_rate,
+            -row.wins,
+            row.wrestler,
+        ),
+    )
