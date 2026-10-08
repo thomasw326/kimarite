@@ -60,6 +60,9 @@ def remove_temporary(
             gain_momentum(state, state.opponent_side(side), 2)
 
     fighter.discard_pile.append(card)
+    state.temporary_outcomes.append(
+        (side, card.name, "disrupted" if disrupted else "survived")
+    )
     state.log(
         f"{card.name} leaves {fighter.wrestler.name}'s Temporary Zone"
         + (" after disruption." if disrupted else ".")
