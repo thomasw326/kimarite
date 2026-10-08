@@ -133,3 +133,25 @@ def test_draw_effect_with_empty_draw_pile_is_immediate_exhaustion_loss():
     assert bout.win_method == "Exhaustion"
     assert bout.fighter_a.hand == []
     assert any("attempts to draw" in entry for entry in bout.event_log)
+
+
+def test_ottsuke_records_kimarite_removal():
+    ottsuke = card_by_name("Ottsuke")
+    tsuridashi = card_by_name("Tsuridashi", prefer_starting_kimarite=True)
+    bout = bout_with_hand([ottsuke])
+    bout.fighter_b.kimarite_zone = [tsuridashi]
+
+    play_card(
+        bout,
+        Side.A,
+        ottsuke,
+        context=EffectContext(
+            choices={
+                "mode": "remove_card",
+                "card_target": 0,
+            }
+        ),
+    )
+
+    assert bout.kimarite_removals == [(Side.A, "Tsuridashi")]
+    assert bout.fighter_b.kimarite_zone == []
