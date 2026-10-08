@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from .effects import EffectContext, IllegalPlay, resolve_exchange_effect
+from .effects import (
+    EffectContext,
+    IllegalPlay,
+    TEMPORARY_CARD_NAMES,
+    resolve_exchange_effect,
+)
 from .models import BoutState, Card, Side
 
 
@@ -35,4 +40,5 @@ def play_card(
         card,
         context or EffectContext(),
     )
-    fighter.discard_pile.append(card)
+    if card.name not in TEMPORARY_CARD_NAMES:
+        fighter.discard_pile.append(card)
