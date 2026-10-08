@@ -56,8 +56,8 @@ def prepared_stats(wrestler: Wrestler) -> TachiaiStats:
     )
     return TachiaiStats(
         power=min(8, wrestler.base_power + sum(card.power for card in cards)),
-        technique=wrestler.base_technique + sum(card.technique for card in cards),
-        spirit=wrestler.base_spirit + sum(card.spirit for card in cards),
+        technique=min(8, wrestler.base_technique + sum(card.technique for card in cards)),
+        spirit=min(8, wrestler.base_spirit + sum(card.spirit for card in cards)),
     )
 
 
