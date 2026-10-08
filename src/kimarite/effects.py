@@ -8,6 +8,7 @@ from .prevention import prevent_negative_effect
 from .rules import (
     effective_total_grip,
     establish_grip,
+    gain_flexible_grip,
     gain_momentum,
     gain_position,
     gain_power,
@@ -181,6 +182,7 @@ def _gain_left_grip(
 ) -> None:
     fighter = state.fighter(side)
     improve_grip(state, side, "left")
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _gain_right_grip(
@@ -188,6 +190,7 @@ def _gain_right_grip(
 ) -> None:
     fighter = state.fighter(side)
     improve_grip(state, side, "right")
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -196,6 +199,7 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
         gain_momentum(state, side, 2)
     else:
         improve_grip(state, side, "left")
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -204,6 +208,7 @@ def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -
         gain_push(state, side, 2)
     else:
         improve_grip(state, side, "right")
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _salt_throw(
@@ -244,7 +249,7 @@ def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if effective_total_grip(state, side, consume_prevention=True) < 1:
-        establish_grip(state, side, "left")
+        gain_flexible_grip(state, side)
         return
     position = state.position * state.sign(side)
     if position > 0:
@@ -253,7 +258,7 @@ def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> N
 
 def _gaburi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if effective_total_grip(state, side, consume_prevention=True) < 1:
-        establish_grip(state, side, "right")
+        gain_flexible_grip(state, side)
         return
     momentum = state.momentum * state.sign(side)
     if momentum > 0:
@@ -677,6 +682,10 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
         "Headlong Charge",
+        "Gain Left Grip",
+        "Gain Right Grip",
+        "Uwate",
+        "Shitate",
         "Attempt Two-Handed Grip",
         "Attempt Deep Outside Grip",
         "Attempt Deep Inside Grip",
