@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from .models import BoutState, Card, GripState, Side, Stat
+from .prevention import prevent_negative_effect
 from .rules import (
     establish_grip,
     gain_momentum,
@@ -102,12 +103,20 @@ def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
     if opponent.right_grip is not GripState.NONE:
         available.append("right")
 
+    chosen: str | None = None
     if len(available) == 1:
-        reduce_grip(state, state.opponent_side(side), hand=available[0])
+        chosen = available[0]
     elif len(available) > 1:
         chosen = context.choice("grip")
         if chosen not in available:
             raise ChoiceRequired(card.name, "grip", available)
+
+    if chosen is not None and not prevent_negative_effect(
+        state,
+        state.opponent_side(side),
+        source="Tsuki",
+        description=f"reduce {chosen.title()} Grip",
+    ):
         reduce_grip(state, state.opponent_side(side), hand=chosen)
 
     draw_one(state, side)
@@ -128,7 +137,14 @@ def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) 
 
 def _harite(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_power(state, side, 1)
-    lose_power(state, state.opponent_side(side), 1)
+    opponent_side = state.opponent_side(side)
+    if not prevent_negative_effect(
+        state,
+        opponent_side,
+        source="Harite",
+        description="lose 1 Power",
+    ):
+        lose_power(state, opponent_side, 1)
 
 
 def _gain_left_grip(
