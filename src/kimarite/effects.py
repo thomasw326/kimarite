@@ -184,6 +184,7 @@ def _gain_left_grip(
         establish_grip(state, side, "left")
     else:
         gain_momentum(state, side, 1)
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _gain_right_grip(
@@ -194,6 +195,7 @@ def _gain_right_grip(
         establish_grip(state, side, "right")
     else:
         gain_push(state, side, 1)
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -202,6 +204,7 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
         gain_momentum(state, side, 2)
     else:
         improve_grip(state, side, "left")
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -210,6 +213,7 @@ def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -
         gain_push(state, side, 2)
     else:
         improve_grip(state, side, "right")
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _salt_throw(
