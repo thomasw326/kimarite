@@ -114,7 +114,19 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name in {"Headlong Charge", "Get Underneath"}:
             pass
         elif name == "Sidestep":
-            raise NotImplementedError("Side-by-Side resolution is not wired yet.")
+            distance = state.side_by_side_distance
+            if state.side_by_side_owner is side:
+                if state.momentum * state.sign(side) >= 0:
+                    favorable = side
+                else:
+                    favorable = state.opponent_side(side)
+                state.position = state.sign(favorable) * distance
+                state.side_by_side_owner = None
+                state.side_by_side_distance = 0
+                state.log(
+                    f"Sidestep survives; {state.fighter(favorable).wrestler.name} "
+                    "takes the favorable orientation."
+                )
         else:
             raise KeyError(f"No start-of-turn Temporary resolution for {name!r}.")
 
