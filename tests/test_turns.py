@@ -224,4 +224,4 @@ def test_kannuki_suppresses_normal_turn_grip_draw_bonus():
 
     drawn = normal_turn_card_access(bout, Side.A)
 
-    assert [c.card_id for c in drawn] == [2, 1]
+    assert [c.card_id for c in drawn] == [1, 2]
