@@ -334,7 +334,7 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     elif card.name == "Oshidashi":
         parts = [_at_least(power_adv, 3), _at_least(momentum, 1), _at_least(position, 2)]
     elif card.name == "Tsukidashi":
-        parts = [_nonnegative(momentum), _at_least(position, 2), _at_least(fighter.cards_played_this_turn, 4)]
+        parts = [_at_least(position, 2), _at_least(fighter.cards_played_this_turn, 4)]
     elif card.name == "Oshitaoshi":
         parts = [_at_least(momentum, 1), _at_least(position, 1), _at_least(fighter.power, 8)]
     elif card.name == "Yoritaoshi":
@@ -363,7 +363,7 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     elif card.name == "Hikiotoshi":
         parts = [_at_most(momentum, -2), _nonnegative(position), _at_least(grip, 1)]
     elif card.name == "Tsukitaoshi":
-        parts = [_at_least(momentum, 2), _nonnegative(position), _at_least(fighter.cards_played_this_turn, 4)]
+        parts = [_at_least(momentum, 2), _at_least(fighter.cards_played_this_turn, 4)]
     elif card.name == "Tsuridashi":
         parts = [_at_least(grip, 3)]
     elif card.name == "Kotenage":
@@ -494,8 +494,8 @@ def _combo_target(state: BoutState, side: Side) -> bool:
     active = {card.name for card in fighter.kimarite_zone}
     position = relative_position(state, side)
     momentum = relative_momentum(state, side)
-    return (("Tsukidashi" in active and position >= 1 and momentum >= 0)
-            or ("Tsukitaoshi" in active and position >= 0 and momentum >= 1))
+    return (("Tsukidashi" in active and position >= 1)
+            or ("Tsukitaoshi" in active and momentum >= 1))
 
 
 def choose_play(
