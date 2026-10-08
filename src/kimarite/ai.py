@@ -338,11 +338,10 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     elif card.name == "Oshitaoshi":
         parts = [_at_least(momentum, 1), _at_least(position, 1), _at_least(fighter.power, 8)]
     elif card.name == "Yoritaoshi":
-        parts = [_at_least(grip, 2), _at_least(position, 2), _at_least(power_adv, 3)]
+        parts = [_at_least(grip, 2), _at_least(position, 2), _at_least(power_adv, 1)]
     elif card.name == "Katasukashi":
         parts = [
             1.0 if fighter.total_grip == 0 else 0.0,
-            _nonnegative(position),
             1.0 if fighter.lost_position_this_turn else 0.0,
         ]
     elif card.name == "Tsukiotoshi":
@@ -351,8 +350,7 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     elif card.name == "Tottari":
         parts = [
             1.0 if fighter.total_grip == 0 else 0.0,
-            1.0 if fighter.opponent_grip_reduced_this_turn else 0.0,
-            _at_least(momentum, 2),
+            1.0 if 0 <= state.turn_number - fighter.tottari_counter_event_turn <= 1 else 0.0,
         ]
     elif card.name == "Uwatenage":
         parts = [
@@ -367,21 +365,16 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     elif card.name == "Tsukitaoshi":
         parts = [_at_least(momentum, 2), _nonnegative(position), _at_least(fighter.cards_played_this_turn, 4)]
     elif card.name == "Tsuridashi":
-        both = (
-            fighter.left_grip is not GripState.NONE
-            and fighter.right_grip is not GripState.NONE
-            and grip > 0
-        )
-        parts = [1.0 if both else _at_least(grip, 2), _at_least(fighter.power, 7)]
+        parts = [_at_least(grip, 3)]
     elif card.name == "Kotenage":
         opponent_grip = effective_total_grip(state, state.opponent_side(side))
         parts = [
             1.0 if opponent_grip == 0 else max(0.0, 1.0 - opponent_grip / 4.0),
             _at_least(momentum, 1),
-            _at_least(len(fighter.hand), 3),
+            _at_least(len(fighter.hand), 6),
         ]
     elif card.name == "Abisetaoshi":
-        parts = [_at_least(grip, 2), _at_least(momentum, 1), _at_least(fighter.power, 7)]
+        parts = [_at_least(grip, 2), _at_least(momentum, 1), _at_least(fighter.power, 6)]
     else:
         return 0.0
 
@@ -494,12 +487,34 @@ def candidate_plays(
     return plays
 
 
+COMBO_CARDS = frozenset({"Oshi", "Tsuki", "Tsuppari"})
+
+def _combo_target(state: BoutState, side: Side) -> bool:
+    fighter = state.fighter(side)
+    active = {card.name for card in fighter.kimarite_zone}
+    position = relative_position(state, side)
+    momentum = relative_momentum(state, side)
+    return (("Tsukidashi" in active and position >= 1 and momentum >= 0)
+            or ("Tsukitaoshi" in active and position >= 0 and momentum >= 1))
+
+
 def choose_play(
     state: BoutState,
     side: Side,
     comparison: TachiaiComparison,
 ) -> AIPlay | None:
     plays = candidate_plays(state, side, comparison)
+    fighter = state.fighter(side)
+    if _combo_target(state, side):
+        saved = sum(card.name in COMBO_CARDS for card in fighter.hand)
+        if saved < 2 and fighter.cards_played_this_turn == 0:
+            plays = [play for play in plays if play.card.name not in COMBO_CARDS]
+        elif saved >= 2 or fighter.cards_played_this_turn > 0:
+            plays = [
+                AIPlay(play.card, play.context,
+                       play.score + (90 if play.card.name in COMBO_CARDS else 0))
+                for play in plays
+            ]
     if not plays:
         return None
 

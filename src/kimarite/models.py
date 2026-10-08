@@ -82,6 +82,7 @@ class FighterState:
     bonus_turns_queued: int = 0
     lost_position_this_turn: bool = False
     opponent_grip_reduced_this_turn: bool = False
+    tottari_counter_event_turn: int = -100
     gained_push_this_turn: bool = False
     gained_momentum_this_turn: bool = False
 

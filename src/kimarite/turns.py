@@ -122,6 +122,7 @@ def check_kimarite_zone(
     side: Side,
     *,
     choose_kimarite: KimariteChoiceResolver | None = None,
+    at_turn_start: bool = False,
 ) -> Card | None:
     """Resolve a Kimarite win.
 
@@ -130,7 +131,8 @@ def check_kimarite_zone(
     when a later reward layer determines the alternatives have meaningfully
     different win rewards.
     """
-    cards = satisfied_kimarite(state, side)
+    cards = [c for c in satisfied_kimarite(state, side)
+             if c.name != "Tsuridashi" or at_turn_start]
     if not cards:
         return None
 
@@ -184,7 +186,7 @@ def start_exchange_turn(
         if state.winner is not None:
             return []
 
-    check_kimarite_zone(state, side, choose_kimarite=choose_kimarite)
+    check_kimarite_zone(state, side, choose_kimarite=choose_kimarite, at_turn_start=True)
     if state.winner is not None:
         return []
 

@@ -227,6 +227,7 @@ def establish_grip(state: BoutState, side: Side, hand: str) -> None:
             source="Kannuki",
             description="prevent establishing Grip",
         ):
+            state.fighter(state.opponent_side(side)).tottari_counter_event_turn = state.turn_number
             state.log(f"Kannuki prevents {fighter.wrestler.name} from establishing Grip.")
             return
     attr = _grip_attr(hand)
@@ -245,6 +246,7 @@ def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> No
             source="Kannuki",
             description="prevent improving Grip",
         ):
+            state.fighter(state.opponent_side(side)).tottari_counter_event_turn = state.turn_number
             state.log(f"Kannuki prevents {fighter.wrestler.name} from improving Grip.")
             return
     attr = _grip_attr(hand)
@@ -274,6 +276,7 @@ def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None 
         if current > 0:
             setattr(fighter, attr, GripState(current - 1))
             state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
+            state.fighter(state.opponent_side(side)).tottari_counter_event_turn = state.turn_number
 
 
 def total_grip(state: BoutState, side: Side) -> int:
