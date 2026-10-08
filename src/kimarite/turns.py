@@ -61,6 +61,7 @@ def first_turn_card_access(
     # It does not stack with the ordinary 2 + Grip Exchange selection.
     advantage = comparison.advantage_for(side, Stat.TECHNIQUE)
     look, keep = technique_access(advantage)
+    look = max(2, look + fighter.technique_look_adjustment)
     fighter.technique_reward_pending = False
     return ai_look_keep(fighter, look, keep)
 
