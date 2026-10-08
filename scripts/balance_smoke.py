@@ -8,7 +8,8 @@ from dataclasses import asdict
 from pathlib import Path
 
 from kimarite.batch import run_round_robin, standings, summarize_series
-from kimarite.catalog import PLAYTEST_WRESTLERS
+from kimarite.catalog import ORIGINAL_WRESTLERS, PLAYTEST_WRESTLERS
+from kimarite.exclusions import exclusions_for_difficulty
 
 
 def main() -> None:
@@ -16,15 +17,40 @@ def main() -> None:
     parser.add_argument("--bouts-per-orientation", type=int, default=1)
     parser.add_argument("--output-dir", default="balance_artifacts")
     parser.add_argument("--max-turns", type=int, default=100)
+    parser.add_argument(
+        "--roster",
+        choices=("all", "original"),
+        default="all",
+    )
+    parser.add_argument("--difficulty", type=int, default=-7)
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    names = list(PLAYTEST_WRESTLERS)
+    names = (
+        list(ORIGINAL_WRESTLERS)
+        if args.roster == "original"
+        else list(PLAYTEST_WRESTLERS)
+    )
+
+    if args.roster == "all" and args.difficulty != -7:
+        raise ValueError(
+            "Only the original 15 currently have authored exclusion priorities; "
+            "use difficulty -7 for the full roster."
+        )
+
+    exclusions = {}
+    if args.roster == "original":
+        exclusions = {
+            name: exclusions_for_difficulty(name, args.difficulty).excluded_ids
+            for name in names
+        }
+
     records = run_round_robin(
         names,
         bouts_per_orientation=args.bouts_per_orientation,
+        exclusions_by_wrestler=exclusions,
         max_turns=args.max_turns,
         seed_start=1,
     )
@@ -84,6 +110,8 @@ def main() -> None:
     )
     payload = {
         "wrestlers": names,
+        "roster": args.roster,
+        "difficulty": args.difficulty,
         "bouts_per_orientation": args.bouts_per_orientation,
         "total_bouts": len(records),
         "completed_bouts": summary.completed_bouts,
