@@ -49,7 +49,13 @@ def remove_temporary(
 
     if disrupted:
         if card.name == "Headlong Charge":
-            gain_momentum(state, state.opponent_side(side), 3)
+            state.momentum = -3 * state.sign(side)
+            opponent = state.opponent(side)
+            for index, found in enumerate(opponent.draw_pile):
+                if found.is_kimarite:
+                    opponent.hand.append(opponent.draw_pile.pop(index))
+                    state.log(f"{opponent.wrestler.name} Searches for {found.name}.")
+                    break
         elif card.name in {
             "Attempt Two-Handed Grip",
             "Attempt Deep Outside Grip",
@@ -112,7 +118,6 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
                 reduce_grip(state, opponent_side, hand="left")
                 reduce_grip(state, opponent_side, hand="right")
         elif name == "Morozashi":
-            gain_momentum(state, side, 1)
             gain_push(state, side, 1)
         elif name in {"Headlong Charge", "Get Underneath", "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
             pass
