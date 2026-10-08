@@ -31,6 +31,6 @@ def test_tochinoshin_seed_911132_matches_ai_vs_ai_sheet():
         (14, "Attempt Two-Handed Grip"),
         (38, "Yorikiri"),
         (9, "Harite"),
-        (35, "Use the Tawara"),
+        (35, "Shikiri"),
         (4, "Tsuki"),
     ]

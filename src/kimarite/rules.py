@@ -126,6 +126,20 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
             )
             return
 
+    # One Push is absorbed per active Grip-defense Temporary, once per card.
+    # Absorption happens before resolving remaining Push (and its overflow).
+    for instance in state.fighter(defending_side).temporary_zone:
+        if amount <= 0:
+            break
+        if instance.card.name in {
+            "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate",
+        } and not instance.opponent_gained_push_while_active:
+            amount -= 1
+            instance.opponent_gained_push_while_active = True
+            state.log(f"{instance.card.name} absorbs 1 Push.")
+    if amount == 0:
+        return
+
     # Sidestep only breaks after Push has survived prevention/suppression.
     _break_sidestep_from_push(state, side)
 

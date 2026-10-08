@@ -155,3 +155,21 @@ def test_ottsuke_records_kimarite_removal():
 
     assert bout.kimarite_removals == [(Side.A, "Tsuridashi")]
     assert bout.fighter_b.kimarite_zone == []
+
+
+def test_shikiri_exchange_rewards_technique_advantage():
+    card = card_by_name("Shikiri")
+    a = wrestler("A", technique=4, primary=Stat.TECHNIQUE)
+    b = wrestler("B", technique=0)
+    bout = BoutState(FighterState(a, hand=[card]), FighterState(b))
+    play_card(bout, Side.A, card, context=EffectContext(comparison=compare_tachiai(a, b)))
+    assert bout.momentum == 1
+    assert bout.position == 1
+
+
+def test_shikiri_exchange_without_threshold_only_gains_momentum():
+    card = card_by_name("Shikiri")
+    bout = bout_with_hand([card])
+    play_card(bout, Side.A, card, context=EffectContext(comparison=compare_tachiai(bout.fighter_a.wrestler, bout.fighter_b.wrestler)))
+    assert bout.momentum == 1
+    assert bout.position == 0

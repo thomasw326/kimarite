@@ -50,12 +50,6 @@ def remove_temporary(
     if disrupted:
         if card.name == "Headlong Charge":
             gain_momentum(state, state.opponent_side(side), 3)
-        elif card.name in {
-            "Attempt Two-Handed Grip",
-            "Attempt Deep Outside Grip",
-            "Attempt Deep Inside Grip",
-        }:
-            gain_momentum(state, state.opponent_side(side), 1)
         elif card.name == "Get Underneath":
             gain_momentum(state, state.opponent_side(side), 2)
 
@@ -82,8 +76,9 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             continue
 
         if name == "Attempt Two-Handed Grip":
-            establish_grip(state, side, "left")
-            establish_grip(state, side, "right")
+            from .rules import improve_grip
+            improve_grip(state, side, "left")
+            improve_grip(state, side, "right")
         elif name == "Attempt Deep Outside Grip":
             fighter.left_grip = GripState.DEEP
             state.log(f"{fighter.wrestler.name}'s Left Grip becomes DEEP.")
@@ -99,7 +94,10 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name == "Pull":
             state.momentum *= -1
             state.log(f"{fighter.wrestler.name} reverses Momentum.")
-        elif name == "Use the Tawara":
+        elif name in {
+            "Use the Tawara", "Gain Left Grip", "Gain Right Grip",
+            "Uwate", "Shitate",
+        }:
             pass
         elif name == "Kannuki":
             opponent_side = state.opponent_side(side)
