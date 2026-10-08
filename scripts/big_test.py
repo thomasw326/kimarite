@@ -105,18 +105,23 @@ def main():
     parser.add_argument("--repetitions", type=int, default=1,
                         help="Mirrored bouts per distinct pairing, per repetition")
     parser.add_argument("--max-turns", type=int, default=100)
+    parser.add_argument("--max-pairs", type=int, default=None,
+                        help="Optional limited pairs for a reporting smoke test")
     parser.add_argument("--output-dir", default="big_test_artifacts")
     parser.add_argument("--seed", type=int, default=20261008)
     parser.add_argument("--batch-id", type=int, default=0)
     args = parser.parse_args()
     if args.batch_id < 0:
         parser.error("--batch-id must be >= 0")
+    if args.max_pairs is not None and args.max_pairs < 1:
+        parser.error("--max-pairs must be >= 1")
     if args.repetitions < 1:
         parser.error("--repetitions must be >= 1")
     output = Path(args.output_dir)
     output.mkdir(parents=True, exist_ok=True)
     configs = roster()
     assert len(configs) == 108
+    planned_bouts = args.repetitions * min(5778, args.max_pairs or 5778) * 2
     bouts = Counter()
     wins = Counter()
     cards = defaultdict(lambda: Counter())
@@ -139,6 +144,8 @@ def main():
                          "spirit_advantage_a"))
         for repeat in range(args.repetitions):
             for pair_idx, (i, j) in enumerate(combinations(range(108), 2)):
+                if args.max_pairs is not None and pair_idx >= args.max_pairs:
+                    break
                 for orientation, (left, right) in enumerate(((i, j), (j, i))):
                     seed = args.seed + args.batch_id * 1_000_000_000 + repeat * 20000 + pair_idx * 2 + orientation
                     a, b = configs[left], configs[right]
@@ -293,7 +300,7 @@ def main():
         "batch_id": args.batch_id,
         "seed_range_start": args.seed + args.batch_id * 1_000_000_000,
         "seed_range_end": args.seed + args.batch_id * 1_000_000_000 + (args.repetitions - 1) * 20000 + 11555,
-        "planned_bouts": args.repetitions * 108 * 107,
+        "planned_bouts": planned_bouts,
         "completed": errors["completed"],
         "errors": dict(errors),
         "win_conditions": dict(outcomes),
@@ -306,8 +313,8 @@ def main():
         "max_turns": args.max_turns,
         "notes": "Per-card hand exposure counts distinct card names per wrestler-bout; played counts if played at least once. Priority slot describes wrestler AI preference, not card order. Excludes incomplete bouts from win rates.",
     }
-    assert sum(outcomes.values()) == args.repetitions * 108 * 107
-    assert sum(errors.values()) == args.repetitions * 108 * 107
+    assert sum(outcomes.values()) == planned_bouts
+    assert sum(errors.values()) == planned_bouts
     assert sum(bouts.values()) == 2 * errors["completed"]
     assert sum(c["bouts"] for c in advantage_results.values()) == 6 * errors["completed"]
     assert sum(c["wins"] for c in kimarite_origins.values()) == sum(
