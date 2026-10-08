@@ -9,6 +9,7 @@ from pathlib import Path
 
 from kimarite.batch import run_round_robin, standings, summarize_series
 from kimarite.catalog import ORIGINAL_WRESTLERS, PLAYTEST_WRESTLERS
+from kimarite.models import Stat
 from kimarite.exclusions import exclusions_for_difficulty
 
 
@@ -247,7 +248,23 @@ def main() -> None:
         )
     )
 
+    technique_stats = {}
+    for name in names:
+        if PLAYTEST_WRESTLERS[name].primary is not Stat.TECHNIQUE:
+            continue
+        all_bouts = [r for r in completed if name in (r.wrestler_a, r.wrestler_b)]
+        long_bouts = [r for r in all_bouts if r.turns >= 3]
+        short_bouts = [r for r in all_bouts if r.turns < 3]
+        technique_stats[name] = {
+            "overall_wins": sum(r.winner == name for r in all_bouts),
+            "overall_bouts": len(all_bouts),
+            "long_wins": sum(r.winner == name for r in long_bouts),
+            "long_bouts": len(long_bouts),
+            "short_wins": sum(r.winner == name for r in short_bouts),
+            "short_bouts": len(short_bouts),
+        }
     payload = {
+        "technique_primary_by_duration": technique_stats,
         "wrestlers": names,
         "roster": args.roster,
         "difficulty": args.difficulty,
