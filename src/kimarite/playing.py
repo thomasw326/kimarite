@@ -7,6 +7,7 @@ from .effects import (
     resolve_exchange_effect,
 )
 from .kimarite_effects import resolve_kimarite_play_effect
+from .legality import can_play_card
 from .models import BoutState, Card, Side
 
 
@@ -24,6 +25,8 @@ def play_card(
         raise IllegalPlay(f"{card.name} is not in {fighter.wrestler.name}'s hand.")
     if fighter.plays_remaining <= 0:
         raise IllegalPlay(f"{fighter.wrestler.name} has no Plays remaining.")
+    if not can_play_card(state, side, card):
+        raise IllegalPlay(f"{card.name} is not currently a legal play.")
 
     fighter.hand.remove(card)
     fighter.plays_remaining -= 1
