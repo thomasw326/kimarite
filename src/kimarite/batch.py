@@ -281,6 +281,7 @@ def run_round_robin(
                         ranking_a=1,
                         ranking_b=2,
                         max_turns=max_turns,
+                        ai_mode=ai_mode,
                     )
                 )
 
@@ -381,4 +382,5 @@ def run_difficulty_round_robin(
         exclusions_by_wrestler=exclusions,
         max_turns=max_turns,
         seed_start=seed_start,
+        ai_mode=ai_mode,
     )
