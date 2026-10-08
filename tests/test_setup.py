@@ -32,8 +32,12 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
 
     assert state.fighter_a.draw_pile[0].name == "Oshi"
     assert state.fighter_b.draw_pile[0].name == "Morozashi"
-    assert state.fighter_a.draw_pile[-1].name == "Stare Down"
-    assert state.fighter_b.draw_pile[-1].name == "Gain Right Grip"
+    # An immediate Tachiai victory ends resolution before prepared cards
+    # are placed at the bottom of either Draw Pile.
+    assert state.fighter_a.wrestler.prepared_tachiai_card.name == "Stare Down"
+    assert state.fighter_b.wrestler.prepared_tachiai_card.name == "Gain Right Grip"
+    assert state.fighter_a.wrestler.prepared_tachiai_card not in state.fighter_a.draw_pile
+    assert state.fighter_b.wrestler.prepared_tachiai_card not in state.fighter_b.draw_pile
 
 
 def test_headlong_charge_prepared_card_enters_temporary_not_bottom():
