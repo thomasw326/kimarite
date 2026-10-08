@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from .kimarite import satisfied_kimarite
 from .models import BoutState, Card, Side, Stat
-from .rules import effective_total_grip, gain_momentum
+from .rules import effective_total_grip, gain_momentum, grip_benefits_suppressed
 from .selection import ai_look_keep
 from .tachiai import TachiaiComparison, spirit_rewards, technique_access
 from .temporary import resolve_start_of_turn_temporaries
@@ -69,7 +69,7 @@ def first_turn_card_access(
 
 def normal_turn_card_access(state: BoutState, side: Side) -> list[Card]:
     fighter = state.fighter(side)
-    look = 2 + effective_total_grip(state, side)
+    look = 2 + effective_total_grip(state, side, consume_prevention=True)
     return ai_look_keep(fighter, look, 2)
 
 
@@ -136,6 +136,13 @@ def check_kimarite_zone(
         card = choose_kimarite(state, side, cards)
         if card not in cards:
             raise ValueError("Kimarite chooser must return one of the satisfied cards.")
+
+    grip_win_cards = {
+        "Yorikiri", "Yoritaoshi", "Uwatenage",
+        "Hikiotoshi", "Tsuridashi", "Abisetaoshi",
+    }
+    if card.name in grip_win_cards and grip_benefits_suppressed(state, side):
+        effective_total_grip(state, side, consume_prevention=True)
 
     state.declare_winner(side, card.name)
     return card
