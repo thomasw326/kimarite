@@ -22,7 +22,7 @@ def _activate_prebout_shiko(state: BoutState, side: Side) -> None:
 
 
 def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> int:
-    winner = comparison.power_winner
+    winner = comparison.spirit_winner
     if winner is None:
         return 0
 
@@ -35,7 +35,7 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> in
         state,
         winner,
         source=card.name,
-        description="reduce Tachiai Push from the Power comparison",
+        description="reduce Tachiai Push from the Spirit comparison",
     ):
         return 0
     return 1 if card.name == "Sidestep" else 2
@@ -47,15 +47,15 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
         _activate_prebout_shiko(state, side)
 
     reduction = _power_push_reduction(state, comparison)
-    power_winner, power_push = apply_tachiai_power_push(
+    spirit_winner, spirit_push = apply_tachiai_power_push(
         state, comparison, reduction=reduction
     )
     if state.winner is not None:
         return
 
     power_push_received = {
-        Side.A: power_push if power_winner is Side.B else 0,
-        Side.B: power_push if power_winner is Side.A else 0,
+        Side.A: spirit_push if spirit_winner is Side.B else 0,
+        Side.B: spirit_push if spirit_winner is Side.A else 0,
     }
     extra_push = {Side.A: 0, Side.B: 0}
     momentum_delta = {Side.A: 0, Side.B: 0}
@@ -144,8 +144,8 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
                 momentum_delta[side] += 1
 
         elif name == "Sidestep":
-            if comparison.power_winner is opponent_side:
-                raw_push = abs(comparison.power_advantage_a)
+            if comparison.spirit_winner is opponent_side:
+                raw_push = abs(comparison.spirit_advantage_a)
                 if raw_push > 0:
                     momentum_delta[side] += 1
 
