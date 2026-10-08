@@ -76,3 +76,22 @@ def test_momentum_overflow_is_symmetric_for_side_b():
     assert bout.momentum == -3
     assert bout.position == 0
     assert bout.winner is None
+
+
+def test_peak_grip_tracks_highest_total_not_final():
+    from kimarite.rules import establish_grip, improve_grip, reduce_grip
+    bout = state()
+    establish_grip(bout, Side.A, "left")
+    establish_grip(bout, Side.A, "right")
+    improve_grip(bout, Side.A, "left")
+    reduce_grip(bout, Side.A, hand="left")
+    assert bout.peak_grip_a == 3
+    assert bout.fighter_a.total_grip == 2
+
+
+def test_peak_grip_tracks_opponent_side():
+    from kimarite.rules import establish_grip
+    bout = state()
+    establish_grip(bout, Side.B, "right")
+    assert bout.peak_grip_b == 1
+    assert bout.peak_grip_a == 0

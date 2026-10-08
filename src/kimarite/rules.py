@@ -235,6 +235,7 @@ def establish_grip(state: BoutState, side: Side, hand: str) -> None:
     if current is GripState.NONE:
         setattr(fighter, attr, GripState.GRIP)
         state.log(f"{fighter.wrestler.name} establishes {hand.title()} Grip.")
+        _record_grip_peak(state, side)
 
 
 def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> None:
@@ -253,6 +254,7 @@ def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> No
     current = int(getattr(fighter, attr))
     updated = GripState(min(int(GripState.DEEP), current + amount))
     setattr(fighter, attr, updated)
+    _record_grip_peak(state, side)
     state.log(f"{fighter.wrestler.name} improves {hand.title()} Grip to {updated.name}.")
 
 
@@ -290,3 +292,11 @@ def _grip_attr(hand: str) -> str:
     if normalized == "right":
         return "right_grip"
     raise ValueError("hand must be 'left' or 'right'")
+
+
+def _record_grip_peak(state: BoutState, side: Side) -> None:
+    grip = state.fighter(side).total_grip
+    if side is Side.A:
+        state.peak_grip_a = max(state.peak_grip_a, grip)
+    else:
+        state.peak_grip_b = max(state.peak_grip_b, grip)
