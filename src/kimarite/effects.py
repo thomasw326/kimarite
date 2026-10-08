@@ -595,6 +595,22 @@ def _morozashi(
 
     add_temporary(state, side, card, phase="exchange")
 
+
+def _sidestep(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    if state.side_by_side_owner is not None:
+        raise IllegalPlay("The bout is already Side-by-Side.")
+
+    state.side_by_side_owner = side
+    state.side_by_side_distance = abs(state.position)
+    state.position = 0
+    state.log(
+        f"{state.fighter(side).wrestler.name} enters Side-by-Side at "
+        f"distance {state.side_by_side_distance}."
+    )
+    add_temporary(state, side, card, phase="exchange")
+
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Oshi": _oshi,
     "Tsuki": _tsuki,
@@ -621,6 +637,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Immovable": _immovable,
     "Henka": _henka,
     "Pull": _pull,
+    "Sidestep": _sidestep,
     "Reset to Neutral": _reset_to_neutral,
     "Get Underneath": _get_underneath,
     "Read the Move": _read_the_move,
@@ -649,11 +666,7 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     }
 )
 
-UNIMPLEMENTED_TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
-    {
-        "Sidestep",
-    }
-)
+UNIMPLEMENTED_TEMPORARY_CARD_NAMES: frozenset[str] = frozenset()
 
 CHOICE_OR_TEMPORARY_EFFECTS_NOT_YET_REGISTERED: frozenset[str] = frozenset()
 
