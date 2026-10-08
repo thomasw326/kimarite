@@ -141,8 +141,21 @@ def lose_power(state: BoutState, side: Side, amount: int) -> None:
     state.log(f"{fighter.wrestler.name} loses {amount} Power.")
 
 
+def grip_benefits_suppressed(state: BoutState, side: Side) -> bool:
+    return _has_temporary(state, state.opponent_side(side), "Kannuki")
+
+
+def effective_total_grip(state: BoutState, side: Side) -> int:
+    if grip_benefits_suppressed(state, side):
+        return 0
+    return state.fighter(side).total_grip
+
+
 def establish_grip(state: BoutState, side: Side, hand: str) -> None:
     fighter = state.fighter(side)
+    if grip_benefits_suppressed(state, side):
+        state.log(f"Kannuki prevents {fighter.wrestler.name} from establishing Grip.")
+        return
     attr = _grip_attr(hand)
     current = getattr(fighter, attr)
     if current is GripState.NONE:
@@ -152,6 +165,9 @@ def establish_grip(state: BoutState, side: Side, hand: str) -> None:
 
 def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> None:
     fighter = state.fighter(side)
+    if grip_benefits_suppressed(state, side):
+        state.log(f"Kannuki prevents {fighter.wrestler.name} from improving Grip.")
+        return
     attr = _grip_attr(hand)
     current = int(getattr(fighter, attr))
     updated = GripState(min(int(GripState.DEEP), current + amount))
