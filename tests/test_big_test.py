@@ -28,9 +28,11 @@ def test_card_positions_are_distinct_and_reproducible():
     fighter = make_fighter(roster()[0], random.Random(12345), 1)
     w = fighter.wrestler
     assert w.starting_kimarite.is_kimarite
-    assert w.prepared_tachiai_card.card_id != w.top_of_deck_card.card_id
+    reserved = {w.starting_kimarite.name, w.prepared_tachiai_card.name,
+                w.top_of_deck_card.name}
+    assert len(reserved) == 3
     assert fighter.draw_pile[0] == w.top_of_deck_card
-    assert w.prepared_tachiai_card not in fighter.draw_pile
+    assert not reserved.intersection(card.name for card in fighter.draw_pile[1:])
 
 
 def test_every_pool_card_is_legal_as_prepared_tachiai():
@@ -53,17 +55,24 @@ def test_every_pool_card_is_legal_as_prepared_tachiai():
         resolve_prepared_tachiai(state, comparison)
 
 
-def test_every_named_card_is_available_in_the_next_test_deck():
+def test_all_names_eligible_globally_and_reserved_locally():
     from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
     all_names = {card.name for card in CARD_POOL}
     assert len(all_names) == 50
     assert {card.name for card in STARTING_KIMARITE} <= all_names
-    for config in roster()[:6]:
-        fighter = make_fighter(config, random.Random(77), 1)
-        assigned = fighter.wrestler
-        names = {
-            assigned.prepared_tachiai_card.name,
-            *(card.name for card in fighter.draw_pile),
-        }
-        assert names == all_names
-        assert assigned.starting_kimarite.name in names
+    seen_kimarite, seen_prepared, seen_top = set(), set(), set()
+    for seed in range(1000):
+        fighter = make_fighter(roster()[seed % 108], random.Random(seed), 1)
+        w = fighter.wrestler
+        reserved = {w.starting_kimarite.name, w.prepared_tachiai_card.name,
+                    w.top_of_deck_card.name}
+        assert len(reserved) == 3
+        assert w.starting_kimarite.is_kimarite
+        assert fighter.draw_pile[0] == w.top_of_deck_card
+        assert not reserved.intersection(card.name for card in fighter.draw_pile[1:])
+        seen_kimarite.add(w.starting_kimarite.name)
+        seen_prepared.add(w.prepared_tachiai_card.name)
+        seen_top.add(w.top_of_deck_card.name)
+    assert seen_kimarite == {card.name for card in STARTING_KIMARITE}
+    assert seen_prepared == all_names
+    assert seen_top == all_names
