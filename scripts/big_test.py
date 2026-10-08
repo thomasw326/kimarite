@@ -39,14 +39,14 @@ def roster():
 def make_fighter(config, rng, ranking):
     name, stats, order = config
     kimarite = rng.choice(STARTING_KIMARITE)
-    # Card assignment and shuffle are deliberately agnostic to wrestler statistics.
-    # Starting Kimarite is a dedicated slot; all 50 card names remain
-    # independently eligible for prepared Tachiai, top-of-deck and remainder.
-    pool = list(CARD_POOL)
-    tachiai = rng.choice(pool)
-    pool = [card for card in pool if card.card_id != tachiai.card_id]
-    top_card = rng.choice(pool)
-    pool = [card for card in pool if card.card_id != top_card.card_id]
+    # All names are eligible for each role, subject to the three assigned
+    # card names being distinct. Exclude all copies from the remainder.
+    tachiai = rng.choice([c for c in CARD_POOL if c.name != kimarite.name])
+    top_card = rng.choice([
+        c for c in CARD_POOL if c.name not in {kimarite.name, tachiai.name}
+    ])
+    reserved = {kimarite.name, tachiai.name, top_card.name}
+    pool = [card for card in CARD_POOL if card.name not in reserved]
     rng.shuffle(pool)
     wrestler = Wrestler(name, *stats, kimarite, tachiai, top_card,
                         primary=order[0], secondary=order[1], tertiary=order[2],
