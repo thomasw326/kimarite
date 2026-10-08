@@ -4,7 +4,7 @@ from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, dr
 from .kimarite import power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
-from .rules import effective_total_grip, establish_grip, gain_momentum, gain_position, gain_power, reduce_grip
+from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, gain_power, reduce_grip
 from .selection import ai_look_keep
 
 
@@ -37,7 +37,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
 
     if card.name == "Yorikiri":
         if relative_position(state, side) >= 0:
-            establish_grip(state, side, "left")
+            gain_flexible_grip(state, side)
 
     elif card.name == "Oshidashi":
         if power_advantage(state, side) >= 2:
@@ -53,7 +53,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
 
     elif card.name == "Yoritaoshi":
         if relative_position(state, side) >= 0:
-            establish_grip(state, side, "left")
+            gain_flexible_grip(state, side)
 
     elif card.name == "Katasukashi":
         if _optional(context, "use_optional", card):
@@ -109,7 +109,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         if _optional(context, "use_optional", card):
             gain_momentum(state, opponent_side, 1)
             draw_one(state, side)
-            establish_grip(state, side, "left")
+            gain_flexible_grip(state, side)
 
     elif card.name == "Tsukitaoshi":
         if relative_momentum(state, side) >= 1:
@@ -151,7 +151,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     elif card.name == "Abisetaoshi":
         if fighter.power >= 5:
             if effective_total_grip(state, side) == 0:
-                establish_grip(state, side, "left")
+                gain_flexible_grip(state, side)
             else:
                 gain_power(state, side, 1)
 
