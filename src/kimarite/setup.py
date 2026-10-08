@@ -5,13 +5,9 @@ from dataclasses import dataclass, field
 from .catalog import ORIGINAL_WRESTLERS
 from .deck import build_seeded_deck
 from .models import BoutState, FighterState, Side
-from .tachiai import (
-    TachiaiComparison,
-    apply_tachiai_power_push,
-    compare_tachiai,
-    first_exchange_side,
-)
-from .turns import apply_initial_power, prepare_exchange_deck
+from .tachiai import TachiaiComparison, compare_tachiai, first_exchange_side
+from .tachiai_effects import resolve_prepared_tachiai
+from .turns import apply_initial_power
 
 
 @dataclass(frozen=True)
@@ -66,12 +62,7 @@ def create_prepared_bout(config: BoutConfig) -> PreparedBout:
 
     comparison = compare_tachiai(wrestler_a, wrestler_b)
     apply_initial_power(state, comparison)
-    apply_tachiai_power_push(state, comparison)
-
-    # Prepared Tachiai cards resolve their Tachiai text separately, then go
-    # to the bottom of the Draw Pile. Card text will be added via the effect registry.
-    prepare_exchange_deck(state, Side.A)
-    prepare_exchange_deck(state, Side.B)
+    resolve_prepared_tachiai(state, comparison)
 
     if state.winner is None:
         state.active_side = first_exchange_side(comparison, wrestler_a, wrestler_b)
