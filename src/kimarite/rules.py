@@ -147,6 +147,13 @@ def grip_benefits_suppressed(state: BoutState, side: Side) -> bool:
 
 def effective_total_grip(state: BoutState, side: Side) -> int:
     if grip_benefits_suppressed(state, side):
+        if prevent_negative_effect(
+            state,
+            side,
+            source="Kannuki",
+            description="suppress benefits from existing Grip",
+        ):
+            return state.fighter(side).total_grip
         return 0
     return state.fighter(side).total_grip
 
@@ -154,8 +161,14 @@ def effective_total_grip(state: BoutState, side: Side) -> int:
 def establish_grip(state: BoutState, side: Side, hand: str) -> None:
     fighter = state.fighter(side)
     if grip_benefits_suppressed(state, side):
-        state.log(f"Kannuki prevents {fighter.wrestler.name} from establishing Grip.")
-        return
+        if not prevent_negative_effect(
+            state,
+            side,
+            source="Kannuki",
+            description="prevent establishing Grip",
+        ):
+            state.log(f"Kannuki prevents {fighter.wrestler.name} from establishing Grip.")
+            return
     attr = _grip_attr(hand)
     current = getattr(fighter, attr)
     if current is GripState.NONE:
@@ -166,8 +179,14 @@ def establish_grip(state: BoutState, side: Side, hand: str) -> None:
 def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> None:
     fighter = state.fighter(side)
     if grip_benefits_suppressed(state, side):
-        state.log(f"Kannuki prevents {fighter.wrestler.name} from improving Grip.")
-        return
+        if not prevent_negative_effect(
+            state,
+            side,
+            source="Kannuki",
+            description="prevent improving Grip",
+        ):
+            state.log(f"Kannuki prevents {fighter.wrestler.name} from improving Grip.")
+            return
     attr = _grip_attr(hand)
     current = int(getattr(fighter, attr))
     updated = GripState(min(int(GripState.DEEP), current + amount))
