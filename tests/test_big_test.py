@@ -51,3 +51,19 @@ def test_every_pool_card_is_legal_as_prepared_tachiai():
         )
         comparison = compare_tachiai(first, foe)
         resolve_prepared_tachiai(state, comparison)
+
+
+def test_every_named_card_is_available_in_the_next_test_deck():
+    from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
+    all_names = {card.name for card in CARD_POOL}
+    assert len(all_names) == 50
+    assert {card.name for card in STARTING_KIMARITE} <= all_names
+    for config in roster()[:6]:
+        fighter = make_fighter(config, random.Random(77), 1)
+        assigned = fighter.wrestler
+        names = {
+            assigned.prepared_tachiai_card.name,
+            *(card.name for card in fighter.draw_pile),
+        }
+        assert names == all_names
+        assert assigned.starting_kimarite.name in names
