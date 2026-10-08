@@ -1,1 +1,89 @@
-from kimarite.catalog import card_by_name\nfrom kimarite.effects import EffectContext\nfrom kimarite.models import BoutState, Card, FighterState, GripState, Side, Wrestler\nfrom kimarite.playing import play_card\nfrom kimarite.rules import gain_push\nfrom kimarite.temporary import remove_temporary, resolve_start_of_turn_temporaries\n\n\ndef wrestler(name: str) -> Wrestler:\n    blank = Card(9900 + len(name), f"{name} Blank")\n    return Wrestler(name, 0, 0, 0, blank, blank, blank)\n\n\ndef bout_with_hand(cards):\n    return BoutState(\n        FighterState(wrestler("A"), hand=list(cards)),\n        FighterState(wrestler("B")),\n    )\n\n\ndef test_headlong_charge_stays_only_in_temporary_zone_after_play():\n    card = card_by_name("Headlong Charge")\n    bout = bout_with_hand([card])\n\n    play_card(bout, Side.A, card)\n\n    assert [x.card.name for x in bout.fighter_a.temporary_zone] == ["Headlong Charge"]\n    assert card not in bout.fighter_a.discard_pile\n\n\ndef test_headlong_disruption_loses_three_momentum():\n    card = card_by_name("Headlong Charge")\n    bout = bout_with_hand([card])\n    play_card(bout, Side.A, card)\n    instance = bout.fighter_a.temporary_zone[0]\n\n    remove_temporary(bout, Side.A, instance, disrupted=True)\n\n    assert bout.momentum == -2  # +1 on play, then -3 for disruption\n    assert card in bout.fighter_a.discard_pile\n\n\ndef test_attempt_two_handed_grip_resolves_at_next_turn_start():\n    card = card_by_name("Attempt Two-Handed Grip")\n    bout = bout_with_hand([card])\n    play_card(bout, Side.A, card)\n\n    resolve_start_of_turn_temporaries(bout, Side.A)\n\n    assert bout.fighter_a.left_grip is GripState.GRIP\n    assert bout.fighter_a.right_grip is GripState.GRIP\n    assert not bout.fighter_a.temporary_zone\n\n\ndef test_immovable_tracks_opponent_push_and_denies_survival_momentum():\n    card = card_by_name("Immovable")\n    bout = bout_with_hand([card])\n    play_card(bout, Side.A, card)\n    gain_push(bout, Side.B, 1)\n\n    resolve_start_of_turn_temporaries(bout, Side.A)\n\n    assert bout.momentum == 0\n\n\ndef test_hold_position_prevents_opponent_push_while_active():\n    card = card_by_name("Hold Position")\n    bout = bout_with_hand([card])\n    play_card(bout, Side.A, card)\n\n    gain_push(bout, Side.B, 2)\n\n    assert bout.position == 0\n\n\ndef test_use_tawara_converts_opponent_push_to_momentum():\n    card = card_by_name("Use the Tawara")\n    bout = bout_with_hand([card])\n    play_card(\n        bout,\n        Side.A,\n        card,\n        context=EffectContext(choices={"lose_position_for_power": False}),\n    )\n\n    gain_push(bout, Side.B, 1)\n\n    assert bout.position == -1\n    assert bout.momentum == 1\n
+from kimarite.catalog import card_by_name
+from kimarite.effects import EffectContext
+from kimarite.models import BoutState, Card, FighterState, GripState, Side, Wrestler
+from kimarite.playing import play_card
+from kimarite.rules import gain_push
+from kimarite.temporary import remove_temporary, resolve_start_of_turn_temporaries
+
+
+def wrestler(name: str) -> Wrestler:
+    blank = Card(9900 + len(name), f"{name} Blank")
+    return Wrestler(name, 0, 0, 0, blank, blank, blank)
+
+
+def bout_with_hand(cards):
+    return BoutState(
+        FighterState(wrestler("A"), hand=list(cards)),
+        FighterState(wrestler("B")),
+    )
+
+
+def test_headlong_charge_stays_only_in_temporary_zone_after_play():
+    card = card_by_name("Headlong Charge")
+    bout = bout_with_hand([card])
+
+    play_card(bout, Side.A, card)
+
+    assert [x.card.name for x in bout.fighter_a.temporary_zone] == ["Headlong Charge"]
+    assert card not in bout.fighter_a.discard_pile
+
+
+def test_headlong_disruption_loses_three_momentum():
+    card = card_by_name("Headlong Charge")
+    bout = bout_with_hand([card])
+    play_card(bout, Side.A, card)
+    instance = bout.fighter_a.temporary_zone[0]
+
+    remove_temporary(bout, Side.A, instance, disrupted=True)
+
+    assert bout.momentum == -2  # +1 on play, then -3 for disruption
+    assert card in bout.fighter_a.discard_pile
+
+
+def test_attempt_two_handed_grip_resolves_at_next_turn_start():
+    card = card_by_name("Attempt Two-Handed Grip")
+    bout = bout_with_hand([card])
+    play_card(bout, Side.A, card)
+
+    resolve_start_of_turn_temporaries(bout, Side.A)
+
+    assert bout.fighter_a.left_grip is GripState.GRIP
+    assert bout.fighter_a.right_grip is GripState.GRIP
+    assert not bout.fighter_a.temporary_zone
+
+
+def test_immovable_tracks_opponent_push_and_denies_survival_momentum():
+    card = card_by_name("Immovable")
+    bout = bout_with_hand([card])
+    play_card(bout, Side.A, card)
+    gain_push(bout, Side.B, 1)
+
+    resolve_start_of_turn_temporaries(bout, Side.A)
+
+    assert bout.momentum == 0
+
+
+def test_hold_position_prevents_opponent_push_while_active():
+    card = card_by_name("Hold Position")
+    bout = bout_with_hand([card])
+    play_card(bout, Side.A, card)
+
+    gain_push(bout, Side.B, 2)
+
+    assert bout.position == 0
+
+
+def test_use_tawara_converts_opponent_push_to_momentum():
+    card = card_by_name("Use the Tawara")
+    bout = bout_with_hand([card])
+    play_card(
+        bout,
+        Side.A,
+        card,
+        context=EffectContext(choices={"lose_position_for_power": False}),
+    )
+
+    gain_push(bout, Side.B, 1)
+
+    assert bout.position == -1
+    assert bout.momentum == 1
