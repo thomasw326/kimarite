@@ -127,6 +127,22 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
             )
             return
 
+    # The four basic Grip cards each protect against one point of incoming Push.
+    # The protection is a real Temporary, discarded when consumed or at its
+    # owner's next turn, and multiple shields can each absorb one Push.
+    defender = state.fighter(defending_side)
+    for instance in list(defender.temporary_zone):
+        if amount <= 0:
+            break
+        if instance.card.name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
+            defender.temporary_zone.remove(instance)
+            defender.discard_pile.append(instance.card)
+            state.temporary_outcomes.append((defending_side, instance.card.name, "protected"))
+            state.log(f"{instance.card.name} prevents 1 incoming Push.")
+            amount -= 1
+    if amount <= 0:
+        return
+
     # Sidestep only breaks after Push has survived prevention/suppression.
     _break_sidestep_from_push(state, side)
 
@@ -200,6 +216,13 @@ def effective_total_grip(
     return state.fighter(side).total_grip
 
 
+def gain_flexible_grip(state: BoutState, side: Side) -> None:
+    """Improve whichever Grip is shallower, left on ties, up to Deep."""
+    fighter = state.fighter(side)
+    hand = "left" if fighter.left_grip <= fighter.right_grip else "right"
+    improve_grip(state, side, hand)
+
+
 def establish_grip(state: BoutState, side: Side, hand: str) -> None:
     fighter = state.fighter(side)
     if grip_benefits_suppressed(state, side):
@@ -209,6 +232,7 @@ def establish_grip(state: BoutState, side: Side, hand: str) -> None:
             source="Kannuki",
             description="prevent establishing Grip",
         ):
+            state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
             state.log(f"Kannuki prevents {fighter.wrestler.name} from establishing Grip.")
             return
     attr = _grip_attr(hand)
@@ -227,6 +251,7 @@ def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> No
             source="Kannuki",
             description="prevent improving Grip",
         ):
+            state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
             state.log(f"Kannuki prevents {fighter.wrestler.name} from improving Grip.")
             return
     attr = _grip_attr(hand)
