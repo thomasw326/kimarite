@@ -5,11 +5,12 @@ from dataclasses import dataclass
 from statistics import mean
 from typing import Iterable
 
+from .ai import live_kimarite_progress
 from .catalog import PLAYTEST_WRESTLERS
 from .exclusions import exclusions_for_difficulty
 from .models import Side
 from .tachiai import compare_tachiai, first_exchange_side
-from .setup import BoutConfig, FighterConfig
+from .setup import BoutConfig, FighterConfig, create_prepared_bout
 from .simulate import run_bout
 
 
@@ -31,6 +32,10 @@ class BoutRecord:
     technique_advantage_a: int
     spirit_advantage_a: int
     first_exchange_wrestler: str | None
+    starting_kimarite_progress_a: float
+    starting_kimarite_progress_b: float
+    opening_momentum: int
+    opening_position: int
     unsupported_reason: str | None = None
 
     @property
@@ -81,21 +86,28 @@ def run_series(
         except ValueError:
             first_exchange_wrestler = None
 
-        result = run_bout(
-            BoutConfig(
-                FighterConfig(
-                    wrestler_a,
-                    seed_a,
-                    exclusions_a,
-                    ranking=ranking_a,
-                ),
-                FighterConfig(
-                    wrestler_b,
-                    seed_b,
-                    exclusions_b,
-                    ranking=ranking_b,
-                ),
+        config = BoutConfig(
+            FighterConfig(
+                wrestler_a,
+                seed_a,
+                exclusions_a,
+                ranking=ranking_a,
             ),
+            FighterConfig(
+                wrestler_b,
+                seed_b,
+                exclusions_b,
+                ranking=ranking_b,
+            ),
+        )
+        opening = create_prepared_bout(config).state
+        starting_kimarite_progress_a = live_kimarite_progress(opening, Side.A)
+        starting_kimarite_progress_b = live_kimarite_progress(opening, Side.B)
+        opening_momentum = opening.momentum
+        opening_position = opening.position
+
+        result = run_bout(
+            config,
             max_turns=max_turns,
         )
         state = result.state
@@ -136,6 +148,10 @@ def run_series(
                 technique_advantage_a=comparison.technique_advantage_a,
                 spirit_advantage_a=comparison.spirit_advantage_a,
                 first_exchange_wrestler=first_exchange_wrestler,
+                starting_kimarite_progress_a=starting_kimarite_progress_a,
+                starting_kimarite_progress_b=starting_kimarite_progress_b,
+                opening_momentum=opening_momentum,
+                opening_position=opening_position,
                 unsupported_reason=result.unsupported_reason,
             )
         )
