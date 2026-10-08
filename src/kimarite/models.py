@@ -1,13 +1,24 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import IntEnum
+from enum import Enum, IntEnum
 
 
 class GripState(IntEnum):
     NONE = 0
     GRIP = 1
     DEEP = 2
+
+
+class Side(str, Enum):
+    A = "A"
+    B = "B"
+
+
+class Stat(str, Enum):
+    POWER = "Power"
+    TECHNIQUE = "Technique"
+    SPIRIT = "Spirit"
 
 
 @dataclass(frozen=True)
@@ -19,6 +30,13 @@ class Card:
     spirit: int = 0
     is_kimarite: bool = False
 
+    def orbs(self, stat: Stat) -> int:
+        if stat is Stat.POWER:
+            return self.power
+        if stat is Stat.TECHNIQUE:
+            return self.technique
+        return self.spirit
+
 
 @dataclass(frozen=True)
 class Wrestler:
@@ -29,23 +47,66 @@ class Wrestler:
     starting_kimarite: Card
     prepared_tachiai_card: Card
     top_of_deck_card: Card
+    primary: Stat = Stat.POWER
+    secondary: Stat = Stat.TECHNIQUE
+    tertiary: Stat = Stat.SPIRIT
+    ranking: int | None = None
+
+
+@dataclass
+class FighterState:
+    wrestler: Wrestler
+    draw_pile: list[Card] = field(default_factory=list)
+    hand: list[Card] = field(default_factory=list)
+    discard_pile: list[Card] = field(default_factory=list)
+    kimarite_zone: list[Card] = field(default_factory=list)
+    temporary_zone: list[Card] = field(default_factory=list)
+    power: int = 0
+    left_grip: GripState = GripState.NONE
+    right_grip: GripState = GripState.NONE
+    plays_remaining: int = 2
+    cards_played_this_turn: int = 0
+    first_exchange_turn: bool = True
+    technique_reward_pending: bool = True
+    spirit_reward_pending: bool = True
+    bonus_turns_queued: int = 0
+
+    @property
+    def total_grip(self) -> int:
+        return int(self.left_grip) + int(self.right_grip)
 
 
 @dataclass
 class BoutState:
-    wrestler_a: Wrestler
-    wrestler_b: Wrestler
+    fighter_a: FighterState
+    fighter_b: FighterState
     momentum: int = 0
     position: int = 0
-    power_a: int = 0
-    power_b: int = 0
-    left_grip_a: GripState = GripState.NONE
-    right_grip_a: GripState = GripState.NONE
-    left_grip_b: GripState = GripState.NONE
-    right_grip_b: GripState = GripState.NONE
-    winner: str | None = None
+    active_side: Side | None = None
+    turn_number: int = 0
+    winner: Side | None = None
     win_method: str | None = None
     event_log: list[str] = field(default_factory=list)
 
+    def fighter(self, side: Side) -> FighterState:
+        return self.fighter_a if side is Side.A else self.fighter_b
+
+    def opponent(self, side: Side) -> FighterState:
+        return self.fighter_b if side is Side.A else self.fighter_a
+
+    @staticmethod
+    def opponent_side(side: Side) -> Side:
+        return Side.B if side is Side.A else Side.A
+
+    @staticmethod
+    def sign(side: Side) -> int:
+        return 1 if side is Side.A else -1
+
     def log(self, message: str) -> None:
         self.event_log.append(message)
+
+    def declare_winner(self, side: Side, method: str) -> None:
+        if self.winner is None:
+            self.winner = side
+            self.win_method = method
+            self.log(f"{self.fighter(side).wrestler.name} wins by {method}.")
