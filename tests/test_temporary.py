@@ -87,3 +87,36 @@ def test_use_tawara_converts_opponent_push_to_momentum():
 
     assert bout.position == -1
     assert bout.momentum == 1
+
+
+def test_sidestep_survives_and_takes_favorable_orientation_on_momentum_tie():
+    card = card_by_name("Sidestep")
+    bout = bout_with_hand([card])
+    bout.position = -2
+
+    play_card(bout, Side.A, card)
+
+    assert bout.position == 0
+    assert bout.side_by_side_owner is Side.A
+    assert bout.side_by_side_distance == 2
+
+    resolve_start_of_turn_temporaries(bout, Side.A)
+
+    assert bout.position == 2
+    assert bout.side_by_side_owner is None
+    assert not bout.fighter_a.temporary_zone
+
+
+def test_opponent_push_breaks_sidestep_before_push_resolves():
+    card = card_by_name("Sidestep")
+    bout = bout_with_hand([card])
+    bout.position = 2
+
+    play_card(bout, Side.A, card)
+    gain_push(bout, Side.B, 1)
+
+    assert bout.side_by_side_owner is None
+    assert not bout.fighter_a.temporary_zone
+    assert card in bout.fighter_a.discard_pile
+    # Retained distance 2 becomes favorable to B, then B's Push moves to -3.
+    assert bout.position == -3
