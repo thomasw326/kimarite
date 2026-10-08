@@ -45,3 +45,16 @@ def test_unchosen_looked_cards_go_to_bottom_in_reveal_order():
     assert [card.card_id for card in kept] == [2, 4]
     assert [card.card_id for card in fighter.hand] == [2, 4]
     assert [card.card_id for card in fighter.draw_pile] == [5, 1, 3]
+
+
+def test_look_keep_with_short_deck_keeps_all_available_cards():
+    fighter = FighterState(
+        wrestler(),
+        draw_pile=[Card(99, "Only", technique=1)],
+    )
+
+    kept = ai_look_keep(fighter, look=4, keep=2)
+
+    assert [card.card_id for card in kept] == [99]
+    assert [card.card_id for card in fighter.hand] == [99]
+    assert fighter.draw_pile == []
