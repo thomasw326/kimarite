@@ -28,7 +28,7 @@ def test_headlong_charge_stays_only_in_temporary_zone_after_play():
     assert card not in bout.fighter_a.discard_pile
 
 
-def test_headlong_disruption_loses_three_momentum():
+def test_headlong_disruption_sets_momentum_to_negative_three():
     card = card_by_name("Headlong Charge")
     bout = bout_with_hand([card])
     play_card(bout, Side.A, card)
@@ -36,7 +36,7 @@ def test_headlong_disruption_loses_three_momentum():
 
     remove_temporary(bout, Side.A, instance, disrupted=True)
 
-    assert bout.momentum == -2  # +1 on play, then -3 for disruption
+    assert bout.momentum == -3  # V4.3 sets relative Momentum to -3
     assert card in bout.fighter_a.discard_pile
     assert bout.temporary_outcomes[-1] == (
         Side.A,
@@ -117,7 +117,7 @@ def test_sidestep_survives_and_takes_favorable_orientation_on_momentum_tie():
     assert not bout.fighter_a.temporary_zone
 
 
-def test_opponent_push_breaks_sidestep_before_push_resolves():
+def test_opponent_push_is_zero_while_sidestep_remains():
     card = card_by_name("Sidestep")
     bout = bout_with_hand([card])
     bout.position = 2
@@ -125,11 +125,9 @@ def test_opponent_push_breaks_sidestep_before_push_resolves():
     play_card(bout, Side.A, card)
     gain_push(bout, Side.B, 1)
 
-    assert bout.side_by_side_owner is None
-    assert not bout.fighter_a.temporary_zone
-    assert card in bout.fighter_a.discard_pile
-    # Retained distance 2 becomes favorable to B, then B's Push moves to -3.
-    assert bout.position == -3
+    assert bout.side_by_side_owner is Side.A
+    assert any(x.card.name == "Sidestep" for x in bout.fighter_a.temporary_zone)
+    assert bout.position == 0  # No Push while Side-by-Side is active.
 
 
 def test_prevented_push_does_not_break_sidestep():
