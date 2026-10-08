@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from statistics import mean
 from typing import Iterable
 
+from .exclusions import exclusions_for_difficulty
 from .models import Side
 from .setup import BoutConfig, FighterConfig
 from .simulate import run_bout
@@ -257,4 +258,55 @@ def standings(records: list[BoutRecord]) -> list[Standing]:
             -row.wins,
             row.wrestler,
         ),
+    )
+
+
+def run_difficulty_series(
+    wrestler_a: str,
+    wrestler_b: str,
+    seed_pairs: Iterable[tuple[int, int]],
+    *,
+    difficulty_a: int = 0,
+    difficulty_b: int = 0,
+    ranking_a: int | None = 1,
+    ranking_b: int | None = 2,
+    max_turns: int = 100,
+) -> list[BoutRecord]:
+    exclusions_a = exclusions_for_difficulty(
+        wrestler_a, difficulty_a
+    ).excluded_ids
+    exclusions_b = exclusions_for_difficulty(
+        wrestler_b, difficulty_b
+    ).excluded_ids
+    return run_series(
+        wrestler_a,
+        wrestler_b,
+        seed_pairs,
+        exclusions_a=exclusions_a,
+        exclusions_b=exclusions_b,
+        ranking_a=ranking_a,
+        ranking_b=ranking_b,
+        max_turns=max_turns,
+    )
+
+
+def run_difficulty_round_robin(
+    wrestler_names: Iterable[str],
+    *,
+    difficulty: int = 0,
+    bouts_per_orientation: int = 1,
+    max_turns: int = 100,
+    seed_start: int = 1,
+) -> list[BoutRecord]:
+    names = list(wrestler_names)
+    exclusions = {
+        name: exclusions_for_difficulty(name, difficulty).excluded_ids
+        for name in names
+    }
+    return run_round_robin(
+        names,
+        bouts_per_orientation=bouts_per_orientation,
+        exclusions_by_wrestler=exclusions,
+        max_turns=max_turns,
+        seed_start=seed_start,
     )
