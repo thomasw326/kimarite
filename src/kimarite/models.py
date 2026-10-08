@@ -54,13 +54,21 @@ class Wrestler:
 
 
 @dataclass
+class TemporaryInstance:
+    card: Card
+    entered_turn: int
+    entered_phase: str
+    opponent_gained_push_while_active: bool = False
+
+
+@dataclass
 class FighterState:
     wrestler: Wrestler
     draw_pile: list[Card] = field(default_factory=list)
     hand: list[Card] = field(default_factory=list)
     discard_pile: list[Card] = field(default_factory=list)
     kimarite_zone: list[Card] = field(default_factory=list)
-    temporary_zone: list[Card] = field(default_factory=list)
+    temporary_zone: list[TemporaryInstance] = field(default_factory=list)
     power: int = 0
     left_grip: GripState = GripState.NONE
     right_grip: GripState = GripState.NONE
