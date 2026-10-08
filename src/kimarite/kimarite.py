@@ -140,7 +140,7 @@ def _tsukitaoshi(state: BoutState, side: Side) -> bool:
 
 
 def _tsuridashi(state: BoutState, side: Side) -> bool:
-    return effective_total_grip(state, side) >= 3
+    return effective_total_grip(state, side) >= 3 and relative_position(state, side) >= 0
 
 
 def _kotenage(state: BoutState, side: Side) -> bool:
