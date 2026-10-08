@@ -22,9 +22,7 @@ def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
             (fighter.right_grip is GripState.GRIP and fighter.left_grip is GripState.NONE)
         )
 
-    # Sidestep remains temporarily unavailable to the autonomous runner until
-    # Push behavior during Side-by-Side is explicitly resolved.
     if card.name == "Sidestep":
-        return False
+        return state.side_by_side_owner is None
 
     return True
