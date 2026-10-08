@@ -139,6 +139,8 @@ def main() -> None:
             "turns",
             "cards_played_a",
             "cards_played_b",
+            "kimarite_removals_a",
+            "kimarite_removals_b",
             "power_advantage_a",
             "technique_advantage_a",
             "spirit_advantage_a",
@@ -157,6 +159,8 @@ def main() -> None:
                 record.turns,
                 "|".join(record.cards_played_a),
                 "|".join(record.cards_played_b),
+                "|".join(record.kimarite_removals_a),
+                "|".join(record.kimarite_removals_b),
                 record.power_advantage_a,
                 record.technique_advantage_a,
                 record.spirit_advantage_a,
@@ -169,6 +173,15 @@ def main() -> None:
         for record in records
         if not record.completed
     )
+    kimarite_removals = Counter(
+        removed
+        for record in records
+        for removed in (
+            *record.kimarite_removals_a,
+            *record.kimarite_removals_b,
+        )
+    )
+
     payload = {
         "wrestlers": names,
         "roster": args.roster,
@@ -183,6 +196,7 @@ def main() -> None:
         "wins": summary.wins,
         "win_methods": summary.win_methods,
         "winning_card_uses": summary.winning_card_uses,
+        "kimarite_removals": dict(kimarite_removals),
         "win_phase_counts": dict(phase_wins),
         "tachiai_forceout_rate": (
             phase_wins.get("Tachiai", 0) / len(completed)
