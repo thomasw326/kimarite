@@ -45,7 +45,7 @@ def test_prepared_tachiai_card_goes_to_bottom():
     ]
 
 
-def test_technique_advantage_six_looks_eight_and_keeps_four_on_first_turn():
+def test_technique_advantage_six_looks_eight_and_keeps_five_on_first_turn():
     a = make_wrestler("A", 6, 0, Stat.TECHNIQUE, Stat.SPIRIT)
     b = make_wrestler("B", 0, 0, Stat.TECHNIQUE, Stat.SPIRIT)
     deck = [
@@ -57,8 +57,8 @@ def test_technique_advantage_six_looks_eight_and_keeps_four_on_first_turn():
 
     kept = resolve_turn_card_access(bout, Side.A, comparison)
 
-    assert len(kept) == 4
-    assert len(bout.fighter_a.hand) == 4
+    assert len(kept) == 5
+    assert len(bout.fighter_a.hand) == 5
     assert bout.fighter_a.first_exchange_turn is False
 
 
@@ -76,7 +76,7 @@ def test_losing_technique_first_turn_draws_two_then_next_turn_uses_normal_access
     assert [c.card_id for c in second] == [3, 4]
 
 
-def test_spirit_advantage_six_gives_momentum_and_queues_bonus_turn():
+def test_spirit_advantage_does_not_grant_old_turn_reward():
     a = make_wrestler("A", 0, 6, Stat.SPIRIT, Stat.POWER)
     b = make_wrestler("B", 0, 0, Stat.SPIRIT, Stat.POWER)
     bout = BoutState(FighterState(a), FighterState(b))
@@ -84,12 +84,12 @@ def test_spirit_advantage_six_gives_momentum_and_queues_bonus_turn():
 
     reward = resolve_first_turn_spirit_reward(bout, Side.A, comparison)
 
-    assert reward == (1, 1)
-    assert bout.momentum == 1
-    assert bout.fighter_a.bonus_turns_queued == 1
+    assert reward == (0, 0)
+    assert bout.momentum == 0
+    assert bout.fighter_a.bonus_turns_queued == 0
 
 
-def test_spirit_momentum_resolves_before_start_kimarite_check():
+def test_spirit_no_longer_grants_momentum_before_kimarite_check():
     kimarite = Card(5000, "Yorikiri", power=1, technique=1, spirit=1, is_kimarite=True)
     prepared_a = Card(5001, "Prepared A", spirit=3)
     prepared_b = Card(5002, "Prepared B")
@@ -111,13 +111,12 @@ def test_spirit_momentum_resolves_before_start_kimarite_check():
     from kimarite.turns import start_exchange_turn
     start_exchange_turn(bout, Side.A, comparison)
 
-    assert bout.momentum == 1
-    assert bout.winner is Side.A
-    assert bout.win_method == "Yorikiri"
-    assert bout.fighter_a.hand == []
+    assert bout.momentum == 0
+    assert bout.winner is None
+    assert len(bout.fighter_a.hand) == 2
 
 
-def test_spirit_bonus_turn_is_taken_before_opponent_turn():
+def test_spirit_no_longer_grants_bonus_turn():
     a = make_wrestler("A", 0, 6, Stat.SPIRIT, Stat.POWER)
     b = make_wrestler("B", 0, 0, Stat.SPIRIT, Stat.POWER)
     bout = BoutState(
@@ -130,7 +129,7 @@ def test_spirit_bonus_turn_is_taken_before_opponent_turn():
     start_exchange_turn(bout, Side.A, comparison)
     next_side = end_exchange_turn(bout, Side.A)
 
-    assert next_side is Side.A
+    assert next_side is Side.B
     assert bout.fighter_a.bonus_turns_queued == 0
 
 
