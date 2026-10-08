@@ -13,7 +13,7 @@ CARD_POOL: tuple[Card, ...] = (
     Card(4, "Tsuki", 1, 0, 0),
     Card(5, "Tsuppari", 2, 0, 1),
     Card(6, "Tsuppari", 2, 0, 1),
-    Card(7, "Headlong Charge", 3, 0, 0),
+    Card(7, "Headlong Charge", 2, 0, 0),
     Card(8, "Nodowa", 2, 0, 0),
     Card(9, "Harite", 2, 0, 1),
     Card(10, "Gain Left Grip", 0, 3, 0),
@@ -59,7 +59,7 @@ CARD_POOL: tuple[Card, ...] = (
     Card(50, "Tsukitaoshi", 1, 0, 2, True),
     Card(51, "Tsuridashi", 2, 1, 0, True),
     Card(52, "Kotenage", 1, 2, 0, True),
-    Card(53, "Abisetaoshi", 3, 0, 0, True),
+    Card(53, "Abisetaoshi", 2, 1, 0, True),
 )
 
 
@@ -82,7 +82,7 @@ STARTING_KIMARITE: tuple[Card, ...] = (
     Card(1010, "Oshitaoshi", 3, 0, 0, True),
     Card(1011, "Tsuridashi", 2, 1, 0, True),
     Card(1012, "Kotenage", 1, 2, 0, True),
-    Card(1013, "Abisetaoshi", 3, 0, 0, True),
+    Card(1013, "Abisetaoshi", 2, 1, 0, True),
     Card(1014, "Yoritaoshi", 2, 1, 0, True),
     Card(1015, "Tsukidashi", 1, 0, 2, True),
 )
