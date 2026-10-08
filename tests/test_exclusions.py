@@ -5,7 +5,7 @@ def test_fujinokawa_difficulty_zero_matches_known_manual_exclusions():
     result = exclusions_for_difficulty("Fujinokawa", 0)
 
     assert result.target == 7
-    assert result.excluded_ids == frozenset({7, 14, 15, 16, 29, 35, 43})
+    assert result.excluded_ids == frozenset({7, 14, 15, 16, 29, 30, 43})
 
 
 def test_tochinoshin_difficulty_zero_follows_written_priority():
