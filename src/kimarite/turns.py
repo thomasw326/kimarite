@@ -69,8 +69,12 @@ def first_turn_card_access(
 
 def normal_turn_card_access(state: BoutState, side: Side) -> list[Card]:
     fighter = state.fighter(side)
-    look = 2 + effective_total_grip(state, side, consume_prevention=True)
-    return ai_look_keep(fighter, look, 2)
+    grip = effective_total_grip(state, side, consume_prevention=True)
+    # The first usable Grip adds a third draw; further Grip improves selection
+    # without increasing the number kept. Suppressed Grip gives no benefit.
+    keep = 3 if grip > 0 else 2
+    look = 2 + grip if grip > 0 else 2
+    return ai_look_keep(fighter, look, keep)
 
 
 def resolve_turn_card_access(
@@ -164,7 +168,7 @@ def start_exchange_turn(
     3. start-of-turn Kimarite check
     4. start-of-turn Temporary effects
     5. Exhaustion / negative-Power loss
-    6. first-turn Technique access OR normal 2 + Grip access
+    6. first-turn Technique access OR normal Grip-based draw/selection
 
     Temporary-zone behavior is card-specific, so a resolver is required when
     cards are present rather than silently guessing duration/resolution.
