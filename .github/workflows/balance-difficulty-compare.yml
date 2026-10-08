@@ -1,0 +1,37 @@
+name: balance-difficulty-compare
+
+on:
+  push:
+    paths:
+      - ".github/workflows/balance-difficulty-compare.yml"
+  workflow_dispatch:
+    inputs:
+      bouts_per_orientation:
+        description: "Bouts per matchup orientation"
+        required: false
+        default: "10"
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        difficulty: [-7, 0]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run original-15 comparison
+        run: |
+          python scripts/balance_smoke.py \
+            --roster original \
+            --difficulty "${{ matrix.difficulty }}" \
+            --bouts-per-orientation "${{ github.event.inputs.bouts_per_orientation || '10' }}" \
+            --output-dir "balance_compare/difficulty_${{ matrix.difficulty }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "balance-original-difficulty-${{ matrix.difficulty }}"
+          path: "balance_compare/difficulty_${{ matrix.difficulty }}/"
