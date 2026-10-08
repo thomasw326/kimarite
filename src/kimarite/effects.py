@@ -56,12 +56,13 @@ class EffectContext:
 ExchangeEffect = Callable[[BoutState, Side, Card, EffectContext], None]
 
 
-def draw_one(state: BoutState, side: Side) -> Card:
+def draw_one(state: BoutState, side: Side) -> Card | None:
     fighter = state.fighter(side)
     if not fighter.draw_pile:
-        raise DeckEmptyDuringDraw(
-            f"{fighter.wrestler.name} attempted to draw from an empty Draw Pile."
+        state.log(
+            f"{fighter.wrestler.name} cannot draw because the Draw Pile is empty."
         )
+        return None
     card = fighter.draw_pile.pop(0)
     fighter.hand.append(card)
     state.log(f"{fighter.wrestler.name} draws {card.name}.")
