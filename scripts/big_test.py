@@ -132,6 +132,9 @@ def main():
     advantage_results = defaultdict(Counter)
     kimarite_origins = defaultdict(Counter)
     played_origins = defaultdict(Counter)
+    actual_plays = Counter()
+    opening_uses = Counter()
+    finish_events = Counter()
 
     with (output / "bouts.csv").open("w", newline="") as file:
         writer = csv.writer(file)
@@ -177,6 +180,7 @@ def main():
                             state.fighter(winner).wrestler, winning_id
                         )
                         kimarite_origins[(state.win_method, winning_card_origin)]["wins"] += 1
+                        finish_events[(state.win_method, winning_card_origin)] += 1
                     def metadata(w):
                         return (
                             "/".join(map(str, (w.base_power, w.base_technique, w.base_spirit))),
@@ -223,6 +227,14 @@ def main():
                                 wrestler.top_of_deck_card, *CARD_POOL
                             )
                         }
+                        # Count every Exchange play, not just distinct card IDs.
+                        for owner, cid in state.card_play_ids:
+                            if owner is side:
+                                played_card = lookup[cid]
+                                actual_plays[(played_card.name, card_origin(wrestler, cid))] += 1
+                        # Prepared cards always participate in Tachiai through orbs;
+                        # this is separate from later Exchange play.
+                        opening_uses[wrestler.prepared_tachiai_card.name] += 1
                         for cid in played_ids:
                             card = lookup[cid]
                             key = (card.name, card_origin(wrestler, cid))
@@ -243,6 +255,22 @@ def main():
                                 key = (card, kind, slot, stat.value)
                                 cards[key]["bouts"] += 1
                                 cards[key]["wins"] += int(won)
+
+    with (output / "card_activity.csv").open("w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(("event", "card", "origin", "count"))
+        for (role, card), tally in sorted(assignments.items()):
+            writer.writerow(("assignment", card, role, tally["bouts"]))
+        for card, count in sorted(opening_uses.items()):
+            writer.writerow(("tachiai_prepared_use", card, "prepared_tachiai", count))
+        for (card, origin), count in sorted(actual_plays.items()):
+            writer.writerow(("exchange_play", card, origin, count))
+        for (card, origin), count in sorted(played_origins.items()):
+            writer.writerow(("exchange_bout_with_card", card, origin, count["bouts"]))
+        for (card, origin), count in sorted(finish_events.items()):
+            writer.writerow(("kimarite_finish", card, origin, count))
+    assert sum(opening_uses.values()) == 2 * errors["completed"]
+    assert sum(tally["bouts"] for (role, card), tally in assignments.items() if role == "starting_card") == sum(opening_uses.values())
 
     with (output / "kimarite_finishes_by_origin.csv").open("w", newline="") as file:
         writer = csv.writer(file)
@@ -304,6 +332,12 @@ def main():
         "completed": errors["completed"],
         "errors": dict(errors),
         "win_conditions": dict(outcomes),
+        "card_activity": {
+            "prepared_tachiai_uses": sum(opening_uses.values()),
+            "exchange_plays": sum(actual_plays.values()),
+            "distinct_card_per_bout_exchange_appearances": sum(t["bouts"] for t in played_origins.values()),
+            "kimarite_finishes": sum(finish_events.values()),
+        },
         "kimarite_finishes_by_origin": {
             f"{card}|{origin}": count["wins"]
             for (card, origin), count in sorted(kimarite_origins.items())
