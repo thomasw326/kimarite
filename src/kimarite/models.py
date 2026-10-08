@@ -103,6 +103,7 @@ class BoutState:
     winner: Side | None = None
     win_method: str | None = None
     card_plays: list[tuple[Side, str]] = field(default_factory=list)
+    kimarite_removals: list[tuple[Side, str]] = field(default_factory=list)
     event_log: list[str] = field(default_factory=list)
 
     def fighter(self, side: Side) -> FighterState:
