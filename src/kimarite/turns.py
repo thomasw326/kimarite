@@ -145,6 +145,7 @@ def check_kimarite_zone(
         effective_total_grip(state, side, consume_prevention=True)
 
     state.win_source = "kimarite"
+    state.winning_kimarite_card_id = card.card_id
     state.declare_winner(side, card.name)
     return card
 
