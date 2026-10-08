@@ -173,3 +173,23 @@ def test_shikiri_exchange_without_threshold_only_gains_momentum():
     play_card(bout, Side.A, card, context=EffectContext(comparison=compare_tachiai(bout.fighter_a.wrestler, bout.fighter_b.wrestler)))
     assert bout.momentum == 1
     assert bout.position == 0
+
+
+def test_tsuri_converts_grip_into_equal_push_and_momentum_capped_at_three():
+    from kimarite.rules import establish_grip
+    for left, right, expected in ((0, 0, 0), (1, 0, 1), (1, 1, 2), (2, 1, 3), (2, 2, 3)):
+        card = card_by_name("Tsuri")
+        bout = bout_with_hand([card])
+        bout.fighter_a.left_grip = GripState(left)
+        bout.fighter_a.right_grip = GripState(right)
+        play_card(bout, Side.A, card)
+        assert bout.position == expected
+        assert bout.momentum == expected
+
+
+def test_three_tsuri_copies_in_shuffled_deck():
+    from kimarite.deck import build_seeded_deck
+    from kimarite.catalog import ORIGINAL_WRESTLERS
+    deck = build_seeded_deck(ORIGINAL_WRESTLERS["Ura"].build(), 17)
+    tsuri = [card for card in deck if card.name == "Tsuri"]
+    assert {card.card_id for card in tsuri} == {22, 46, 47}
