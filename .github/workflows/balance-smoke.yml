@@ -20,12 +20,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - label: all-minus7
+          - label: all-minus7-push
             roster: all
             difficulty: -7
-          - label: original-difficulty0
+            defense: push
+          - label: all-minus7-momentum
+            roster: all
+            difficulty: -7
+            defense: momentum
+          - label: all-minus7-both
+            roster: all
+            difficulty: -7
+            defense: both
+          - label: original-difficulty0-push
             roster: original
             difficulty: 0
+            defense: push
+          - label: original-difficulty0-momentum
+            roster: original
+            difficulty: 0
+            defense: momentum
+          - label: original-difficulty0-both
+            roster: original
+            difficulty: 0
+            defense: both
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -33,6 +51,8 @@ jobs:
           python-version: "3.11"
       - run: python -m pip install -e .
       - name: Run round robin
+        env:
+          KIMARITE_GRIP_DEFENSE: ${{ matrix.defense }}
         run: |
           python scripts/balance_smoke.py \
             --bouts-per-orientation "${{ github.event.inputs.bouts_per_orientation || '1' }}" \
