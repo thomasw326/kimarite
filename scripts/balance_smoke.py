@@ -145,6 +145,10 @@ def main() -> None:
             "technique_advantage_a",
             "spirit_advantage_a",
             "first_exchange_wrestler",
+            "starting_kimarite_progress_a",
+            "starting_kimarite_progress_b",
+            "opening_momentum",
+            "opening_position",
             "unsupported_reason",
         ])
         for record in records:
@@ -165,6 +169,10 @@ def main() -> None:
                 record.technique_advantage_a,
                 record.spirit_advantage_a,
                 record.first_exchange_wrestler or "",
+                record.starting_kimarite_progress_a,
+                record.starting_kimarite_progress_b,
+                record.opening_momentum,
+                record.opening_position,
                 record.unsupported_reason or "",
             ])
 
@@ -173,6 +181,19 @@ def main() -> None:
         for record in records
         if not record.completed
     )
+
+    opening_progress = {}
+    for name in names:
+        values = []
+        for record in records:
+            if record.wrestler_a == name:
+                values.append(record.starting_kimarite_progress_a)
+            elif record.wrestler_b == name:
+                values.append(record.starting_kimarite_progress_b)
+        opening_progress[name] = (
+            sum(values) / len(values) if values else 0.0
+        )
+
     kimarite_removals = Counter(
         removed
         for record in records
@@ -197,6 +218,7 @@ def main() -> None:
         "win_methods": summary.win_methods,
         "winning_card_uses": summary.winning_card_uses,
         "kimarite_removals": dict(kimarite_removals),
+        "average_opening_kimarite_progress": opening_progress,
         "win_phase_counts": dict(phase_wins),
         "tachiai_forceout_rate": (
             phase_wins.get("Tachiai", 0) / len(completed)
