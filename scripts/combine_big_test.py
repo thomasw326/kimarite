@@ -49,12 +49,19 @@ def main():
             ("card_assignments.csv", ("role", "card")),
             ("cards.csv", ("card", "outcome", "priority_slot", "priority_stat")),
             ("win_conditions.csv", ("win_category",)),
+            ("kimarite_finishes_by_origin.csv", ("kimarite", "origin")),
+            ("card_play_by_origin.csv", ("card", "origin")),
+            ("stat_advantages.csv", ("stat", "signed_advantage")),
         ):
             data = totals.setdefault(filename, defaultdict(Counter))
             for row in read_rows(folder / filename):
                 key = tuple(row[k] for k in keys)
                 if "bouts" in row:
                     data[key]["bouts"] += int(row["bouts"])
+                if "bouts_played" in row:
+                    data[key]["bouts"] += int(row["bouts_played"])
+                if "finishes" in row:
+                    data[key]["finishes"] += int(row["finishes"])
                 if "wins" in row:
                     data[key]["wins"] += int(row["wins"])
 
@@ -68,6 +75,12 @@ def main():
             header = ("role", "card")
         elif filename == "cards.csv":
             header = ("card", "outcome", "priority_slot", "priority_stat")
+        elif filename == "kimarite_finishes_by_origin.csv":
+            header = ("kimarite", "origin")
+        elif filename == "card_play_by_origin.csv":
+            header = ("card", "origin")
+        elif filename == "stat_advantages.csv":
+            header = ("stat", "signed_advantage")
         else:
             header = ("win_category",)
         with (destination / filename).open("w", newline="") as handle:
@@ -76,8 +89,14 @@ def main():
                 writer.writerow((*header, "bouts"))
                 for key, counts in sorted(data.items()):
                     writer.writerow((*key, counts["bouts"]))
+            elif filename == "kimarite_finishes_by_origin.csv":
+                writer.writerow((*header, "finishes"))
+                for key, counts in sorted(data.items()):
+                    writer.writerow((*key, counts["finishes"]))
             else:
-                writer.writerow((*header, "bouts", "wins", "win_rate"))
+                count_label = ("bouts_played" if filename == "card_play_by_origin.csv"
+                               else "bouts")
+                writer.writerow((*header, count_label, "wins", "win_rate"))
                 for key, counts in sorted(data.items()):
                     n = counts["bouts"]
                     writer.writerow((*key, n, counts["wins"],
