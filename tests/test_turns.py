@@ -45,7 +45,7 @@ def test_prepared_tachiai_card_goes_to_bottom():
     ]
 
 
-def test_technique_advantage_six_looks_eight_and_keeps_four_on_first_turn():
+def test_technique_advantage_six_looks_eight_and_keeps_five_on_first_turn():
     a = make_wrestler("A", 6, 0, Stat.TECHNIQUE, Stat.SPIRIT)
     b = make_wrestler("B", 0, 0, Stat.TECHNIQUE, Stat.SPIRIT)
     deck = [
@@ -57,8 +57,8 @@ def test_technique_advantage_six_looks_eight_and_keeps_four_on_first_turn():
 
     kept = resolve_turn_card_access(bout, Side.A, comparison)
 
-    assert len(kept) == 4
-    assert len(bout.fighter_a.hand) == 4
+    assert len(kept) == 5
+    assert len(bout.fighter_a.hand) == 5
     assert bout.fighter_a.first_exchange_turn is False
 
 
