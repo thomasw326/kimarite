@@ -119,9 +119,19 @@ def tachiai_comparisons_won(context: EffectContext, side: Side) -> int:
 
 
 def _oshi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    gain_push(state, side, 1)
-    add_play(state, side)
     draw_one(state, side)
+    if state.winner is not None:
+        return
+    fighter = state.fighter(side)
+    if len(fighter.hand) == 1:
+        index = 0
+    else:
+        index = context.choice("hand_index")
+        if index not in range(len(fighter.hand)):
+            raise ChoiceRequired(card.name, "hand_index", list(range(len(fighter.hand))))
+    discarded = fighter.hand.pop(index)
+    fighter.discard_pile.append(discarded)
+    state.log(f"{fighter.wrestler.name} discards {discarded.name} with Oshi.")
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -606,7 +616,6 @@ def _ottsuke(state: BoutState, side: Side, card: Card, context: EffectContext) -
         state.log(f"Ottsuke removes {target.name} from the opponent Kimarite Zone.")
 
     gain_momentum(state, side, 1)
-    gain_push(state, side, 1)
 
 
 def _morozashi(
