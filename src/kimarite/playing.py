@@ -33,6 +33,7 @@ def play_card(
     fighter.cards_played_this_turn += 1
     fighter.played_this_turn.append(card)
     state.card_plays.append((side, card.name))
+    state.card_play_ids.append((side, card.card_id))
     state.log(f"{fighter.wrestler.name} plays {card.name}.")
 
     if card.is_kimarite:
