@@ -193,6 +193,9 @@ def main() -> None:
             if exchange_completed else 0.0
         ),
         "advantage_diagnostics": advantage_diagnostics(records),
+        "exchange_only_advantage_diagnostics": advantage_diagnostics(
+            exchange_records
+        ),
         "incomplete_reasons": dict(incomplete),
         "standings": [asdict(row) for row in table],
         "exchange_only_standings": [asdict(row) for row in exchange_table],
