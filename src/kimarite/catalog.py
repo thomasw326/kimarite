@@ -55,6 +55,10 @@ CARD_POOL: tuple[Card, ...] = (
 )
 
 
+FUTURE_CARDS: tuple[Card, ...] = (
+    Card(1035, "Use the Tawara", 0, 1, 2),
+)
+
 # Starting Kimarite are game definitions, not necessarily present in the
 # current 45-card shuffled pool snapshot. Synthetic IDs are engine-only.
 STARTING_KIMARITE: tuple[Card, ...] = (
@@ -77,7 +81,7 @@ STARTING_KIMARITE: tuple[Card, ...] = (
 
 
 def card_by_id(card_id: int) -> Card:
-    for card in (*CARD_POOL, *STARTING_KIMARITE):
+    for card in (*CARD_POOL, *STARTING_KIMARITE, *FUTURE_CARDS):
         if card.card_id == card_id:
             return card
     raise KeyError(card_id)
@@ -85,9 +89,9 @@ def card_by_id(card_id: int) -> Card:
 
 def card_by_name(name: str, *, prefer_starting_kimarite: bool = False) -> Card:
     groups = (
-        (STARTING_KIMARITE, CARD_POOL)
+        (STARTING_KIMARITE, CARD_POOL, FUTURE_CARDS)
         if prefer_starting_kimarite
-        else (CARD_POOL, STARTING_KIMARITE)
+        else (CARD_POOL, STARTING_KIMARITE, FUTURE_CARDS)
     )
     for group in groups:
         for card in group:
