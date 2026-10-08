@@ -487,12 +487,34 @@ def candidate_plays(
     return plays
 
 
+COMBO_CARDS = frozenset({"Oshi", "Tsuki", "Tsuppari"})
+
+def _combo_target(state: BoutState, side: Side) -> bool:
+    fighter = state.fighter(side)
+    active = {card.name for card in fighter.kimarite_zone}
+    position = relative_position(state, side)
+    momentum = relative_momentum(state, side)
+    return (("Tsukidashi" in active and position >= 1 and momentum >= 0)
+            or ("Tsukitaoshi" in active and position >= 0 and momentum >= 1))
+
+
 def choose_play(
     state: BoutState,
     side: Side,
     comparison: TachiaiComparison,
 ) -> AIPlay | None:
     plays = candidate_plays(state, side, comparison)
+    fighter = state.fighter(side)
+    if _combo_target(state, side):
+        saved = sum(card.name in COMBO_CARDS for card in fighter.hand)
+        if saved < 2 and fighter.cards_played_this_turn == 0:
+            plays = [play for play in plays if play.card.name not in COMBO_CARDS]
+        elif saved >= 2 or fighter.cards_played_this_turn > 0:
+            plays = [
+                AIPlay(play.card, play.context,
+                       play.score + (90 if play.card.name in COMBO_CARDS else 0))
+                for play in plays
+            ]
     if not plays:
         return None
 
