@@ -38,7 +38,7 @@ def test_tsuppari_chains_after_oshi():
     bout = bout_with_hand([oshi, tsuppari])
     bout.fighter_a.draw_pile = [Card(8101, "Draw A"), Card(8102, "Draw B")]
 
-    play_card(bout, Side.A, oshi)
+    play_card(bout, Side.A, oshi, context=EffectContext(choices={"hand_index": 1}))
     play_card(bout, Side.A, tsuppari)
 
     assert bout.momentum == 1
@@ -98,7 +98,7 @@ def test_belt_slap_uses_recorded_spirit_advantage():
     assert bout.momentum == 1
 
 
-def test_ottsuke_removes_grip_temporary_and_rewards_momentum_push():
+def test_ottsuke_removes_grip_temporary_and_rewards_momentum_only():
     from kimarite.temporary import add_temporary
 
     ottsuke = card_by_name("Ottsuke")
@@ -121,7 +121,7 @@ def test_ottsuke_removes_grip_temporary_and_rewards_momentum_push():
 
     assert not bout.fighter_b.temporary_zone
     assert bout.momentum == 1
-    assert bout.position == 1
+    assert bout.position == 0
 
 
 def test_draw_effect_with_empty_draw_pile_is_immediate_exhaustion_loss():
