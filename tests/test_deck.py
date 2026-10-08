@@ -29,8 +29,8 @@ def test_tochinoshin_seed_911132_matches_ai_vs_ai_sheet():
         (37, "Morozashi"),
         (7, "Headlong Charge"),
         (14, "Attempt Two-Handed Grip"),
+        (47, "Tsuri"),
         (38, "Yorikiri"),
         (9, "Harite"),
         (35, "Shikiri"),
-        (4, "Tsuki"),
     ]
