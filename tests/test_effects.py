@@ -120,3 +120,15 @@ def test_ottsuke_removes_grip_temporary_and_rewards_momentum_push():
     assert not bout.fighter_b.temporary_zone
     assert bout.momentum == 1
     assert bout.position == 1
+
+
+def test_draw_effect_with_empty_draw_pile_is_a_no_op_not_immediate_loss():
+    tsuki = card_by_name("Tsuki")
+    bout = bout_with_hand([tsuki])
+    bout.fighter_a.draw_pile = []
+
+    play_card(bout, Side.A, tsuki)
+
+    assert bout.winner is None
+    assert bout.fighter_a.hand == []
+    assert any("cannot draw" in entry for entry in bout.event_log)
