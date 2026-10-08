@@ -94,7 +94,10 @@ def main():
     parser.add_argument("--max-turns", type=int, default=100)
     parser.add_argument("--output-dir", default="big_test_artifacts")
     parser.add_argument("--seed", type=int, default=20261008)
+    parser.add_argument("--batch-id", type=int, default=0)
     args = parser.parse_args()
+    if args.batch_id < 0:
+        parser.error("--batch-id must be >= 0")
     if args.repetitions < 1:
         parser.error("--repetitions must be >= 1")
     output = Path(args.output_dir)
@@ -111,11 +114,11 @@ def main():
 
     with (output / "bouts.csv").open("w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(("a", "b", "seed", "winner", "method", "win_category", "winner_grip", "turns", "error", "a_stats", "b_stats", "a_priorities", "b_priorities", "a_kimarite", "a_start_card", "a_top_card", "b_kimarite", "b_start_card", "b_top_card"))
+        writer.writerow(("batch_id", "a", "b", "seed", "winner", "method", "win_category", "winner_grip", "turns", "error", "a_stats", "b_stats", "a_priorities", "b_priorities", "a_kimarite", "a_start_card", "a_top_card", "b_kimarite", "b_start_card", "b_top_card"))
         for repeat in range(args.repetitions):
             for pair_idx, (i, j) in enumerate(combinations(range(108), 2)):
                 for orientation, (left, right) in enumerate(((i, j), (j, i))):
-                    seed = args.seed + repeat * 20000 + pair_idx * 2 + orientation
+                    seed = args.seed + args.batch_id * 1_000_000_000 + repeat * 20000 + pair_idx * 2 + orientation
                     a, b = configs[left], configs[right]
                     state, available, played, error = run_one(a, b, seed, args.max_turns)
                     errors[error or "completed"] += 1
@@ -143,7 +146,7 @@ def main():
                             w.prepared_tachiai_card.name,
                             w.top_of_deck_card.name,
                         )
-                    writer.writerow((a[0], b[0], seed,
+                    writer.writerow((args.batch_id, a[0], b[0], seed,
                                      state.fighter(winner).wrestler.name if winner else "",
                                      state.win_method or "", category,
                                      winner_grip if winner is not None else "",
@@ -212,6 +215,9 @@ def main():
         writer.writerows(sorted(outcomes.items()))
     summary = {
         "configs": len(configs),
+        "batch_id": args.batch_id,
+        "seed_range_start": args.seed + args.batch_id * 1_000_000_000,
+        "seed_range_end": args.seed + args.batch_id * 1_000_000_000 + (args.repetitions - 1) * 20000 + 11555,
         "planned_bouts": args.repetitions * 108 * 107,
         "completed": errors["completed"],
         "errors": dict(errors),
@@ -221,6 +227,10 @@ def main():
         "max_turns": args.max_turns,
         "notes": "Per-card hand exposure counts distinct card names per wrestler-bout; played counts if played at least once. Priority slot describes wrestler AI preference, not card order. Excludes incomplete bouts from win rates.",
     }
+    assert sum(outcomes.values()) == args.repetitions * 108 * 107
+    assert sum(errors.values()) == args.repetitions * 108 * 107
+    assert sum(bouts.values()) == 2 * errors["completed"]
+    assert not any(key.startswith("other:") for key in outcomes), outcomes
     (output / "summary.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
 
