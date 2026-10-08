@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from .kimarite import satisfied_kimarite
 from .models import BoutState, Card, Side, Stat
-from .rules import gain_momentum
+from .rules import effective_total_grip, gain_momentum
 from .selection import ai_look_keep
 from .tachiai import TachiaiComparison, spirit_rewards, technique_access
 from .temporary import resolve_start_of_turn_temporaries
@@ -69,7 +69,7 @@ def first_turn_card_access(
 
 def normal_turn_card_access(state: BoutState, side: Side) -> list[Card]:
     fighter = state.fighter(side)
-    look = 2 + fighter.total_grip
+    look = 2 + effective_total_grip(state, side)
     return ai_look_keep(fighter, look, 2)
 
 
