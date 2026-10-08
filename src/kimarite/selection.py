@@ -19,9 +19,9 @@ def ai_rank_cards(cards: Iterable[Card], wrestler: Wrestler) -> list[Card]:
 
 
 def ai_choose_from_look(cards: list[Card], wrestler: Wrestler, keep: int) -> list[Card]:
-    if keep < 0 or keep > len(cards):
-        raise ValueError("keep must be between 0 and number of looked-at cards")
-    return ai_rank_cards(cards, wrestler)[:keep]
+    if keep < 0:
+        raise ValueError("keep must be non-negative")
+    return ai_rank_cards(cards, wrestler)[: min(keep, len(cards))]
 
 
 def look_from_top(fighter: FighterState, count: int) -> list[Card]:
@@ -54,8 +54,6 @@ def keep_and_bottom(
 
 def ai_look_keep(fighter: FighterState, look: int, keep: int) -> list[Card]:
     looked = look_from_top(fighter, look)
-    if len(looked) < keep:
-        raise ValueError("not enough cards in draw pile to keep requested amount")
     kept = ai_choose_from_look(looked, fighter.wrestler, keep)
     keep_and_bottom(fighter, looked, kept)
     return kept
