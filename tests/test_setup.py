@@ -23,7 +23,9 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
     assert state.fighter_a.power == 4
     assert state.fighter_b.power == 5
     assert state.position == 3
-    assert state.active_side is Side.A
+    assert state.winner is Side.A
+    assert state.win_method == "Oshidashi"
+    assert state.active_side is None  # Tachiai force-out ends the bout before Exchange.
 
     assert state.fighter_a.kimarite_zone[0].name == "Tsukitaoshi"
     assert state.fighter_b.kimarite_zone[0].name == "Tsuridashi"
