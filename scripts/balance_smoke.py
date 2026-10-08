@@ -168,6 +168,8 @@ def main() -> None:
             "winner",
             "win_method",
             "win_source",
+            "peak_grip_a",
+            "peak_grip_b",
             "turns",
             "cards_played_a",
             "cards_played_b",
@@ -195,6 +197,8 @@ def main() -> None:
                 record.winner or "",
                 record.win_method or "",
                 record.win_source or "",
+                record.peak_grip_a,
+                record.peak_grip_b,
                 record.turns,
                 "|".join(record.cards_played_a),
                 "|".join(record.cards_played_b),
@@ -258,6 +262,9 @@ def main() -> None:
         if record.win_source != "kimarite_zone" and record.win_method
     )
 
+    grip_peaks = Counter(peak for record in completed for peak in (record.peak_grip_a, record.peak_grip_b))
+    grip_threshold_reached = {str(threshold): sum(count for peak, count in grip_peaks.items() if peak >= threshold) for threshold in range(1, 5)}
+
     payload = {
         "wrestlers": names,
         "roster": args.roster,
@@ -272,6 +279,8 @@ def main() -> None:
         "wins": summary.wins,
         "win_methods": summary.win_methods,
         "actual_kimarite_activations": dict(actual_kimarite_wins),
+        "peak_total_grip_distribution": dict(sorted(grip_peaks.items())),
+        "grip_threshold_reached": grip_threshold_reached,
         "non_kimarite_wins_by_label": dict(generic_wins),
         "winning_card_uses": summary.winning_card_uses,
         "card_play_win_diagnostics": card_play_win_diagnostics(records),
