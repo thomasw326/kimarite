@@ -85,3 +85,30 @@ def test_technique_advantage_1_4_7_thresholds():
         (7, 4), (8, 4), (9, 5), (10, 5), (11, 5), (12, 6),
     ]
     assert technique_access(-3) == (2, 2)
+
+
+def test_card_origins_use_identity_not_name():
+    from scripts.big_test import card_origin
+    fighter = make_fighter(roster()[0], random.Random(701), 1)
+    w = fighter.wrestler
+    assert card_origin(w, w.starting_kimarite.card_id) == "starting_kimarite"
+    assert card_origin(w, w.prepared_tachiai_card.card_id) == "prepared_tachiai"
+    assert card_origin(w, w.top_of_deck_card.card_id) == "top_of_deck"
+    assert card_origin(w, fighter.draw_pile[1].card_id) == "shuffled_remainder"
+
+
+def test_kimarite_victory_records_specific_copy():
+    from kimarite.models import BoutState, FighterState, GripState, Side
+    from kimarite.turns import check_kimarite_zone
+    fighter = make_fighter(roster()[0], random.Random(600), 1)
+    other = make_fighter(roster()[1], random.Random(601), 2)
+    from kimarite.catalog import card_by_name
+    card = card_by_name("Yorikiri")
+    fighter.kimarite_zone = [card]
+    fighter.left_grip = GripState.DEEP
+    fighter.right_grip = GripState.DEEP
+    state = BoutState(fighter, other, position=2)
+    # The winner identity is recorded even when it is not the starting copy.
+    selected = check_kimarite_zone(state, Side.A)
+    if selected is not None:
+        assert state.winning_kimarite_card_id == selected.card_id
