@@ -6,7 +6,7 @@ from .kimarite import satisfied_kimarite
 from .models import BoutState, Card, Side, Stat
 from .rules import effective_total_grip, gain_momentum, grip_benefits_suppressed
 from .selection import ai_look_keep
-from .tachiai import TachiaiComparison, spirit_rewards, technique_access
+from .tachiai import TachiaiComparison, technique_access
 from .temporary import resolve_start_of_turn_temporaries
 
 
@@ -41,7 +41,7 @@ def resolve_first_turn_spirit_reward(
         return (0, 0)
 
     advantage = comparison.advantage_for(side, Stat.SPIRIT)
-    momentum, bonus_turns = spirit_rewards(advantage)
+    momentum, bonus_turns = (0, 0)  # V4.4: Spirit generates Tachiai Push instead.
     fighter.spirit_reward_pending = False
     fighter.bonus_turns_queued += bonus_turns
     if momentum:
