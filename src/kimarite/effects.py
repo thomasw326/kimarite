@@ -11,12 +11,14 @@ from .rules import (
     gain_power,
     gain_push,
     improve_grip,
+    lose_momentum,
     lose_position,
     lose_power,
     reduce_grip,
 )
 from .selection import ai_look_keep
 from .tachiai import TachiaiComparison
+from .temporary import add_temporary
 
 
 class IllegalPlay(RuntimeError):
@@ -254,41 +256,107 @@ def _give_ground(
     ai_look_keep(state.fighter(side), 2, 1)
 
 
+
+def _headlong_charge(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    gain_momentum(state, side, 1)
+    gain_push(state, side, 1)
+    gain_power(state, side, 1)
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _attempt_two_handed(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _attempt_deep_outside(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _attempt_deep_inside(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _hold_position(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _immovable(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    gain_power(state, side, 1)
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _get_underneath(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    gain_momentum(state, side, 1)
+    gain_push(state, side, 1)
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _use_the_tawara(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    use_cost = context.choice("lose_position_for_power")
+    if use_cost is None:
+        raise ChoiceRequired(card.name, "lose_position_for_power", [True, False])
+    if use_cost:
+        lose_position(state, side, 1)
+        gain_power(state, side, 1)
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _kannuki(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    add_temporary(state, side, card, phase="exchange")
+
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Oshi": _oshi,
     "Tsuki": _tsuki,
     "Tsuppari": _tsuppari,
     "Harite": _harite,
+    "Headlong Charge": _headlong_charge,
     "Gain Left Grip": _gain_left_grip,
     "Gain Right Grip": _gain_right_grip,
     "Uwate": _uwate,
     "Shitate": _shitate,
+    "Attempt Two-Handed Grip": _attempt_two_handed,
+    "Attempt Deep Outside Grip": _attempt_deep_outside,
+    "Attempt Deep Inside Grip": _attempt_deep_inside,
     "Salt Throw": _salt_throw,
     "Stare Down": _stare_down,
     "Belt Slap": _belt_slap,
     "Tsuri": _tsuri,
     "Yori": _yori,
     "Gaburi": _gaburi,
+    "Hold Position": _hold_position,
+    "Immovable": _immovable,
     "Henka": _henka,
     "Reset to Neutral": _reset_to_neutral,
+    "Get Underneath": _get_underneath,
     "Regain Balance": _regain_balance,
+    "Use the Tawara": _use_the_tawara,
+    "Kannuki": _kannuki,
     "Give Ground": _give_ground,
 }
 
 
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
-        "Headlong Charge",
-        "Attempt Two-Handed Grip",
-        "Attempt Deep Outside Grip",
-        "Attempt Deep Inside Grip",
-        "Hold Position",
-        "Immovable",
         "Pull",
-        "Get Underneath",
         "Sidestep",
-        "Use the Tawara",
-        "Kannuki",
         "Morozashi",
     }
 )
