@@ -3,6 +3,13 @@ from __future__ import annotations
 from .models import BoutState, Side
 
 
+def has_negative_effect_prevention(state: BoutState, side: Side) -> bool:
+    return any(
+        instance.card.name == "Shiko Stomp"
+        for instance in state.fighter(side).temporary_zone
+    )
+
+
 def prevent_negative_effect(
     state: BoutState,
     target_side: Side,
