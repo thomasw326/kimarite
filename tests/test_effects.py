@@ -62,15 +62,16 @@ def test_tsuki_requires_choice_only_when_both_opposing_grips_exist():
         raise AssertionError("Tsuki should require a Grip choice when both are present")
 
 
-def test_gain_right_grip_converts_to_push_if_already_established():
+def test_gain_right_grip_deepens_existing_grip_and_grants_temporary_shield():
     card = card_by_name("Gain Right Grip")
     bout = bout_with_hand([card])
     bout.fighter_a.right_grip = GripState.GRIP
 
     play_card(bout, Side.A, card)
 
-    assert bout.fighter_a.right_grip is GripState.GRIP
-    assert bout.position == 1
+    assert bout.fighter_a.right_grip is GripState.DEEP
+    assert bout.position == 0
+    assert [t.card.name for t in bout.fighter_a.temporary_zone] == ["Gain Right Grip"]
 
 
 def test_regain_balance_recovers_negative_momentum():
@@ -81,6 +82,7 @@ def test_regain_balance_recovers_negative_momentum():
     play_card(bout, Side.A, card)
 
     assert bout.momentum == 0
+    assert bout.fighter_a.power == 1
 
 
 def test_belt_slap_uses_recorded_spirit_advantage():
