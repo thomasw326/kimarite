@@ -70,6 +70,10 @@ class FighterState:
     technique_reward_pending: bool = True
     spirit_reward_pending: bool = True
     bonus_turns_queued: int = 0
+    lost_position_this_turn: bool = False
+    opponent_grip_reduced_this_turn: bool = False
+    gained_push_this_turn: bool = False
+    gained_momentum_this_turn: bool = False
 
     @property
     def total_grip(self) -> int:
