@@ -36,7 +36,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     opponent_side = state.opponent_side(side)
 
     if card.name == "Yorikiri":
-        if effective_total_grip(state, side) >= 1:
+        if effective_total_grip(state, side, consume_prevention=True) >= 1:
             gain_position(state, side, 1)
 
     elif card.name == "Oshidashi":
