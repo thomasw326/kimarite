@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .models import BoutState, Card, GripState, Side, TemporaryInstance
+from .prevention import prevent_negative_effect
 from .rules import establish_grip, gain_momentum, gain_power, gain_push, reduce_grip
 
 
@@ -99,8 +100,14 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             pass
         elif name == "Kannuki":
             opponent_side = state.opponent_side(side)
-            reduce_grip(state, opponent_side, hand="left")
-            reduce_grip(state, opponent_side, hand="right")
+            if not prevent_negative_effect(
+                state,
+                opponent_side,
+                source="Kannuki",
+                description="reduce both Grips by 1 level",
+            ):
+                reduce_grip(state, opponent_side, hand="left")
+                reduce_grip(state, opponent_side, hand="right")
         elif name == "Morozashi":
             gain_momentum(state, side, 1)
             gain_push(state, side, 1)
