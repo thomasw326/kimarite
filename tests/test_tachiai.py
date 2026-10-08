@@ -36,9 +36,11 @@ def test_power_advantage_scaling():
 
 def test_technique_access_scaling():
     assert technique_access(0) == (2, 2)
-    assert technique_access(2) == (4, 2)
+    assert technique_access(1) == (3, 2)
+    assert technique_access(2) == (4, 3)
     assert technique_access(3) == (5, 3)
-    assert technique_access(6) == (8, 4)
+    assert technique_access(4) == (6, 4)
+    assert technique_access(6) == (8, 5)
 
 
 def test_spirit_reward_scaling():
