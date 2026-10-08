@@ -1,7 +1,35 @@
 from __future__ import annotations
 
+import os
+
 from .models import BoutState, GripState, Side
 from .prevention import has_negative_effect_prevention, prevent_negative_effect
+
+
+GRIP_DEFENSE_MODE = os.environ.get("KIMARITE_GRIP_DEFENSE", "push").lower()
+if GRIP_DEFENSE_MODE not in {"push", "momentum", "both"}:
+    raise ValueError("KIMARITE_GRIP_DEFENSE must be push, momentum or both")
+GRIP_DEFENSE_CARDS = frozenset({"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"})
+
+
+def _absorb_grip_defense(state: BoutState, attacker: Side, amount: int, kind: str) -> int:
+    if GRIP_DEFENSE_MODE != "both" and GRIP_DEFENSE_MODE != kind:
+        return amount
+    defender = state.opponent_side(attacker)
+    for instance in state.fighter(defender).temporary_zone:
+        if amount <= 0:
+            break
+        if instance.card.name not in GRIP_DEFENSE_CARDS:
+            continue
+        # One activation per card for each protection type in the both arm.
+        # The existing Push activation flag is reused for Push; Momentum is
+        # tracked separately on the instance for this simulation variant.
+        flag = "opponent_gained_push_while_active" if kind == "push" else "momentum_absorbed"
+        if not getattr(instance, flag, False):
+            setattr(instance, flag, True)
+            amount -= 1
+            state.log(f"{instance.card.name} absorbs 1 {kind.title()}.")
+    return amount
 
 
 TRACK_MIN = -3
@@ -39,6 +67,11 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
         return
     if kind not in {"momentum", "push"}:
         raise ValueError(f"unknown track kind: {kind}")
+
+    if kind == "momentum":
+        amount = _absorb_grip_defense(state, side, amount, "momentum")
+        if amount == 0:
+            return
 
     sign = state.sign(side)
     current = state.momentum if kind == "momentum" else state.position
@@ -126,17 +159,7 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
             )
             return
 
-    # One Push is absorbed per active Grip-defense Temporary, once per card.
-    # Absorption happens before resolving remaining Push (and its overflow).
-    for instance in state.fighter(defending_side).temporary_zone:
-        if amount <= 0:
-            break
-        if instance.card.name in {
-            "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate",
-        } and not instance.opponent_gained_push_while_active:
-            amount -= 1
-            instance.opponent_gained_push_while_active = True
-            state.log(f"{instance.card.name} absorbs 1 Push.")
+    amount = _absorb_grip_defense(state, side, amount, "push")
     if amount == 0:
         return
 
