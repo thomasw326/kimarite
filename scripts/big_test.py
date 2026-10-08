@@ -65,12 +65,16 @@ def card_origin(wrestler, card_id):
     return "shuffled_remainder"
 
 
-def run_one(a, b, seed, max_turns):
+def run_one(a, b, seed, max_turns, *, neutral_opening_position=False):
     rng = random.Random(seed)
     state = BoutState(make_fighter(a, rng, 1), make_fighter(b, rng, 2))
     comparison = compare_tachiai(state.fighter_a.wrestler, state.fighter_b.wrestler)
     apply_initial_power(state, comparison)
     resolve_prepared_tachiai(state, comparison)
+    if neutral_opening_position:
+        # Preserve Tachiai Power, Momentum, cards and turn order; isolate
+        # only the positional advantage carried into Exchange.
+        state.position = 0
     available = {Side.A: set(), Side.B: set()}
     played = {Side.A: set(), Side.B: set()}
     if state.winner is None:
@@ -110,6 +114,8 @@ def main():
     parser.add_argument("--output-dir", default="big_test_artifacts")
     parser.add_argument("--seed", type=int, default=20261008)
     parser.add_argument("--batch-id", type=int, default=0)
+    parser.add_argument("--neutral-opening-position", action="store_true",
+                        help="Reset Position to 0 after Tachiai, before Exchange")
     args = parser.parse_args()
     if args.batch_id < 0:
         parser.error("--batch-id must be >= 0")
@@ -152,7 +158,10 @@ def main():
                 for orientation, (left, right) in enumerate(((i, j), (j, i))):
                     seed = args.seed + args.batch_id * 1_000_000_000 + repeat * 20000 + pair_idx * 2 + orientation
                     a, b = configs[left], configs[right]
-                    state, available, played, error = run_one(a, b, seed, args.max_turns)
+                    state, available, played, error = run_one(
+                        a, b, seed, args.max_turns,
+                        neutral_opening_position=args.neutral_opening_position,
+                    )
                     errors[error or "completed"] += 1
                     winner = state.winner
                     winner_grip = state.fighter(winner).total_grip if winner else None
@@ -330,6 +339,7 @@ def main():
         "seed_range_end": args.seed + args.batch_id * 1_000_000_000 + (args.repetitions - 1) * 20000 + 11555,
         "planned_bouts": planned_bouts,
         "completed": errors["completed"],
+        "neutral_opening_position": args.neutral_opening_position,
         "errors": dict(errors),
         "win_conditions": dict(outcomes),
         "card_activity": {
