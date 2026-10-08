@@ -96,6 +96,8 @@ class BoutState:
     fighter_b: FighterState
     momentum: int = 0
     position: int = 0
+    side_by_side_owner: Side | None = None
+    side_by_side_distance: int = 0
     active_side: Side | None = None
     turn_number: int = 0
     winner: Side | None = None
