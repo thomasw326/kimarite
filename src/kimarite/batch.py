@@ -5,8 +5,10 @@ from dataclasses import dataclass
 from statistics import mean
 from typing import Iterable
 
+from .catalog import ORIGINAL_WRESTLERS
 from .exclusions import exclusions_for_difficulty
 from .models import Side
+from .tachiai import compare_tachiai, first_exchange_side
 from .setup import BoutConfig, FighterConfig
 from .simulate import run_bout
 
@@ -23,6 +25,10 @@ class BoutRecord:
     turns: int
     cards_played_a: tuple[str, ...]
     cards_played_b: tuple[str, ...]
+    power_advantage_a: int
+    technique_advantage_a: int
+    spirit_advantage_a: int
+    first_exchange_wrestler: str | None
     unsupported_reason: str | None = None
 
     @property
@@ -58,6 +64,21 @@ def run_series(
     records: list[BoutRecord] = []
 
     for seed_a, seed_b in seed_pairs:
+        wrestler_obj_a = ORIGINAL_WRESTLERS[wrestler_a].build(ranking=ranking_a)
+        wrestler_obj_b = ORIGINAL_WRESTLERS[wrestler_b].build(ranking=ranking_b)
+        comparison = compare_tachiai(wrestler_obj_a, wrestler_obj_b)
+        try:
+            first_side = first_exchange_side(
+                comparison,
+                wrestler_obj_a,
+                wrestler_obj_b,
+            )
+            first_exchange_wrestler = (
+                wrestler_a if first_side is Side.A else wrestler_b
+            )
+        except ValueError:
+            first_exchange_wrestler = None
+
         result = run_bout(
             BoutConfig(
                 FighterConfig(
@@ -99,6 +120,10 @@ def run_series(
                 cards_played_b=tuple(
                     name for side, name in state.card_plays if side is Side.B
                 ),
+                power_advantage_a=comparison.power_advantage_a,
+                technique_advantage_a=comparison.technique_advantage_a,
+                spirit_advantage_a=comparison.spirit_advantage_a,
+                first_exchange_wrestler=first_exchange_wrestler,
                 unsupported_reason=result.unsupported_reason,
             )
         )
