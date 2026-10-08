@@ -177,6 +177,9 @@ def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> No
 
 def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None = None) -> None:
     fighter = state.fighter(side)
+    if _has_temporary(state, side, "Morozashi"):
+        state.log(f"Morozashi prevents {fighter.wrestler.name}'s Grip from being reduced.")
+        return
     for _ in range(amount):
         if hand is not None:
             attr = _grip_attr(hand)
