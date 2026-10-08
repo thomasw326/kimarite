@@ -13,7 +13,7 @@ CARD_POOL: tuple[Card, ...] = (
     Card(4, "Tsuki", 1, 0, 0),
     Card(5, "Tsuppari", 2, 0, 1),
     Card(6, "Tsuppari", 2, 0, 1),
-    Card(7, "Headlong Charge", 2, 0, 0),
+    Card(7, "Headlong Charge", 2, 0, 1),
     Card(8, "Nodowa", 2, 0, 0),
     Card(9, "Harite", 2, 0, 1),
     Card(10, "Gain Left Grip", 0, 3, 0),
@@ -142,21 +142,21 @@ class WrestlerTemplate:
 
 
 ORIGINAL_WRESTLERS: dict[str, WrestlerTemplate] = {
-    "Ura": WrestlerTemplate("Ura", Stat.TECHNIQUE, Stat.TECHNIQUE, Stat.POWER, 0, 5, 1, "Katasukashi", "Salt Throw", "Oshi", "Power/comparison, Spirit comparison, Power threshold."),
+    "Ura": WrestlerTemplate("Ura", Stat.TECHNIQUE, Stat.TECHNIQUE, Stat.POWER, 1, 4, 1, "Katasukashi", "Salt Throw", "Oshi", "Power/comparison, Spirit comparison, Power threshold."),
     "Oshoma": WrestlerTemplate("Oshoma", Stat.TECHNIQUE, Stat.SPIRIT, Stat.POWER, 1, 3, 2, "Hikiotoshi", "Get Underneath", "Pull", "Multiple Push, Push+Power, other Push."),
     "Asakoryu": WrestlerTemplate("Asakoryu", Stat.TECHNIQUE, Stat.SPIRIT, Stat.POWER, 0, 3, 3, "Tottari", "Shikiri", "Ottsuke", "Provide Grip, Power comparisons, Power thresholds."),
     "Wakamotoharu": WrestlerTemplate("Wakamotoharu", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 4, 0, "Yorikiri", "Gain Left Grip", "Yori", "Spirit comparisons, remove Grip, high Spirit orbs."),
     "Hoshoryu": WrestlerTemplate("Hoshoryu", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 3, 1, "Uwatenage", "Shiko Stomp", "Attempt Deep Outside Grip", "Remove Grip, require negative, downside gamble."),
     "Abi": WrestlerTemplate("Abi", Stat.SPIRIT, Stat.TECHNIQUE, Stat.POWER, 1, 2, 3, "Hatakikomi", "Henka", "Kannuki", "No-Spirit cards, highest Push first."),
     "Tobizaru": WrestlerTemplate("Tobizaru", Stat.SPIRIT, Stat.TECHNIQUE, Stat.POWER, 0, 2, 4, "Tsukiotoshi", "Give Ground", "Sidestep", "Power comparison, Power threshold, provide Power."),
-    "Fujinokawa": WrestlerTemplate("Fujinokawa", Stat.SPIRIT, Stat.SPIRIT, Stat.TECHNIQUE, 1, 0, 5, "Tsukitaoshi", "Stare Down", "Oshi", "Lose Position, lose Momentum, require Grip."),
+    "Fujinokawa": WrestlerTemplate("Fujinokawa", Stat.SPIRIT, Stat.SPIRIT, Stat.TECHNIQUE, 1, 1, 4, "Tsukitaoshi", "Stare Down", "Oshi", "Lose Position, lose Momentum, require Grip."),
     "Houdan": WrestlerTemplate("Houdan", Stat.SPIRIT, Stat.POWER, Stat.TECHNIQUE, 3, 0, 3, "Oshidashi", "Headlong Charge", "Read the Move", "Require Grip, establish Grip, highest Technique orbs."),
     "Takanosho": WrestlerTemplate("Takanosho", Stat.SPIRIT, Stat.POWER, Stat.TECHNIQUE, 2, 1, 3, "Oshitaoshi", "Nodowa", "Regain Balance", "No draw/additional Play; then Grip; then least Power."),
     "Tochinoshin": WrestlerTemplate("Tochinoshin", Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT, 3, 3, 0, "Tsuridashi", "Gain Right Grip", "Morozashi", "Spirit-care; among non-Grip/non-Push, fewest Technique+Power."),
     "Tamawashi": WrestlerTemplate("Tamawashi", Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT, 3, 2, 1, "Kotenage", "Hold Position", "Tsuki", "Lose Position/Momentum; neither Power nor Grip disruption; fewest Power+Technique."),
     "Daieisho": WrestlerTemplate("Daieisho", Stat.POWER, Stat.SPIRIT, Stat.TECHNIQUE, 3, 1, 2, "Tsukidashi", "Harite", "Tsuppari", "Require Grip; establish Grip; fewest Power+Spirit."),
     "Shishi": WrestlerTemplate("Shishi", Stat.POWER, Stat.SPIRIT, Stat.TECHNIQUE, 4, 0, 2, "Abisetaoshi", "Belt Slap", "Attempt Two-Handed Grip", "Protect Grip-building; then Technique-orb cards, fewest Power+Spirit."),
-    "Kotozakura": WrestlerTemplate("Kotozakura", Stat.POWER, Stat.POWER, Stat.SPIRIT, 5, 1, 0, "Yoritaoshi", "Immovable", "Attempt Deep Inside Grip", "Neither Power nor Grip utility; then fewest Power; Technique tie-break."),
+    "Kotozakura": WrestlerTemplate("Kotozakura", Stat.POWER, Stat.POWER, Stat.SPIRIT, 4, 1, 1, "Yoritaoshi", "Immovable", "Attempt Deep Inside Grip", "Neither Power nor Grip utility; then fewest Power; Technique tie-break."),
 }
 
 
