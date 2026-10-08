@@ -185,6 +185,106 @@ def _context_for_card(
     return EffectContext(comparison=comparison, choices=choices)
 
 
+
+def _at_least(value: int, target: int) -> float:
+    if target <= 0:
+        return 1.0
+    return max(0.0, min(1.0, value / target))
+
+
+def _at_most(value: int, target: int) -> float:
+    if value <= target:
+        return 1.0
+    distance = value - target
+    return max(0.0, 1.0 - distance / 3.0)
+
+
+def _nonnegative(value: int) -> float:
+    if value >= 0:
+        return 1.0
+    return max(0.0, 1.0 + value / 3.0)
+
+
+def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
+    """Return 0..1 progress toward one live Kimarite."""
+    fighter = state.fighter(side)
+    opponent = state.opponent(side)
+    momentum = relative_momentum(state, side)
+    position = relative_position(state, side)
+    grip = effective_total_grip(state, side)
+    power_adv = fighter.power - opponent.power
+
+    if card.name == "Yorikiri":
+        parts = [_at_least(grip, 2), _at_least(momentum, 1), _at_least(position, 2)]
+    elif card.name == "Oshidashi":
+        parts = [_at_least(power_adv, 3), _at_least(momentum, 1), _at_least(position, 2)]
+    elif card.name == "Tsukidashi":
+        parts = [_nonnegative(momentum), _at_least(position, 2), _at_least(fighter.cards_played_this_turn, 4)]
+    elif card.name == "Oshitaoshi":
+        parts = [_at_least(momentum, 1), _at_least(position, 1), _at_least(fighter.power, 8)]
+    elif card.name == "Yoritaoshi":
+        parts = [_at_least(grip, 2), _at_least(position, 2), _at_least(power_adv, 3)]
+    elif card.name == "Katasukashi":
+        parts = [
+            1.0 if fighter.total_grip == 0 else 0.0,
+            _nonnegative(position),
+            1.0 if fighter.lost_position_this_turn else 0.0,
+        ]
+    elif card.name == "Tsukiotoshi":
+        discard_diff = len(opponent.discard_pile) - len(fighter.discard_pile)
+        parts = [_at_most(position, -2), _at_least(discard_diff, 3)]
+    elif card.name == "Tottari":
+        parts = [
+            1.0 if fighter.total_grip == 0 else 0.0,
+            1.0 if fighter.opponent_grip_reduced_this_turn else 0.0,
+            _at_least(momentum, 2),
+        ]
+    elif card.name == "Uwatenage":
+        parts = [
+            1.0 if fighter.left_grip is GripState.DEEP and grip > 0 else 0.0,
+            _at_least(momentum, 1),
+            _nonnegative(position),
+        ]
+    elif card.name == "Hatakikomi":
+        parts = [_at_most(momentum, -2), _nonnegative(position), _at_least(fighter.power, 5)]
+    elif card.name == "Hikiotoshi":
+        parts = [_at_most(momentum, -2), _nonnegative(position), _at_least(grip, 1)]
+    elif card.name == "Tsukitaoshi":
+        parts = [_at_least(momentum, 2), _nonnegative(position), _at_least(fighter.cards_played_this_turn, 4)]
+    elif card.name == "Tsuridashi":
+        both = (
+            fighter.left_grip is not GripState.NONE
+            and fighter.right_grip is not GripState.NONE
+            and grip > 0
+        )
+        parts = [1.0 if both else _at_least(grip, 2), _at_least(fighter.power, 7)]
+    elif card.name == "Kotenage":
+        opponent_grip = effective_total_grip(state, state.opponent_side(side))
+        parts = [
+            1.0 if opponent_grip == 0 else max(0.0, 1.0 - opponent_grip / 4.0),
+            _at_least(momentum, 1),
+            _at_least(len(fighter.hand), 3),
+        ]
+    elif card.name == "Abisetaoshi":
+        parts = [_at_least(grip, 2), _at_least(momentum, 1), _at_least(fighter.power, 7)]
+    else:
+        return 0.0
+
+    return sum(parts) / len(parts)
+
+
+def live_kimarite_progress(state: BoutState, side: Side) -> float:
+    cards = state.fighter(side).kimarite_zone
+    if not cards:
+        return 0.0
+    values = sorted(
+        (kimarite_progress(state, side, card) for card in cards),
+        reverse=True,
+    )
+    # Focus on the best live path, but give a little value to a second route.
+    return values[0] + (values[1] * 0.15 if len(values) > 1 else 0.0)
+
+
 def score_state(state: BoutState, side: Side) -> float:
     if state.winner is side:
         return 1_000_000.0
@@ -195,31 +295,31 @@ def score_state(state: BoutState, side: Side) -> float:
     opponent = state.opponent(side)
 
     score = 0.0
-    score += relative_momentum(state, side) * 18
-    score += relative_position(state, side) * 20
-    score += (fighter.power - opponent.power) * 5
-    score += effective_total_grip(state, side) * 7
-    score -= effective_total_grip(state, state.opponent_side(side)) * 5
+    score += relative_momentum(state, side) * 8
+    score += relative_position(state, side) * 10
+    score += (fighter.power - opponent.power) * 3
+    score += effective_total_grip(state, side) * 4
+    score -= effective_total_grip(state, state.opponent_side(side)) * 3
     score += len(fighter.hand) * 1.5
     score -= len(opponent.hand) * 0.5
     score += fighter.plays_remaining * 0.5
+
+    own_progress = live_kimarite_progress(state, side)
+    opponent_progress = live_kimarite_progress(
+        state,
+        state.opponent_side(side),
+    )
+    score += own_progress * 75
+    score -= opponent_progress * 55
 
     # A satisfied Kimarite at the current check is effectively decisive.
     try:
         if satisfied_kimarite(state, side):
             score += 100_000
+        if satisfied_kimarite(state, state.opponent_side(side)):
+            score -= 5_000
     except KeyError:
         pass
-
-    # Reward progress toward common win axes even before a full condition.
-    score += max(0, relative_momentum(state, side)) * 3
-    score += max(0, relative_position(state, side)) * 3
-    if effective_total_grip(state, side) >= 2:
-        score += 8
-    if fighter.power >= 7:
-        score += 6
-    if fighter.cards_played_this_turn >= 4:
-        score += 10
 
     return score
 
