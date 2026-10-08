@@ -86,6 +86,10 @@ def main() -> None:
             "turns",
             "cards_played_a",
             "cards_played_b",
+            "power_advantage_a",
+            "technique_advantage_a",
+            "spirit_advantage_a",
+            "first_exchange_wrestler",
             "unsupported_reason",
         ])
         for record in records:
@@ -100,6 +104,10 @@ def main() -> None:
                 record.turns,
                 "|".join(record.cards_played_a),
                 "|".join(record.cards_played_b),
+                record.power_advantage_a,
+                record.technique_advantage_a,
+                record.spirit_advantage_a,
+                record.first_exchange_wrestler or "",
                 record.unsupported_reason or "",
             ])
 
