@@ -28,7 +28,7 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> in
 
     loser = state.opponent_side(winner)
     card = state.fighter(loser).wrestler.prepared_tachiai_card
-    if card.name not in {"Hold Position", "Immovable"}:
+    if card.name not in {"Hold Position", "Immovable", "Sidestep"}:
         return 0
 
     if prevent_negative_effect(
@@ -38,7 +38,7 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> in
         description="reduce Tachiai Push from the Power comparison",
     ):
         return 0
-    return 2
+    return 1 if card.name == "Sidestep" else 2
 
 
 def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) -> None:
@@ -140,6 +140,12 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
         elif name == "Get Underneath":
             if power_push_received[side] <= 1:
                 momentum_delta[side] += 1
+
+        elif name == "Sidestep":
+            if comparison.power_winner is opponent_side:
+                raw_push = abs(comparison.power_advantage_a)
+                if raw_push > 0:
+                    momentum_delta[side] += 1
 
         elif name == "Give Ground":
             gain_power(state, side, 1)
