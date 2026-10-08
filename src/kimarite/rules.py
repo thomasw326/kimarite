@@ -60,7 +60,13 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
     if excess == 0:
         return
 
-    # Overflow converts 1:1. If the destination track is already capped for
+    # Experimental rule: Momentum is capped; excess Momentum does not
+    # convert to Push, even if Push is already at the winning cap.
+    if kind == "momentum":
+        state.log(f"{excess} excess Momentum is lost at the track cap.")
+        return
+
+    # Push overflow still converts 1:1 into Momentum. If the destination track is already capped for
     # the same wrestler, conversion would loop forever; that is an immediate win.
     if _track_at_favorable_cap(state, side, next_kind):
         losing_side = state.opponent_side(side)
