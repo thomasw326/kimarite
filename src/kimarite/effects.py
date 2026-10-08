@@ -208,7 +208,7 @@ def _belt_slap(
 
 
 def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    grip = effective_total_grip(state, side)
+    grip = effective_total_grip(state, side, consume_prevention=True)
     if grip == 1:
         gain_push(state, side, 1)
     elif grip == 2:
@@ -221,7 +221,7 @@ def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 
 def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    if effective_total_grip(state, side) < 1:
+    if effective_total_grip(state, side, consume_prevention=True) < 1:
         raise IllegalPlay("Yori requires at least 1 usable Grip.")
     position = state.position * state.sign(side)
     if position > 0:
@@ -229,7 +229,7 @@ def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> N
 
 
 def _gaburi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    if effective_total_grip(state, side) < 1:
+    if effective_total_grip(state, side, consume_prevention=True) < 1:
         raise IllegalPlay("Gaburi requires at least 1 usable Grip.")
     momentum = state.momentum * state.sign(side)
     if momentum > 0:
