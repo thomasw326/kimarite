@@ -355,12 +355,28 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
 
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
+        "Headlong Charge",
+        "Attempt Two-Handed Grip",
+        "Attempt Deep Outside Grip",
+        "Attempt Deep Inside Grip",
+        "Hold Position",
+        "Immovable",
+        "Pull",
+        "Get Underneath",
+        "Sidestep",
+        "Use the Tawara",
+        "Kannuki",
+        "Morozashi",
+    }
+)
+
+UNIMPLEMENTED_TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
+    {
         "Pull",
         "Sidestep",
         "Morozashi",
     }
 )
-
 
 CHOICE_OR_TEMPORARY_EFFECTS_NOT_YET_REGISTERED: frozenset[str] = frozenset(
     {
@@ -383,7 +399,7 @@ def resolve_exchange_effect(
         effect(state, side, card, context)
         return
 
-    if card.name in TEMPORARY_CARD_NAMES:
+    if card.name in UNIMPLEMENTED_TEMPORARY_CARD_NAMES:
         raise NotImplementedError(
             f"Temporary effect for {card.name} is not implemented yet."
         )
