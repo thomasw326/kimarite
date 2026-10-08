@@ -105,6 +105,10 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
             for _ in range(max(0, spirit_advantage // 3)):
                 draw_one(state, side)
 
+        elif name == "Tsuppari":
+            if comparison.advantage_for(side, Stat.POWER) >= 2:
+                draw_one(state, side)
+
         elif name == "Stare Down":
             if comparison.advantage_for(side, Stat.POWER) > 0:
                 extra_push[side] += 1
