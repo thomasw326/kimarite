@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .effects import ChoiceRequired, EffectContext, add_play, draw_one
+from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, draw_one
 from .kimarite import power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
@@ -58,7 +58,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     elif card.name == "Katasukashi":
         if _optional(context, "use_optional", card):
             gain_momentum(state, opponent_side, 1)
-            ai_look_keep(fighter, 2, 1)
+            draw_from_look(state, side, look=2, keep=1)
 
     elif card.name == "Tsukiotoshi":
         if _optional(context, "use_optional", card):
@@ -108,7 +108,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     elif card.name == "Hikiotoshi":
         if _optional(context, "use_optional", card):
             gain_momentum(state, opponent_side, 1)
-            ai_look_keep(fighter, 2, 1)
+            draw_from_look(state, side, look=2, keep=1)
 
     elif card.name == "Tsukitaoshi":
         if relative_momentum(state, side) >= 1:
