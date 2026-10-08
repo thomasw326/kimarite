@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .catalog import ORIGINAL_WRESTLERS
+from .catalog import PLAYTEST_WRESTLERS
 from .deck import build_seeded_deck
 from .models import BoutState, FighterState, Side
 from .tachiai import TachiaiComparison, compare_tachiai, first_exchange_side
@@ -31,8 +31,8 @@ class PreparedBout:
 
 
 def create_prepared_bout(config: BoutConfig) -> PreparedBout:
-    template_a = ORIGINAL_WRESTLERS[config.fighter_a.wrestler_name]
-    template_b = ORIGINAL_WRESTLERS[config.fighter_b.wrestler_name]
+    template_a = PLAYTEST_WRESTLERS[config.fighter_a.wrestler_name]
+    template_b = PLAYTEST_WRESTLERS[config.fighter_b.wrestler_name]
     wrestler_a = template_a.build(ranking=config.fighter_a.ranking)
     wrestler_b = template_b.build(ranking=config.fighter_b.ranking)
 
