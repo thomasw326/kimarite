@@ -78,10 +78,10 @@ def test_all_names_eligible_globally_and_reserved_locally():
     assert seen_top == all_names
 
 
-def test_technique_advantage_odd_thresholds():
+def test_technique_advantage_1_4_7_thresholds():
     from kimarite.tachiai import technique_access
-    assert [technique_access(d) for d in range(0, 10)] == [
-        (2, 2), (3, 3), (4, 3), (5, 4), (6, 4),
-        (7, 5), (8, 5), (9, 6), (10, 6), (11, 7),
+    assert [technique_access(d) for d in range(0, 11)] == [
+        (2, 2), (3, 3), (4, 3), (5, 3), (6, 4),
+        (7, 4), (8, 4), (9, 5), (10, 5), (11, 5), (12, 6),
     ]
     assert technique_access(-3) == (2, 2)
