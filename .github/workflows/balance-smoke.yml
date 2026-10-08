@@ -6,7 +6,7 @@ on:
       bouts_per_orientation:
         description: "Bouts per matchup orientation"
         required: false
-        default: "1"
+        default: "10"
   push:
     paths:
       - "scripts/balance_smoke.py"
@@ -35,7 +35,7 @@ jobs:
       - name: Run round robin
         run: |
           python scripts/balance_smoke.py \
-            --bouts-per-orientation "${{ github.event.inputs.bouts_per_orientation || '1' }}" \
+            --bouts-per-orientation "${{ github.event.inputs.bouts_per_orientation || '10' }}" \
             --roster "${{ matrix.roster }}" \
             --difficulty "${{ matrix.difficulty }}" \
             --output-dir "balance_artifacts/${{ matrix.label }}"
