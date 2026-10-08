@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from .models import BoutState, Side
+from .models import BoutState, Side, Stat
+from .rules import gain_momentum
 from .selection import ai_look_keep
 from .tachiai import TachiaiComparison, spirit_rewards, technique_access
 
@@ -8,12 +9,11 @@ from .tachiai import TachiaiComparison, spirit_rewards, technique_access
 def prepare_exchange_deck(state: BoutState, side: Side) -> None:
     """Put the prepared Tachiai card on the bottom after Tachiai resolution."""
     fighter = state.fighter(side)
-    prepared = fighter.wrestler.prepared_tachiai_card
-    if prepared not in fighter.draw_pile:
-        fighter.draw_pile.append(prepared)
+    fighter.draw_pile.append(fighter.wrestler.prepared_tachiai_card)
 
 
 def apply_initial_power(state: BoutState, comparison: TachiaiComparison) -> None:
+    """Power persists into the Exchange at the prepared Tachiai total."""
     state.fighter_a.power = comparison.wrestler_a.power
     state.fighter_b.power = comparison.wrestler_b.power
 
@@ -23,14 +23,21 @@ def resolve_first_turn_spirit_reward(
     side: Side,
     comparison: TachiaiComparison,
 ) -> tuple[int, int]:
+    """Resolve the first-turn Spirit reward once.
+
+    This helper is intentionally separate from the complete start-of-turn
+    sequence until the exact ordering relative to the Kimarite check is fixed.
+    """
     fighter = state.fighter(side)
     if not fighter.spirit_reward_pending:
         return (0, 0)
 
-    advantage = comparison.advantage_for(side, fighter.wrestler.primary.__class__.SPIRIT)
+    advantage = comparison.advantage_for(side, Stat.SPIRIT)
     momentum, bonus_turns = spirit_rewards(advantage)
     fighter.spirit_reward_pending = False
     fighter.bonus_turns_queued += bonus_turns
+    if momentum:
+        gain_momentum(state, side, momentum)
     return (momentum, bonus_turns)
 
 
@@ -45,7 +52,7 @@ def first_turn_card_access(
 
     # The first-turn Technique result IS the first hand/card access for that turn.
     # It does not stack with the ordinary 2 + Grip Exchange selection.
-    advantage = comparison.advantage_for(side, fighter.wrestler.primary.__class__.TECHNIQUE)
+    advantage = comparison.advantage_for(side, Stat.TECHNIQUE)
     look, keep = technique_access(advantage)
     fighter.technique_reward_pending = False
     return ai_look_keep(fighter, look, keep)
@@ -71,6 +78,7 @@ def resolve_turn_card_access(
 
 
 def apply_start_of_turn_exhaustion(state: BoutState, side: Side) -> None:
+    """Apply the current start-of-turn Exhaustion rule once for this turn."""
     fighter = state.fighter(side)
 
     if not fighter.draw_pile:
