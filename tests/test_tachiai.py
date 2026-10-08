@@ -30,8 +30,12 @@ def test_power_advantage_scaling():
     assert push_from_power_advantage(0) == 0
     assert push_from_power_advantage(1) == 1
     assert push_from_power_advantage(2) == 1
-    assert push_from_power_advantage(3) == 2
-    assert push_from_power_advantage(6) == 3
+    assert push_from_power_advantage(3) == 1
+    assert push_from_power_advantage(4) == 2
+    assert push_from_power_advantage(6) == 2
+    assert push_from_power_advantage(7) == 3
+    assert push_from_power_advantage(9) == 3
+    assert push_from_power_advantage(10) == 4
 
 
 def test_technique_access_scaling():
