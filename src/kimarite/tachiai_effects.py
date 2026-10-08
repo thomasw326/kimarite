@@ -28,7 +28,7 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> in
 
     loser = state.opponent_side(winner)
     card = state.fighter(loser).wrestler.prepared_tachiai_card
-    if card.name not in {"Hold Position", "Immovable", "Sidestep"}:
+    if card.name not in {"Hold Position", "Immovable", "Sidestep", "Shikiri"}:
         return 0
 
     if prevent_negative_effect(
@@ -38,6 +38,8 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> in
         description="reduce Tachiai Push from the Power comparison",
     ):
         return 0
+    if card.name == "Shikiri":
+        return max(0, comparison.advantage_for(loser, Stat.TECHNIQUE) // 3)
     return 1 if card.name == "Sidestep" else 2
 
 
@@ -99,6 +101,9 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
         elif name == "Gain Right Grip":
             if comparison.advantage_for(side, Stat.TECHNIQUE) > 0:
                 establish_grip(state, side, "right")
+
+        elif name == "Shikiri":
+            pass  # Power-comparison Push reduction resolved before the opening push.
 
         elif name == "Salt Throw":
             spirit_advantage = comparison.advantage_for(side, Stat.SPIRIT)
