@@ -80,6 +80,9 @@ def _context_for_card(
     opponent = state.opponent(side)
     fighter = state.fighter(side)
 
+    if card.name == "Oshi":
+        choices["hand_index"] = _best_hand_index(state, side, prefer_discard=True) if fighter.hand else 0
+
     if card.name in {"Tsuki", "Kotenage"}:
         if opponent.left_grip is not GripState.NONE and opponent.right_grip is not GripState.NONE:
             choices["grip"] = _best_grip_to_reduce(state, side)
