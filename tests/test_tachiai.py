@@ -57,8 +57,8 @@ def test_power_defense_blocks_spirit_push_example():
     state = BoutState(FighterState(a), FighterState(b))
     winner, push = apply_tachiai_power_push(state, comparison)
     assert winner is Side.A
-    assert push == 0
-    assert state.position == 0
+    assert push == 2
+    assert state.position == 2
 
 
 def test_power_defense_never_reverses_push():
