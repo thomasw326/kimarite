@@ -11,7 +11,7 @@ from .rules import effective_total_grip
 from .tachiai import TachiaiComparison
 
 
-UNSUPPORTED_AI_CARDS = frozenset({"Sidestep"})
+UNSUPPORTED_AI_CARDS = frozenset()
 
 
 @dataclass(frozen=True)
@@ -214,7 +214,7 @@ def score_state(state: BoutState, side: Side) -> float:
     # Reward progress toward common win axes even before a full condition.
     score += max(0, relative_momentum(state, side)) * 3
     score += max(0, relative_position(state, side)) * 3
-    if fighter.total_grip >= 2:
+    if effective_total_grip(state, side) >= 2:
         score += 8
     if fighter.power >= 7:
         score += 6
