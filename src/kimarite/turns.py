@@ -5,7 +5,7 @@ from collections.abc import Callable
 from .kimarite import satisfied_kimarite
 from .models import BoutState, Card, Side, Stat
 from .rules import effective_total_grip, gain_momentum, grip_benefits_suppressed
-from .selection import ai_look_keep
+from .selection import situational_look_keep
 from .tachiai import TachiaiComparison, spirit_rewards, technique_access
 from .temporary import resolve_start_of_turn_temporaries
 
@@ -64,7 +64,7 @@ def first_turn_card_access(
     look, keep = technique_access(advantage)
     look = max(2, look + fighter.technique_look_adjustment)
     fighter.technique_reward_pending = False
-    return ai_look_keep(fighter, look, keep)
+    return situational_look_keep(state, side, look, keep)
 
 
 def normal_turn_card_access(state: BoutState, side: Side) -> list[Card]:
@@ -74,7 +74,7 @@ def normal_turn_card_access(state: BoutState, side: Side) -> list[Card]:
     # without increasing the number kept. Suppressed Grip gives no benefit.
     keep = 3 if grip > 0 else 2
     look = 2 + grip if grip > 0 else 2
-    return ai_look_keep(fighter, look, keep)
+    return situational_look_keep(state, side, look, keep)
 
 
 def resolve_turn_card_access(
