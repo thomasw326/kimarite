@@ -69,6 +69,7 @@ def run_series(
     ranking_a: int | None = 1,
     ranking_b: int | None = 2,
     max_turns: int = 100,
+    ai_mode: str = "tactical",
 ) -> list[BoutRecord]:
     records: list[BoutRecord] = []
 
@@ -111,6 +112,7 @@ def run_series(
         result = run_bout(
             config,
             max_turns=max_turns,
+            ai_mode=ai_mode,
         )
         state = result.state
 
@@ -226,6 +228,7 @@ def run_round_robin(
     exclusions_by_wrestler: dict[str, frozenset[int]] | None = None,
     max_turns: int = 100,
     seed_start: int = 1,
+    ai_mode: str = "tactical",
 ) -> list[BoutRecord]:
     names = list(wrestler_names)
     if len(set(names)) != len(names):
@@ -258,6 +261,7 @@ def run_round_robin(
                         ranking_a=1,
                         ranking_b=2,
                         max_turns=max_turns,
+                        ai_mode=ai_mode,
                     )
                 )
 
@@ -333,6 +337,7 @@ def run_difficulty_series(
     *,
     difficulty_a: int = 0,
     difficulty_b: int = 0,
+    ai_mode: str = "tactical",
     ranking_a: int | None = 1,
     ranking_b: int | None = 2,
     max_turns: int = 100,
@@ -352,6 +357,7 @@ def run_difficulty_series(
         ranking_a=ranking_a,
         ranking_b=ranking_b,
         max_turns=max_turns,
+        ai_mode=ai_mode,
     )
 
 
@@ -359,6 +365,7 @@ def run_difficulty_round_robin(
     wrestler_names: Iterable[str],
     *,
     difficulty: int = 0,
+    ai_mode: str = "tactical",
     bouts_per_orientation: int = 1,
     max_turns: int = 100,
     seed_start: int = 1,
