@@ -40,7 +40,9 @@ def make_fighter(config, rng, ranking):
     name, stats, order = config
     kimarite = rng.choice(STARTING_KIMARITE)
     # Card assignment and shuffle are deliberately agnostic to wrestler statistics.
-    pool = [card for card in CARD_POOL if card.name != kimarite.name]
+    # Starting Kimarite is a dedicated slot; all 50 card names remain
+    # independently eligible for prepared Tachiai, top-of-deck and remainder.
+    pool = list(CARD_POOL)
     tachiai = rng.choice(pool)
     pool = [card for card in pool if card.card_id != tachiai.card_id]
     top_card = rng.choice(pool)
