@@ -103,7 +103,7 @@ def eligible_cards(wrestler_name: str) -> list[Card]:
     return [
         card
         for card in CARD_POOL
-        if card.card_id not in UNIVERSALLY_PROTECTED_IDS
+        if card.card_id <= 45 and card.card_id not in UNIVERSALLY_PROTECTED_IDS
         and card.name not in reserved
     ]
 
