@@ -83,10 +83,17 @@ def draw_from_look(
     *,
     look: int,
     keep: int = 1,
+    required_draws: int = 1,
 ) -> list[Card]:
-    if lose_to_empty_draw(state, side):
+    fighter = state.fighter(side)
+    if len(fighter.draw_pile) < required_draws:
+        state.log(
+            f"{fighter.wrestler.name} cannot complete a required draw of "
+            f"{required_draws} card(s) from the Draw Pile."
+        )
+        state.declare_winner(state.opponent_side(side), "Exhaustion")
         return []
-    return ai_look_keep(state.fighter(side), look, keep)
+    return ai_look_keep(fighter, look, keep)
 
 
 def add_play(state: BoutState, side: Side, amount: int = 1) -> None:
