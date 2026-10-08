@@ -161,10 +161,11 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     # Sidestep only breaks after Push has survived prevention/suppression.
     _break_sidestep_from_push(state, side)
 
-    for instance in state.fighter(defending_side).temporary_zone:
-        instance.opponent_gained_push_while_active = True
-
+    old_position = state.position
     _resolve_shared_track_gain(state, side, amount, "push")
+    if state.position != old_position or state.winner is not None:
+        for instance in state.fighter(defending_side).temporary_zone:
+            instance.opponent_gained_push_while_active = True
 
     if _has_temporary(state, defending_side, "Use the Tawara"):
         gain_momentum(state, defending_side, 1)
