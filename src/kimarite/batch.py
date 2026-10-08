@@ -25,6 +25,8 @@ class BoutRecord:
     turns: int
     cards_played_a: tuple[str, ...]
     cards_played_b: tuple[str, ...]
+    kimarite_removals_a: tuple[str, ...]
+    kimarite_removals_b: tuple[str, ...]
     power_advantage_a: int
     technique_advantage_a: int
     spirit_advantage_a: int
@@ -119,6 +121,16 @@ def run_series(
                 ),
                 cards_played_b=tuple(
                     name for side, name in state.card_plays if side is Side.B
+                ),
+                kimarite_removals_a=tuple(
+                    name
+                    for remover_side, name in state.kimarite_removals
+                    if remover_side is Side.A
+                ),
+                kimarite_removals_b=tuple(
+                    name
+                    for remover_side, name in state.kimarite_removals
+                    if remover_side is Side.B
                 ),
                 power_advantage_a=comparison.power_advantage_a,
                 technique_advantage_a=comparison.technique_advantage_a,
