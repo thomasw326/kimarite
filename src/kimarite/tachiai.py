@@ -116,3 +116,33 @@ def first_exchange_side(
         return Side.A if wrestler_a.ranking < wrestler_b.ranking else Side.B
 
     raise ValueError("Tachiai priority is tied and wrestler ranking is unavailable.")
+
+
+def apply_tachiai_power_push(
+    state,
+    comparison: TachiaiComparison,
+) -> tuple[Side | None, int]:
+    """Apply only the fixed Power-comparison Push from the Tachiai.
+
+    Tachiai force-out is special: Push beyond the ring edge ends the bout
+    immediately instead of converting excess Push into Momentum.
+    Card-specific Tachiai effects are resolved separately.
+    """
+    winner = comparison.power_winner
+    if winner is None:
+        return (None, 0)
+
+    advantage = abs(comparison.power_advantage_a)
+    push = push_from_power_advantage(advantage)
+    sign = state.sign(winner)
+    target = state.position + sign * push
+
+    if target > 3 or target < -3:
+        state.position = 3 if winner is Side.A else -3
+        method = "Yorikiri" if state.fighter(winner).total_grip > 0 else "Oshidashi"
+        state.declare_winner(winner, method)
+        return (winner, push)
+
+    state.position = target
+    state.log(f"{state.fighter(winner).wrestler.name} gains {push} Tachiai Push.")
+    return (winner, push)
