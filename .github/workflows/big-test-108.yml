@@ -7,6 +7,8 @@ on:
       - scripts/big_test.py
       - .github/workflows/big-test-108.yml
       - src/kimarite/personality_ai.py
+      - tests/test_big_test.py
+      - pyproject.toml
 
 jobs:
   big-test:
