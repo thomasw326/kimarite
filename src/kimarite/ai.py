@@ -370,12 +370,7 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     elif card.name == "Tsukitaoshi":
         parts = [_at_least(momentum, 2), _nonnegative(position), _at_least(fighter.cards_played_this_turn, 4)]
     elif card.name == "Tsuridashi":
-        both = (
-            fighter.left_grip is not GripState.NONE
-            and fighter.right_grip is not GripState.NONE
-            and grip > 0
-        )
-        parts = [1.0 if both else _at_least(grip, 2), _at_least(fighter.power, 7)]
+        parts = [_at_least(grip, 3), _nonnegative(position)]
     elif card.name == "Kotenage":
         opponent_grip = effective_total_grip(state, state.opponent_side(side))
         parts = [
