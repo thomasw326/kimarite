@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from .models import BoutState, GripState, Side
-from .prevention import prevent_negative_effect
+from .prevention import has_negative_effect_prevention, prevent_negative_effect
 
 
 TRACK_MIN = -3
@@ -171,16 +171,31 @@ def grip_benefits_suppressed(state: BoutState, side: Side) -> bool:
     return _has_temporary(state, state.opponent_side(side), "Kannuki")
 
 
-def effective_total_grip(state: BoutState, side: Side) -> int:
-    if grip_benefits_suppressed(state, side):
-        if prevent_negative_effect(
+def effective_total_grip(
+    state: BoutState,
+    side: Side,
+    *,
+    consume_prevention: bool = False,
+) -> int:
+    """Return usable Grip without mutating state during inspection.
+
+    If Kannuki suppresses Grip and Shiko Stomp is available, pure callers see
+    the protected Grip as usable. Actual gameplay callers may set
+    consume_prevention=True to spend Shiko Stomp on that negative effect.
+    """
+    if not grip_benefits_suppressed(state, side):
+        return state.fighter(side).total_grip
+
+    if not has_negative_effect_prevention(state, side):
+        return 0
+
+    if consume_prevention:
+        prevent_negative_effect(
             state,
             side,
             source="Kannuki",
             description="suppress benefits from existing Grip",
-        ):
-            return state.fighter(side).total_grip
-        return 0
+        )
     return state.fighter(side).total_grip
 
 
