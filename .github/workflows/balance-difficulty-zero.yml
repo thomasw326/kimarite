@@ -20,6 +20,9 @@ on:
       - "src/kimarite/selection.py"
       - "src/kimarite/simulate.py"
       - "src/kimarite/temporary.py"
+      - "src/kimarite/setup.py"
+      - "src/kimarite/models.py"
+      - "src/kimarite/tachiai.py"
       - "src/kimarite/turns.py"
 
 jobs:
