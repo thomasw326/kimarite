@@ -19,7 +19,7 @@ from .rules import (
 )
 from .selection import ai_look_keep
 from .tachiai import TachiaiComparison
-from .temporary import add_temporary
+from .temporary import add_temporary, remove_temporary
 
 
 class IllegalPlay(RuntimeError):
@@ -338,11 +338,143 @@ def _kannuki(
 ) -> None:
     add_temporary(state, side, card, phase="exchange")
 
+
+def _choose_opponent_temporary(
+    state: BoutState,
+    side: Side,
+    card: Card,
+    context: EffectContext,
+):
+    instances = state.opponent(side).temporary_zone
+    if not instances:
+        return None
+    if len(instances) == 1:
+        return instances[0]
+
+    choice = context.choice("temporary_index")
+    options = list(range(len(instances)))
+    if choice not in options:
+        raise ChoiceRequired(card.name, "temporary_index", options)
+    return instances[choice]
+
+
+def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_power(state, side, 2)
+    target = _choose_opponent_temporary(state, side, card, context)
+    if target is None:
+        return
+
+    opponent_side = state.opponent_side(side)
+    if prevent_negative_effect(
+        state,
+        opponent_side,
+        source="Nodowa",
+        description=f"remove {target.card.name} from the Temporary Zone",
+    ):
+        return
+    remove_temporary(state, opponent_side, target, disrupted=True)
+
+
+def _read_the_move(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    target = _choose_opponent_temporary(state, side, card, context)
+    if target is None:
+        return
+
+    opponent_side = state.opponent_side(side)
+    if prevent_negative_effect(
+        state,
+        opponent_side,
+        source="Read the Move",
+        description=f"remove {target.card.name} from the Temporary Zone",
+    ):
+        return
+
+    remove_temporary(state, opponent_side, target, disrupted=True)
+    gain_momentum(state, side, 1)
+    draw_one(state, side)
+
+
+def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    use_cost = context.choice("pay_pull_cost")
+    if use_cost is None:
+        raise ChoiceRequired(card.name, "pay_pull_cost", [True, False])
+
+    if use_cost:
+        fighter = state.fighter(side)
+        if not fighter.discard_pile:
+            raise IllegalPlay("Pull cannot pay its optional cost with an empty discard pile.")
+
+        if len(fighter.discard_pile) == 1:
+            index = 0
+        else:
+            index = context.choice("discard_index")
+            options = list(range(len(fighter.discard_pile)))
+            if index not in options:
+                raise ChoiceRequired(card.name, "discard_index", options)
+
+        lose_momentum(state, side, 1)
+        lose_position(state, side, 1)
+        recovered = fighter.discard_pile.pop(index)
+        fighter.draw_pile.insert(0, recovered)
+        state.log(f"{fighter.wrestler.name} puts {recovered.name} on top of the Draw Pile.")
+
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _power_water(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    fighter = state.fighter(side)
+    if not fighter.discard_pile:
+        return
+
+    max_count = min(4, len(fighter.discard_pile))
+    selected = context.choice("discard_indices")
+    if selected is None:
+        if max_count == 1:
+            selected = [0]
+        else:
+            raise ChoiceRequired(
+                card.name,
+                "discard_indices",
+                list(range(len(fighter.discard_pile))),
+            )
+
+    selected = list(selected)
+    if not 1 <= len(selected) <= max_count:
+        raise ValueError("Power Water must choose between 1 and 4 discard cards.")
+    if len(set(selected)) != len(selected):
+        raise ValueError("Power Water discard choices must be unique.")
+    if any(i < 0 or i >= len(fighter.discard_pile) for i in selected):
+        raise ValueError("Power Water discard choice is out of range.")
+
+    if len(selected) == 1:
+        hand_index = selected[0]
+    else:
+        hand_index = context.choice("hand_index")
+        if hand_index not in selected:
+            raise ChoiceRequired(card.name, "hand_index", selected)
+
+    chosen_cards = [fighter.discard_pile[i] for i in selected]
+    hand_card = fighter.discard_pile[hand_index]
+    for i in sorted(selected, reverse=True):
+        fighter.discard_pile.pop(i)
+
+    fighter.hand.append(hand_card)
+    for chosen in chosen_cards:
+        if chosen is not hand_card:
+            fighter.draw_pile.append(chosen)
+
+    state.log(f"{fighter.wrestler.name} recovers {hand_card.name} with Power Water.")
+
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Oshi": _oshi,
     "Tsuki": _tsuki,
     "Tsuppari": _tsuppari,
     "Harite": _harite,
+    "Nodowa": _nodowa,
     "Headlong Charge": _headlong_charge,
     "Gain Left Grip": _gain_left_grip,
     "Gain Right Grip": _gain_right_grip,
@@ -353,6 +485,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Attempt Deep Inside Grip": _attempt_deep_inside,
     "Salt Throw": _salt_throw,
     "Stare Down": _stare_down,
+    "Power Water": _power_water,
     "Belt Slap": _belt_slap,
     "Tsuri": _tsuri,
     "Yori": _yori,
@@ -360,8 +493,10 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Hold Position": _hold_position,
     "Immovable": _immovable,
     "Henka": _henka,
+    "Pull": _pull,
     "Reset to Neutral": _reset_to_neutral,
     "Get Underneath": _get_underneath,
+    "Read the Move": _read_the_move,
     "Regain Balance": _regain_balance,
     "Use the Tawara": _use_the_tawara,
     "Kannuki": _kannuki,
@@ -388,7 +523,6 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
 
 UNIMPLEMENTED_TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
-        "Pull",
         "Sidestep",
         "Morozashi",
     }
@@ -396,10 +530,7 @@ UNIMPLEMENTED_TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
 
 CHOICE_OR_TEMPORARY_EFFECTS_NOT_YET_REGISTERED: frozenset[str] = frozenset(
     {
-        "Nodowa",
-        "Power Water",
         "Ottsuke",
-        "Read the Move",
     }
 )
 
