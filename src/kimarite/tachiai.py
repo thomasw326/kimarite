@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from math import ceil
 
-from .models import Card, Side, Stat, Wrestler
+from .models import BoutState, Card, Side, Stat, Wrestler
 
 
 @dataclass(frozen=True)
@@ -118,9 +118,32 @@ def first_exchange_side(
     raise ValueError("Tachiai priority is tied and wrestler ranking is unavailable.")
 
 
+def apply_tachiai_push(
+    state: BoutState,
+    side: Side,
+    amount: int,
+) -> int:
+    """Apply Tachiai Push with immediate force-out beyond the edge."""
+    if amount <= 0 or state.winner is not None:
+        return 0
+
+    target = state.position + state.sign(side) * amount
+    if target > 3 or target < -3:
+        state.position = 3 if side is Side.A else -3
+        method = "Yorikiri" if state.fighter(side).total_grip > 0 else "Oshidashi"
+        state.declare_winner(side, method)
+        return amount
+
+    state.position = target
+    state.log(f"{state.fighter(side).wrestler.name} gains {amount} Tachiai Push.")
+    return amount
+
+
 def apply_tachiai_power_push(
-    state,
+    state: BoutState,
     comparison: TachiaiComparison,
+    *,
+    reduction: int = 0,
 ) -> tuple[Side | None, int]:
     """Apply only the fixed Power-comparison Push from the Tachiai.
 
@@ -133,16 +156,6 @@ def apply_tachiai_power_push(
         return (None, 0)
 
     advantage = abs(comparison.power_advantage_a)
-    push = push_from_power_advantage(advantage)
-    sign = state.sign(winner)
-    target = state.position + sign * push
-
-    if target > 3 or target < -3:
-        state.position = 3 if winner is Side.A else -3
-        method = "Yorikiri" if state.fighter(winner).total_grip > 0 else "Oshidashi"
-        state.declare_winner(winner, method)
-        return (winner, push)
-
-    state.position = target
-    state.log(f"{state.fighter(winner).wrestler.name} gains {push} Tachiai Push.")
+    push = max(0, push_from_power_advantage(advantage) - max(0, reduction))
+    apply_tachiai_push(state, winner, push)
     return (winner, push)
