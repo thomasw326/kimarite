@@ -134,9 +134,9 @@ class WrestlerTemplate:
 
 
 ORIGINAL_WRESTLERS: dict[str, WrestlerTemplate] = {
-    "Ura": WrestlerTemplate("Ura", Stat.TECHNIQUE, Stat.TECHNIQUE, Stat.POWER, 0, 5, 1, "Katasukashi", "Salt Throw", "Shikiri", "Power/comparison, Spirit comparison, Power threshold."),
+    "Ura": WrestlerTemplate("Ura", Stat.TECHNIQUE, Stat.TECHNIQUE, Stat.POWER, 0, 5, 1, "Katasukashi", "Salt Throw", "Oshi", "Power/comparison, Spirit comparison, Power threshold."),
     "Oshoma": WrestlerTemplate("Oshoma", Stat.TECHNIQUE, Stat.SPIRIT, Stat.POWER, 1, 3, 2, "Hikiotoshi", "Get Underneath", "Pull", "Multiple Push, Push+Power, other Push."),
-    "Asakoryu": WrestlerTemplate("Asakoryu", Stat.TECHNIQUE, Stat.SPIRIT, Stat.POWER, 0, 3, 3, "Tottari", "Power Water", "Ottsuke", "Provide Grip, Power comparisons, Power thresholds."),
+    "Asakoryu": WrestlerTemplate("Asakoryu", Stat.TECHNIQUE, Stat.SPIRIT, Stat.POWER, 0, 3, 3, "Tottari", "Shikiri", "Ottsuke", "Provide Grip, Power comparisons, Power thresholds."),
     "Wakamotoharu": WrestlerTemplate("Wakamotoharu", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 4, 0, "Yorikiri", "Gain Left Grip", "Yori", "Spirit comparisons, remove Grip, high Spirit orbs."),
     "Hoshoryu": WrestlerTemplate("Hoshoryu", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 3, 1, "Uwatenage", "Shiko Stomp", "Attempt Deep Outside Grip", "Remove Grip, require negative, downside gamble."),
     "Abi": WrestlerTemplate("Abi", Stat.SPIRIT, Stat.TECHNIQUE, Stat.POWER, 1, 2, 3, "Hatakikomi", "Henka", "Kannuki", "No-Spirit cards, highest Push first."),
