@@ -38,6 +38,11 @@ def test_headlong_disruption_loses_three_momentum():
 
     assert bout.momentum == -2  # +1 on play, then -3 for disruption
     assert card in bout.fighter_a.discard_pile
+    assert bout.temporary_outcomes[-1] == (
+        Side.A,
+        "Headlong Charge",
+        "disrupted",
+    )
 
 
 def test_attempt_two_handed_grip_resolves_at_next_turn_start():
@@ -50,6 +55,11 @@ def test_attempt_two_handed_grip_resolves_at_next_turn_start():
     assert bout.fighter_a.left_grip is GripState.GRIP
     assert bout.fighter_a.right_grip is GripState.GRIP
     assert not bout.fighter_a.temporary_zone
+    assert bout.temporary_outcomes[-1] == (
+        Side.A,
+        "Attempt Two-Handed Grip",
+        "survived",
+    )
 
 
 def test_immovable_tracks_opponent_push_and_denies_survival_momentum():
