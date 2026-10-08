@@ -66,6 +66,7 @@ class FighterState:
     right_grip: GripState = GripState.NONE
     plays_remaining: int = 2
     cards_played_this_turn: int = 0
+    played_this_turn: list[Card] = field(default_factory=list)
     first_exchange_turn: bool = True
     technique_reward_pending: bool = True
     spirit_reward_pending: bool = True
