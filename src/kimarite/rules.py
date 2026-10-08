@@ -24,6 +24,13 @@ def _track_at_favorable_cap(state: BoutState, side: Side, kind: str) -> bool:
     return (state.momentum if kind == "momentum" else state.position) == cap
 
 
+def _has_temporary(state: BoutState, side: Side, card_name: str) -> bool:
+    return any(
+        instance.card.name == card_name
+        for instance in state.fighter(side).temporary_zone
+    )
+
+
 def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: str) -> None:
     if amount < 0:
         raise ValueError("amount must be non-negative")
@@ -55,6 +62,14 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
     # Overflow converts 1:1. If the destination track is already capped for
     # the same wrestler, conversion would loop forever; that is an immediate win.
     if _track_at_favorable_cap(state, side, next_kind):
+        losing_side = state.opponent_side(side)
+        if kind == "push" and _has_temporary(state, losing_side, "Use the Tawara"):
+            state.log(
+                f"Use the Tawara prevents {state.fighter(losing_side).wrestler.name} "
+                "from losing to Push."
+            )
+            return
+
         method = "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi"
         state.declare_winner(side, method)
         return
@@ -71,7 +86,23 @@ def lose_momentum(state: BoutState, side: Side, amount: int) -> None:
 
 
 def gain_push(state: BoutState, side: Side, amount: int) -> None:
+    if amount <= 0 or state.winner is not None:
+        return
+
+    defending_side = state.opponent_side(side)
+    if _has_temporary(state, defending_side, "Hold Position"):
+        state.log(
+            f"Hold Position prevents {state.fighter(side).wrestler.name} from gaining Push."
+        )
+        return
+
+    for instance in state.fighter(defending_side).temporary_zone:
+        instance.opponent_gained_push_while_active = True
+
     _resolve_shared_track_gain(state, side, amount, "push")
+
+    if _has_temporary(state, defending_side, "Use the Tawara"):
+        gain_momentum(state, defending_side, 1)
 
 
 def gain_position(state: BoutState, side: Side, amount: int) -> None:
