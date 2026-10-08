@@ -2,7 +2,7 @@ from kimarite.models import Side
 from kimarite.setup import BoutConfig, FighterConfig, create_prepared_bout
 
 
-def test_fujinokawa_tochinoshin_setup_matches_known_difficulty_zero_case():
+def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
     bout = create_prepared_bout(
         BoutConfig(
             FighterConfig(
@@ -22,7 +22,7 @@ def test_fujinokawa_tochinoshin_setup_matches_known_difficulty_zero_case():
 
     assert state.fighter_a.power == 4
     assert state.fighter_b.power == 5
-    assert state.position == -1
+    assert state.position == 3
     assert state.active_side is Side.A
 
     assert state.fighter_a.kimarite_zone[0].name == "Tsukitaoshi"
