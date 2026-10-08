@@ -63,14 +63,14 @@ def test_first_exchange_priority_spirit_then_power_then_technique():
     assert first_exchange_side(comparison, a, b) is Side.A
 
 
-def test_tachiai_total_power_capped_at_seven_after_starting_cards():
+def test_tachiai_total_power_capped_at_eight_after_starting_cards():
     kimarite = Card(201, "Power Kimarite", power=3, technique=1, spirit=0, is_kimarite=True)
     prepared = Card(202, "Power Prepared", power=3, technique=0, spirit=2)
     blank = Card(203, "Blank")
     strong = Wrestler("Strong", 4, 1, 1, kimarite, prepared, blank)
     weak = Wrestler("Weak", 0, 1, 1, blank, blank, blank)
     result = compare_tachiai(strong, weak)
-    assert result.wrestler_a.power == 7
-    assert result.power_advantage_a == 7
+    assert result.wrestler_a.power == 8
+    assert result.power_advantage_a == 8
     assert result.wrestler_a.technique == 2
     assert result.wrestler_a.spirit == 3
