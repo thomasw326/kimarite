@@ -68,10 +68,9 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
     if kind not in {"momentum", "push"}:
         raise ValueError(f"unknown track kind: {kind}")
 
-    if kind == "momentum":
-        amount = _absorb_grip_defense(state, side, amount, "momentum")
-        if amount == 0:
-            return
+    amount = _absorb_grip_defense(state, side, amount, kind)
+    if amount == 0:
+        return
 
     sign = state.sign(side)
     current = state.momentum if kind == "momentum" else state.position
@@ -158,10 +157,6 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
                 f"Hold Position prevents {state.fighter(side).wrestler.name} from gaining Push."
             )
             return
-
-    amount = _absorb_grip_defense(state, side, amount, "push")
-    if amount == 0:
-        return
 
     # Sidestep only breaks after Push has survived prevention/suppression.
     _break_sidestep_from_push(state, side)
