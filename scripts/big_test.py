@@ -105,10 +105,13 @@ def main():
     wins = Counter()
     cards = defaultdict(lambda: Counter())
     errors = Counter()
+    outcomes = Counter()
+    assignments = defaultdict(Counter)
+    cohorts = defaultdict(Counter)
 
     with (output / "bouts.csv").open("w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(("a", "b", "seed", "winner", "method", "turns", "error"))
+        writer.writerow(("a", "b", "seed", "winner", "method", "win_category", "winner_grip", "turns", "error", "a_stats", "b_stats", "a_priorities", "b_priorities", "a_kimarite", "a_start_card", "a_top_card", "b_kimarite", "b_start_card", "b_top_card"))
         for repeat in range(args.repetitions):
             for pair_idx, (i, j) in enumerate(combinations(range(108), 2)):
                 for orientation, (left, right) in enumerate(((i, j), (j, i))):
@@ -116,11 +119,36 @@ def main():
                     a, b = configs[left], configs[right]
                     state, available, played, error = run_one(a, b, seed, args.max_turns)
                     errors[error or "completed"] += 1
+                    winner = state.winner
+                    winner_grip = state.fighter(winner).total_grip if winner else None
+                    if winner is None:
+                        category = "incomplete"
+                    elif state.win_source == "ringout":
+                        category = "ringout_with_grip" if winner_grip else "ringout_without_grip"
+                    elif state.win_source == "kimarite":
+                        category = "kimarite:" + (state.win_method or "unknown")
+                    elif state.win_method == "Exhaustion":
+                        category = "deck_exhaustion"
+                    elif state.win_method == "Power":
+                        category = "no_power"
+                    else:
+                        category = "other:" + (state.win_method or "unknown")
+                    outcomes[category] += 1
+                    wa, wb = state.fighter_a.wrestler, state.fighter_b.wrestler
+                    def metadata(w):
+                        return (
+                            "/".join(map(str, (w.base_power, w.base_technique, w.base_spirit))),
+                            "/".join(x.value for x in (w.primary, w.secondary, w.tertiary)),
+                            w.starting_kimarite.name,
+                            w.prepared_tachiai_card.name,
+                            w.top_of_deck_card.name,
+                        )
                     writer.writerow((a[0], b[0], seed,
-                                     state.fighter(state.winner).wrestler.name
-                                     if state.winner is not None else "",
-                                     state.win_method or "", state.turn_number,
-                                     error or ""))
+                                     state.fighter(winner).wrestler.name if winner else "",
+                                     state.win_method or "", category,
+                                     winner_grip if winner is not None else "",
+                                     state.turn_number, error or "",
+                                     *metadata(wa), *metadata(wb)))
                     if state.winner is None:
                         continue
                     for side, config in ((Side.A, a), (Side.B, b)):
@@ -128,6 +156,20 @@ def main():
                         won = state.winner is side
                         bouts[name] += 1
                         wins[name] += int(won)
+                        for group in (("build", *config[1]), *(
+                            (label, value) for label, value in
+                            zip(("Power", "Technique", "Spirit"), config[1])
+                        ), ("priority", *(x.value for x in priority))):
+                            cohorts[group]["bouts"] += 1
+                            cohorts[group]["wins"] += int(won)
+                        wrestler = state.fighter(side).wrestler
+                        for role, card in (
+                            ("designated_kimarite", wrestler.starting_kimarite),
+                            ("starting_card", wrestler.prepared_tachiai_card),
+                            ("top_deck_card", wrestler.top_of_deck_card),
+                        ):
+                            assignments[(role, card.name)]["bouts"] += 1
+                            assignments[(role, card.name)]["wins"] += int(won)
                         # Cards may be in hand multiple turns: count each card
                         # once per wrestler-bout, separating played from unplayed.
                         for card in available[side]:
@@ -152,11 +194,28 @@ def main():
         for key, tally in sorted(cards.items(), key=lambda x: x[0][:3]):
             n = tally["bouts"]
             writer.writerow((*key, n, tally["wins"], tally["wins"] / n if n else ""))
+    with (output / "card_assignments.csv").open("w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(("role", "card", "bouts", "wins", "win_rate"))
+        for key, tally in sorted(assignments.items()):
+            n = tally["bouts"]
+            writer.writerow((*key, n, tally["wins"], tally["wins"] / n))
+    with (output / "wrestler_cohorts.csv").open("w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(("group", "value_1", "value_2", "value_3", "bouts", "wins", "win_rate"))
+        for key, tally in sorted(cohorts.items(), key=lambda item: str(item[0])):
+            n = tally["bouts"]
+            writer.writerow((*key, *([""] * (4 - len(key))), n, tally["wins"], tally["wins"] / n))
+    with (output / "win_conditions.csv").open("w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(("win_category", "bouts"))
+        writer.writerows(sorted(outcomes.items()))
     summary = {
         "configs": len(configs),
         "planned_bouts": args.repetitions * 108 * 107,
         "completed": errors["completed"],
         "errors": dict(errors),
+        "win_conditions": dict(outcomes),
         "repetitions": args.repetitions,
         "seed": args.seed,
         "max_turns": args.max_turns,
