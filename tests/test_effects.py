@@ -94,3 +94,29 @@ def test_belt_slap_uses_recorded_spirit_advantage():
 
     assert bout.position == 1
     assert bout.momentum == 1
+
+
+def test_ottsuke_removes_grip_temporary_and_rewards_momentum_push():
+    from kimarite.temporary import add_temporary
+
+    ottsuke = card_by_name("Ottsuke")
+    morozashi = card_by_name("Morozashi")
+    bout = bout_with_hand([ottsuke])
+    bout.fighter_b.left_grip = GripState.GRIP
+    add_temporary(bout, Side.B, morozashi, phase="exchange")
+
+    play_card(
+        bout,
+        Side.A,
+        ottsuke,
+        context=EffectContext(
+            choices={
+                "mode": "remove_card",
+                "card_target": 0,
+            }
+        ),
+    )
+
+    assert not bout.fighter_b.temporary_zone
+    assert bout.momentum == 1
+    assert bout.position == 1
