@@ -114,7 +114,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name == "Morozashi":
             gain_momentum(state, side, 1)
             gain_push(state, side, 1)
-        elif name in {"Headlong Charge", "Get Underneath"}:
+        elif name in {"Headlong Charge", "Get Underneath", "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
             pass
         elif name == "Sidestep":
             distance = state.side_by_side_distance
