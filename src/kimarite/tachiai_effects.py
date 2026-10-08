@@ -70,7 +70,6 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
         if name == "Headlong Charge":
             momentum_delta[side] += 1
             extra_push[side] += 1
-            gain_power(state, side, 1)
             add_temporary(state, side, card, phase="tachiai")
 
         elif name == "Shiko Stomp":
@@ -121,8 +120,7 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
             pass
 
         elif name == "Belt Slap":
-            spirit_advantage = comparison.advantage_for(side, Stat.SPIRIT)
-            extra_push[side] += max(0, spirit_advantage // 3)
+            pass
 
         elif name in {"Hold Position", "Immovable"}:
             pass
