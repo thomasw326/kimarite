@@ -167,6 +167,7 @@ def main() -> None:
             "completed",
             "winner",
             "win_method",
+            "win_source",
             "turns",
             "cards_played_a",
             "cards_played_b",
@@ -193,6 +194,7 @@ def main() -> None:
                 record.completed,
                 record.winner or "",
                 record.win_method or "",
+                record.win_source or "",
                 record.turns,
                 "|".join(record.cards_played_a),
                 "|".join(record.cards_played_b),
@@ -247,6 +249,15 @@ def main() -> None:
         )
     )
 
+    actual_kimarite_wins = Counter(
+        record.win_method for record in completed
+        if record.win_source == "kimarite_zone" and record.win_method
+    )
+    generic_wins = Counter(
+        record.win_method for record in completed
+        if record.win_source != "kimarite_zone" and record.win_method
+    )
+
     payload = {
         "wrestlers": names,
         "roster": args.roster,
@@ -260,6 +271,8 @@ def main() -> None:
         "average_turns": summary.average_turns,
         "wins": summary.wins,
         "win_methods": summary.win_methods,
+        "actual_kimarite_activations": dict(actual_kimarite_wins),
+        "non_kimarite_wins_by_label": dict(generic_wins),
         "winning_card_uses": summary.winning_card_uses,
         "card_play_win_diagnostics": card_play_win_diagnostics(records),
         "kimarite_removals": dict(kimarite_removals),
