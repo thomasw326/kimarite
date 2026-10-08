@@ -38,7 +38,7 @@ def test_headlong_charge_prepared_card_enters_temporary_not_bottom():
     bout = create_prepared_bout(
         BoutConfig(
             FighterConfig("Houdan", 11, ranking=1),
-            FighterConfig("Ura", 12, ranking=2),
+            FighterConfig("Kotozakura", 12, ranking=2),
         )
     )
     state = bout.state
