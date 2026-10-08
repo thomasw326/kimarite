@@ -236,6 +236,7 @@ def _belt_slap(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     gain_push(state, side, 1)
+    gain_power(state, side, 1)
     if tachiai_advantage(context, side, Stat.SPIRIT) >= 3:
         gain_momentum(state, side, 1)
 
@@ -296,6 +297,7 @@ def _regain_balance(
 ) -> None:
     if state.momentum * state.sign(side) < 0:
         gain_momentum(state, side, 2)
+        gain_power(state, side, 1)
     else:
         draw_one(state, side)
 
@@ -314,7 +316,6 @@ def _headlong_charge(
 ) -> None:
     gain_momentum(state, side, 1)
     gain_push(state, side, 1)
-    gain_power(state, side, 1)
     add_temporary(state, side, card, phase="exchange")
 
 
