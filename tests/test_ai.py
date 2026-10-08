@@ -1,4 +1,4 @@
-from kimarite.ai import candidate_plays, score_state
+from kimarite.ai import candidate_plays, next_turn_kimarite_state, score_state
 from kimarite.catalog import card_by_name
 from kimarite.models import BoutState, Card, FighterState, GripState, Side, Wrestler
 from kimarite.temporary import add_temporary
@@ -52,3 +52,22 @@ def test_ottsuke_generates_distinct_grip_and_card_removal_candidates():
 
     assert "reduce_grip" in modes
     assert "remove_card" in modes
+
+
+def test_next_turn_threat_state_clears_transient_kimarite_flags():
+    a = wrestler("A")
+    b = wrestler("B")
+    bout = BoutState(
+        FighterState(a),
+        FighterState(b),
+    )
+    bout.fighter_b.cards_played_this_turn = 4
+    bout.fighter_b.lost_position_this_turn = True
+    bout.fighter_b.opponent_grip_reduced_this_turn = True
+
+    future = next_turn_kimarite_state(bout, Side.B)
+
+    assert future.fighter_b.cards_played_this_turn == 0
+    assert future.fighter_b.lost_position_this_turn is False
+    assert future.fighter_b.opponent_grip_reduced_this_turn is False
+    assert bout.fighter_b.cards_played_this_turn == 4
