@@ -109,7 +109,6 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         if _optional(context, "use_optional", card):
             gain_momentum(state, opponent_side, 1)
             draw_one(state, side)
-            gain_flexible_grip(state, side)
 
     elif card.name == "Tsukitaoshi":
         if relative_momentum(state, side) >= 1:
