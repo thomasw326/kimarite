@@ -131,8 +131,7 @@ def check_kimarite_zone(
     when a later reward layer determines the alternatives have meaningfully
     different win rewards.
     """
-    cards = [c for c in satisfied_kimarite(state, side)
-             if c.name != "Tsuridashi" or at_turn_start]
+    cards = satisfied_kimarite(state, side)
     if not cards:
         return None
 
