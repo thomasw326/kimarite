@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from statistics import mean
 from typing import Iterable
 
-from .catalog import ORIGINAL_WRESTLERS
+from .catalog import PLAYTEST_WRESTLERS
 from .exclusions import exclusions_for_difficulty
 from .models import Side
 from .tachiai import compare_tachiai, first_exchange_side
@@ -64,8 +64,8 @@ def run_series(
     records: list[BoutRecord] = []
 
     for seed_a, seed_b in seed_pairs:
-        wrestler_obj_a = ORIGINAL_WRESTLERS[wrestler_a].build(ranking=ranking_a)
-        wrestler_obj_b = ORIGINAL_WRESTLERS[wrestler_b].build(ranking=ranking_b)
+        wrestler_obj_a = PLAYTEST_WRESTLERS[wrestler_a].build(ranking=ranking_a)
+        wrestler_obj_b = PLAYTEST_WRESTLERS[wrestler_b].build(ranking=ranking_b)
         comparison = compare_tachiai(wrestler_obj_a, wrestler_obj_b)
         try:
             first_side = first_exchange_side(
