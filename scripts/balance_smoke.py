@@ -50,6 +50,37 @@ def advantage_diagnostics(records):
     }
 
 
+
+def card_play_win_diagnostics(records):
+    played_bouts = Counter()
+    wins_when_played = Counter()
+
+    for record in records:
+        if not record.completed or record.winner is None:
+            continue
+        for wrestler, cards in (
+            (record.wrestler_a, record.cards_played_a),
+            (record.wrestler_b, record.cards_played_b),
+        ):
+            unique_cards = set(cards)
+            for card in unique_cards:
+                played_bouts[card] += 1
+                if record.winner == wrestler:
+                    wins_when_played[card] += 1
+
+    return {
+        card: {
+            "bouts_played": played_bouts[card],
+            "wins_when_played": wins_when_played[card],
+            "win_rate_when_played": (
+                wins_when_played[card] / played_bouts[card]
+                if played_bouts[card] else 0.0
+            ),
+        }
+        for card in sorted(played_bouts)
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--bouts-per-orientation", type=int, default=1)
@@ -217,6 +248,7 @@ def main() -> None:
         "wins": summary.wins,
         "win_methods": summary.win_methods,
         "winning_card_uses": summary.winning_card_uses,
+        "card_play_win_diagnostics": card_play_win_diagnostics(records),
         "kimarite_removals": dict(kimarite_removals),
         "average_opening_kimarite_progress": opening_progress,
         "win_phase_counts": dict(phase_wins),
