@@ -146,3 +146,22 @@ ORIGINAL_WRESTLERS: dict[str, WrestlerTemplate] = {
     "Shishi": WrestlerTemplate("Shishi", Stat.POWER, Stat.SPIRIT, Stat.TECHNIQUE, 4, 0, 2, "Abisetaoshi", "Belt Slap", "Attempt Two-Handed Grip", "Protect Grip-building; then Technique-orb cards, fewest Power+Spirit."),
     "Kotozakura": WrestlerTemplate("Kotozakura", Stat.POWER, Stat.POWER, Stat.SPIRIT, 5, 1, 0, "Yoritaoshi", "Immovable", "Attempt Deep Inside Grip", "Neither Power nor Grip utility; then fewest Power; Technique tie-break."),
 }
+
+
+ADDITIONAL_WRESTLERS: dict[str, WrestlerTemplate] = {
+    "Arashigane": WrestlerTemplate("Arashigane", Stat.POWER, Stat.SPIRIT, Stat.TECHNIQUE, 4, 0, 2, "Oshidashi", "Headlong Charge", "Tsuppari", ""),
+    "Aonami": WrestlerTemplate("Aonami", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 4, 0, "Yorikiri", "Gain Left Grip", "Morozashi", ""),
+    "Hoshikaze": WrestlerTemplate("Hoshikaze", Stat.SPIRIT, Stat.SPIRIT, Stat.TECHNIQUE, 1, 0, 5, "Tsukitaoshi", "Stare Down", "Read the Move", ""),
+    "Iwagane": WrestlerTemplate("Iwagane", Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT, 3, 2, 1, "Kotenage", "Hold Position", "Kannuki", ""),
+    "Mizuhane": WrestlerTemplate("Mizuhane", Stat.TECHNIQUE, Stat.SPIRIT, Stat.POWER, 1, 3, 2, "Tsukiotoshi", "Salt Throw", "Power Water", ""),
+    "Onosato": WrestlerTemplate("Onosato", Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT, 3, 3, 0, "Yorikiri", "Nodowa", "Yori", ""),
+    "Aonishiki": WrestlerTemplate("Aonishiki", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 4, 0, "Yoritaoshi", "Gain Right Grip", "Yori", ""),
+    "Kirishima": WrestlerTemplate("Kirishima", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 3, 1, "Uwatenage", "Gain Left Grip", "Uwate", ""),
+    "Atamifuji": WrestlerTemplate("Atamifuji", Stat.POWER, Stat.SPIRIT, Stat.TECHNIQUE, 4, 0, 2, "Oshidashi", "Immovable", "Regain Balance", ""),
+    "Takerufuji": WrestlerTemplate("Takerufuji", Stat.POWER, Stat.SPIRIT, Stat.TECHNIQUE, 3, 1, 2, "Oshidashi", "Tsuppari", "Ottsuke", ""),
+}
+
+PLAYTEST_WRESTLERS: dict[str, WrestlerTemplate] = {
+    **ORIGINAL_WRESTLERS,
+    **ADDITIONAL_WRESTLERS,
+}
