@@ -10,6 +10,17 @@ on:
   push:
     paths:
       - ".github/workflows/balance-difficulty-zero.yml"
+      - "scripts/balance_smoke.py"
+      - "src/kimarite/ai.py"
+      - "src/kimarite/batch.py"
+      - "src/kimarite/effects.py"
+      - "src/kimarite/kimarite.py"
+      - "src/kimarite/kimarite_effects.py"
+      - "src/kimarite/rules.py"
+      - "src/kimarite/selection.py"
+      - "src/kimarite/simulate.py"
+      - "src/kimarite/temporary.py"
+      - "src/kimarite/turns.py"
 
 jobs:
   simulate:
