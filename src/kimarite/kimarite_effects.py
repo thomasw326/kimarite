@@ -58,7 +58,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     elif card.name == "Katasukashi":
         if _optional(context, "use_optional", card):
             gain_momentum(state, opponent_side, 1)
-            draw_from_look(state, side, look=2, keep=1)
+            draw_from_look(state, side, look=2, keep=1, required_draws=2)
 
     elif card.name == "Tsukiotoshi":
         if _optional(context, "use_optional", card):
@@ -108,7 +108,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     elif card.name == "Hikiotoshi":
         if _optional(context, "use_optional", card):
             gain_momentum(state, opponent_side, 1)
-            draw_from_look(state, side, look=2, keep=1)
+            draw_from_look(state, side, look=2, keep=1, required_draws=2)
 
     elif card.name == "Tsukitaoshi":
         if relative_momentum(state, side) >= 1:
