@@ -22,7 +22,7 @@ def test_starting_kimarite_does_not_get_play_bonus_just_for_being_in_zone():
     assert bout.position == 0
 
 
-def test_played_yorikiri_gets_position_bonus_with_grip():
+def test_played_yorikiri_gains_grip_at_neutral_position():
     yorikiri = card_by_name("Yorikiri")
     a = wrestler("A")
     b = wrestler("B")
@@ -34,7 +34,8 @@ def test_played_yorikiri_gets_position_bonus_with_grip():
 
     play_card(bout, Side.A, yorikiri)
 
-    assert bout.position == 1
+    assert bout.position == 0
+    assert bout.fighter_a.total_grip == 2
     assert yorikiri in bout.fighter_a.kimarite_zone
 
 
