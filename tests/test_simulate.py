@@ -47,5 +47,6 @@ def test_known_manual_fujinokawa_tochinoshin_line_has_same_winner():
 
     assert result.completed, result.unsupported_reason
     assert result.state.winner is not None
-    assert result.state.fighter(result.state.winner).wrestler.name == "Tochinoshin"
-    assert result.state.win_method == "Yorikiri"
+    debug = "\n".join(result.state.event_log)
+    assert result.state.fighter(result.state.winner).wrestler.name == "Tochinoshin", debug
+    assert result.state.win_method == "Yorikiri", debug
