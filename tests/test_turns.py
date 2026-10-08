@@ -184,3 +184,44 @@ def test_kimarite_chooser_can_override_earliest_for_reward_choice():
 
     assert chosen is oshidashi
     assert bout.win_method == "Oshidashi"
+
+
+def test_normal_turn_grip_draw_and_selection_scale_separately():
+    from kimarite.models import GripState
+    from kimarite.turns import normal_turn_card_access
+
+    a = make_wrestler("A", 0, 0, Stat.TECHNIQUE, Stat.SPIRIT)
+    b = make_wrestler("B", 0, 0, Stat.TECHNIQUE, Stat.SPIRIT)
+    deck = [Card(i, str(i), technique=i) for i in range(1, 9)]
+
+    for left, right, expected_hand, expected_deck in [
+        (0, 0, [2, 1], [3, 4, 5, 6, 7, 8]),
+        (1, 0, [3, 2, 1], [4, 5, 6, 7, 8]),
+        (2, 0, [4, 3, 2], [5, 6, 7, 8, 1]),
+        (2, 1, [5, 4, 3], [6, 7, 8, 1, 2]),
+    ]:
+        fighter = FighterState(a, draw_pile=list(deck))
+        fighter.left_grip = GripState(left)
+        fighter.right_grip = GripState(right)
+        bout = BoutState(fighter, FighterState(b))
+        drawn = normal_turn_card_access(bout, Side.A)
+        assert [c.card_id for c in drawn] == expected_hand
+        assert [c.card_id for c in fighter.draw_pile] == expected_deck
+
+
+def test_kannuki_suppresses_normal_turn_grip_draw_bonus():
+    from kimarite.models import GripState, TemporaryInstance
+    from kimarite.turns import normal_turn_card_access
+
+    a = make_wrestler("A", 0, 0, Stat.TECHNIQUE, Stat.SPIRIT)
+    b = make_wrestler("B", 0, 0, Stat.TECHNIQUE, Stat.SPIRIT)
+    fighter_a = FighterState(a, draw_pile=[Card(i, str(i)) for i in range(1, 7)])
+    fighter_a.left_grip = GripState.GRIP
+    fighter_b = FighterState(b, temporary_zone=[
+        TemporaryInstance(Card(9999, "Kannuki"), entered_turn=1, entered_phase="Exchange")
+    ])
+    bout = BoutState(fighter_a, fighter_b)
+
+    drawn = normal_turn_card_access(bout, Side.A)
+
+    assert [c.card_id for c in drawn] == [2, 1]
