@@ -7,6 +7,7 @@ from .models import BoutState, Card, Side, Stat
 from .rules import gain_momentum
 from .selection import ai_look_keep
 from .tachiai import TachiaiComparison, spirit_rewards, technique_access
+from .temporary import resolve_start_of_turn_temporaries
 
 
 class TemporaryResolutionRequired(RuntimeError):
@@ -177,10 +178,9 @@ def start_exchange_turn(
 
     if fighter.temporary_zone:
         if resolve_temporary_start is None:
-            raise TemporaryResolutionRequired(
-                f"{fighter.wrestler.name} has Temporary cards requiring start resolution."
-            )
-        resolve_temporary_start(state, side)
+            resolve_start_of_turn_temporaries(state, side)
+        else:
+            resolve_temporary_start(state, side)
         if state.winner is not None:
             return []
 
