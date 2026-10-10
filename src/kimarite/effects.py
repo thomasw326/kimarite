@@ -873,7 +873,6 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Use the Tawara",
         "Kannuki",
         "Morozashi",
-        "Give Ground",
     }
 )
 
