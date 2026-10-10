@@ -16,4 +16,6 @@ def test_opponent_max_momentum_does_not_trigger_katasukashi():
     state.fighter_a.lost_position_this_turn = True
     assert not kimarite_is_satisfied(state, Side.A, k)
     state.momentum = -1
+    assert not kimarite_is_satisfied(state, Side.A, k)
+    state.momentum = 1
     assert kimarite_is_satisfied(state, Side.A, k)
