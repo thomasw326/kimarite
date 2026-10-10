@@ -9,7 +9,7 @@ from kimarite.simulate import run_bout
 
 CONFIG = BoutConfig(
     FighterConfig("Fujinokawa", 102, ranking=1),
-    FighterConfig("Tochinoshin", 911132, ranking=2),
+    FighterConfig("Fujinokawa", 911132, ranking=2),
 )
 
 
