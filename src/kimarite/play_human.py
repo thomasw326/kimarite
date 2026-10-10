@@ -3,8 +3,7 @@
 Usage:
     python -m kimarite.play_human --human Fujinokawa --opponent Fujinokawa
 
-Early V5 prototype: first-turn and normal hand selection are still automatic
-according to the fighter's priorities. Card effect choices are interactive.
+Human Technique/Grip look-and-keep and card-effect choices are interactive.
 """
 from __future__ import annotations
 
@@ -74,6 +73,20 @@ def main() -> None:
     print("KIMARITE — V5 terminal prototype")
     print("Enter a playable card number, 'pass' to end your turn, or 'quit'.")
     while not bout.finished:
+        if bout.pending_selection is not None:
+            pending = bout.pending_selection
+            print(f"\nLooked at {len(pending.options)} card(s); keep exactly {pending.keep}:")
+            for i, card in enumerate(pending.options):
+                print(f"  {i}: {card.name} [P{card.power} T{card.technique} S{card.spirit}]")
+            raw_selection = input("Indices to keep, separated by spaces (or quit): ").strip()
+            if raw_selection.lower() in {"quit", "q"}:
+                return
+            try:
+                indices = [int(word) for word in raw_selection.split()]
+                bout.choose_cards(indices)
+            except (ValueError, IllegalPlay) as exc:
+                print(f"Selection invalid: {exc}")
+            continue
         _display(bout)
         raw = input("\nAction: ").strip().lower()
         if raw in {"quit", "q"}:
