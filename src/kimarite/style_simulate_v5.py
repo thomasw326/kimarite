@@ -5,7 +5,7 @@ Does not alter the established 30-wrestler Big Test.
 """
 from __future__ import annotations
 
-from .models import BoutState, Side
+from .models import BoutState, Side, Stat
 from .simulate import SimulationResult
 from .style_ai_v5 import play_style_turn
 from .style_builds_v5 import build_style
@@ -30,9 +30,7 @@ def run_style_bout(
         fighter = state.fighter(side)
         if fighter.wrestler.prepared_tachiai_card.name != "Headlong Charge":
             continue
-        advantage = comp.advantage_for(side, __import__(
-            "kimarite.models", fromlist=["Stat"]
-        ).Stat.SPIRIT)
+        advantage = comp.advantage_for(side, Stat.SPIRIT)
         # A large Spirit lead can convert the additional Push into an
         # opening ring-out; otherwise preserve the sole finishing option.
         opening_choices[side] = 0 if advantage >= 5 and fighter.kimarite_zone else None
