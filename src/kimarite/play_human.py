@@ -285,6 +285,8 @@ def _public_event(event: str, bout: HumanBout) -> str:
     opponent = bout.state.opponent(bout.human_side).wrestler.name
     if event.startswith(opponent + " draws "):
         return f"{opponent} draws a card."
+    if event.startswith(opponent + " looks at ") and " and adds " in event:
+        return f"{opponent} looks at cards and adds one to hand."
     return event
 
 
