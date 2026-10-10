@@ -30,3 +30,16 @@ def test_shiko_stomp_has_diminishing_returns_and_opponent_cost():
     assert 0 < second_gain < first_gain
     add_temporary(state, Side.B, card_by_name("Shiko Stomp"), phase="exchange")
     assert score_state(state, Side.A) < baseline + first_gain + second_gain
+
+
+def test_shiko_stomp_approved_orbs_apply_to_tachiai():
+    from kimarite.tachiai import prepared_stats
+    shiko = card_by_name("Shiko Stomp")
+    assert (shiko.power, shiko.technique, shiko.spirit) == (1, 1, 1)
+    k = card_by_name("Oshidashi")
+    top = card_by_name("Oshi")
+    wrestler = Wrestler("Shiko wrestler", 2, 2, 2, k, shiko, top)
+    compared = prepared_stats(wrestler)
+    assert compared.power == 2 + 2 + k.power + 1
+    assert compared.technique == 2 + 2 + k.technique + 1
+    assert compared.spirit == 2 + 2 + k.spirit + 1
