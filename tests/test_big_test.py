@@ -147,7 +147,7 @@ def test_reporting_smoke_produces_consistent_csvs(tmp_path, monkeypatch):
         "starting_kimarite", "prepared_tachiai", "top_of_deck", "shuffled_remainder"
     }
     assert set(row["origin"] for row in plays) <= {
-        "prepared_tachiai", "top_of_deck", "shuffled_remainder"
+        "prepared_tachiai", "top_of_deck", "shuffled_remainder", "generated"
     }
     # Verify the new per-origin/stat reports survive batch aggregation.
     from scripts.combine_big_test import main as combine_main
