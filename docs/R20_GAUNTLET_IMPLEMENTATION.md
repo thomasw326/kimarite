@@ -47,7 +47,7 @@ No weighted score, no automatic winner, no balance changes. Preserve the raw rec
 - In both modes, remove unwanted duplicates by card identity and card name; protect all other experimental variant IDs from mixing into the test.
 - Preserve supporting-card randomness without specializing decks based on the tested Kimarite. Baseline opponent draws and setup remain fixed between test arms.
 
-## How to inspect the schedule locally
+## How to inspect the schedule
 
 From a checkout of this experimental branch:
 
@@ -61,17 +61,17 @@ Generates one scheduled fixture row per arm, placement and generic matchup, pres
 
     pytest -q tests/test_r20_gauntlet.py
 
-Checks the schedule and metric contract locally. Avoid GitHub Actions: the branch was committed with [skip ci].
+Checks the schedule and metric contract locally.
 
-## Windows one-command smoke (local only)
+## Windows local smoke
 
 In a PowerShell terminal at the experimental branch checkout, run:
 
     powershell -ExecutionPolicy Bypass -File scripts/r20_local_smoke.ps1
 
-This runs unit checks first and stops on failures. Only if they pass, it runs 160 local sample bouts across Hikiotoshi, Okuridashi, Tsukiotoshi and Katasukashi in both Starting and Shuffled placements. It then produces CSV and JSON descriptive summaries. It does not trigger GitHub Actions, and uses no Actions minutes.
+This runs unit checks first and stops on failures. Only if they pass, it runs 160 sample bouts across Hikiotoshi, Okuridashi, Tsukiotoshi and Katasukashi in both Starting and Shuffled placements. It then produces CSV and JSON descriptive summaries.
 
-## Smoke-and-go full tournament (Windows local)
+## Smoke-and-go full tournament (Windows)
 
 Run from a PowerShell session in the experimental branch checkout:
 
@@ -79,9 +79,9 @@ Run from a PowerShell session in the experimental branch checkout:
 
 This command runs the R20 unit tests and 160 smoke bouts first. It **stops without starting the full tournament** if tests fail, any smoke bout is incomplete, or any smoke error is recorded. If clean, it runs the 90,720-bout single-seat schedule in **216-bout checkpoint chunks**, saving the raw CSVs to artifacts/r20_full. Rerunning the command resumes existing verified checkpoint files; a seed, chunk-size, max-turns or frozen design-catalogue mismatch halts rather than mixing incompatible data. On completion, variant_placement_summary.csv, generic_profile_breakdown.csv, seat_diagnostics.csv, errors_and_incomplete.csv and report.json appear in artifacts/r20_full/report.
 
-The script is local only: it doesn't invoke GitHub Actions or alter V5 wrestler builds. It has not been executed in the current assistant environment because that environment cannot clone or run the connected GitHub checkout.
+The script does not alter V5 wrestler builds. The GitHub workflow provides an alternative hosted execution and saves downloadable raw records and summaries.
 
-## Running local batches (no GitHub Actions)
+## Running local batches
 
 Use a local Python 3.11+ checkout of this experimental branch. No changes are made to live V5 wrestlers or style assignments.
 
@@ -113,3 +113,7 @@ A complete all-arm schedule currently plans 90,720 bouts. Use repeated --start o
 7. **Logs:** emit a setup/version manifest (source design SHA, git commit, seed policy, active effects), raw per-bout records, summaries per variant/placement, and separate seat-diagnostic reports.
 
 **No simulation data exists for R20 yet.** The 90,720 figure is the revised planned experimental sample, not reported results.
+
+## Public GitHub tournament
+
+The dedicated [R20 smoke-and-gauntlet workflow](https://github.com/thomasw326/kimarite/actions/workflows/r20-gauntlet.yml) runs the same 70-arm / 90,720-bout schedule on the experimental branch. Regression and 160-bout smoke checks gate a 14-shard tournament; a final job combines records into the full Starting-versus-Shuffled report. The workflow publishes both raw CSVs and processed summaries as run artifacts. Follow the [initiated run](https://github.com/thomasw326/kimarite/actions/runs/38096326198).
