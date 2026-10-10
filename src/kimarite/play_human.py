@@ -267,8 +267,8 @@ CARD_LIBRARY_TEXT = {
   },
   "abisetaoshi": {
     "timing": "Start & End of Turn",
-    "effect": "Grip 2+ · Momentum 1+ · Power 7+",
-    "notes": "Live engine orbs 3/0/0; any V4.3 annotation calling these 2/1/0 is obsolete."
+    "effect": "Win: Grip 2+ · Power 9+. Exchange: If your Power is 6+, gain 1 flexible Grip if you have no usable Grip; otherwise gain 1 Power.",
+    "notes": "No Momentum win prerequisite and no Power Advantage Exchange rider. Printed orbs: 3 Power."
   },
   "shove": {
     "timing": "Tachiai / Exchange",
