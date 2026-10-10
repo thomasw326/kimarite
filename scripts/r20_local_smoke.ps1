@@ -1,4 +1,4 @@
-# Local-only R20 rule and combat smoke test. Never launches GitHub Actions.
+# Local-only R20 rule and combat smoke test.
 $ErrorActionPreference = "Stop"
 Set-Location (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 New-Item -ItemType Directory -Force -Path "artifacts\r20_smoke" | Out-Null
