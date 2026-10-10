@@ -116,7 +116,7 @@ def submit_card_action(
 
     trial = deepcopy(state)
     trial_card = trial.fighter(side).hand[hand_index]
-    play_card(trial, side, trial_card, context=EffectContext(comparison=comparison, choices=dict(choices or {})))
+    play_card(trial, side, trial_card, context=EffectContext(comparison=comparison, choices={"__human__": True, **dict(choices or {})}))
     # Preserve the BoutState object identity so callers can retain their handle.
     # All nested state belongs to the accepted transaction from this point on.
     state.__dict__.update(trial.__dict__)
