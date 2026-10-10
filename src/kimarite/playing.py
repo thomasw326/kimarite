@@ -38,12 +38,16 @@ def play_card(
 
     if card.is_kimarite:
         fighter.kimarite_zone.append(card)
-        resolve_kimarite_play_effect(
-            state,
-            side,
-            card,
-            context or EffectContext(),
-        )
+        if getattr(state, "r20_active", False) and card.name.startswith("R20:"):
+            from .r20_variant_rules import variant_exchange
+            variant_exchange(state, side, card, context or EffectContext())
+        else:
+            resolve_kimarite_play_effect(
+                state,
+                side,
+                card,
+                context or EffectContext(),
+            )
         return
 
     resolve_exchange_effect(
@@ -54,5 +58,7 @@ def play_card(
     )
     if card.name == "Power Water Cantrip":
         state.log("Power Water Cantrip is exhausted and removed from the bout.")
-    elif card.name not in TEMPORARY_CARD_NAMES:
+    elif card.name not in TEMPORARY_CARD_NAMES and not (
+        getattr(state, "r20_active", False) and card.name == "Henka"
+    ):
         fighter.discard_pile.append(card)
