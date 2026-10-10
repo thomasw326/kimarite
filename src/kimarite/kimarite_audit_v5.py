@@ -67,7 +67,10 @@ def audit(*, repetitions: int = 20, seed: int = 20261010, max_turns: int = 30,
                             counts[match, "starting_trigger_wins"] += 1
                         else:
                             counts[match, "nonstarting_trigger_wins"] += 1
-                finishes[state.win_method or "unknown"] += 1
+                # A generic ringout may have a traditional kimarite name in
+                # win_method, but must not be counted as a Kimarite-card finish.
+                finish_category = "Ringout" if state.win_source == "ringout" else (state.win_method or "unknown")
+                finishes[finish_category] += 1
 
     def rate(numerator: int, denominator: int):
         return round(numerator / denominator, 4) if denominator else None
