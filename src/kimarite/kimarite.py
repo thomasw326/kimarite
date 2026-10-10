@@ -76,7 +76,7 @@ def _oshitaoshi(state: BoutState, side: Side) -> bool:
     return (
         relative_momentum(state, side) >= 1
         and relative_position(state, side) >= 1
-        and state.fighter(side).power >= 6
+        and state.fighter(side).power >= 8
     )
 
 
@@ -133,7 +133,7 @@ def _hatakikomi(state: BoutState, side: Side) -> bool:
     return (
         relative_momentum(state, side) <= -2
         and relative_position(state, side) >= 0
-        and state.fighter(side).power >= 3
+        and state.fighter(side).power >= 7
     )
 
 
