@@ -64,7 +64,6 @@ CARD_POOL: tuple[Card, ...] = (
     Card(54, "Shove", 2, 0, 0),
     Card(55, "Explosive Step — Fumikomi", 0, 0, 3),
     Card(56, "Big Tsuki", 1, 0, 0),
-    Card(57, "Bad Oshi", 0, 0, 1),
     Card(58, "Shitatenage", 0, 2, 1, True),
     Card(59, "Injury", 0, 0, 0),
 )
