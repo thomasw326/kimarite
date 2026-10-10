@@ -1,7 +1,7 @@
 """Runnable, opt-in R20 generic-wrestler bout adapter.
 
-Never invoked by live V5 or its style tests. Uses fixed role-based seeds,
-so swapping A/B seats cannot change either subject's built deck.
+Never invoked by live V5 or its style tests. Uses fixed role-based seeds
+and a single balanced seat per fixture; no reverse-seat rematches.
 """
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ class GauntletResult:
 
 
 def _role_rng(seed: int, role: str) -> random.Random:
-    # Seed by stable role, not A/B. This keeps seat mirrors genuinely paired.
+    # Seed by stable role, not A/B. Variants use identical role-based decks.
     digest = hashlib.sha256(f"r20:{seed}:{role}".encode()).digest()
     return random.Random(int.from_bytes(digest[:8], "big"))
 
@@ -214,7 +214,7 @@ def execute_batch(
     with output.open("w", encoding="utf-8", newline="") as out:
         writer = csv.DictWriter(out, fieldnames=list(GauntletResult.__dataclass_fields__))
         writer.writeheader()
-        # Iteration is deterministic; no full 181,440-row schedule in memory.
+        # Iteration is deterministic; no full 90,720-row schedule in memory.
         for i, bout in enumerate(schedule(selected, seed=seed)):
             if i < start:
                 continue
