@@ -53,4 +53,10 @@ The following changes are committed on the V5 branch (no balance changes):
 - AI Read the Move now considers `draw` as well as each valid Temporary removal target, using explicit `mode` values.
 - Get Underneath's Exchange search no longer prompts the acting human to choose from the opponent's hidden Draw Pile. Opponent-owned search choice is still a pending dedicated interactive-controller feature; noninteractive search remains deterministic.
 - Added regression tests for both AI mode sets.
-- **Verification status:** source edits are committed, but not yet test-certified. The local runtime cannot resolve GitHub for a repository clone, and no GitHub Actions run was triggered to avoid unnecessary Actions usage.
+- **Verification status:** source edits are committed but are not yet test-certified. GitHub Actions minutes are no longer a project constraint because the repository is public; run CI as needed for regression validation. A passing run for the latest commits is still required before baseline certification.
+
+## CI usage policy (updated October 9, 2026)
+
+- The repository is public, so **do not restrict or defer GitHub Actions runs because of the previous monthly minutes cap**.
+- Push parity fixes and run relevant regression workflows freely, including the full test suite when appropriate.
+- A green CI run validates code/tests, **not** card balance; the balance-adjustment approval gate and V4.5 preservation still apply.
