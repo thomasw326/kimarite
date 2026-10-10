@@ -17,7 +17,8 @@ from .style_simulate_v5 import run_style_bout
 from .styles_v5 import STYLES
 
 
-def audit(*, repetitions: int = 20, seed: int = 20261010, max_turns: int = 30) -> dict:
+def audit(*, repetitions: int = 20, seed: int = 20261010, max_turns: int = 30,
+          disable_kimarite_exchange_effects: bool = False) -> dict:
     if repetitions < 1:
         raise ValueError("repetitions must be positive")
     kimarite_names = sorted({c.name for c in CARD_POOL if c.is_kimarite})
@@ -30,7 +31,8 @@ def audit(*, repetitions: int = 20, seed: int = 20261010, max_turns: int = 30) -
         for pair_index, (first, second) in enumerate(combinations(STYLES, 2)):
             pair_seed = seed + rep * 10000 + pair_index
             for a, b in ((first, second), (second, first)):
-                result = run_style_bout(a, b, seed=pair_seed, max_turns=max_turns)
+                result = run_style_bout(a, b, seed=pair_seed, max_turns=max_turns,
+                                        disable_kimarite_exchange_effects=disable_kimarite_exchange_effects)
                 bouts += 1
                 state = result.state
                 if not result.completed or state.winner is None:
@@ -92,7 +94,9 @@ def audit(*, repetitions: int = 20, seed: int = 20261010, max_turns: int = 30) -
         report.append(record)
     return {"planned_bouts": bouts, "completed": bouts - sum(incomplete.values()),
             "incomplete": dict(incomplete), "repetitions": repetitions,
-            "seed": seed, "max_turns": max_turns, "kimarite": report,
+            "seed": seed, "max_turns": max_turns,
+            "disable_kimarite_exchange_effects": disable_kimarite_exchange_effects,
+            "kimarite": report,
             "finishes": dict(finishes),
             "notes": ["Featured means included in the starter or shuffled deck at setup.",
                       "Final-zone presence is a snapshot at bout end, not ever-in-play.",
@@ -105,9 +109,11 @@ def main() -> None:
     parser.add_argument("--repetitions", type=int, default=20)
     parser.add_argument("--seed", type=int, default=20261010)
     parser.add_argument("--max-turns", type=int, default=30)
+    parser.add_argument("--disable-kimarite-exchange-effects", action="store_true")
     parser.add_argument("--output", default="artifacts/kimarite-audit-v5.json")
     args = parser.parse_args()
-    result = audit(repetitions=args.repetitions, seed=args.seed, max_turns=args.max_turns)
+    result = audit(repetitions=args.repetitions, seed=args.seed, max_turns=args.max_turns,
+                   disable_kimarite_exchange_effects=args.disable_kimarite_exchange_effects)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2), encoding="utf-8")
