@@ -86,3 +86,7 @@ This supersedes previous proposals for human/AI `kimarite_index` choices and opp
 ## Approved V5 orb override — October 9, 2026
 
 At designer request, **Shiko Stomp** is **1 Power / 1 Technique / 1 Spirit** (previously 0/0/0). This is a deliberate approved balance modification in `src/kimarite/catalog.py`, not a transcription error. The frozen `data/v5_print_pool_snapshot.json` remains unchanged as a historical source snapshot; production V5 catalog takes precedence for this explicitly approved override. Shiko Stomp's persistent Temporary and Tachiai protection effects are unchanged. Any CI round robin after commit `eaf6d2c8` must be treated as a new balance version.
+
+## Approved V5 orb override — Stare Down
+
+At designer request, **Stare Down** changes from **2 Power / 1 Technique / 2 Spirit** to **1 Power / 1 Technique / 1 Spirit**. Its Tachiai effects are unchanged. This is an explicitly approved V5 balance override; the frozen snapshot remains historical and V4.5 remains untouched. Rerun V5 balance measurements before comparing win rates.
