@@ -1,6 +1,6 @@
 # R20 generic Kimarite gauntlet — implementation notes
 
-**Status (2026-10-10): Schedule and catalogue implemented; combat adapter pending. No R20 bouts have been executed.** This experimental branch is based on the active V5 integration draft. No existing wrestler decks, styles, live card IDs, or balance values are modified.
+**Status (2026-10-10): 70-arm catalogue, generic combat adapter, variant win/Exchange dispatch, R20 Reversal timing, tactical AI choices, local batch runner and CSV reporting implemented. Tests are authored but have NOT been executed or verified. No R20 bouts have been run.** This experimental branch is based on the active V5 integration draft. No existing wrestler decks, styles, live card IDs, or balance values are modified.
 
 ## Goal
 
@@ -63,13 +63,34 @@ Generates the planned mirrored fixture rows with arm, placement, profiles and se
 
 Checks the schedule and metric contract locally. Avoid GitHub Actions: the branch was committed with [skip ci].
 
+## Running local batches (no GitHub Actions)
+
+Use a local Python 3.11+ checkout of this experimental branch. No changes are made to live V5 wrestlers or style assignments.
+
+First run the structural and combat tests:
+
+    python -m pytest -q tests/test_r20_gauntlet.py tests/test_r20_variant_runtime.py tests/test_r20_gauntlet_report.py
+
+Then use a bounded smoke batch to validate actual completion and absence of exceptions:
+
+    python -m kimarite.r20_gauntlet_bouts --arm HIK-3 --count 20 --output artifacts/r20_hik3_smoke.csv
+
+For mirrored Starting vs Shuffled coverage, use a complete one-arm 2,592-bout batch, then aggregate:
+
+    python -m kimarite.r20_gauntlet_bouts --arm HIK-3 --count 2592 --output artifacts/r20_hik3_full.csv
+    python -m kimarite.r20_gauntlet_report artifacts/r20_hik3_full.csv --output-dir artifacts/r20_report
+
+A complete all-arm schedule currently plans 181,440 bouts. Use repeated --start offsets and --count to checkpoint local batches; never launch the full simulation before unit tests and short smoke batches pass. Report inputs are de-duplicated by arm, placement, fixture, seat and seed.
+
+**Important setup policies:** Seat swaps keep the same decks and RNG streams for each wrestler identity. Both generic wrestlers decline Headlong Charge's optional sacrifice, avoiding accidental removal of the experimental starting Kimarite. All other effects retain the current engine behavior except the expressly gated R20 changes. All five approved Reversals complete naturally before the R20 start-of-turn Kimarite check.
+
 ## Remaining implementation gates before any win rate is valid
 
-1. **Variant-aware Kimarite engine:** all 70 arms must have explicit, tested predicate and Exchange-effect behavior independent of the live card-name dispatch. Existing src/kimarite/kimarite.py and src/kimarite/kimarite_effects.py cannot currently distinguish e.g. OKD-1 from OKD-2.
-2. **New Kimarite names / orbs:** implement and test currently absent R20 finishers and planned Utchari rename in the isolated test context, without changing V5 live assignments.
-3. **Reversal-event timing:** the five approved Reversal cards (Henka, Pull Temporary branch, Sidestep, Immovable, Kannuki) must record success when their delayed Temporary effect naturally completes/discards, before that wrestler's start-of-turn Kimarite check. Interruption must not count, and a positive outcome is not required.
-4. **Generic bout construction:** add a combat adapter from fixtures to fighter state, including variant slots and copy-exclusion parity in both Starting/Shuffled modes. Keep fighter-specific RNG independent of A/B seat.
-5. **AI compatibility:** ensure AI knows how to use the variant's Exchange actions, card access, required setup, and finish checks. Fail loudly for any missing implementation; do not substitute a legacy same-name effect.
+1. **Validate variant-aware Kimarite engine (code added; tests unrun): all 70 arms must have explicit, tested predicate and Exchange-effect behavior independent of the live card-name dispatch. Existing src/kimarite/kimarite.py and src/kimarite/kimarite_effects.py cannot currently distinguish e.g. OKD-1 from OKD-2.
+2. **Verify experimental names / orbs (catalogue and constructors added):** implement and test currently absent R20 finishers and planned Utchari rename in the isolated test context, without changing V5 live assignments.
+3. **Verify Reversal-event timing (R20-only code added):** the five approved Reversal cards (Henka, Pull Temporary branch, Sidestep, Immovable, Kannuki) must record success when their delayed Temporary effect naturally completes/discards, before that wrestler's start-of-turn Kimarite check. Interruption must not count, and a positive outcome is not required.
+4. **Validate generic bout construction (code added):** add a combat adapter from fixtures to fighter state, including variant slots and copy-exclusion parity in both Starting/Shuffled modes. Keep fighter-specific RNG independent of A/B seat.
+5. **Validate AI compatibility (experimental choice and progress code added):** ensure AI knows how to use the variant's Exchange actions, card access, required setup, and finish checks. Fail loudly for any missing implementation; do not substitute a legacy same-name effect.
 6. **Dry-run checks:** use local unit tests and a small group of completed bouts with explicit variant attribution and no turn-limit/errors; only then start bounded local batches. Keep production V5 and existing 15 Sumo Styles unchanged.
 7. **Logs:** emit a setup/version manifest (source design SHA, git commit, seed policy, active effects), raw per-bout records, summaries per variant/placement, and separate seat-diagnostic reports.
 
