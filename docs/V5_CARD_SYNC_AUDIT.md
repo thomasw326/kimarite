@@ -60,3 +60,12 @@ The following changes are committed on the V5 branch (no balance changes):
 - The repository is public, so **do not restrict or defer GitHub Actions runs because of the previous monthly minutes cap**.
 - Push parity fixes and run relevant regression workflows freely, including the full test suite when appropriate.
 - A green CI run validates code/tests, **not** card balance; the balance-adjustment approval gate and V4.5 preservation still apply.
+
+### Interactive search / CI follow-up
+
+- Green CI run #650 confirmed the earlier repaired suite (before the current follow-up commits).
+- Human Headlong Charge selection is forwarded through both standard and style bout entry points, and prompted in the terminal.
+- When AI Get Underneath targets a human opponent's deck, the search is deferred to that human; the terminal shows only the human's own eligible Kimarite and lets them choose by Draw Pile index. Simulated/noninteractive games still resolve automatically.
+- AI Use the Tawara now nominates a card through the engine's explicit search choice, rather than passing the obsolete `lose_position_for_power` key. Normal noninteractive searches retain a deterministic fallback.
+- Regression coverage added for opponent-owned human searches and AI Tawara selections.
+- **Validation:** current commits are awaiting the next CI result. No official balance baseline should run until CI is green and the pending interaction audit is reviewed.
