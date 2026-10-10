@@ -56,9 +56,9 @@ def _yorikiri(state: BoutState, side: Side) -> bool:
 
 def _oshidashi(state: BoutState, side: Side) -> bool:
     return (
-        power_advantage(state, side) >= 3
+        relative_position(state, side) >= 2
         and relative_momentum(state, side) >= 1
-        and relative_position(state, side) >= 2
+        and power_advantage(state, side) >= 1
     )
 
 
@@ -73,7 +73,7 @@ def _oshitaoshi(state: BoutState, side: Side) -> bool:
     return (
         relative_momentum(state, side) >= 1
         and relative_position(state, side) >= 1
-        and state.fighter(side).power >= 10
+        and state.fighter(side).power >= 8
     )
 
 
@@ -88,8 +88,8 @@ def _yoritaoshi(state: BoutState, side: Side) -> bool:
 def _katasukashi(state: BoutState, side: Side) -> bool:
     return (
         no_grip(state, side)
-        and state.fighter(side).lost_position_this_turn
-        and relative_momentum(state, side) >= 1
+        and relative_momentum(state, side) >= 0
+        and (state.fighter(side).lost_position_this_turn or relative_momentum(state, state.opponent_side(side)) >= 3)
     )
 
 
@@ -97,8 +97,8 @@ def _tsukiotoshi(state: BoutState, side: Side) -> bool:
     fighter = state.fighter(side)
     opponent = state.opponent(side)
     return (
-        relative_position(state, side) <= -2
-        and len(opponent.discard_pile) >= len(fighter.discard_pile) + 3
+        fighter.gained_momentum_this_turn
+        and (relative_position(state, side) <= -3 or relative_momentum(state, side) <= -2)
     )
 
 
@@ -130,7 +130,7 @@ def _hatakikomi(state: BoutState, side: Side) -> bool:
     return (
         relative_momentum(state, side) <= -2
         and relative_position(state, side) >= 0
-        and state.fighter(side).power >= 7
+        and state.fighter(side).power >= 5
     )
 
 
@@ -150,7 +150,8 @@ def _tsukitaoshi(state: BoutState, side: Side) -> bool:
 
 
 def _tsuridashi(state: BoutState, side: Side) -> bool:
-    return effective_total_grip(state, side) >= 3 and relative_position(state, side) >= 0
+    return (effective_total_grip(state, side) >= 3 and relative_position(state, side) >= 0
+            and state.fighter(side).power >= 5)
 
 
 def _kotenage(state: BoutState, side: Side) -> bool:
@@ -165,7 +166,7 @@ def _abisetaoshi(state: BoutState, side: Side) -> bool:
     return (
         effective_total_grip(state, side) >= 2
         and relative_momentum(state, side) >= 1
-        and state.fighter(side).power >= 9
+        and state.fighter(side).power >= 7
     )
 
 
