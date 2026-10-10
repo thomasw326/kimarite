@@ -58,7 +58,9 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
 
     elif card.name == "Tsukidashi":
         if relative_position(state, side) >= 1:
-            add_play(state, side, 1)
+            draw_one(state, side)
+            if state.winner is None:
+                gain_momentum(state, side, 1)
 
     elif card.name == "Oshitaoshi":
         if relative_momentum(state, side) >= 1:
@@ -127,10 +129,9 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         draw_from_look(state, side, look=2, keep=1)
 
     elif card.name == "Tsukitaoshi":
-        if relative_momentum(state, side) >= 1:
-            add_play(state, side, 1)
-            draw_one(state, side)
-            _discard_one_from_hand(state, side, card, context)
+        add_play(state, side, 1)
+        draw_one(state, side)
+        _discard_one_from_hand(state, side, card, context)
 
     elif card.name == "Tsuridashi":
         gain_power(state, side, 1)
