@@ -35,5 +35,5 @@ def test_uwate_deep_grip_plays_selected_card_free():
     assert state.fighter_a.left_grip is GripState.DEEP
     assert state.fighter_a.plays_remaining == 1
     assert state.fighter_a.cards_played_this_turn == 2
-    assert state.card_plays == [(Side.A, "Uwate"), (Side.A, "Injury")]
+    assert state.card_plays == [(Side.A, "Uwate"), (Side.A, "Belt Slap")]
     assert [c.card.name for c in state.fighter_a.temporary_zone] == ["Uwate"]
