@@ -9,13 +9,13 @@ if ($LASTEXITCODE -ne 0) {
     throw "R20 tests failed. No batch simulation was started."
 }
 
-# Every single-arm placement has 108 profiles x 6 opponents x 2 seats = 1,296 bouts.
-# Use offset 0 for Starting and 1296 for Shuffled; do not accidentally
-# mistake two Starting subsets for two separate placement types.
+# Each placement has 108 profiles x 6 opponents x 1 seat = 648 bouts.
+# Half the subject fixtures use A and half use B; no seat-mirror rematches.
+# Starting occupies offsets 0..647; Shuffled occupies 648..1295.
 foreach ($arm in @("HIK-3", "OKD-1", "TSO-1", "KAT-1")) {
     foreach ($placement in @(
         @{ name = "starting"; offset = 0 },
-        @{ name = "shuffled"; offset = 1296 }
+        @{ name = "shuffled"; offset = 648 }
     )) {
         $target = "artifacts\r20_smoke\$arm-$($placement.name).csv"
         Write-Host "[R20] $arm in $($placement.name) placement..."
