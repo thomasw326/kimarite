@@ -11,6 +11,14 @@ on:
       - src/kimarite/style_builds_v5.py
       - src/kimarite/style_simulate_v5.py
       - src/kimarite/style_round_robin_v5.py
+      - src/kimarite/effects.py
+      - src/kimarite/temporary.py
+      - src/kimarite/tachiai_effects.py
+      - src/kimarite/rules.py
+      - src/kimarite/turns.py
+      - src/kimarite/ai.py
+      - src/kimarite/models.py
+      - data/v5_print_pool_snapshot.json
 
 jobs:
   round-robin:
