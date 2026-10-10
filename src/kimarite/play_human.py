@@ -37,7 +37,7 @@ CARD_LIBRARY_TEXT = {
   },
   "headlong charge": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai / Exchange: You may discard a Kimarite in play; if you do, gain 1 Momentum and 1 Push. Mill 2. Prepared copy is discarded after Tachiai.",
+    "effect": "Tachiai / Exchange: Discard 1 of your Kimarite in play; gain 1 Momentum and 1 Push. Mill 2. Cannot play in Exchange without a Kimarite to sacrifice. Prepared copy is discarded after Tachiai.",
     "notes": ""
   },
   "nodowa": {
@@ -127,7 +127,7 @@ CARD_LIBRARY_TEXT = {
   },
   "ottsuke": {
     "timing": "Tachiai / Exchange",
-    "effect": "Choose: reduce 1 opposing Grip by 1 level, OR remove opposing Grip-referencing Temporary or Kimarite and gain 1 Momentum. No Push reward.",
+    "effect": "Choose: reduce 1 opposing Grip by 1 level, OR remove opposing Grip-referencing Temporary or Kimarite and gain 1 Momentum, OR draw 1 card. No Push reward.",
     "notes": ""
   },
   "hold position": {
