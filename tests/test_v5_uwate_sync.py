@@ -11,7 +11,7 @@ def bout():
     b = Wrestler("B", 2, 2, 2, starter, starter, starter)
     return BoutState(
         FighterState(a, hand=[card_by_name("Uwate")],
-                     draw_pile=[card_by_name("Injury"), card_by_name("Shove")]),
+                     draw_pile=[card_by_name("Belt Slap"), card_by_name("Shove")]),
         FighterState(b, power=3),
         active_side=Side.A,
     )
@@ -22,7 +22,7 @@ def test_uwate_without_deep_grip_looks_and_draws():
     play_card(state, Side.A, state.fighter_a.hand[0])
     assert state.fighter_a.left_grip is GripState.GRIP
     assert state.fighter_a.plays_remaining == 1
-    assert [c.name for c in state.fighter_a.hand] == ["Injury"]
+    assert [c.name for c in state.fighter_a.hand] == ["Belt Slap"]
     assert [c.name for c in state.fighter_a.draw_pile] == ["Shove"]
     assert [c.card.name for c in state.fighter_a.temporary_zone] == ["Uwate"]
 
