@@ -372,7 +372,11 @@ def _gaburi(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 
 
 def _henka(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    draw_one(state, side)
+    if getattr(state, "r20_active", False):
+        # Approved R20 design: defensive Temporary, delayed draw on completion.
+        add_temporary(state, side, card, phase="exchange")
+    else:
+        draw_one(state, side)
 
 
 def _reset_to_neutral(
