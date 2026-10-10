@@ -54,20 +54,30 @@ def test_fixtures_cover_each_subject_with_distinct_opponents():
     assert set(opponent_counts.values()) == {6}
 
 
-def test_mirrors_have_same_seed_and_fixture_without_seat_bias():
+def test_single_seat_per_fixture_with_balanced_assignment():
     arm = load_arms()[0]
     bouts = list(schedule([arm]))
-    assert len(bouts) == 108 * 6 * 2 * 2
-    pairs = {}
-    for bout in bouts:
-        key = (bout.arm_id, bout.placement, bout.fixture_id)
-        pairs.setdefault(key, []).append(bout)
-    assert len(pairs) == 108 * 6 * 2
-    for mirrored in pairs.values():
-        assert {b.subject_seat for b in mirrored} == {"A", "B"}
-        assert mirrored[0].seed == mirrored[1].seed
-        assert mirrored[0].subject_index == mirrored[1].subject_index
-        assert mirrored[0].opponent_index == mirrored[1].opponent_index
+    # One bout per fixture per placement; never repeat the reversed seat.
+    assert len(bouts) == 108 * 6 * 2
+    assert len({
+        (b.arm_id, b.placement, b.fixture_id) for b in bouts
+    }) == len(bouts)
+    for placement in PLACEMENTS:
+        subset = [b for b in bouts if b.placement == placement]
+        assert len(subset) == 648
+        assert Counter(b.subject_seat for b in subset) == {"A": 324, "B": 324}
+        # Each generic wrestler has three Side A and three Side B opponents.
+        by_subject = {}
+        for b in subset:
+            by_subject.setdefault(b.subject_index, []).append(b.subject_seat)
+        assert len(by_subject) == 108
+        assert all(Counter(seats) == {"A": 3, "B": 3}
+                   for seats in by_subject.values())
+    # Same seed and chosen seat in both Starting and Shuffled conditions.
+    for start, shuffled in zip(bouts[:648], bouts[648:]):
+        assert (start.fixture_id, start.subject_seat, start.seed) == (
+            shuffled.fixture_id, shuffled.subject_seat, shuffled.seed
+        )
 
 
 def test_arm_comparisons_get_exact_same_fixtures():
@@ -88,8 +98,9 @@ def test_arm_comparisons_get_exact_same_fixtures():
 def test_complete_schedule_count():
     arms = load_arms()
     plan = plan_summary(arms, len(DEFAULT_OPPONENT_OFFSETS))
-    assert plan["planned_bouts"] == 181440
-    assert plan["bouts_per_arm_per_placement"] == 1296
+    assert plan["planned_bouts"] == 90720
+    assert plan["seat_orientations_per_fixture"] == 1
+    assert plan["bouts_per_arm_per_placement"] == 648
     assert list(PLACEMENTS) == ["starting", "shuffled"]
 
 
