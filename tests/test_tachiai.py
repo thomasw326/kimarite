@@ -20,9 +20,9 @@ def test_tachiai_uses_base_stats_starting_kimarite_and_prepared_card():
 
     result = compare_tachiai(a, b)
 
-    assert result.wrestler_a.power == 4
-    assert result.wrestler_a.technique == 3
-    assert result.wrestler_a.spirit == 4
+    assert result.wrestler_a.power == 5
+    assert result.wrestler_a.technique == 4
+    assert result.wrestler_a.spirit == 5
     assert result.power_advantage_a == -1
     assert result.technique_advantage_a == 1
     assert result.spirit_advantage_a == 1
@@ -102,7 +102,7 @@ def test_nodowa_power_applies_before_spirit_push_resistance():
     state = BoutState(FighterState(a), FighterState(b))
     resolve_prepared_tachiai(state, comparison)
 
-    assert state.fighter_b.power == 2
+    assert state.fighter_b.power == 3
     assert state.position == 1
 
 
@@ -120,8 +120,8 @@ def test_harite_power_applies_before_spirit_push_resistance():
     state = BoutState(FighterState(a), FighterState(b))
     resolve_prepared_tachiai(state, comparison)
 
-    assert state.fighter_b.power == 1
-    assert state.fighter_a.power == -1
+    assert state.fighter_b.power == 2
+    assert state.fighter_a.power == 0
     assert state.position == 0
 
     # Without Harite's Power modifiers, the same printed-orb
