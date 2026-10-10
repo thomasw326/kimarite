@@ -111,6 +111,9 @@ class BoutState:
     kimarite_removals: list[tuple[Side, str]] = field(default_factory=list)
     temporary_outcomes: list[tuple[Side, str, str]] = field(default_factory=list)
     event_log: list[str] = field(default_factory=list)
+    # Human-owned searches are deferred without revealing opponent Draw Pile order.
+    human_choice_side: Side | None = None
+    pending_kimarite_searches: list[tuple[Side, str]] = field(default_factory=list)
 
     def fighter(self, side: Side) -> FighterState:
         return self.fighter_a if side is Side.A else self.fighter_b
