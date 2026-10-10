@@ -63,12 +63,23 @@ def main() -> None:
     parser.add_argument("--ai-mode", default="tactical", choices=("tactical", "personality"))
     parser.add_argument("--max-turns", type=int, default=100)
     args = parser.parse_args()
+    tachiai_sacrifice = None
+    if args.human_style:
+        from .style_builds_v5 import build_style
+        preview = build_style(args.human_style, seed=args.seed, ranking=1).fighter.wrestler
+    else:
+        preview = PLAYTEST_WRESTLERS[args.human].build(ranking=1)
+    if preview.prepared_tachiai_card.name == "Headlong Charge":
+        print(f"Headlong Charge: sacrifice {preview.starting_kimarite.name} for +1 Momentum and +1 Push?")
+        tachiai_sacrifice = 0 if input("Sacrifice? [y/N]: ").strip().lower() in {"y", "yes"} else None
+
     if args.human_style or args.opponent_style:
         if not (args.human_style and args.opponent_style):
             parser.error("Provide both --human-style and --opponent-style.")
         bout = HumanBout.new_styles(
             args.human_style, args.opponent_style,
             seed=args.seed, max_turns=args.max_turns,
+            tachiai_sacrifice=tachiai_sacrifice,
         )
     else:
         bout = HumanBout.new(
@@ -79,6 +90,7 @@ def main() -> None:
             human_side=Side.A,
             ai_mode=args.ai_mode,
             max_turns=args.max_turns,
+            tachiai_sacrifice=tachiai_sacrifice,
         )
 
     print("KIMARITE — V5 terminal prototype")
