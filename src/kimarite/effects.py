@@ -492,8 +492,10 @@ def _search_kimarite(state: BoutState, searched_side: Side, source: str,
     choice = None if context is None else context.choice("kimarite_index")
     if len(options) == 1:
         selected = options[0]
-    elif context is None:
-        selected = options[0]
+    elif context is None or not context.choice("__human__"):
+        # Noninteractive AI selects deterministically, unless its controller
+        # explicitly nominates a valid eligible card.
+        selected = choice if choice in options else options[0]
     else:
         if choice not in options:
             raise ChoiceRequired(source, "kimarite_index", options)
