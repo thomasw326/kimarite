@@ -573,6 +573,8 @@ def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 def _read_the_move(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    if context.choice("__human__") and state.opponent(side).temporary_zone and context.choice("mode") not in {"draw", "remove"}:
+        raise ChoiceRequired(card.name, "mode", ["remove", "draw"])
     if context.choice("mode") == "draw" or not state.opponent(side).temporary_zone:
         draw_one(state, side)
         return
@@ -597,6 +599,8 @@ def _read_the_move(
 
 def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     """Current Pull choice: setup a reversal or filter one card."""
+    if context.choice("__human__") and context.choice("mode") not in {"reversal", "filter"}:
+        raise ChoiceRequired(card.name, "mode", ["reversal", "filter"])
     if context.choice("mode") in {"filter", "draw_discard"}:
         draw_one(state, side)
         if state.winner is None:
