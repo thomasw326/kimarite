@@ -118,3 +118,18 @@ This run used *five times more bouts* and changed the pair-leg seed policy relat
 Oshidashi 657; Katasukashi 421; Kotenage 328; Yorikiri 318; Tsukiotoshi 315; Abisetaoshi 310; Oshitaoshi 294; Shitatenage 257; Hatakikomi 232; Tsuridashi 213; Tottari 207; Hikiotoshi 201; Uwatenage 197; Power 81; Yoritaoshi 49; Tsukidashi 46; Tsukitaoshi 41; Shove 33.
 
 **No balance changes approved or applied.** The source artifact retains the full ordered-matchup win matrix and per-style exchange card-play counts.
+
+## Card-slot win-rate audit — same 4,200-bout protocol
+
+Source: [CI run #720](https://github.com/thomasw326/kimarite/actions/runs/38026729559), source commit `5e9ba76a574b5e4574d91d13804c83b96bc89956`. Card-slot outcome data is in the JSON artifact's `card_slot_outcomes` field and the connected **Kimarite Card Library → 5.0 Data** worksheet beginning at row 114.
+
+For each bout participant, record a single card in **Starting Kimarite**, **Tachiai**, and **Top**, plus every unique card included in the **Shuffled** remainder. The record describes a deck-build inclusion, not a played-card effect. Each of the first three categories accounts for 8,400 participant appearances and 4,200 wins, 4,200 losses. Shuffled cards account for 369,600 card-in-deck appearances across 8,400 participants. For every row, appearances = wins + losses.
+
+Examples of role-dependent outcomes:
+- **Headlong Charge**: Tachiai 188/477 (39.4%); top 229/441 (51.9%); shuffled 790/1,466 (53.9%).
+- **Stare Down**: Tachiai 154/231 (66.7%); top 116/243 (47.7%).
+- **Sidestep**: Tachiai 238/386 (61.7%); top 187/342 (54.7%).
+- **Use the Tawara**: Tachiai 136/298 (45.6%); top 183/307 (59.6%).
+- **Katasukashi** as starting Kimarite: 216/370 (58.4%).
+
+**Interpretation warning:** These are observational correlations across heterogeneous styles and matchups, not isolated treatment effects. The shuffled slot is heavily confounded by exclusions, differing pools, and style prevalence; do not rank card strength causally from that column. No balance adjustments are applied.
