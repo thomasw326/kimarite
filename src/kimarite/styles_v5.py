@@ -27,7 +27,7 @@ _SOURCE_JSON = r'''[
       "Oshitaoshi"
     ],
     "preferred": [
-      "Oshidashi",
+      "Tsuki",
       "Harite",
       "Shove",
       "Tsuppari",
