@@ -85,6 +85,7 @@ class FighterState:
     opponent_grip_reduced_this_turn: bool = False
     gained_push_this_turn: bool = False
     gained_momentum_this_turn: bool = False
+    successful_reversal_this_turn: bool = False
 
     @property
     def total_grip(self) -> int:
@@ -102,6 +103,7 @@ class BoutState:
     active_side: Side | None = None
     turn_number: int = 0
     disable_kimarite_exchange_effects: bool = False
+    r20_active: bool = False  # Experimental gauntlet only; never enabled for normal V5 bouts.
     winner: Side | None = None
     win_method: str | None = None
     win_source: str | None = None
@@ -112,6 +114,7 @@ class BoutState:
     first_exchange_hands: dict[Side, tuple[str, ...]] = field(default_factory=dict)
     kimarite_removals: list[tuple[Side, str]] = field(default_factory=list)
     temporary_outcomes: list[tuple[Side, str, str]] = field(default_factory=list)
+    reversal_completions: list[tuple[Side, str, int]] = field(default_factory=list)
     headlong_decisions: list[tuple[Side, str, str, str | None]] = field(default_factory=list)
     position_loss_events: list[tuple[Side, int, str, int]] = field(default_factory=list)
     katasukashi_win_sources: list[str] = field(default_factory=list)
