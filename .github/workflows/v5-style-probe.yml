@@ -19,6 +19,7 @@ on:
       - src/kimarite/ai.py
       - src/kimarite/models.py
       - data/v5_print_pool_snapshot.json
+      - docs/V5_STYLE_BASELINE.md
 
 jobs:
   round-robin:
