@@ -20,7 +20,7 @@ CARD_POOL: tuple[Card, ...] = (
     Card(14, "Attempt Two-Handed Grip", 0, 3, 1),
     Card(15, "Attempt Deep Outside Grip", 0, 3, 1),
     Card(16, "Attempt Deep Inside Grip", 0, 3, 1),
-    Card(17, "Shiko Stomp", 0, 0, 0),
+    Card(17, "Shiko Stomp", 1, 1, 1),
     Card(18, "Salt Throw", 1, 1, 3),
     Card(19, "Stare Down", 2, 1, 2),
     Card(20, "Power Water", 1, 2, 2),
