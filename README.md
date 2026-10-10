@@ -43,3 +43,7 @@ Run a mirrored 15-style test locally (210 bouts per repetition):\n\n```powershel
 4. Compare deterministic AI-vs-AI runs for balance without changing approved card rules unnecessarily.
 
 The tabletop rules and card library remain the design source of truth; gameplay changes are validated separately from controller and UI development.
+
+## CI and validation policy
+
+The repository is public. The earlier GitHub Actions monthly-minutes constraint is retired: run Actions workflows and regression tests whenever useful for development. Continue to keep V5 changes in draft PR #16 until validated; no balance, card-stat, or rules-tuning decisions are approved merely by a green build.
