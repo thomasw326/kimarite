@@ -128,6 +128,7 @@ def reset_turn_events(state: BoutState, side: Side) -> None:
     fighter.cards_played_this_turn = 0
     fighter.played_this_turn.clear()
     fighter.lost_position_this_turn = False
+    state.position_loss_events = [e for e in state.position_loss_events if e[0] is not side]
     fighter.opponent_grip_reduced_this_turn = False
     fighter.gained_push_this_turn = False
     fighter.gained_momentum_this_turn = False
@@ -164,6 +165,10 @@ def check_kimarite_zone(
     if card.name in grip_win_cards and grip_benefits_suppressed(state, side):
         effective_total_grip(state, side, consume_prevention=True)
 
+    if card.name == "Katasukashi":
+        sources = [source for event_side, turn, source, amount in state.position_loss_events
+                   if event_side is side and turn == state.turn_number]
+        state.katasukashi_win_sources = list(dict.fromkeys(sources)) or ["unknown"]
     state.win_source = "kimarite"
     state.winning_kimarite_card_id = card.card_id
     state.declare_winner(side, card.name)
