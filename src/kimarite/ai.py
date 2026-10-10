@@ -88,12 +88,11 @@ def _context_for_card(
             choices["grip"] = _best_grip_to_reduce(state, side)
 
     if card.name == "Use the Tawara":
-        # Pay the optional Position cost only when Power is strategically useful
-        # and doing so does not move the wrestler to the brink unnecessarily.
-        choices["lose_position_for_power"] = (
-            relative_position(state, side) > -2
-            and fighter.power <= opponent.power
-        )
+        eligible = [i for i, c in enumerate(fighter.draw_pile) if c.is_kimarite]
+        if eligible:
+            choices["kimarite_index"] = max(
+                eligible, key=lambda i: _card_priority(fighter.draw_pile[i], state, side)
+            )
 
     if card.name == "Pull":
         choices["mode"] = "reversal" if fighter.discard_pile and relative_momentum(state, side) <= -1 else "filter"
