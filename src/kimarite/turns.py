@@ -135,6 +135,7 @@ def reset_turn_events(state: BoutState, side: Side) -> None:
     fighter.opponent_grip_reduced_this_turn = False
     fighter.gained_push_this_turn = False
     fighter.gained_momentum_this_turn = False
+    fighter.successful_reversal_this_turn = False
 
 
 def check_kimarite_zone(
@@ -214,13 +215,23 @@ def start_exchange_turn(
         if state.winner is not None:
             return []
 
+    # Only R20 reverses the legacy ordering: completed Reversal Temporaries
+    # must resolve and naturally discard BEFORE the starting Kimarite check.
+    if getattr(state, "r20_active", False) and fighter.temporary_zone:
+        if resolve_temporary_start is None:
+            resolve_start_of_turn_temporaries(state, side)
+        else:
+            resolve_temporary_start(state, side)
+        if state.winner is not None:
+            return []
+
     check_kimarite_zone(state, side, choose_kimarite=choose_kimarite)
     # Do not carry last turn's event into this turn's end-of-turn check.
     fighter.opponent_grip_reduced_this_turn = False
     if state.winner is not None:
         return []
 
-    if fighter.temporary_zone:
+    if not getattr(state, "r20_active", False) and fighter.temporary_zone:
         if resolve_temporary_start is None:
             resolve_start_of_turn_temporaries(state, side)
         else:
