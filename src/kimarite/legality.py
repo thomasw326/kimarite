@@ -22,6 +22,9 @@ def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
     }:
         return False
 
+    if card.name == "Headlong Charge" and not fighter.kimarite_zone:
+        return False
+
     if card.name == "Morozashi":
         return (
             (fighter.left_grip is not GripState.NONE and fighter.right_grip is GripState.NONE)
