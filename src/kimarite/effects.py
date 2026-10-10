@@ -120,7 +120,7 @@ def tachiai_comparisons_won(context: EffectContext, side: Side) -> int:
 
 def _oshi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     # Check momentum before resolving this card's effects.
-    can_push = state.momentum * state.sign(side) >= 1
+    can_push = state.momentum * state.sign(side) >= 0
     if can_push:
         gain_push(state, side, 1)
     add_play(state, side)
@@ -142,7 +142,7 @@ def _discard_from_hand(state: BoutState, side: Side, card: Card, context: Effect
 
 
 def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    chained = any(played.name in {"Oshi", "Tsuki", "Big Tsuki", "Tsuppari"}
+    chained = any(played.name in {"Oshi", "Tsuki", "Tsuppari"}
                   for played in state.fighter(side).played_this_turn[:-1])
     gain_push(state, side, 1)
     if chained and state.winner is None:
@@ -159,7 +159,7 @@ def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectCon
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    can_disrupt = state.momentum * state.sign(side) >= 1
+    can_disrupt = state.momentum * state.sign(side) >= 0
     add_play(state, side)
     if can_disrupt:
         opponent = state.opponent(side)
@@ -217,12 +217,15 @@ def _big_tsuki(state: BoutState, side: Side, card: Card, context: EffectContext)
 def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     fighter = state.fighter(side)
     chained = any(
-        played.name in {"Oshi", "Tsuki", "Big Tsuki", "Tsuppari", "Shove"}
+        played.name in {"Oshi", "Tsuki", "Tsuppari", "Shove"}
         for played in fighter.played_this_turn[:-1]
     )
     gain_momentum(state, side, 1)
     if chained and state.winner is None:
         gain_push(state, side, 1)
+    if state.winner is None:
+        add_play(state, side, 1)
+        draw_one(state, side)
 
 
 
@@ -714,7 +717,6 @@ def _sidestep(
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Injury": lambda state, side, card, context: None,
     "Oshi": _oshi,
-    "Big Tsuki": _big_tsuki,
     "Shove": _shove,
     "Explosive Step — Fumikomi": _explosive_step,
     "Tsuki": _tsuki,
@@ -761,7 +763,6 @@ MILL_AMOUNTS = {
     "Tsuppari": 1,
     "Oshi": 1,
     "Tsuki": 1,
-    "Big Tsuki": 1,
     "Shove": 1,
 }
 RECYCLE_NAMES = frozenset({
