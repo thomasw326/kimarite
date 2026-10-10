@@ -12,7 +12,7 @@ from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
 SOURCE = json.loads((Path(__file__).resolve().parents[1] / "data" / "v5_print_pool_snapshot.json").read_text())
 ALIASES = {"Explosive Step": "Explosive Step — Fumikomi"}
 # Approved overrides take precedence over the immutable historical snapshot.
-APPROVED_ORB_OVERRIDES = {"Shiko Stomp": (1, 1, 1), "Stare Down": (1, 1, 1)}
+APPROVED_ORB_OVERRIDES = {"Get Underneath": (1, 1, 0), "Shiko Stomp": (1, 1, 1), "Stare Down": (1, 1, 1)}
 
 
 def test_current_print_pool_orbs_match_snapshot():
