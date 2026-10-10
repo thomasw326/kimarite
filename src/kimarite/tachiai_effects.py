@@ -86,6 +86,7 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
     for side in (Side.A, Side.B):
         _activate_prebout_shiko(state, side)
     _reveal_tachiai_orbs(state, comparison)
+    state.tachiai_spirit_advantage_a = comparison.spirit_advantage_a
 
     # Resolve Tachiai Power modifiers before Spirit Push resistance.
     for side in (Side.A, Side.B):
