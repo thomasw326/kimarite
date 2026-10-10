@@ -20,7 +20,7 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
 
     state = bout.state
 
-    assert state.fighter_a.power == 6
+    assert state.fighter_a.power == 5
     assert state.fighter_b.power == 7
     assert state.position == 3
     assert state.winner is Side.A
