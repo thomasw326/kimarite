@@ -5,7 +5,7 @@ from collections.abc import Callable
 from .kimarite import satisfied_kimarite
 from .models import BoutState, Card, Side, Stat
 from .rules import effective_total_grip, gain_momentum, grip_benefits_suppressed
-from .selection import ai_look_keep
+from .selection import ai_look_keep, keep_and_bottom, look_from_top
 from .tachiai import TachiaiComparison, technique_access
 from .temporary import resolve_start_of_turn_temporaries
 
@@ -16,6 +16,19 @@ class TemporaryResolutionRequired(RuntimeError):
 
 TemporaryStartResolver = Callable[[BoutState, Side], None]
 KimariteChoiceResolver = Callable[[BoutState, Side, list[Card]], Card]
+CardAccessChooser = Callable[[list[Card], int], list[Card]]
+
+
+def _choose_card_access(fighter, look: int, keep: int, chooser: CardAccessChooser | None) -> list[Card]:
+    if chooser is None:
+        return ai_look_keep(fighter, look, keep)
+    looked = look_from_top(fighter, look)
+    required = min(keep, len(looked))
+    selected = chooser(looked, required)
+    if len(selected) != required:
+        raise ValueError(f"Must keep exactly {required} card(s).")
+    keep_and_bottom(fighter, looked, selected)
+    return selected
 
 
 def prepare_exchange_deck(state: BoutState, side: Side) -> None:
@@ -53,6 +66,7 @@ def first_turn_card_access(
     state: BoutState,
     side: Side,
     comparison: TachiaiComparison,
+    *, choose_cards: CardAccessChooser | None = None,
 ) -> list[Card]:
     fighter = state.fighter(side)
     if not fighter.technique_reward_pending:
@@ -64,26 +78,29 @@ def first_turn_card_access(
     look, keep = technique_access(advantage)
     look = max(2, look + fighter.technique_look_adjustment)
     fighter.technique_reward_pending = False
-    return ai_look_keep(fighter, look, keep)
+    return _choose_card_access(fighter, look, keep, choose_cards)
 
 
-def normal_turn_card_access(state: BoutState, side: Side) -> list[Card]:
+def normal_turn_card_access(
+    state: BoutState, side: Side, *, choose_cards: CardAccessChooser | None = None
+) -> list[Card]:
     fighter = state.fighter(side)
     look = 2 + effective_total_grip(state, side, consume_prevention=True)
-    return ai_look_keep(fighter, look, 2)
+    return _choose_card_access(fighter, look, 2, choose_cards)
 
 
 def resolve_turn_card_access(
     state: BoutState,
     side: Side,
     comparison: TachiaiComparison,
+    *, choose_cards: CardAccessChooser | None = None,
 ) -> list[Card]:
     fighter = state.fighter(side)
     if fighter.first_exchange_turn:
-        cards = first_turn_card_access(state, side, comparison)
+        cards = first_turn_card_access(state, side, comparison, choose_cards=choose_cards)
         fighter.first_exchange_turn = False
         return cards
-    return normal_turn_card_access(state, side)
+    return normal_turn_card_access(state, side, choose_cards=choose_cards)
 
 
 def apply_start_of_turn_exhaustion(state: BoutState, side: Side) -> None:
@@ -159,6 +176,7 @@ def start_exchange_turn(
     *,
     resolve_temporary_start: TemporaryStartResolver | None = None,
     choose_kimarite: KimariteChoiceResolver | None = None,
+    choose_cards: CardAccessChooser | None = None,
 ) -> list[Card]:
     """Run the fixed start-of-turn sequence through card access.
 
@@ -199,7 +217,7 @@ def start_exchange_turn(
     if state.winner is not None:
         return []
 
-    return resolve_turn_card_access(state, side, comparison)
+    return resolve_turn_card_access(state, side, comparison, choose_cards=choose_cards)
 
 
 def end_exchange_turn(
