@@ -277,7 +277,13 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
     if deep:
         # Temporarily allow one Play to make the selected follow-up free.
         fighter.plays_remaining += 1
-        eligible = [candidate for candidate in looked if can_play_card(state, side, candidate)]
+        eligible = []
+        for candidate in looked:
+            fighter.hand.append(candidate)
+            is_legal = can_play_card(state, side, candidate)
+            fighter.hand.pop()
+            if is_legal:
+                eligible.append(candidate)
         if not eligible:
             fighter.plays_remaining -= 1
             keep_and_bottom(fighter, looked, [])
