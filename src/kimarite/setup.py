@@ -30,7 +30,9 @@ class PreparedBout:
     comparison: TachiaiComparison
 
 
-def create_prepared_bout(\n    config: BoutConfig, *, sacrifice_choices: dict[Side, int | None] | None = None\n) -> PreparedBout:
+def create_prepared_bout(
+    config: BoutConfig, *, sacrifice_choices: dict[Side, int | None] | None = None
+) -> PreparedBout:
     template_a = PLAYTEST_WRESTLERS[config.fighter_a.wrestler_name]
     template_b = PLAYTEST_WRESTLERS[config.fighter_b.wrestler_name]
     wrestler_a = template_a.build(ranking=config.fighter_a.ranking)
