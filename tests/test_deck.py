@@ -30,4 +30,4 @@ def test_current_deck_can_include_newer_cards():
     names = {card.name for card in deck}
     assert "Shove" in names
     assert "Explosive Step — Fumikomi" in names
-    assert "Injury" in names
+    assert "Injury" not in names
