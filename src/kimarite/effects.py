@@ -404,7 +404,7 @@ def _regain_balance(
 
 
 def _give_ground(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    lose_position(state, side, 1)
+    lose_position(state, side, 1, source="Give Ground")
     gain_momentum(state, side, 1)
     gain_power(state, side, 1)
     if state.winner is None:
@@ -500,7 +500,7 @@ def _get_underneath(
 
 
 def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    lose_position(state, side, 1)
+    lose_position(state, side, 1, source="Use the Tawara")
     if state.winner is None:
         gain_momentum(state, side, 1)
     _search_kimarite(state, side, card.name)
@@ -592,7 +592,7 @@ def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> N
     fighter = state.fighter(side)
     lose_momentum(state, side, 1)
     if state.winner is None:
-        lose_position(state, side, 1)
+        lose_position(state, side, 1, source="Pull")
     if fighter.discard_pile and state.winner is None:
         index = context.choice("discard_index")
         if not isinstance(index, int) or not 0 <= index < len(fighter.discard_pile):
