@@ -6,7 +6,7 @@ from .catalog import CARD_POOL, ORIGINAL_WRESTLERS
 from .models import Card
 
 
-UNIVERSALLY_PROTECTED_IDS = frozenset({1, 2, 3, 4})
+UNIVERSALLY_PROTECTED_IDS = frozenset({1, 3})
 
 
 POWER_COMPARISON = frozenset({
@@ -103,7 +103,7 @@ def eligible_cards(wrestler_name: str) -> list[Card]:
     return [
         card
         for card in CARD_POOL
-        if card.card_id <= 45 and card.card_id not in UNIVERSALLY_PROTECTED_IDS
+        if card.card_id not in UNIVERSALLY_PROTECTED_IDS
         and card.name not in reserved
     ]
 

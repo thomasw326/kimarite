@@ -58,7 +58,9 @@ def test_every_pool_card_is_legal_as_prepared_tachiai():
 def test_all_names_eligible_globally_and_reserved_locally():
     from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
     all_names = {card.name for card in CARD_POOL}
-    assert len(all_names) == 56
+    assert len(all_names) == 53
+    assert "Oshi" in all_names
+    assert "Bad Oshi" not in all_names
     assert len({card.card_id for card in CARD_POOL}) == len(CARD_POOL)
     assert {card.name for card in STARTING_KIMARITE} <= all_names
     seen_kimarite, seen_prepared, seen_top = set(), set(), set()
@@ -145,7 +147,7 @@ def test_reporting_smoke_produces_consistent_csvs(tmp_path, monkeypatch):
         "starting_kimarite", "prepared_tachiai", "top_of_deck", "shuffled_remainder"
     }
     assert set(row["origin"] for row in plays) <= {
-        "prepared_tachiai", "top_of_deck", "shuffled_remainder"
+        "prepared_tachiai", "top_of_deck", "shuffled_remainder", "generated"
     }
     # Verify the new per-origin/stat reports survive batch aggregation.
     from scripts.combine_big_test import main as combine_main

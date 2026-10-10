@@ -22,12 +22,12 @@ def make_bout(hand=(), draw=(), discard=(), power=5):
     )
 
 
-def test_power_water_generates_three_cantrips():
+def test_power_water_generates_six_cantrips():
     water = card_by_name("Power Water")
     bout = make_bout(hand=[water], draw=[Card(101, "Other")])
     play_card(bout, Side.A, water)
-    assert sum(c.name == "Power Water Cantrip" for c in bout.fighter_a.draw_pile) == 3
-    assert len(bout.fighter_a.draw_pile) == 4
+    assert sum(c.name == "Power Water Cantrip" for c in bout.fighter_a.draw_pile) == 6
+    assert len(bout.fighter_a.draw_pile) == 7
 
 
 def test_cantrips_are_not_in_starting_pool():
@@ -59,6 +59,9 @@ def test_cantrip_recovers_selected_discard():
     )
     assert target in bout.fighter_a.hand
     assert target not in bout.fighter_a.discard_pile
+    assert cantrip not in bout.fighter_a.discard_pile
+    assert cantrip not in bout.fighter_a.draw_pile
+    assert cantrip not in bout.fighter_a.hand
 
 
 def test_cantrip_grants_play_and_draws():

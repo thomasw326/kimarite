@@ -38,15 +38,16 @@ def test_tsuppari_chains_after_oshi():
     oshi = card_by_name("Oshi")
     tsuppari = card_by_name("Tsuppari")
     bout = bout_with_hand([oshi, tsuppari])
-    bout.fighter_a.draw_pile = [Card(8101, "Draw A"), Card(8102, "Draw B")]
+    bout.fighter_a.draw_pile = [Card(8101, "Draw A"), Card(8102, "Draw B"), Card(8103, "Draw C"), Card(8104, "Draw D")]
 
     play_card(bout, Side.A, oshi)
     play_card(bout, Side.A, tsuppari)
 
     assert bout.momentum == 1
-    assert bout.position == 1
+    assert bout.position == 2
     assert [c.name for c in bout.fighter_a.played_this_turn] == ["Oshi", "Tsuppari"]
-    assert bout.fighter_a.plays_remaining == 1
+    assert bout.fighter_a.plays_remaining == 2
+    assert bout.winner is None
 
 
 def test_tsuki_requires_choice_only_when_both_opposing_grips_exist():
@@ -85,7 +86,7 @@ def test_regain_balance_recovers_negative_momentum():
     play_card(bout, Side.A, card)
 
     assert bout.momentum == 0
-    assert bout.fighter_a.power == 1
+    assert bout.fighter_a.power == 2
 
 
 def test_belt_slap_uses_recorded_spirit_advantage():

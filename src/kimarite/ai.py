@@ -87,16 +87,10 @@ def _context_for_card(
         if opponent.left_grip is not GripState.NONE and opponent.right_grip is not GripState.NONE:
             choices["grip"] = _best_grip_to_reduce(state, side)
 
-    if card.name == "Use the Tawara":
-        # Pay the optional Position cost only when Power is strategically useful
-        # and doing so does not move the wrestler to the brink unnecessarily.
-        choices["lose_position_for_power"] = (
-            relative_position(state, side) > -2
-            and fighter.power <= opponent.power
-        )
-
     if card.name == "Pull":
-        choices["pay_pull_cost"] = bool(fighter.discard_pile) and relative_momentum(state, side) <= -1
+        choices["mode"] = "reversal" if fighter.discard_pile and relative_momentum(state, side) <= -1 else "filter"
+        if choices["mode"] == "filter" and fighter.hand:
+            choices["hand_index"] = _best_hand_index(state, side, prefer_discard=True)
         if fighter.discard_pile:
             choices["discard_index"] = _best_discard_index(state, side)
 
@@ -109,6 +103,9 @@ def _context_for_card(
         selected = ranked[: min(4, len(ranked))]
         choices["discard_indices"] = selected
         choices["hand_index"] = selected[0]
+
+    if card.name == "Read the Move":
+        choices["mode"] = "remove" if opponent.temporary_zone else "draw"
 
     if card.name in {"Nodowa", "Read the Move"} and opponent.temporary_zone:
         priority = {
@@ -218,30 +215,25 @@ def _contexts_for_card(
     if card.name == "Headlong Charge":
         return [
             _context_variant(base, sacrifice_kimarite=i)
-            for i in [None] + list(range(len(fighter.kimarite_zone)))
+            for i in range(len(fighter.kimarite_zone))
         ]
 
     if card.name == "Pull":
-        variants = [_context_variant(base, pay_pull_cost=False)]
+        variants = [_context_variant(base, mode="filter")]
         if fighter.discard_pile:
-            best_index = _best_discard_index(state, side)
-            variants.append(
-                _context_variant(
-                    base,
-                    pay_pull_cost=True,
-                    discard_index=best_index,
-                )
-            )
+            variants.append(_context_variant(base, mode="reversal",
+                                             discard_index=_best_discard_index(state, side)))
         return variants
 
     if card.name in {"Nodowa", "Read the Move"} and opponent.temporary_zone:
-        return [
-            _context_variant(base, temporary_index=index)
-            for index in range(len(opponent.temporary_zone))
-        ]
+        variants = [_context_variant(base, temporary_index=index, mode="remove")
+                    for index in range(len(opponent.temporary_zone))]
+        if card.name == "Read the Move":
+            variants.append(_context_variant(base, mode="draw"))
+        return variants
 
     if card.name == "Ottsuke":
-        variants: list[EffectContext] = []
+        variants: list[EffectContext] = [_context_variant(base, mode="draw") ]
 
         grips = []
         if opponent.left_grip is not GripState.NONE:
@@ -428,6 +420,14 @@ def score_state(state: BoutState, side: Side) -> float:
     score += len(fighter.hand) * 1.5
     score -= len(opponent.hand) * 0.5
     score += fighter.plays_remaining * 0.5
+
+    # Shiko Stomp prevents a future opposing negative effect and persists
+    # until consumed. Without a state value, one-step AI treats this delayed
+    # defense as a wasted Play. Additional copies have diminishing value.
+    stomp_count = sum(t.card.name == "Shiko Stomp" for t in fighter.temporary_zone)
+    opposing_stomps = sum(t.card.name == "Shiko Stomp" for t in opponent.temporary_zone)
+    score += min(stomp_count, 1) * 17 + max(0, stomp_count - 1) * 5
+    score -= min(opposing_stomps, 1) * 13 + max(0, opposing_stomps - 1) * 4
 
     own_progress = live_kimarite_progress(state, side)
     opponent_side = state.opponent_side(side)

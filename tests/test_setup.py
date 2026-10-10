@@ -20,20 +20,20 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
 
     state = bout.state
 
-    assert state.fighter_a.power == 6
-    assert state.fighter_b.power == 7
-    assert state.position == 3
-    assert state.winner is Side.A
-    assert state.win_method == "Oshidashi"
-    assert state.active_side is None  # Tachiai force-out ends the bout before Exchange.
+    assert state.fighter_a.power == 4
+    assert state.fighter_b.power == 6
+    assert state.position == 2
+    assert state.winner is None
+    assert state.win_method is None
+    assert state.active_side is not None  # Revised opening no longer forces a ringout.
 
     assert state.fighter_a.kimarite_zone[0].name == "Tsukitaoshi"
     assert state.fighter_b.kimarite_zone[0].name == "Tsuridashi"
 
     assert state.fighter_a.draw_pile[0].name == "Oshi"
     assert state.fighter_b.draw_pile[0].name == "Morozashi"
-    assert state.fighter_a.draw_pile[-1].name == "Reset to Neutral"
-    assert state.fighter_b.draw_pile[-1].name == "Tsuppari"
+    assert state.fighter_a.draw_pile[-1].name == "Stare Down"
+    assert state.fighter_b.draw_pile[-1].name == "Gain Right Grip"
 
 
 def test_headlong_charge_prepared_card_does_not_enter_temporary():

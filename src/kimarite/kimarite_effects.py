@@ -4,7 +4,7 @@ from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, dr
 from .kimarite import power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
-from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, gain_power, reduce_grip
+from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, gain_power, lose_momentum, reduce_grip
 from .selection import ai_look_keep
 
 
@@ -31,7 +31,22 @@ def _bottom_one_from_hand(state: BoutState, side: Side, card: Card, context: Eff
     state.log(f"{fighter.wrestler.name} bottoms {bottomed.name}.")
 
 
+def _discard_one_from_hand(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    fighter = state.fighter(side)
+    if not fighter.hand:
+        return
+    options = list(range(len(fighter.hand)))
+    index = 0 if len(options) == 1 else context.choice("hand_index")
+    if index not in options:
+        raise ChoiceRequired(card.name, "hand_index", options)
+    discarded = fighter.hand.pop(index)
+    fighter.discard_pile.append(discarded)
+    state.log(f"{fighter.wrestler.name} discards {discarded.name} with {card.name}.")
+
+
 def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    if state.disable_kimarite_exchange_effects:
+        return
     fighter = state.fighter(side)
     opponent_side = state.opponent_side(side)
 
@@ -40,24 +55,30 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
             gain_flexible_grip(state, side)
 
     elif card.name == "Oshidashi":
-        if power_advantage(state, side) >= 2:
+        if relative_position(state, side) >= 1:
             gain_momentum(state, side, 1)
 
     elif card.name == "Tsukidashi":
         if relative_position(state, side) >= 1:
             add_play(state, side, 1)
+            if state.winner is None:
+                draw_one(state, side)
 
     elif card.name == "Oshitaoshi":
         if relative_momentum(state, side) >= 1:
             gain_power(state, side, 1)
+        if power_advantage(state, side) >= 1:
+            gain_momentum(state, side, 1)
 
     elif card.name == "Yoritaoshi":
-        if relative_position(state, side) >= 0:
+        if power_advantage(state, side) >= 1:
             gain_flexible_grip(state, side)
+        if fighter.total_grip >= 1:
+            gain_power(state, side, 1)
 
     elif card.name == "Katasukashi":
         if _optional(context, "use_optional", card):
-            gain_momentum(state, opponent_side, 1)
+            lose_momentum(state, side, 1)
             draw_from_look(state, side, look=2, keep=1, required_draws=2)
 
     elif card.name == "Tsukiotoshi":
@@ -91,7 +112,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
 
     elif card.name == "Hatakikomi":
         if _optional(context, "use_optional", card):
-            gain_momentum(state, opponent_side, 1)
+            lose_momentum(state, side, 1)
             opponent = state.opponent(side)
             if opponent.hand:
                 if len(opponent.hand) == 1:
@@ -110,10 +131,9 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         draw_from_look(state, side, look=2, keep=1)
 
     elif card.name == "Tsukitaoshi":
-        if relative_momentum(state, side) >= 1:
-            add_play(state, side, 1)
-            draw_one(state, side)
-            _bottom_one_from_hand(state, side, card, context)
+        add_play(state, side, 1)
+        draw_one(state, side)
+        _discard_one_from_hand(state, side, card, context)
 
     elif card.name == "Tsuridashi":
         gain_power(state, side, 1)
@@ -147,7 +167,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 fighter.discard_pile.append(discarded)
 
     elif card.name == "Abisetaoshi":
-        if fighter.power >= 7:
+        if fighter.power >= 6:
             if effective_total_grip(state, side) == 0:
                 gain_flexible_grip(state, side)
             else:

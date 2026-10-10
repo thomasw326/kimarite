@@ -30,7 +30,9 @@ class PreparedBout:
     comparison: TachiaiComparison
 
 
-def create_prepared_bout(config: BoutConfig) -> PreparedBout:
+def create_prepared_bout(
+    config: BoutConfig, *, sacrifice_choices: dict[Side, int | None] | None = None
+) -> PreparedBout:
     template_a = PLAYTEST_WRESTLERS[config.fighter_a.wrestler_name]
     template_b = PLAYTEST_WRESTLERS[config.fighter_b.wrestler_name]
     wrestler_a = template_a.build(ranking=config.fighter_a.ranking)
@@ -62,7 +64,7 @@ def create_prepared_bout(config: BoutConfig) -> PreparedBout:
 
     comparison = compare_tachiai(wrestler_a, wrestler_b)
     apply_initial_power(state, comparison)
-    resolve_prepared_tachiai(state, comparison)
+    resolve_prepared_tachiai(state, comparison, sacrifice_choices=sacrifice_choices)
 
     if state.winner is None:
         state.active_side = first_exchange_side(comparison, wrestler_a, wrestler_b)

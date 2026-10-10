@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .effects import draw_one
+from .effects import draw_one, give_opponent_kimarite, resolve_exchange_effect, EffectContext
 from .models import BoutState, Side, Stat, Card
 from .prevention import prevent_negative_effect
 from .rules import establish_grip, gain_momentum, gain_power, lose_power
@@ -8,8 +8,8 @@ from .tachiai import TachiaiComparison, TachiaiStats, apply_tachiai_power_push, 
 from .temporary import add_temporary
 
 
-PREPARED_TEMPORARY_TACHIAI = frozenset({"Shiko Stomp"})
-REVEAL_FAMILY = frozenset({"Oshi", "Bad Oshi", "Tsuki", "Big Tsuki"})
+PREPARED_TEMPORARY_TACHIAI = frozenset({"Shiko Stomp", "Salt Throw"})
+REVEAL_FAMILY = frozenset({"Oshi", "Tsuki"})
 
 
 def _reveal_tachiai_orbs(state: BoutState, comparison: TachiaiComparison) -> None:
@@ -81,16 +81,38 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> in
     return 1 if card.name in {"Sidestep", "Give Ground"} else 2
 
 
-def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) -> None:
+def resolve_prepared_tachiai(
+    state: BoutState,
+    comparison: TachiaiComparison,
+    *,
+    sacrifice_choices: dict[Side, int | None] | None = None,
+) -> None:
     """Resolve prepared Tachiai cards, including cards without a Tachiai-specific effect."""
     for side in (Side.A, Side.B):
         _activate_prebout_shiko(state, side)
     _reveal_tachiai_orbs(state, comparison)
+    state.tachiai_spirit_advantage_a = comparison.spirit_advantage_a
 
     # Resolve Tachiai Power modifiers before Spirit Push resistance.
+    headlong_sacrificed = {Side.A: False, Side.B: False}
     for side in (Side.A, Side.B):
         name = state.fighter(side).wrestler.prepared_tachiai_card.name
-        if name == "Nodowa":
+        if name in {"Hold Position", "Immovable"}:
+            gain_power(state, side, 2)
+        elif name == "Headlong Charge":
+            fighter = state.fighter(side)
+            choice = (sacrifice_choices or {}).get(side)
+            if choice is not None:
+                if type(choice) is not int or not 0 <= choice < len(fighter.kimarite_zone):
+                    raise ValueError("Invalid Headlong Charge sacrifice choice")
+                sacrificed = fighter.kimarite_zone.pop(choice)
+                fighter.discard_pile.append(sacrificed)
+                state.headlong_decisions.append((side, "Tachiai", "sacrifice", sacrificed.name))
+                state.log(f"{fighter.wrestler.name} sacrifices {sacrificed.name} during Tachiai.")
+                headlong_sacrificed[side] = True
+            else:
+                state.headlong_decisions.append((side, "Tachiai", "decline", None))
+        elif name == "Nodowa":
             gain_power(state, side, 2)
         elif name == "Harite":
             gain_power(state, side, 1)
@@ -123,12 +145,7 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
         name = card.name
 
         if name == "Headlong Charge":
-            if fighter.kimarite_zone:
-                sacrificed = fighter.kimarite_zone.pop(0)
-                fighter.discard_pile.append(sacrificed)
-                state.log(
-                    f"{fighter.wrestler.name} sacrifices {sacrificed.name}."
-                )
+            if headlong_sacrificed[side]:
                 momentum_delta[side] += 1
                 extra_push[side] += 1
 
@@ -154,13 +171,18 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
                 establish_grip(state, side, "right")
 
         elif name == "Salt Throw":
-            pass
+            resolve_exchange_effect(state, side, card, EffectContext(comparison=comparison))
 
         elif name == "Tsuppari":
             _shuffle_generated(state, side, [
-                Card(20001, "Oshi", 0, 0, 1),
-                Card(20002, "Tsuki", 1, 0, 0),
-                Card(20003, "Shove", 2, 0, 0),
+                Card(20001 + i * 3, "Oshi", 0, 0, 1)
+                for i in range(3)
+            ] + [
+                Card(20002 + i * 3, "Tsuki", 1, 0, 0)
+                for i in range(3)
+            ] + [
+                Card(20003 + i * 3, "Shove", 2, 0, 0)
+                for i in range(3)
             ])
 
         elif name == "Explosive Step — Fumikomi":
@@ -175,12 +197,9 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
             if comparison.advantage_for(side, Stat.POWER) > 0:
                 extra_push[side] += 1
             if comparison.advantage_for(side, Stat.TECHNIQUE) > 0:
-                fighter.technique_look_adjustment += 1
+                fighter.technique_keep_adjustment += 1
             if comparison.advantage_for(side, Stat.SPIRIT) > 0:
                 momentum_delta[side] += 1
-
-        elif name == "Power Water":
-            _shuffle_generated(state, side, [Card(62, "Power Water Cantrip") for _ in range(3)])
 
         elif name == "Belt Slap":
             pass
@@ -189,22 +208,15 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
             pass
 
         elif name == "Henka":
-            opponent = _opponent_stats(comparison, side)
-            triggered = False
-            if opponent.power >= 7:
-                momentum_delta[side] += 1
-                triggered = True
-            if opponent.spirit >= 7:
-                momentum_delta[side] += 1
-                triggered = True
-            if triggered:
+            if (
+                comparison.wrestler_a.technique if side is Side.A else comparison.wrestler_b.technique
+            ) > _opponent_stats(comparison, side).spirit:
                 reset_position = True
-            else:
-                momentum_delta[opponent_side] += 3
 
         elif name == "Get Underneath":
-            if power_push_received[side] <= 1:
-                momentum_delta[side] += 1
+            momentum_delta[side] += 1
+            extra_push[side] += 1
+            give_opponent_kimarite(state, side, name)
 
         elif name == "Sidestep":
             if comparison.spirit_winner is opponent_side:
@@ -257,5 +269,12 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
 
     for side in (Side.A, Side.B):
         card = state.fighter(side).wrestler.prepared_tachiai_card
-        if card.name not in PREPARED_TEMPORARY_TACHIAI:
+        if card.name == "Headlong Charge":
+            # Prepared Headlong Charge is spent, not returned to the deck.
+            # The style builder seeds this card on the bottom already.
+            fighter = state.fighter(side)
+            if card in fighter.draw_pile:
+                fighter.draw_pile.remove(card)
+            fighter.discard_pile.append(card)
+        elif card.name not in PREPARED_TEMPORARY_TACHIAI:
             state.fighter(side).draw_pile.append(card)

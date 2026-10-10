@@ -119,10 +119,7 @@ def tachiai_comparisons_won(context: EffectContext, side: Side) -> int:
 
 
 def _oshi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    # Check momentum before resolving this card's effects.
-    can_push = state.momentum * state.sign(side) >= 1
-    if can_push:
-        gain_push(state, side, 1)
+    gain_push(state, side, 1)
     add_play(state, side)
     if state.winner is None:
         draw_one(state, side)
@@ -141,14 +138,8 @@ def _discard_from_hand(state: BoutState, side: Side, card: Card, context: Effect
     state.log(f"{fighter.wrestler.name} discards {discarded.name} with {card.name}.")
 
 
-def _bad_oshi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    _oshi(state, side, card, context)
-    if state.winner is None:
-        _discard_from_hand(state, side, card, context)
-
-
 def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    chained = any(played.name in {"Oshi", "Bad Oshi", "Tsuki", "Big Tsuki", "Tsuppari"}
+    chained = any(played.name in {"Oshi", "Tsuki", "Tsuppari"}
                   for played in state.fighter(side).played_this_turn[:-1])
     gain_push(state, side, 1)
     if chained and state.winner is None:
@@ -165,27 +156,25 @@ def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectCon
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    can_disrupt = state.momentum * state.sign(side) >= 1
     add_play(state, side)
-    if can_disrupt:
-        opponent = state.opponent(side)
-        available: list[str] = []
-        if opponent.left_grip is not GripState.NONE:
-            available.append("left")
-        if opponent.right_grip is not GripState.NONE:
-            available.append("right")
-        chosen: str | None = None
-        if len(available) == 1:
-            chosen = available[0]
-        elif len(available) > 1:
-            chosen = context.choice("grip")
-            if chosen not in available:
-                raise ChoiceRequired(card.name, "grip", available)
-        if chosen is not None and not prevent_negative_effect(
-            state, state.opponent_side(side), source=card.name,
-            description=f"reduce {chosen.title()} Grip",
-        ):
-            reduce_grip(state, state.opponent_side(side), hand=chosen)
+    opponent = state.opponent(side)
+    available: list[str] = []
+    if opponent.left_grip is not GripState.NONE:
+        available.append("left")
+    if opponent.right_grip is not GripState.NONE:
+        available.append("right")
+    chosen: str | None = None
+    if len(available) == 1:
+        chosen = available[0]
+    elif len(available) > 1:
+        chosen = context.choice("grip")
+        if chosen not in available:
+            raise ChoiceRequired(card.name, "grip", available)
+    if chosen is not None and not prevent_negative_effect(
+        state, state.opponent_side(side), source=card.name,
+        description=f"reduce {chosen.title()} Grip",
+    ):
+        reduce_grip(state, state.opponent_side(side), hand=chosen)
     if state.winner is None:
         draw_one(state, side)
 
@@ -223,12 +212,15 @@ def _big_tsuki(state: BoutState, side: Side, card: Card, context: EffectContext)
 def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     fighter = state.fighter(side)
     chained = any(
-        played.name in {"Oshi", "Bad Oshi", "Tsuki", "Big Tsuki", "Tsuppari", "Shove"}
+        played.name in {"Oshi", "Tsuki", "Tsuppari", "Shove"}
         for played in fighter.played_this_turn[:-1]
     )
     gain_momentum(state, side, 1)
     if chained and state.winner is None:
         gain_push(state, side, 1)
+    if state.winner is None:
+        add_play(state, side, 1)
+        draw_one(state, side)
 
 
 
@@ -261,12 +253,60 @@ def _gain_right_grip(
 
 
 def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    """Look based on total Grip; Deep Left Grip plays a selected card for free."""
+    from .selection import ai_choose_from_look, keep_and_bottom, look_from_top
+    from .legality import can_play_card
+    from .playing import play_card
+
     fighter = state.fighter(side)
-    if fighter.left_grip is GripState.DEEP:
-        gain_momentum(state, side, 2)
-    else:
-        improve_grip(state, side, "left")
+    improve_grip(state, side, "left")
     add_temporary(state, side, card, phase="exchange")
+    if state.winner is not None:
+        return
+
+    looked = look_from_top(fighter, fighter.total_grip)
+    if not looked:
+        return
+
+    deep = fighter.left_grip is GripState.DEEP
+    if deep:
+        # Temporarily allow one Play to make the selected follow-up free.
+        fighter.plays_remaining += 1
+        eligible = []
+        for candidate in looked:
+            fighter.hand.append(candidate)
+            is_legal = can_play_card(state, side, candidate)
+            fighter.hand.pop()
+            if is_legal:
+                eligible.append(candidate)
+        if not eligible:
+            fighter.plays_remaining -= 1
+            keep_and_bottom(fighter, looked, [])
+            return
+    else:
+        eligible = looked
+
+    chosen_index = context.choice("uwate_card_index")
+    if chosen_index is None:
+        if context.choice("__human__") and len(eligible) > 1:
+            raise ChoiceRequired(
+                card.name, "uwate_card_index",
+                [i for i, candidate in enumerate(looked) if candidate in eligible],
+            )
+        chosen = ai_choose_from_look(eligible, fighter.wrestler, 1)[0]
+    else:
+        if not isinstance(chosen_index, int) or not 0 <= chosen_index < len(looked):
+            raise ChoiceRequired(card.name, "uwate_card_index", list(range(len(looked))))
+        chosen = looked[chosen_index]
+        if chosen not in eligible:
+            raise IllegalPlay("Uwate's selected card cannot currently be played.")
+
+    keep_and_bottom(fighter, looked, [chosen])
+    state.log(f"{fighter.wrestler.name} looks at {len(looked)} card(s) with Uwate and adds {chosen.name} to hand.")
+    if deep:
+        state.log(f"{fighter.wrestler.name} plays {chosen.name} for free with Deep Left Grip.")
+        play_card(state, side, chosen, context=context)
+
 
 
 def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -282,7 +322,7 @@ def _salt_throw(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
-    if len(fighter.discard_pile) >= 9:
+    if len(fighter.discard_pile) >= 7:
         fighter.draw_pile.extend(fighter.discard_pile)
         fighter.discard_pile.clear()
         state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
@@ -305,34 +345,30 @@ def _belt_slap(
 
 
 def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    grip = effective_total_grip(state, side, consume_prevention=True)
-    if grip == 1:
-        gain_push(state, side, 1)
-    elif grip == 2:
-        gain_push(state, side, 2)
-    elif grip == 3:
-        gain_push(state, side, 3)
-    elif grip >= 4:
-        gain_push(state, side, 3)
-        gain_momentum(state, side, 1)
+    if effective_total_grip(state, side, consume_prevention=True) < 1:
+        gain_flexible_grip(state, side)
+    else:
+        gain_power(state, side, 1)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
 
 
 def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if effective_total_grip(state, side, consume_prevention=True) < 1:
         gain_flexible_grip(state, side)
-        return
-    position = state.position * state.sign(side)
-    if position > 0:
-        gain_momentum(state, side, min(position, 3))
+    else:
+        gain_push(state, side, 1)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
 
 
 def _gaburi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if effective_total_grip(state, side, consume_prevention=True) < 1:
         gain_flexible_grip(state, side)
-        return
-    momentum = state.momentum * state.sign(side)
-    if momentum > 0:
-        gain_push(state, side, min(momentum, 3))
+    else:
+        gain_momentum(state, side, 1)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
 
 
 def _henka(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -342,6 +378,11 @@ def _henka(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 def _reset_to_neutral(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    for owner in (side, state.opponent_side(side)):
+        for instance in list(state.fighter(owner).temporary_zone):
+            remove_temporary(state, owner, instance, disrupted=True)
+    state.side_by_side_owner = None
+    state.side_by_side_distance = 0
     fighter = state.fighter(side)
     removed = fighter.total_grip > 0
     fighter.left_grip = GripState.NONE
@@ -358,21 +399,18 @@ def _reset_to_neutral(
 def _regain_balance(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
-    if state.momentum * state.sign(side) < 0:
+    draw_one(state, side)
+    if state.winner is None and state.momentum * state.sign(side) < 0:
         gain_momentum(state, side, 2)
-        gain_power(state, side, 1)
-    else:
-        draw_one(state, side)
+        gain_power(state, side, 2)
 
 
 def _give_ground(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    lose_position(state, side, 1)
+    lose_position(state, side, 1, source="Give Ground")
     gain_momentum(state, side, 1)
     gain_power(state, side, 1)
     if state.winner is None:
         draw_one(state, side)
-    if state.winner is None:
-        add_temporary(state, side, card, phase="exchange")
 
 
 
@@ -384,16 +422,14 @@ def _headlong_charge(
         return
 
     choice = context.choice("sacrifice_kimarite")
-    options = [None] + list(range(len(fighter.kimarite_zone)))
+    options = list(range(len(fighter.kimarite_zone)))
 
     if choice not in options:
         raise ChoiceRequired(card.name, "sacrifice_kimarite", options)
 
-    if choice is None:
-        return
-
     sacrificed = fighter.kimarite_zone.pop(choice)
     fighter.discard_pile.append(sacrificed)
+    state.headlong_decisions.append((side, "Exchange", "sacrifice", sacrificed.name))
     state.log(f"{fighter.wrestler.name} sacrifices {sacrificed.name}.")
 
     gain_momentum(state, side, 1)
@@ -403,18 +439,25 @@ def _headlong_charge(
 def _attempt_two_handed(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    fighter = state.fighter(side)
+    chosen = context.choice("grip")
+    if chosen not in {"left", "right"}:
+        chosen = "left" if fighter.left_grip <= fighter.right_grip else "right"
+    establish_grip(state, side, chosen)
     add_temporary(state, side, card, phase="exchange")
 
 
 def _attempt_deep_outside(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    establish_grip(state, side, "left")
     add_temporary(state, side, card, phase="exchange")
 
 
 def _attempt_deep_inside(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    establish_grip(state, side, "right")
     add_temporary(state, side, card, phase="exchange")
 
 
@@ -431,22 +474,34 @@ def _immovable(
     add_temporary(state, side, card, phase="exchange")
 
 
+def _search_kimarite(state: BoutState, searched_side: Side, source: str) -> None:
+    """Automatically move the first eligible Kimarite from Draw Pile to zone."""
+    fighter = state.fighter(searched_side)
+    for index, found in enumerate(fighter.draw_pile):
+        if found.is_kimarite:
+            fighter.kimarite_zone.append(fighter.draw_pile.pop(index))
+            state.log(f"{fighter.wrestler.name} searches {found.name} into the Kimarite Zone after {source}.")
+            return
+
+
+def give_opponent_kimarite(state: BoutState, side: Side, source: str) -> None:
+    _search_kimarite(state, state.opponent_side(side), source)
+
+
 def _get_underneath(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     gain_momentum(state, side, 1)
     gain_push(state, side, 1)
-    add_temporary(state, side, card, phase="exchange")
+    if state.winner is None:
+        give_opponent_kimarite(state, side, card.name)
 
 
 def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    lose_position(state, side, 1)
-    fighter = state.fighter(side)
-    for index, found in enumerate(fighter.draw_pile):
-        if found.is_kimarite:
-            fighter.kimarite_zone.append(fighter.draw_pile.pop(index))
-            state.log(f"{fighter.wrestler.name} puts {found.name} into the Kimarite Zone.")
-            break
+    lose_position(state, side, 1, source="Use the Tawara")
+    if state.winner is None:
+        gain_momentum(state, side, 1)
+    _search_kimarite(state, side, card.name)
     add_temporary(state, side, card, phase="exchange")
 
 
@@ -496,8 +551,14 @@ def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 def _read_the_move(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    if context.choice("__human__") and state.opponent(side).temporary_zone and context.choice("mode") not in {"draw", "remove"}:
+        raise ChoiceRequired(card.name, "mode", ["remove", "draw"])
+    if context.choice("mode") == "draw" or not state.opponent(side).temporary_zone:
+        draw_one(state, side)
+        return
     target = _choose_opponent_temporary(state, side, card, context)
     if target is None:
+        draw_one(state, side)
         return
 
     opponent_side = state.opponent_side(side)
@@ -515,20 +576,30 @@ def _read_the_move(
 
 
 def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    """Current Pull choice: setup a reversal or filter one card."""
+    if context.choice("__human__") and context.choice("mode") not in {"reversal", "filter"}:
+        raise ChoiceRequired(card.name, "mode", ["reversal", "filter"])
+    if context.choice("mode") in {"filter", "draw_discard"}:
+        draw_one(state, side)
+        if state.winner is None:
+            _discard_from_hand(state, side, card, context)
+        # Pull is ordinarily a Temporary, but filter mode never enters it.
+        state.fighter(side).discard_pile.append(card)
+        return
+
     fighter = state.fighter(side)
     lose_momentum(state, side, 1)
-    lose_position(state, side, 1)
-    if fighter.discard_pile:
-        # Deterministic default prevents forcing an AI choice.
-        # Human/controller may supply a valid index to select another card.
+    if state.winner is None:
+        lose_position(state, side, 1, source="Pull")
+    if fighter.discard_pile and state.winner is None:
         index = context.choice("discard_index")
         if not isinstance(index, int) or not 0 <= index < len(fighter.discard_pile):
             index = len(fighter.discard_pile) - 1
         recovered = fighter.discard_pile.pop(index)
         fighter.draw_pile.insert(0, recovered)
         state.log(f"{fighter.wrestler.name} puts {recovered.name} on top of the Draw Pile.")
-    add_temporary(state, side, card, phase="exchange")
-
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
 
 
 def _power_water(
@@ -540,7 +611,7 @@ def _power_water(
     fighter = state.fighter(side)
     cantrips = [
         Card(62, "Power Water Cantrip")
-        for _ in range(3)
+        for _ in range(6)
     ]
 
     # Derive a reproducible shuffle from the current bout state.
@@ -558,7 +629,7 @@ def _power_water(
 
     fighter.draw_pile.extend(cantrips)
     random.Random(seed).shuffle(fighter.draw_pile)
-    state.log(f"{fighter.wrestler.name} shuffles 3 Power Water Cantrips into the Draw Pile.")
+    state.log(f"{fighter.wrestler.name} shuffles 6 Power Water Cantrips into the Draw Pile.")
 
 
 def _power_water_cantrip(
@@ -627,12 +698,15 @@ def _ottsuke(state: BoutState, side: Side, card: Card, context: EffectContext) -
         modes.append("reduce_grip")
     if temp_targets or kimarite_targets:
         modes.append("remove_card")
-    if not modes:
-        return
+    modes.append("draw")
 
     mode = modes[0] if len(modes) == 1 else context.choice("mode")
     if mode not in modes:
         raise ChoiceRequired(card.name, "mode", modes)
+
+    if mode == "draw":
+        draw_one(state, side)
+        return
 
     if mode == "reduce_grip":
         chosen = grips[0] if len(grips) == 1 else context.choice("grip")
@@ -721,8 +795,6 @@ def _sidestep(
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Injury": lambda state, side, card, context: None,
     "Oshi": _oshi,
-    "Bad Oshi": _bad_oshi,
-    "Big Tsuki": _big_tsuki,
     "Shove": _shove,
     "Explosive Step — Fumikomi": _explosive_step,
     "Tsuki": _tsuki,
@@ -768,16 +840,9 @@ MILL_AMOUNTS = {
     "Explosive Step — Fumikomi": 2,
     "Tsuppari": 1,
     "Oshi": 1,
-    "Bad Oshi": 1,
     "Tsuki": 1,
-    "Big Tsuki": 1,
     "Shove": 1,
 }
-RECYCLE_NAMES = frozenset({
-    "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate",
-    "Morozashi", "Use the Tawara",
-})
-
 
 def mill_cards(state: BoutState, side: Side, amount: int) -> None:
     """Move up to X cards from top of Draw Pile to Discard Pile; never draw."""
@@ -788,25 +853,6 @@ def mill_cards(state: BoutState, side: Side, amount: int) -> None:
     state.log(f"{fighter.wrestler.name} mills {moved} card(s).")
 
 
-def recycle_one(state: BoutState, side: Side, context: EffectContext) -> None:
-    """Return one discarded card to bottom of Draw Pile.
-
-    An explicit discard_index selects a card when present. The AI/default
-    deterministically selects the last discarded card to avoid choice deadlocks.
-    """
-    fighter = state.fighter(side)
-    if not fighter.discard_pile:
-        return
-    selected = context.choice("recycle_discard_index")
-    if selected is None:
-        selected = len(fighter.discard_pile) - 1
-    if not isinstance(selected, int) or not 0 <= selected < len(fighter.discard_pile):
-        raise ValueError("Invalid recycling discard index.")
-    recovered = fighter.discard_pile.pop(selected)
-    fighter.draw_pile.append(recovered)
-    state.log(f"{fighter.wrestler.name} recycles {recovered.name} to the bottom of the Draw Pile.")
-
-
 def _with_resource_cost(name: str, original: ExchangeEffect) -> ExchangeEffect:
     def effect(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
         original(state, side, card, context)
@@ -814,12 +860,10 @@ def _with_resource_cost(name: str, original: ExchangeEffect) -> ExchangeEffect:
             return
         if name in MILL_AMOUNTS:
             mill_cards(state, side, MILL_AMOUNTS[name])
-        if name in RECYCLE_NAMES:
-            recycle_one(state, side, context)
     return effect
 
 
-for _name in (*MILL_AMOUNTS, *RECYCLE_NAMES):
+for _name in MILL_AMOUNTS:
     if _name not in EXCHANGE_EFFECTS:
         raise RuntimeError(f"Missing exchange effect for {_name}")
     EXCHANGE_EFFECTS[_name] = _with_resource_cost(_name, EXCHANGE_EFFECTS[_name])
@@ -829,6 +873,9 @@ for _name in (*MILL_AMOUNTS, *RECYCLE_NAMES):
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
         "Salt Throw",
+        "Tsuri",
+        "Yori",
+        "Gaburi",
         "Gain Left Grip",
         "Gain Right Grip",
         "Uwate",
@@ -839,12 +886,10 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Hold Position",
         "Immovable",
         "Pull",
-        "Get Underneath",
         "Sidestep",
         "Use the Tawara",
         "Kannuki",
         "Morozashi",
-        "Give Ground",
     }
 )
 
