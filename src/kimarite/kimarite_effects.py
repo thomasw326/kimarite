@@ -67,6 +67,8 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     elif card.name == "Yoritaoshi":
         if power_advantage(state, side) >= 1:
             gain_flexible_grip(state, side)
+        if fighter.total_grip >= 1:
+            gain_power(state, side, 1)
 
     elif card.name == "Katasukashi":
         if _optional(context, "use_optional", card):
