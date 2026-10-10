@@ -79,3 +79,42 @@ Oshidashi 121; Katasukashi 95; Kotenage 73; Tsukiotoshi 70; Hatakikomi 62; Abise
 A new CI gate on PR #16 runs 20 repetitions × 105 unordered style pairings × 2 seat assignments = **4,200 bouts** (30-turn cap). Each pair of seat assignments shares one base seed. This corrects the earlier seed mismatch between the two legs, but **does not ensure identical card orders for each style**, because styles are independently seeded by seat in the underlying builder. Treat this as better-controlled replication, not a fully counterfactual same-deck test.
 
 Do not mix its win rates with the original 840-bout results as though they were the same experiment: the seeding policy has changed. Preserve the original report and artifact as historical snapshots. New analysis will emphasize completion rate, seat bias, interval uncertainty, matchup sample sizes, and whether the previously identified extremes persist. No automatic balance changes.
+
+## Larger paired-seed replication — CI run #712
+
+**Source:** [GitHub Actions run #712](https://github.com/thomasw326/kimarite/actions/runs/38025928484), code commit `865d007a03de1acb71977fce2f257e9fec0b12ae`, artifact `v5-style-baseline`. Results also appear in the connected **Kimarite Card Library → 5.0 Data** worksheet.
+
+**Protocol:** 20 repetitions, 15 styles, 105 unordered pairings, two reversed seat assignments per repetition = **4,200 bouts**, 560 appearances per style, seed 20261009, 30-turn maximum. Same base seed for each pairing's two seats, not necessarily identical card order.
+
+- 4,200/4,200 completed, zero unresolved.
+- Side A victories: 2,131/4,200 = **50.74%**.
+- Opening finishes: 221/4,200 = **5.26%**.
+- All winning finish counts sum to 4,200.
+
+| Style | Wins | Losses | Win rate | Opening losses | Average bout turns |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| The Specialist | 326 | 234 | 58.21% | 71 | 5.29 |
+| Mawashi Specialist | 324 | 236 | 57.86% | 17 | 6.78 |
+| The Technician | 307 | 253 | 54.82% | 54 | 6.47 |
+| Speed Demon | 305 | 255 | 54.46% | 0 | 6.02 |
+| Power Grappler | 304 | 256 | 54.29% | 20 | 6.33 |
+| The Arsenal | 295 | 265 | 52.68% | 38 | 6.69 |
+| Charger | 286 | 274 | 51.07% | 0 | 5.89 |
+| Unorthodox Powerhouse | 283 | 277 | 50.54% | 15 | 6.88 |
+| Disruptor | 283 | 277 | 50.54% | 6 | 6.64 |
+| Fast Grappler | 279 | 281 | 49.82% | 0 | 7.32 |
+| Bulldozer | 268 | 292 | 47.86% | 0 | 5.63 |
+| Opportunist | 255 | 305 | 45.54% | 0 | 7.43 |
+| Heavy Hitter | 249 | 311 | 44.46% | 0 | 6.08 |
+| Mountain | 223 | 337 | 39.82% | 0 | 6.39 |
+| Pressure Fighter | 213 | 347 | 38.04% | 0 | 6.52 |
+
+### Comparison limitations
+
+This run used *five times more bouts* and changed the pair-leg seed policy relative to the older 840-bout baseline. Raw differences must not be described as the effect of a specific rule or card change. The strongest changes in observed style percentages were Opportunist (-7.14 percentage points), Charger (-6.97), Bulldozer (+5.90), Pressure Fighter (-4.82), Heavy Hitter (-4.65), and Power Grappler (+4.29). Individual style standard errors near 50% are approximately 2.1 percentage points across 560 bouts if treated as independent, but matchup and shared-seed structure may enlarge effective uncertainty. Preserve both results, and evaluate further replication/AI-card usage before any balance changes.
+
+### Finish counts (4,200 total)
+
+Oshidashi 657; Katasukashi 421; Kotenage 328; Yorikiri 318; Tsukiotoshi 315; Abisetaoshi 310; Oshitaoshi 294; Shitatenage 257; Hatakikomi 232; Tsuridashi 213; Tottari 207; Hikiotoshi 201; Uwatenage 197; Power 81; Yoritaoshi 49; Tsukidashi 46; Tsukitaoshi 41; Shove 33.
+
+**No balance changes approved or applied.** The source artifact retains the full ordered-matchup win matrix and per-style exchange card-play counts.
