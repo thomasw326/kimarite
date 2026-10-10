@@ -1,4 +1,4 @@
-"""Local-only V5 15-style round robin; no scheduled GitHub action.
+"""Reproducible V5 15-style round robin (including CI baseline runs).
 
 Usage: python -m kimarite.style_round_robin_v5 --repetitions 2
 """
@@ -32,9 +32,13 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
     turns_by_style = Counter()
     for repeat in range(repetitions):
         for pair_index, (first, second) in enumerate(combinations(styles, 2)):
-            for leg, (a, b) in enumerate(((first, second), (second, first))):
+            # Use one common seed for both seat assignments in a matchup.
+            # The styles still generate their own seeded decks by seat, so this
+            # controls the base RNG seed; it does not make hands identical.
+            pair_seed = seed + repeat * 10000 + pair_index
+            for a, b in ((first, second), (second, first)):
                 result = run_style_bout(
-                    a, b, seed=seed + repeat * 10000 + pair_index * 2 + leg,
+                    a, b, seed=pair_seed,
                     max_turns=max_turns,
                 )
                 bouts += 1
@@ -89,6 +93,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
         },
         "finishes": dict(finishes),
         "repetitions": repetitions, "seed": seed,
+        "seed_policy": "same base seed in both seat assignments per pairing",
     }
 
 
