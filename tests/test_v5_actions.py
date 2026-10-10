@@ -69,3 +69,25 @@ def test_other_side_cannot_play_and_invalid_index_is_atomic():
     with pytest.raises(IllegalPlay):
         submit_card_action(state, Side.A, 44)
     assert state == before
+
+
+def test_human_pull_prompts_for_mode_without_mutation():
+    state = state_with_hand("Pull")
+    before = deepcopy(state)
+    with pytest.raises(ChoiceRequired) as exc:
+        submit_card_action(state, Side.A, 0)
+    assert exc.value.choice_name == "mode"
+    assert set(exc.value.options) == {"reversal", "filter"}
+    assert state == before
+
+
+def test_human_read_the_move_prompts_when_removal_is_available():
+    from kimarite.temporary import add_temporary
+    state = state_with_hand("Read the Move")
+    add_temporary(state, Side.B, card_by_name("Pull"), phase="exchange")
+    before = deepcopy(state)
+    with pytest.raises(ChoiceRequired) as exc:
+        submit_card_action(state, Side.A, 0)
+    assert exc.value.choice_name == "mode"
+    assert set(exc.value.options) == {"remove", "draw"}
+    assert state == before
