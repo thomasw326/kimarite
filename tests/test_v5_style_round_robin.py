@@ -17,7 +17,7 @@ def test_pair_legs_share_base_seed(monkeypatch):
     def fake_bout(a, b, *, seed, max_turns):
         observed.append((a, b, seed))
         state = SimpleNamespace(
-            card_plays=[], winner=Side.A, win_method="Oshidashi"
+            card_plays=[], headlong_decisions=[], winner=Side.A, win_method="Oshidashi"
         )
         return SimpleNamespace(completed=True, turns=1, state=state)
 
