@@ -54,7 +54,7 @@ class HumanBout:
     ) -> "HumanBout":
         if max_turns <= 0:
             raise ValueError("max_turns must be positive")
-        prepared = create_prepared_bout(config)
+        prepared = create_prepared_bout(\n            config, sacrifice_choices={human_side: tachiai_sacrifice}\n        )
         session = cls(
             prepared.state,
             prepared.comparison,
@@ -66,7 +66,7 @@ class HumanBout:
         return session
 
     @classmethod
-    def new_styles(cls, human_style: str, opponent_style: str, *, seed: int = 0, max_turns: int = 100):
+    def new_styles(cls, human_style: str, opponent_style: str, *, seed: int = 0,\n                   max_turns: int = 100, tachiai_sacrifice: int | None = None):
         """Begin an archetype-versus-archetype human game."""
         from .style_builds_v5 import build_style
         from .style_ai_v5 import play_style_turn
@@ -80,7 +80,7 @@ class HumanBout:
         state = BoutState(a.fighter, b.fighter)
         comparison = compare_tachiai(a.fighter.wrestler, b.fighter.wrestler)
         apply_initial_power(state, comparison)
-        resolve_prepared_tachiai(state, comparison)
+        resolve_prepared_tachiai(\n            state, comparison, sacrifice_choices={Side.A: tachiai_sacrifice}\n        )
         if state.winner is None:
             state.active_side = first_exchange_side(comparison, a.fighter.wrestler, b.fighter.wrestler)
         def controller(state, side, comparison):
