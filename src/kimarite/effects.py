@@ -293,6 +293,11 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
     chosen_index = context.choice("uwate_card_index")
     if chosen_index is None:
+        if context.choice("__human__") and len(eligible) > 1:
+            raise ChoiceRequired(
+                card.name, "uwate_card_index",
+                [i for i, candidate in enumerate(looked) if candidate in eligible],
+            )
         chosen = ai_choose_from_look(eligible, fighter.wrestler, 1)[0]
     else:
         if not isinstance(chosen_index, int) or not 0 <= chosen_index < len(looked):
