@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .models import BoutState, Card, GripState, Side, TemporaryInstance
+from .catalog import card_by_name
 from .prevention import prevent_negative_effect
 from .rules import establish_grip, gain_momentum, gain_power, gain_push, reduce_grip
 
@@ -93,6 +94,22 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name == "Attempt Deep Inside Grip":
             fighter.right_grip = GripState.DEEP
             state.log(f"{fighter.wrestler.name}'s Right Grip becomes DEEP.")
+        elif name == "Tsuri":
+            from .rules import effective_total_grip
+            if fighter.power >= 5 and effective_total_grip(state, side) >= 2:
+                gain_push(state, side, 3)
+            else:
+                gain_push(state, side, 1)
+        elif name == "Yori":
+            from .rules import effective_total_grip
+            owner_grip = effective_total_grip(state, side)
+            other_grip = effective_total_grip(state, state.opponent_side(side))
+            gain_momentum(state, side, 3 if owner_grip > other_grip else 1)
+        elif name == "Gaburi":
+            if fighter.power > state.opponent(side).power:
+                created = card_by_name("Yorikiri")
+                fighter.kimarite_zone.append(created)
+                state.log(f"{fighter.wrestler.name} creates Yorikiri with Gaburi.")
         elif name == "Hold Position":
             gain_momentum(state, side, 1)
             gain_power(state, side, 1)
