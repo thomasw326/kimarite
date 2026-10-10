@@ -103,6 +103,7 @@ class BoutState:
     winner: Side | None = None
     win_method: str | None = None
     win_source: str | None = None
+    tachiai_spirit_advantage_a: int = 0
     winning_kimarite_card_id: int | None = None
     card_play_ids: list[tuple[Side, int]] = field(default_factory=list)
     card_plays: list[tuple[Side, str]] = field(default_factory=list)
