@@ -17,10 +17,12 @@ from .turns import apply_initial_power, end_exchange_turn, start_exchange_turn
 def run_style_bout(
     style_a: str, style_b: str, *,
     seed: int = 0, max_turns: int = 100, difficulty: int = 0,
+    disable_kimarite_exchange_effects: bool = False,
 ) -> SimulationResult:
     first = build_style(style_a, seed=seed, ranking=1, difficulty=difficulty)
     second = build_style(style_b, seed=seed + 1009, ranking=2, difficulty=difficulty)
     state = BoutState(first.fighter, second.fighter)
+    state.disable_kimarite_exchange_effects = disable_kimarite_exchange_effects
     comp = compare_tachiai(first.fighter.wrestler, second.fighter.wrestler)
     apply_initial_power(state, comp)
     # R15 Headlong Charge: always sacrifice the first available Kimarite.
