@@ -141,14 +141,8 @@ def _discard_from_hand(state: BoutState, side: Side, card: Card, context: Effect
     state.log(f"{fighter.wrestler.name} discards {discarded.name} with {card.name}.")
 
 
-def _bad_oshi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    _oshi(state, side, card, context)
-    if state.winner is None:
-        _discard_from_hand(state, side, card, context)
-
-
 def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    chained = any(played.name in {"Oshi", "Bad Oshi", "Tsuki", "Big Tsuki", "Tsuppari"}
+    chained = any(played.name in {"Oshi", "Tsuki", "Big Tsuki", "Tsuppari"}
                   for played in state.fighter(side).played_this_turn[:-1])
     gain_push(state, side, 1)
     if chained and state.winner is None:
@@ -223,7 +217,7 @@ def _big_tsuki(state: BoutState, side: Side, card: Card, context: EffectContext)
 def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     fighter = state.fighter(side)
     chained = any(
-        played.name in {"Oshi", "Bad Oshi", "Tsuki", "Big Tsuki", "Tsuppari", "Shove"}
+        played.name in {"Oshi", "Tsuki", "Big Tsuki", "Tsuppari", "Shove"}
         for played in fighter.played_this_turn[:-1]
     )
     gain_momentum(state, side, 1)
@@ -721,7 +715,6 @@ def _sidestep(
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Injury": lambda state, side, card, context: None,
     "Oshi": _oshi,
-    "Bad Oshi": _bad_oshi,
     "Big Tsuki": _big_tsuki,
     "Shove": _shove,
     "Explosive Step — Fumikomi": _explosive_step,
@@ -768,7 +761,6 @@ MILL_AMOUNTS = {
     "Explosive Step — Fumikomi": 2,
     "Tsuppari": 1,
     "Oshi": 1,
-    "Bad Oshi": 1,
     "Tsuki": 1,
     "Big Tsuki": 1,
     "Shove": 1,
