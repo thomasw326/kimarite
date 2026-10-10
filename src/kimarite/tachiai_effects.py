@@ -81,7 +81,12 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> in
     return 1 if card.name in {"Sidestep", "Give Ground"} else 2
 
 
-def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) -> None:
+def resolve_prepared_tachiai(
+    state: BoutState,
+    comparison: TachiaiComparison,
+    *,
+    sacrifice_choices: dict[Side, int | None] | None = None,
+) -> None:
     """Resolve prepared Tachiai cards, including cards without a Tachiai-specific effect."""
     for side in (Side.A, Side.B):
         _activate_prebout_shiko(state, side)
@@ -124,12 +129,14 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
         name = card.name
 
         if name == "Headlong Charge":
-            if fighter.kimarite_zone:
-                sacrificed = fighter.kimarite_zone.pop(0)
+            # An omitted choice means decline, never sacrifice automatically.
+            choice = (sacrifice_choices or {}).get(side)
+            if choice is not None:
+                if type(choice) is not int or not 0 <= choice < len(fighter.kimarite_zone):
+                    raise ValueError("Invalid Headlong Charge sacrifice choice")
+                sacrificed = fighter.kimarite_zone.pop(choice)
                 fighter.discard_pile.append(sacrificed)
-                state.log(
-                    f"{fighter.wrestler.name} sacrifices {sacrificed.name}."
-                )
+                state.log(f"{fighter.wrestler.name} sacrifices {sacrificed.name}.")
                 momentum_delta[side] += 1
                 extra_push[side] += 1
 
