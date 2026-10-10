@@ -1,3 +1,10 @@
+## Current verification checkpoint (October 9, 2026)
+
+- **CI green:** test run #672 passed after deferred human-owned search support; subsequent run #676 passed after the Sidestep Temporary lock cleanup and its regression test.
+- **Sidestep regression repaired:** when the Temporary is disrupted, Side-by-Side is cleared and future Push is no longer indefinitely suppressed.
+- **New baseline trigger:** the V5 style probe workflow now runs when core effects, Temporary, Tachiai, turn, AI, model, or print-pool files change; its results must be evaluated independently of regression success.
+- The numbered 5-item list above is the original audit backlog, not the current outstanding checklist. Current unresolved items are independent validation of the baseline probe and any behavioral issues it exposes; card/stat balancing still requires designer approval.
+
 # V5 current-card synchronization audit
 
 **Source:** `Kimarite Card Library` → `Playtest Print Pool V4.3 — Test`, range A1:M63. The literal current card texts and values are frozen in `data/v5_print_pool_snapshot.json`. Tests in `tests/test_v5_print_pool_sync.py` enforce listed orbs and active/retired status.
