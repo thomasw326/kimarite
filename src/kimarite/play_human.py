@@ -52,22 +52,22 @@ CARD_LIBRARY_TEXT = {
   },
   "gain left grip": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai: If you win Technique, establish your Left Grip. Exchange: Increase Left Grip by 1 level (max Level 2). Temporary: Prevent the next 1 Push you receive while this protection remains active. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile).",
+    "effect": "Tachiai: If you win Technique, establish your Left Grip. Exchange: Increase Left Grip by 1 level (max Level 2). Temporary: Prevent the next 1 Push you receive while this protection remains active.",
     "notes": ""
   },
   "gain right grip": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai: If you win Technique, establish your Right Grip. Exchange: Increase Right Grip by 1 level (max Level 2). Temporary: Prevent the next 1 Push you receive while this protection remains active. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile).",
+    "effect": "Tachiai: If you win Technique, establish your Right Grip. Exchange: Increase Right Grip by 1 level (max Level 2). Temporary: Prevent the next 1 Push you receive while this protection remains active.",
     "notes": ""
   },
   "uwate": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: Improve Left Grip by 1. Look at the top X cards of your Draw Pile, where X is your Total Grip. If Left Grip is Deep, play 1 without spending a Play; otherwise, draw 1. Put the rest on the bottom of your Draw Pile. Temporary: Prevent the next 1 Push you receive while this protection remains active. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile).",
+    "effect": "Exchange: Improve Left Grip by 1. Look at the top X cards of your Draw Pile, where X is your Total Grip. If Left Grip is Deep, play 1 without spending a Play; otherwise, draw 1. Put the rest on the bottom of your Draw Pile. Temporary: Prevent the next 1 Push you receive while this protection remains active.",
     "notes": ""
   },
   "shitate": {
     "timing": "Tachiai / Exchange",
-    "effect": "Improve Right Grip by 1. If Right Grip is already Deep, gain 2 Push instead. Temporary: Prevent the next 1 Push you receive while this protection remains active. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile).",
+    "effect": "Improve Right Grip by 1. If Right Grip is already Deep, gain 2 Push instead. Temporary: Prevent the next 1 Push you receive while this protection remains active.",
     "notes": ""
   },
   "attempt two-handed grip": {
@@ -92,7 +92,7 @@ CARD_LIBRARY_TEXT = {
   },
   "salt throw": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai / Exchange: If your Discard Pile has 7+ cards, return the entire Discard Pile to the bottom of the Draw Pile. Enter a persistent Temporary; at the start of each of your turns, recycle one discarded card to the bottom of your Draw Pile.",
+    "effect": "No Exchange effect (deck recycling removed).",
     "notes": ""
   },
   "stare down": {
@@ -177,7 +177,7 @@ CARD_LIBRARY_TEXT = {
   },
   "use the tawara": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange — Temporary: Lose 1 Position. Gain 1 Momentum. Search for a Kimarite. While this remains, Push cannot move you. At the start of your next turn, discard this. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile).",
+    "effect": "Exchange — Temporary: Lose 1 Position. Gain 1 Momentum. Search for a Kimarite. While this remains, Push cannot move you. At the start of your next turn, discard this.",
     "notes": ""
   },
   "kannuki": {
@@ -187,7 +187,7 @@ CARD_LIBRARY_TEXT = {
   },
   "morozashi": {
     "timing": "Tachiai / Exchange",
-    "effect": "Requires one Level 1 Grip. Gain other Grip at Level 1; protect Grips while Temporary remains. If it survives to your next turn, gain 1 Push (not Momentum). Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile).",
+    "effect": "Requires one Level 1 Grip. Gain other Grip at Level 1; protect Grips while Temporary remains. If it survives to your next turn, gain 1 Push (not Momentum).",
     "notes": ""
   },
   "yorikiri": {
