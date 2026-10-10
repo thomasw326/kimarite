@@ -10,7 +10,7 @@ CARD_POOL: tuple[Card, ...] = (
     Card(1, "Oshi", 0, 0, 1),
     Card(3, "Tsuki", 1, 0, 0),
     Card(5, "Tsuppari", 2, 0, 1),
-    Card(7, "Headlong Charge", 0, 0, 3),
+    Card(7, "Headlong Charge", 0, 0, 4),
     Card(8, "Nodowa", 2, 0, 0),
     Card(9, "Harite", 2, 0, 1),
     Card(10, "Gain Left Grip", 0, 3, 0),
