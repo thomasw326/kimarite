@@ -23,7 +23,20 @@ def run_style_bout(
     state = BoutState(first.fighter, second.fighter)
     comp = compare_tachiai(first.fighter.wrestler, second.fighter.wrestler)
     apply_initial_power(state, comp)
-    resolve_prepared_tachiai(state, comp)
+    # Optional opening sacrifice: AI weighs a possible immediate force-out
+    # against losing its starting Kimarite. Never auto-sacrifice by default.
+    opening_choices = {}
+    for side in (Side.A, Side.B):
+        fighter = state.fighter(side)
+        if fighter.wrestler.prepared_tachiai_card.name != "Headlong Charge":
+            continue
+        advantage = comp.advantage_for(side, __import__(
+            "kimarite.models", fromlist=["Stat"]
+        ).Stat.SPIRIT)
+        # A large Spirit lead can convert the additional Push into an
+        # opening ring-out; otherwise preserve the sole finishing option.
+        opening_choices[side] = 0 if advantage >= 5 and fighter.kimarite_zone else None
+    resolve_prepared_tachiai(state, comp, sacrifice_choices=opening_choices)
     if state.winner is not None:
         return SimulationResult(state, True, 0)
     state.active_side = first_exchange_side(comp, first.fighter.wrestler, second.fighter.wrestler)
