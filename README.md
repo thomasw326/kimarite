@@ -1,24 +1,37 @@
 # Kimarite
 
-Kimarite is a sumo-inspired tactical card game currently being developed as a deterministic rules engine and AI-vs-AI simulator.
+Kimarite is a sumo-inspired tactical card game with a deterministic rules engine, AI-vs-AI simulator, and an early **V5.0 human-vs-AI terminal prototype**.
 
-## Current goal
+## Play a bout (V5.0 development branch)
 
-The first implementation milestone is a headless simulator that can:
+From the repository root:
 
-- resolve a bout deterministically from seeds,
-- run AI-vs-AI matches,
-- emit a complete event log for debugging,
-- batch thousands of matches for balance analysis.
+```powershell
+python -m pip install -e ".[dev]"
+python -m kimarite.play_human --human Fujinokawa --opponent Fujinokawa
+```
 
-Player-facing UI will come later.
+Choose cards to keep when the Technique or Grip card-access prompt appears. During your Exchange turn, enter the numbered card you want to play, `pass` to end the turn, or `quit` to leave. Some card effects prompt for extra choices. You can also choose a different opponent and AI mode:
 
-## Development approach
+```powershell
+python -m kimarite.play_human --human Fujinokawa --opponent Tochinoshin --ai-mode personality --seed 42
+```
 
-The codebase is split conceptually into:
+**Prototype limits:** This is terminal-only, not a graphical game; it uses the existing predefined wrestler templates rather than the upcoming 15 weighted style archetypes. The engine's AI operates on full game state internally; the public observation API only exposes the player's own hand and public opponent information. There is no persistent save/load interface yet.
 
-1. **Game engine** — rules and state transitions.
-2. **AI** — decisions made from legal game states.
-3. **Simulation / analysis** — batch runs and balance statistics.
+## Developer tests
 
-The tabletop rules and card library remain the design source of truth while the engine is being validated.
+```powershell
+python -m pytest -q
+```
+
+The rules engine remains shared across tactical AI, personality AI, automated simulation, and human actions. Human card and keep/bottom choices use transactional execution so invalid input does not corrupt the bout state.
+
+## Current development roadmap
+
+1. Complete and validate the human-vs-AI bout lifecycle.
+2. Introduce the 15 style-aware AI opponents with weighted preferred cards and Kimarite.
+3. Add survival-first AI priorities for dangerous Position and Momentum.
+4. Compare deterministic AI-vs-AI runs for balance without changing approved card rules unnecessarily.
+
+The tabletop rules and card library remain the design source of truth; gameplay changes are validated separately from controller and UI development.
