@@ -65,6 +65,30 @@ class HumanBout:
         session.advance()
         return session
 
+    @classmethod
+    def new_styles(cls, human_style: str, opponent_style: str, *, seed: int = 0, max_turns: int = 100):
+        """Begin an archetype-versus-archetype human game."""
+        from .style_builds_v5 import build_style
+        from .style_ai_v5 import play_style_turn
+        from .tachiai import compare_tachiai, first_exchange_side
+        from .tachiai_effects import resolve_prepared_tachiai
+        from .turns import apply_initial_power
+        if max_turns <= 0:
+            raise ValueError("max_turns must be positive")
+        a = build_style(human_style, seed=seed, ranking=1)
+        b = build_style(opponent_style, seed=seed + 1009, ranking=2)
+        state = BoutState(a.fighter, b.fighter)
+        comparison = compare_tachiai(a.fighter.wrestler, b.fighter.wrestler)
+        apply_initial_power(state, comparison)
+        resolve_prepared_tachiai(state, comparison)
+        if state.winner is None:
+            state.active_side = first_exchange_side(comparison, a.fighter.wrestler, b.fighter.wrestler)
+        def controller(state, side, comparison):
+            return play_style_turn(state, side, comparison, opponent_style)
+        session = cls(state, comparison, Side.A, controller, max_turns)
+        session.advance()
+        return session
+
     @property
     def finished(self) -> bool:
         return self.state.winner is not None or self.stopped_reason is not None
