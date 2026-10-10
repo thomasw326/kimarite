@@ -165,15 +165,11 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 fighter.discard_pile.append(discarded)
 
     elif card.name == "Abisetaoshi":
-        if fighter.power >= 5:
+        if fighter.power >= 6:
             if effective_total_grip(state, side) == 0:
                 gain_flexible_grip(state, side)
             else:
                 gain_power(state, side, 1)
-        if power_advantage(state, side) >= 3:
-            gain_momentum(state, side, 1)
-            from .rules import lose_power
-            lose_power(state, opponent_side, 1)
 
     else:
         raise KeyError(f"No Kimarite play effect registered for {card.name!r}.")
