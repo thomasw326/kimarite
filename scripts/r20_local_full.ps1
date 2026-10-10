@@ -27,6 +27,25 @@ if ($arms.Count -ne 70 -or @($arms | Sort-Object -Unique).Count -ne 70) {
 }
 
 $expected = $arms.Count * 2 * 648
+$config = @{
+    seed = $Seed
+    max_turns = $MaxTurns
+    chunk_size = $ChunkSize
+    expected_bouts = $expected
+    design_sha256 = (Get-FileHash "data\r20_kimarite_arms.json" -Algorithm SHA256).Hash
+}
+$configPath = Join-Path $root "run_config.json"
+if (Test-Path $configPath) {
+    $prior = Get-Content $configPath -Raw | ConvertFrom-Json
+    foreach ($key in $config.Keys) {
+        if ([string]$prior.$key -ne [string]$config[$key]) {
+            throw "Checkpoint $configPath belongs to another schedule ($key differs). Move the old outputs before restarting."
+        }
+    }
+}
+else {
+    $config | ConvertTo-Json | Set-Content -Encoding UTF8 $configPath
+}
 $done = 0
 $skipped = 0
 foreach ($arm in $arms) {
@@ -69,6 +88,7 @@ foreach ($arm in $arms) {
     }
 }
 
+if ($done -ne $expected) { throw "Only $done of $expected bouts were checkpointed." }
 Write-Host "[R20] Full schedule complete: $done / $expected bouts ($skipped resumed)."
 $all = @(Get-ChildItem $root -Filter "*.csv" | Select-Object -ExpandProperty FullName)
 python -m kimarite.r20_gauntlet_report @all --output-dir (Join-Path $root "report")
