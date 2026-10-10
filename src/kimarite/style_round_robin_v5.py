@@ -29,6 +29,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
     incomplete_by_style = Counter()
     pair_wins = Counter()
     finishes_by_winner = Counter()
+    defeats_by_loser_and_method = Counter()
     opening_losses = Counter()
     card_plays_by_style = Counter()
     turns_by_style = Counter()
@@ -105,6 +106,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                 loser = b if result.state.winner.value == "A" else a
                 wins[winner] += 1
                 losses[loser] += 1
+                defeats_by_loser_and_method[(loser, result.state.win_method or 'unknown')] += 1
                 pair_wins[(winner, loser)] += 1
                 finish = result.state.win_method or "unknown"
                 if result.state.win_source == "ringout":
@@ -127,6 +129,18 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
         },
         "average_bout_turns_by_style": {
             style: round(turns_by_style[style] / (2 * (len(styles) - 1) * repetitions), 2)
+            for style in styles
+        },
+        "losses_by_finish_and_style": {
+            style: {method: count for (name, method), count in defeats_by_loser_and_method.items() if name == style}
+            for style in styles
+        },
+        "power_and_exhaustion_losses_by_style": {
+            style: {
+                "negative_power": defeats_by_loser_and_method[(style, "Power")],
+                "empty_draw_pile": defeats_by_loser_and_method[(style, "Exhaustion")],
+                "combined": defeats_by_loser_and_method[(style, "Power")] + defeats_by_loser_and_method[(style, "Exhaustion")],
+            }
             for style in styles
         },
         "wins_by_finish_and_style": {
