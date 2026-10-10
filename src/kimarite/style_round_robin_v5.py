@@ -32,6 +32,8 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
     card_plays_by_style = Counter()
     turns_by_style = Counter()
     slot_outcomes = Counter()
+    headlong_choice_counts = Counter()
+    headlong_choice_outcomes = Counter()
     for repeat in range(repetitions):
         for pair_index, (first, second) in enumerate(combinations(styles, 2)):
             # Use one common seed for both seat assignments in a matchup.
@@ -66,6 +68,10 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                             slot_outcomes[(role, c.name, "appearances")] += 1
                             if result.completed:
                                 slot_outcomes[(role, c.name, "wins" if result.state.winner.value == ("A" if idx == 0 else "B") else "losses")] += 1
+                for deciding_side, phase, decision, sacrificed_name in result.state.headlong_decisions:
+                    style_name = a if deciding_side is __import__("kimarite.models", fromlist=["Side"]).Side.A else b
+                    headlong_choice_counts[(phase, decision)] += 1
+                    headlong_choice_outcomes[(phase, decision, style_name, "wins" if result.state.winner is deciding_side else "losses")] += 1
                 for played_side, card_name in result.state.card_plays:
                     card_plays_by_style[(a if played_side.value == 'A' else b, card_name)] += 1
                 turns_by_style[a] += result.turns
@@ -110,6 +116,25 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
         "matchup_wins": {
             style: {opponent: pair_wins[(style, opponent)] for opponent in styles if opponent != style}
             for style in styles
+        },
+        "headlong_charge_ai_choices": {
+            phase: {
+                decision: {
+                    "count": headlong_choice_counts[(phase, decision)],
+                    "wins": sum(count for (p, d, style, result), count in headlong_choice_outcomes.items() if p == phase and d == decision and result == "wins"),
+                    "losses": sum(count for (p, d, style, result), count in headlong_choice_outcomes.items() if p == phase and d == decision and result == "losses"),
+                    "by_style": {
+                        style: {
+                            "wins": headlong_choice_outcomes[(phase, decision, style, "wins")],
+                            "losses": headlong_choice_outcomes[(phase, decision, style, "losses")],
+                        }
+                        for style in styles
+                        if headlong_choice_outcomes[(phase, decision, style, "wins")] + headlong_choice_outcomes[(phase, decision, style, "losses")]
+                    },
+                }
+                for decision in ("sacrifice", "decline")
+            }
+            for phase in ("Tachiai", "Exchange")
         },
         "card_slot_outcomes": {
             role: {
