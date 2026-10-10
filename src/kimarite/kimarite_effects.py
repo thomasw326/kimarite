@@ -58,9 +58,9 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
 
     elif card.name == "Tsukidashi":
         if relative_position(state, side) >= 1:
-            draw_one(state, side)
+            add_play(state, side, 1)
             if state.winner is None:
-                gain_momentum(state, side, 1)
+                draw_one(state, side)
 
     elif card.name == "Oshitaoshi":
         if relative_momentum(state, side) >= 1:
