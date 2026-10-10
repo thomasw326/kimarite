@@ -1,24 +1,26 @@
-"""CLI smoke tests run through the actual entry point without a terminal."""
+"""CLI smoke tests exercise the real entry point with a reproducible seed."""
 import sys
 
 from kimarite import play_human
 
 
-def test_cli_can_open_bout_and_quit_during_card_access(monkeypatch, capsys):
+def test_cli_can_open_bout_and_quit(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["kimarite.play_human", "--seed", "20261009"])
     monkeypatch.setattr("builtins.input", lambda _: "quit")
     play_human.main()
     output = capsys.readouterr().out
     assert "KIMARITE" in output
-    assert "Looked at" in output
+    assert "Bout seed: 20261009" in output
+    assert "Playable:" in output
+    assert "Session ended without recording a victory." in output
 
 
-def test_cli_can_keep_cards_and_reach_play_prompt(monkeypatch, capsys):
+def test_cli_can_pass_turn_and_reach_next_prompt(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["kimarite.play_human", "--seed", "20261009"])
-    replies = iter(["0 1", "quit"])
+    replies = iter(["pass", "quit"])
     monkeypatch.setattr("builtins.input", lambda _: next(replies))
     play_human.main()
     output = capsys.readouterr().out
-    assert "Looked at" in output
+    assert "KIMARITE" in output
     assert "Your plays remaining" in output
     assert "Session ended without recording a victory." in output
