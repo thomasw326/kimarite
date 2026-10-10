@@ -18,6 +18,221 @@ from .styles_v5 import STYLES
 
 
 
+CARD_LIBRARY_TEXT = {
+  "oshi": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: Reveal top cards, adding each card's printed orbs; continue through Oshi/Tsuki until first other card. Discard revealed cards. Exchange: Gain 1 Push and 1 Play. Draw 1. Then Mill 1."
+  },
+  "tsuki": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: Same reveal-orb chain as Oshi. Exchange: Reduce one opponent Grip by one level if they have one. Gain 1 Play. Draw 1. Then Mill 1."
+  },
+  "tsuppari": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: Shuffle 3 Oshi, 3 Tsuki and 3 Shove into your Draw Pile (9 generated cards). Exchange: Gain 1 Momentum; if another Oshi/Tsuki/Tsuppari/Shove was played this turn, gain 1 Push. Gain 1 Play, draw 1, then Mill 1."
+  },
+  "headlong charge": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai / Exchange: You may discard a Kimarite in play; if you do, gain 1 Momentum and 1 Push. Mill 2. Prepared copy is discarded after Tachiai."
+  },
+  "nodowa": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: Gain 2 Power. Opponent looks at 2 fewer cards when resolving Technique, minimum 2. Exchange: Gain 2 Power. Remove 1 opposing Temporary."
+  },
+  "harite": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Gain 1 Power. Opponent loses 1 Power."
+  },
+  "gain left grip": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: If you win Technique, establish your Left Grip. Exchange: Increase Left Grip by 1 level (max Level 2). Temporary: Prevent the next 1 Push you receive while this protection remains active. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile)."
+  },
+  "gain right grip": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: If you win Technique, establish your Right Grip. Exchange: Increase Right Grip by 1 level (max Level 2). Temporary: Prevent the next 1 Push you receive while this protection remains active. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile)."
+  },
+  "uwate": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: Improve Left Grip by 1. Look at the top X cards of your Draw Pile, where X is your Total Grip. If Left Grip is Deep, play 1 without spending a Play; otherwise, draw 1. Put the rest on the bottom of your Draw Pile. Temporary: Prevent the next 1 Push you receive while this protection remains active. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile)."
+  },
+  "shitate": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Improve Right Grip by 1. If Right Grip is already Deep, gain 2 Push instead. Temporary: Prevent the next 1 Push you receive while this protection remains active. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile)."
+  },
+  "attempt two-handed grip": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: Establish 1 chosen Grip at Level 1 (without reducing an existing higher Grip). Temporary: Remains until the beginning of your next turn. If it survives, establish both Left and Right Grip at Level 1 (without reducing existing higher Grips). If removed or prevented before then, lose 1 Momentum."
+  },
+  "attempt deep outside grip": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: Establish Left Grip at Level 1 (without reducing an existing higher Grip). Temporary: Remains until the beginning of your next turn. If it survives, set your Left Grip to Deep (2). If removed or prevented before then, lose 1 Momentum."
+  },
+  "attempt deep inside grip": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: Establish Right Grip at Level 1 (without reducing an existing higher Grip). Temporary: Remains until the beginning of your next turn. If it survives, set your Right Grip to Deep (2). If removed or prevented before then, lose 1 Momentum."
+  },
+  "shiko stomp": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai / Exchange: Enter a persistent Temporary. When an opponent effect would negatively affect you or something you control, prevent that effect and discard Shiko Stomp. It does not expire at the beginning of your turn."
+  },
+  "salt throw": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai / Exchange: If your Discard Pile has 7+ cards, return the entire Discard Pile to the bottom of the Draw Pile. Enter a persistent Temporary; at the start of each of your turns, recycle one discarded card to the bottom of your Draw Pile."
+  },
+  "stare down": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: If you win Power, gain 1 Push. If you win Technique, improve opening card access by 1 kept card. If you win Spirit, gain 1 Momentum. Exchange: Look at top 1 plus the number of Tachiai comparisons won cards; keep 1, bottom the rest."
+  },
+  "power water": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: Shuffle 6 Power Water Cantrip cards into your Draw Pile."
+  },
+  "belt slap": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: Gain 1 Push. If you won Spirit in the Tachiai by 3 or more, gain 1 Momentum."
+  },
+  "tsuri": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: If you have no usable Grip, gain 1 Grip instead; otherwise, gain 1 Power. Temporary: Remains until the beginning of your next turn. If it survives, gain 3 Push if your Power is 5+ and your Total Grip is 2+; otherwise, gain 1 Push."
+  },
+  "yori": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: If you have no usable Grip, gain 1 Grip instead; otherwise, gain 1 Push. Temporary: Remains until the beginning of your next turn. If it survives, gain 3 Momentum if your Total Grip is greater than your opponent's Total Grip; otherwise, gain 1 Momentum."
+  },
+  "gaburi": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: If you have no usable Grip, gain 1 Grip instead; otherwise, gain 1 Momentum. Temporary: Remains until the beginning of your next turn. If it survives and your Power is greater than your opponent's Power, create a Yorikiri in your Kimarite Zone."
+  },
+  "ottsuke": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Choose: reduce 1 opposing Grip by 1 level, OR remove opposing Grip-referencing Temporary or Kimarite and gain 1 Momentum. No Push reward."
+  },
+  "hold position": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange — Temporary: Your opponent cannot gain Push while Hold Position remains. Remains until the beginning of your next turn. If it survives, gain 1 Momentum and 1 Power."
+  },
+  "immovable": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange — Temporary: Gain 1 Power. Remains until the beginning of your next turn. If it survives and your opponent gained no Push while it remained, gain 2 Momentum."
+  },
+  "henka": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: If your Technique is greater than your opponent's Spirit, the bout begins at Position 0, regardless of Tachiai Push. Exchange: Draw 1 card."
+  },
+  "pull": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange — Choose: (1) Lose 1 Momentum and 1 Position; put 1 card from your discard pile on top of your Draw Pile. Temporary: At the start of your next turn, if Pull remains, reverse your Momentum. (2) Draw 1 card, then discard 1 card."
+  },
+  "get underneath": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai / Exchange: Gain 1 Momentum and 1 Push. Opponent searches their deck for a Kimarite and puts it in their Kimarite Zone."
+  },
+  "read the move": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: Choose one — Remove 1 card from your opponent's Temporary Zone. If you do, gain 1 Momentum and draw 1 card; OR draw 1 card."
+  },
+  "reset to neutral": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: Remove all cards from both players' Temporary Zones. Remove all your Grip. If your Momentum is negative, set it to 0. If you removed at least 1 Grip this way, gain 1 Position."
+  },
+  "regain balance": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange: Draw 1 card. If your Momentum is negative, gain 2 Momentum and 2 Power."
+  },
+  "sidestep": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai unchanged. Exchange Temporary: Enter Side-by-Side at current distance. While active, ALL Push from both wrestlers is 0. At start of your next turn resolve favorable Position by Momentum, then discard."
+  },
+  "use the tawara": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Exchange — Temporary: Lose 1 Position. Gain 1 Momentum. Search for a Kimarite. While this remains, Push cannot move you. At the start of your next turn, discard this. Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile)."
+  },
+  "kannuki": {
+    "timing": "Tachiai / Exchange",
+    "effect": "While Kannuki remains, your opponent cannot establish or improve Grip and cannot gain benefits from their existing Grip. At the start of your next turn, reduce both their Left Grip and Right Grip by 1 level, then discard Kannuki."
+  },
+  "morozashi": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Requires one Level 1 Grip. Gain other Grip at Level 1; protect Grips while Temporary remains. If it survives to your next turn, gain 1 Push (not Momentum). Exchange: After resolving the other effects, Recycle 1 (move 1 card from your Discard Pile to the bottom of your Draw Pile)."
+  },
+  "yorikiri": {
+    "timing": "Start & End of Turn",
+    "effect": "Grip 2+ · Momentum 1+ · Position 2+"
+  },
+  "oshidashi": {
+    "timing": "Start & End of Turn",
+    "effect": "Position 2+ · Momentum 1+ · (Power Advantage 1+ OR Tachiai Spirit Advantage 3+)"
+  },
+  "tsukidashi": {
+    "timing": "Start & End of Turn",
+    "effect": "Position 2+ · Cards Played This Turn 4+"
+  },
+  "oshitaoshi": {
+    "timing": "Start & End of Turn",
+    "effect": "Momentum 1+ · Position 1+ · Power 8+"
+  },
+  "yoritaoshi": {
+    "timing": "Start & End of Turn",
+    "effect": "Grip 2+ · Position 2+ · Power Advantage 2+"
+  },
+  "give ground": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: If you lose Spirit, reduce the Push you receive by 1. Exchange: Lose 1 Position. Gain 1 Momentum and 1 Power. Draw 1 card."
+  },
+  "uwatenage": {
+    "timing": "Start & End of Turn",
+    "effect": "Deep Left Grip · Momentum 1+ · Position 0+"
+  },
+  "hatakikomi": {
+    "timing": "Start & End of Turn",
+    "effect": "Momentum ≤ −2 · Position 0+ · Power 5+"
+  },
+  "katasukashi": {
+    "timing": "Start & End of Turn",
+    "effect": "Win: No active Grip; your Momentum +1 or higher; lost Position during your current Exchange turn."
+  },
+  "hikiotoshi": {
+    "timing": "Start & End of Turn",
+    "effect": "Momentum ≤ −2 · Position 0+ · Grip 1+"
+  },
+  "tottari": {
+    "timing": "Start & End of Turn",
+    "effect": "No Grip · Opponent's Grip attempt was prevented or reduced during the specified turn window"
+  },
+  "tsukiotoshi": {
+    "timing": "Start & End of Turn",
+    "effect": "Gained Momentum this turn · (Position −3 OR Momentum −2)"
+  },
+  "tsukitaoshi": {
+    "timing": "Start & End of Turn",
+    "effect": "Momentum 2+ · Cards Played This Turn 4+"
+  },
+  "tsuridashi": {
+    "timing": "Start & End of Turn",
+    "effect": "Total Grip 3+ · Position 0+ · Power 5+"
+  },
+  "kotenage": {
+    "timing": "Start & End of Turn",
+    "effect": "Opponent has no Grip · Momentum 1+ · 5+ cards remaining in hand"
+  },
+  "abisetaoshi": {
+    "timing": "Start & End of Turn",
+    "effect": "Grip 2+ · Momentum 1+ · Power 7+"
+  },
+  "shove": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: Gain 1 Push; if your Position is +3 after the opening Push, immediately win by Shove. Exchange: Gain 1 Push. If you played Oshi/Tsuki/Tsuppari earlier this turn, draw 1 then discard 1 from hand. Mill 1."
+  },
+  "explosive step — fumikomi": {
+    "timing": "Tachiai / Exchange",
+    "effect": "Tachiai: If you win Spirit, gain 1 Push. Exchange: Gain 1 Momentum; if your Momentum was 0 or less before play, gain 1 Push. Mill 2 in both phases."
+  },
+  "shitatenage": {
+    "timing": "Start & End of Turn",
+    "effect": "Deep Right Grip · Momentum 1+ · Position 0+"
+  }
+}
+
 CARD_DESCRIPTIONS = {
     "oshi": "Exchange: Gain 1 Push, gain 1 Play, then draw 1 card. After play, mill 1 card from the top of your Draw Pile.",
 }
@@ -33,7 +248,12 @@ def _card_lookup(raw: str) -> bool:
         print(f"Unknown card: {raw[1:]}. Try /oshi.")
         return True
     print(f"\n{card.name} [P{card.power} T{card.technique} S{card.spirit}]")
-    print(CARD_DESCRIPTIONS.get(query, "Card effect description not yet available in the terminal. Check the Card Library."))
+    details = CARD_LIBRARY_TEXT.get(query)
+    if details:
+        print(f"Timing: {details['timing']}")
+        print(details["effect"])
+    else:
+        print(CARD_DESCRIPTIONS.get(query, "Effect text unavailable in the current V5 print pool."))
     return True
 
 
