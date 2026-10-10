@@ -157,25 +157,24 @@ def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectCon
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     add_play(state, side)
-    if True:  # Tsuki's Grip disruption no longer requires nonnegative Momentum.
-        opponent = state.opponent(side)
-        available: list[str] = []
-        if opponent.left_grip is not GripState.NONE:
-            available.append("left")
-        if opponent.right_grip is not GripState.NONE:
-            available.append("right")
-        chosen: str | None = None
-        if len(available) == 1:
-            chosen = available[0]
-        elif len(available) > 1:
-            chosen = context.choice("grip")
-            if chosen not in available:
-                raise ChoiceRequired(card.name, "grip", available)
-        if chosen is not None and not prevent_negative_effect(
-            state, state.opponent_side(side), source=card.name,
-            description=f"reduce {chosen.title()} Grip",
-        ):
-            reduce_grip(state, state.opponent_side(side), hand=chosen)
+    opponent = state.opponent(side)
+    available: list[str] = []
+    if opponent.left_grip is not GripState.NONE:
+        available.append("left")
+    if opponent.right_grip is not GripState.NONE:
+        available.append("right")
+    chosen: str | None = None
+    if len(available) == 1:
+        chosen = available[0]
+    elif len(available) > 1:
+        chosen = context.choice("grip")
+        if chosen not in available:
+            raise ChoiceRequired(card.name, "grip", available)
+    if chosen is not None and not prevent_negative_effect(
+        state, state.opponent_side(side), source=card.name,
+        description=f"reduce {chosen.title()} Grip",
+    ):
+        reduce_grip(state, state.opponent_side(side), hand=chosen)
     if state.winner is None:
         draw_one(state, side)
 
