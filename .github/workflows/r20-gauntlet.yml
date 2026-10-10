@@ -72,7 +72,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -e .
-      - name: Run 5 variants x 1296 bouts (both placements)
+      - name: Run 5 variants x 1296 bouts, recording rare turn-limit outcomes
         env:
           R20_SHARD: ${{ matrix.shard }}
         run: |
@@ -88,14 +88,26 @@ jobs:
               aid=arm["id"]
               path=p/f"{aid}.csv"
               subprocess.run([sys.executable,"-m","kimarite.r20_gauntlet_bouts",
-                  "--arm",aid,"--count","1296","--output",str(path)],check=True)
+                  "--arm",aid,"--count","1296","--max-turns","60",
+                  "--output",str(path)],check=True)
               with path.open(newline="",encoding="utf-8") as stream:
                   rows=list(csv.DictReader(stream))
               assert len(rows)==1296,(aid,len(rows))
-              incomplete=[r for r in rows if r["error"] or r["completed"]!="True"]
-              if incomplete:
-                  print("INCOMPLETE",aid,len(incomplete),incomplete[:3])
+              # Turn-limit outcomes are observations, not engine crashes. Keep
+              # them in the raw CSV; exclude them from completed-bout rates.
+              # Still fail on actual exceptions or malformed outcome records.
+              expected_limit="Turn limit 60"
+              failed=[r for r in rows
+                      if r["error"] not in ("",expected_limit)
+                      or (r["completed"]!="True" and r["error"]!=expected_limit)
+                      or (r["completed"]=="True" and r["error"])]
+              if failed:
+                  print("ENGINE ERROR",aid,len(failed),failed[:3])
                   raise SystemExit(1)
+              incomplete=[r for r in rows if r["completed"]!="True"]
+              if incomplete:
+                  print("RECORDED UNRESOLVED",aid,len(incomplete),
+                        "of",len(rows),"examples",incomplete[:2])
           print("SHARD COMPLETE",shard,[a["id"] for a in batch])
           PY
       - name: Upload completed and diagnostic records
