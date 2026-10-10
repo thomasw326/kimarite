@@ -57,7 +57,7 @@ def make_fighter(config, rng, ranking):
 
 
 def card_origin(wrestler, card_id):
-    if card_id in {62, 20001, 20002, 20003}:
+    if card_id == 62 or 20001 <= card_id <= 20009:
         return "generated"
     if card_id == wrestler.starting_kimarite.card_id:
         return "starting_kimarite"
