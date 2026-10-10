@@ -58,7 +58,10 @@ def _oshidashi(state: BoutState, side: Side) -> bool:
     return (
         relative_position(state, side) >= 2
         and relative_momentum(state, side) >= 1
-        and power_advantage(state, side) >= 1
+        and (
+            power_advantage(state, side) >= 1
+            or state.tachiai_spirit_advantage_a * state.sign(side) >= 3
+        )
     )
 
 
