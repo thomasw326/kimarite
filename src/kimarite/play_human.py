@@ -327,6 +327,14 @@ def _ask_effect_choices(bout: HumanBout, hand_index: int) -> None:
         except ChoiceRequired as requirement:
             print(f"{requirement.card_name}: choose {requirement.choice_name}")
             for i, option in enumerate(requirement.options):
+                if requirement.choice_name == "uwate_card_index":
+                    # Uwate looks at the unchanged top of the draw pile.
+                    # The engine tests choices on a clone until one is accepted.
+                    pile = bout.state.fighter(bout.human_side).draw_pile
+                    if isinstance(option, int) and 0 <= option < len(pile):
+                        card = pile[option]
+                        print(f"  {i}: {card.name} [P{card.power} T{card.technique} S{card.spirit}]")
+                        continue
                 print(f"  {i}: {option}")
             while True:
                 raw = input("Choice number: ").strip()
