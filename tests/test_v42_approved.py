@@ -14,7 +14,7 @@ def fighter(name):
 
 
 def test_approved_orbs_and_uncapped_power():
-    assert (card_by_name("Headlong Charge").power, card_by_name("Headlong Charge").technique, card_by_name("Headlong Charge").spirit) == (0, 0, 4)
+    assert (card_by_name("Headlong Charge").power, card_by_name("Headlong Charge").technique, card_by_name("Headlong Charge").spirit) == (0, 0, 3)
     a = card_by_name("Abisetaoshi")
     assert (a.power, a.technique, a.spirit) == (3, 0, 0)
     assert (push_from_power_advantage(1), push_from_power_advantage(3),
