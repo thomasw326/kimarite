@@ -59,6 +59,9 @@ def test_cantrip_recovers_selected_discard():
     )
     assert target in bout.fighter_a.hand
     assert target not in bout.fighter_a.discard_pile
+    assert cantrip not in bout.fighter_a.discard_pile
+    assert cantrip not in bout.fighter_a.draw_pile
+    assert cantrip not in bout.fighter_a.hand
 
 
 def test_cantrip_grants_play_and_draws():
