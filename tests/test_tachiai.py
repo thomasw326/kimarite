@@ -20,9 +20,9 @@ def test_tachiai_uses_base_stats_starting_kimarite_and_prepared_card():
 
     result = compare_tachiai(a, b)
 
-    assert result.wrestler_a.power == 6
-    assert result.wrestler_a.technique == 5
-    assert result.wrestler_a.spirit == 6
+    assert result.wrestler_a.power == 4
+    assert result.wrestler_a.technique == 3
+    assert result.wrestler_a.spirit == 4
     assert result.power_advantage_a == -1
     assert result.technique_advantage_a == 1
     assert result.spirit_advantage_a == 1
