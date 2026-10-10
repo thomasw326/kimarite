@@ -23,6 +23,15 @@ foreach ($arm in @("HIK-3", "OKD-1", "TSO-1", "KAT-1")) {
         if ($LASTEXITCODE -ne 0) {
             throw "R20 smoke failed on $arm/$($placement.name). Inspect $target."
         }
+        $rows = @(Import-Csv $target)
+        if ($rows.Count -ne 20) {
+            throw "R20 smoke produced $($rows.Count) rows instead of 20 for $arm/$($placement.name)."
+        }
+        $unresolved = @($rows | Where-Object { $_.error -ne "" -or $_.completed -ne "True" })
+        if ($unresolved.Count -gt 0) {
+            Write-Warning "$($unresolved.Count) unresolved smoke bouts in $target"
+            throw "R20 smoke is not clean. Full run must not start."
+        }
     }
 }
 
