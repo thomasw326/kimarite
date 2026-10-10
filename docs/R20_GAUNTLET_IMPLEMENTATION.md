@@ -13,17 +13,17 @@ The immutable R20 design snapshot is in data/r20_kimarite_arms.json, copied from
 - **18** stat distributions, matching the 108-configuration Big Test roster.
 - **6** priority permutations per distribution; **108** generic profiles total.
 - **6** distinct, cyclically rotated opposing profiles for each tested profile, without requiring style-based card assignment.
-- For every fixture and every arm, test **starting** and **shuffled** placement with **A and B seat orientation**.
-- Each pair of seat orientations uses the same fixture seed and the same two generic builds. Compare variants with the *same* fixture IDs and RNG seeds.
-- **1,296 bouts per variant per placement**; **181,440 planned bouts** for all 70 variants and two placements.
+- For every fixture and arm, test **starting** and **shuffled** placement **once each**, not as a double seat-mirrored series.
+- Alternate the subject's seat deterministically across opponent samples (3 on A and 3 on B per generic profile). Every arm and both placements use the *same* fixture/seat combinations and RNG seeds.
+- **648 bouts per variant per placement**; **90,720 planned bouts** for all 70 variants and two placements (exactly half of the original mirrored plan).
 
 The schedule is intentionally balanced rather than a complete 108×108 round robin.
 
 ### Seat position / game symmetry
 
-This game is largely symmetrical: a fighter taking seat A rather than seat B is not expected to materially affect balance except possible opening Tachiai tie handling, first-mover determination, or implementation defects. **Seat reversal is a diagnostic control, not the primary measure of Kimarite quality.** Record both seats and report unexpected disparities, without allowing seat position to substitute for card win/finish rates.
+This game is largely symmetrical: a fighter taking seat A rather than seat B is not expected to materially affect balance except possible opening Tachiai tie handling, first-mover determination, or implementation defects. **We do not schedule reversed-seat rematches.** Instead, we distribute the single assigned seat evenly across fixtures, retaining the seat field only as a lightweight diagnostic and never selecting cards by seat-specific win rates.
 
-Seat-mirror fixtures should keep a **fixed role-based deck and RNG stream for each fighter**, not seed decks by seat index. The existing V5 style probe used seat-dependent seeding and did not guarantee same decks after flipping seats; **do not repeat that confound in this gauntlet**.
+Every fixture keeps a **fixed role-based deck and RNG stream for each fighter**, not a deck seeded by seat. This ensures variants and placements are comparable without adding reversed-seat bouts.
 
 ## Metrics: report, don't rank
 
@@ -57,7 +57,7 @@ Prints JSON planning totals. It **does not run bouts**.
 
     python -m kimarite.r20_gauntlet --plan-csv artifacts/r20-plan.csv
 
-Generates the planned mirrored fixture rows with arm, placement, profiles and seed, without touching the simulation engine.
+Generates one scheduled fixture row per arm, placement and generic matchup, preserving its chosen seat and seed without running combat.
 
     pytest -q tests/test_r20_gauntlet.py
 
@@ -83,18 +83,18 @@ Then use a bounded smoke batch to validate actual completion and absence of exce
 
     python -m kimarite.r20_gauntlet_bouts --arm HIK-3 --count 20 --output artifacts/r20_hik3_smoke.csv
 
-For mirrored Starting vs Shuffled coverage, use a complete one-arm 2,592-bout batch, then aggregate:
+For both Starting and Shuffled coverage, use a complete one-arm 1,296-bout batch, then aggregate:
 
-    python -m kimarite.r20_gauntlet_bouts --arm HIK-3 --count 2592 --output artifacts/r20_hik3_full.csv
+    python -m kimarite.r20_gauntlet_bouts --arm HIK-3 --count 1296 --output artifacts/r20_hik3_full.csv
     python -m kimarite.r20_gauntlet_report artifacts/r20_hik3_full.csv --output-dir artifacts/r20_report
 
-A complete all-arm schedule currently plans 181,440 bouts. Use repeated --start offsets and --count to checkpoint local batches; never launch the full simulation before unit tests and short smoke batches pass. Report inputs are de-duplicated by arm, placement, fixture, seat and seed.
+A complete all-arm schedule currently plans 90,720 bouts. Use repeated --start offsets and --count to checkpoint local batches; never launch the full simulation before unit tests and short smoke batches pass. Report inputs are de-duplicated by arm, placement, fixture, seat and seed.
 
-**Important setup policies:** Seat swaps keep the same decks and RNG streams for each wrestler identity. Both generic wrestlers decline Headlong Charge's optional sacrifice, avoiding accidental removal of the experimental starting Kimarite. All other effects retain the current engine behavior except the expressly gated R20 changes. All five approved Reversals complete naturally before the R20 start-of-turn Kimarite check.
+**Important setup policies:** Role-based seeds keep each wrestler's deck stable across arms; seat assignments are even across fixtures without mirror rematches. Both generic wrestlers decline Headlong Charge's optional sacrifice, avoiding accidental removal of the experimental starting Kimarite. All other effects retain the current engine behavior except the expressly gated R20 changes. All five approved Reversals complete naturally before the R20 start-of-turn Kimarite check.
 
 ## Remaining implementation gates before any win rate is valid
 
-1. **Validate variant-aware Kimarite engine (code added; tests unrun): all 70 arms must have explicit, tested predicate and Exchange-effect behavior independent of the live card-name dispatch. Existing src/kimarite/kimarite.py and src/kimarite/kimarite_effects.py cannot currently distinguish e.g. OKD-1 from OKD-2.
+1. **Validate variant-aware Kimarite engine (code added; tests unrun):** All 70 arms must have explicit, tested predicate and Exchange-effect behavior independent of the live card-name dispatch. Existing src/kimarite/kimarite.py and src/kimarite/kimarite_effects.py cannot currently distinguish e.g. OKD-1 from OKD-2.
 2. **Verify experimental names / orbs (catalogue and constructors added):** implement and test currently absent R20 finishers and planned Utchari rename in the isolated test context, without changing V5 live assignments.
 3. **Verify Reversal-event timing (R20-only code added):** the five approved Reversal cards (Henka, Pull Temporary branch, Sidestep, Immovable, Kannuki) must record success when their delayed Temporary effect naturally completes/discards, before that wrestler's start-of-turn Kimarite check. Interruption must not count, and a positive outcome is not required.
 4. **Validate generic bout construction (code added):** add a combat adapter from fixtures to fighter state, including variant slots and copy-exclusion parity in both Starting/Shuffled modes. Keep fighter-specific RNG independent of A/B seat.
@@ -102,4 +102,4 @@ A complete all-arm schedule currently plans 181,440 bouts. Use repeated --start 
 6. **Dry-run checks:** use local unit tests and a small group of completed bouts with explicit variant attribution and no turn-limit/errors; only then start bounded local batches. Keep production V5 and existing 15 Sumo Styles unchanged.
 7. **Logs:** emit a setup/version manifest (source design SHA, git commit, seed policy, active effects), raw per-bout records, summaries per variant/placement, and separate seat-diagnostic reports.
 
-**No simulation data exists for R20 yet.** The 181,440 figure is the planned experimental sample, not reported results.
+**No simulation data exists for R20 yet.** The 90,720 figure is the revised planned experimental sample, not reported results.
