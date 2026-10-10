@@ -193,6 +193,10 @@ KIMARITE_PREDICATES: dict[str, Predicate] = {
 
 
 def kimarite_is_satisfied(state: BoutState, side: Side, card: Card) -> bool:
+    # Experimental R20 arms are distinct cards, never an alias for the live rule.
+    if card.name.startswith("R20:"):
+        from .r20_variant_rules import arm_id, variant_predicate
+        return variant_predicate(state, side, arm_id(card))
     predicate = KIMARITE_PREDICATES.get(card.name)
     if predicate is None:
         raise KeyError(f"No Kimarite predicate registered for {card.name!r}")
