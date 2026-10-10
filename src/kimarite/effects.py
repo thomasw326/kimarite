@@ -119,10 +119,7 @@ def tachiai_comparisons_won(context: EffectContext, side: Side) -> int:
 
 
 def _oshi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    # Check momentum before resolving this card's effects.
-    can_push = state.momentum * state.sign(side) >= 0
-    if can_push:
-        gain_push(state, side, 1)
+    gain_push(state, side, 1)
     add_play(state, side)
     if state.winner is None:
         draw_one(state, side)
@@ -159,9 +156,8 @@ def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectCon
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    can_disrupt = state.momentum * state.sign(side) >= 0
     add_play(state, side)
-    if can_disrupt:
+    if True:  # Tsuki's Grip disruption no longer requires nonnegative Momentum.
         opponent = state.opponent(side)
         available: list[str] = []
         if opponent.left_grip is not GripState.NONE:
