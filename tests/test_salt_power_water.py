@@ -27,7 +27,7 @@ def test_power_water_generates_six_cantrips():
     bout = make_bout(hand=[water], draw=[Card(101, "Other")])
     play_card(bout, Side.A, water)
     assert sum(c.name == "Power Water Cantrip" for c in bout.fighter_a.draw_pile) == 6
-    assert len(bout.fighter_a.draw_pile) == 4
+    assert len(bout.fighter_a.draw_pile) == 7
 
 
 def test_cantrips_are_not_in_starting_pool():
