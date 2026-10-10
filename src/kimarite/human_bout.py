@@ -187,7 +187,7 @@ class HumanBout:
             self.awaiting_human = False
 
     def play(self, hand_index: int, *, choices: dict | None = None) -> None:
-        if not self.awaiting_human or self.finished or self.pending_selection or self.pending_kimarite_search is not None:
+        if not self.awaiting_human or self.finished or self.pending_selection:
             raise IllegalPlay("No human card-play phase is active.")
         submit_card_action(
             self.state, self.human_side, hand_index,
@@ -206,7 +206,7 @@ class HumanBout:
         self.turn_started = False
 
     def end_turn(self) -> None:
-        if not self.awaiting_human or self.finished or self.pending_selection or self.pending_kimarite_search is not None:
+        if not self.awaiting_human or self.finished or self.pending_selection:
             raise IllegalPlay("Finish card selection before ending the human turn.")
         self.awaiting_human = False
         self._finish_turn()
