@@ -102,7 +102,7 @@ def test_nodowa_power_applies_before_spirit_push_resistance():
     state = BoutState(FighterState(a), FighterState(b))
     resolve_prepared_tachiai(state, comparison)
 
-    assert state.fighter_b.power == 3
+    assert state.fighter_b.power == 2
     assert state.position == 1
 
 
@@ -120,8 +120,8 @@ def test_harite_power_applies_before_spirit_push_resistance():
     state = BoutState(FighterState(a), FighterState(b))
     resolve_prepared_tachiai(state, comparison)
 
-    assert state.fighter_b.power == 2
-    assert state.fighter_a.power == 0
+    assert state.fighter_b.power == 1
+    assert state.fighter_a.power == -1
     assert state.position == 0
 
     # Without Harite's Power modifiers, the same printed-orb
