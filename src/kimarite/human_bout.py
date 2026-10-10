@@ -1,19 +1,34 @@
-"""Incremental human-vs-AI bout driver using the existing rules engine.
+"""Incremental human-vs-AI bout with interactive card access and card play.
 
-A session stops at human card choices. Card-access selection still follows the
-engine's automatic Primary/Secondary ranking; manual look/keep is a later step.
+AI and human use the same rules. Human card access pauses before modifying the
+authoritative state; choosing which cards to keep replays the start phase on a
+clone and commits only a complete, validated choice.
 """
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass
 
-from .actions import PlayerObservation, legal_actions, observe, submit_card_action
+from .actions import CardView, PlayerObservation, _view, legal_actions, observe, submit_card_action
 from .controllers import TurnController, controller_for_mode
 from .effects import IllegalPlay
-from .models import BoutState, Side
+from .models import BoutState, Card, Side
 from .setup import BoutConfig, create_prepared_bout
 from .tachiai import TachiaiComparison
 from .turns import end_exchange_turn, start_exchange_turn
+
+
+@dataclass(frozen=True)
+class CardSelection:
+    """Cards visible to the human during a Technique or Grip card access."""
+    options: tuple[CardView, ...]
+    keep: int
+
+
+class _NeedCardSelection(Exception):
+    def __init__(self, looked: list[Card], keep: int) -> None:
+        self.looked = looked
+        self.keep = keep
 
 
 @dataclass
@@ -26,6 +41,7 @@ class HumanBout:
     awaiting_human: bool = False
     turn_started: bool = False
     stopped_reason: str | None = None
+    pending_selection: CardSelection | None = None
 
     @classmethod
     def new(
@@ -57,7 +73,7 @@ class HumanBout:
         return observe(self.state, self.human_side)
 
     def actions(self):
-        if not self.awaiting_human or self.finished:
+        if not self.awaiting_human or self.finished or self.pending_selection:
             return ()
         return legal_actions(self.state, self.human_side)
 
@@ -75,7 +91,29 @@ class HumanBout:
                     self.stopped_reason = f"Turn limit {self.max_turns} reached."
                     break
                 try:
-                    start_exchange_turn(self.state, side, self.comparison)
+                    if side is self.human_side:
+                        # A card-access request must not partially consume
+                        # a turn, a discard, or the exhaustion Power penalty.
+                        trial = deepcopy(self.state)
+
+                        def request_selection(looked: list[Card], keep: int) -> list[Card]:
+                            raise _NeedCardSelection(looked, keep)
+
+                        try:
+                            start_exchange_turn(
+                                trial, side, self.comparison,
+                                choose_cards=request_selection,
+                            )
+                        except _NeedCardSelection as needed:
+                            self.pending_selection = CardSelection(
+                                tuple(_view(card) for card in needed.looked),
+                                needed.keep,
+                            )
+                            self.awaiting_human = True
+                            return
+                        self.state.__dict__.update(trial.__dict__)
+                    else:
+                        start_exchange_turn(self.state, side, self.comparison)
                 except NotImplementedError as exc:
                     self.stopped_reason = str(exc)
                     break
@@ -92,6 +130,42 @@ class HumanBout:
                 break
             self._finish_turn()
 
+    def choose_cards(self, indices: list[int] | tuple[int, ...]) -> None:
+        """Keep selected looked-at cards, bottoming the rest in reveal order."""
+        pending = self.pending_selection
+        if self.finished or not self.awaiting_human or pending is None:
+            raise IllegalPlay("No card-access selection is pending.")
+        if (
+            len(indices) != pending.keep
+            or len(set(indices)) != len(indices)
+            or any(not isinstance(i, int) or not 0 <= i < len(pending.options) for i in indices)
+        ):
+            raise IllegalPlay(f"Select exactly {pending.keep} distinct valid indices.")
+
+        trial = deepcopy(self.state)
+
+        def chosen(looked: list[Card], keep: int) -> list[Card]:
+            if keep != pending.keep or tuple(_view(c) for c in looked) != pending.options:
+                raise IllegalPlay("Card-access options changed unexpectedly.")
+            return [looked[i] for i in indices]
+
+        start_exchange_turn(trial, self.human_side, self.comparison, choose_cards=chosen)
+        self.state.__dict__.update(trial.__dict__)
+        self.pending_selection = None
+        self.turn_started = True
+        if self.state.winner is not None:
+            self.awaiting_human = False
+
+    def play(self, hand_index: int, *, choices: dict | None = None) -> None:
+        if not self.awaiting_human or self.finished or self.pending_selection:
+            raise IllegalPlay("No human card-play phase is active.")
+        submit_card_action(
+            self.state, self.human_side, hand_index,
+            choices=choices, comparison=self.comparison,
+        )
+        if self.state.winner is not None:
+            self.awaiting_human = False
+
     def _finish_turn(self) -> None:
         side = self.state.active_side
         assert side is not None
@@ -101,18 +175,9 @@ class HumanBout:
             self.stopped_reason = str(exc)
         self.turn_started = False
 
-    def play(self, hand_index: int, *, choices: dict | None = None) -> None:
-        if not self.awaiting_human or self.finished:
-            raise IllegalPlay("No human turn is waiting for a card action.")
-        submit_card_action(
-            self.state, self.human_side, hand_index, choices=choices, comparison=self.comparison
-        )
-        if self.state.winner is not None:
-            self.awaiting_human = False
-
     def end_turn(self) -> None:
-        if not self.awaiting_human or self.finished:
-            raise IllegalPlay("There is no active human turn to end.")
+        if not self.awaiting_human or self.finished or self.pending_selection:
+            raise IllegalPlay("Finish card selection before ending the human turn.")
         self.awaiting_human = False
         self._finish_turn()
         if not self.finished:
