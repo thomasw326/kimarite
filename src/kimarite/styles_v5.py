@@ -359,10 +359,10 @@ _SOURCE_JSON = r'''[
     "preferred": [
       "Reset to Neutral",
       "Tsukiotoshi",
-      "Kotenage",
+      "Read the Move",
       "Salt Throw",
       "Get Underneath",
-      "Katasukashi",
+      "Tsuki",
       "Ottsuke"
     ],
     "weights": [
