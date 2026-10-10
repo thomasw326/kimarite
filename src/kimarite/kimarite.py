@@ -91,7 +91,7 @@ def _yoritaoshi(state: BoutState, side: Side) -> bool:
 def _katasukashi(state: BoutState, side: Side) -> bool:
     return (
         no_grip(state, side)
-        and relative_momentum(state, side) <= -1
+        and relative_momentum(state, side) >= 1
         and state.fighter(side).lost_position_this_turn
     )
 
