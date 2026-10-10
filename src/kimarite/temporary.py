@@ -48,6 +48,13 @@ def remove_temporary(
     fighter.temporary_zone.remove(instance)
     card = instance.card
 
+    # A disrupted Sidestep must release the shared Side-by-Side lock.
+    # Without this, Push remains suppressed indefinitely after its card leaves.
+    if card.name == "Sidestep" and state.side_by_side_owner is side:
+        state.side_by_side_owner = None
+        state.side_by_side_distance = 0
+        state.log("Side-by-Side ends when Sidestep leaves the Temporary Zone.")
+
     if disrupted:
         if card.name in {
             "Attempt Two-Handed Grip",
