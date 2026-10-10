@@ -508,8 +508,12 @@ def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 def _read_the_move(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    if context.choice("mode") == "draw" or not state.opponent(side).temporary_zone:
+        draw_one(state, side)
+        return
     target = _choose_opponent_temporary(state, side, card, context)
     if target is None:
+        draw_one(state, side)
         return
 
     opponent_side = state.opponent_side(side)
