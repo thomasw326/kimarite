@@ -32,7 +32,7 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
 
     assert state.fighter_a.draw_pile[0].name == "Oshi"
     assert state.fighter_b.draw_pile[0].name == "Morozashi"
-    assert state.fighter_a.draw_pile[-1].name == "Reset to Neutral"
+    assert state.fighter_a.draw_pile[-1].name == "Stare Down"
     assert state.fighter_b.draw_pile[-1].name == "Hatakikomi"
 
 
