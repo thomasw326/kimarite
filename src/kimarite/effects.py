@@ -321,8 +321,12 @@ def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -
 def _salt_throw(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
-    # Salt Throw's former deck recycling has been retired.
-    return
+    fighter = state.fighter(side)
+    if len(fighter.discard_pile) >= 7:
+        fighter.draw_pile.extend(fighter.discard_pile)
+        fighter.discard_pile.clear()
+        state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _stare_down(
@@ -869,6 +873,7 @@ for _name in MILL_AMOUNTS:
 
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
+        "Salt Throw",
         "Tsuri",
         "Yori",
         "Gaburi",
