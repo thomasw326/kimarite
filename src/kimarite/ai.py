@@ -344,6 +344,9 @@ def _nonnegative(value: int) -> float:
 
 def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     """Return 0..1 progress toward one live Kimarite."""
+    if card.name.startswith("R20:"):
+        from .r20_variant_rules import arm_id, variant_progress
+        return variant_progress(state, side, arm_id(card))
     fighter = state.fighter(side)
     opponent = state.opponent(side)
     momentum = relative_momentum(state, side)
