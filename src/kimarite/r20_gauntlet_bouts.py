@@ -144,12 +144,8 @@ def run_fixture(arm: Arm, bout: ScheduledBout, *, max_turns: int = 30) -> Gauntl
     state, experimental, subject_side = prepare_fixture(arm, bout)
     cmp = compare_tachiai(state.fighter_a.wrestler, state.fighter_b.wrestler)
     apply_initial_power(state, cmp)
-    choices = {
-        side: 0
-        for side in (Side.A, Side.B)
-        if state.fighter(side).wrestler.prepared_tachiai_card.name == "Headlong Charge"
-        and state.fighter(side).kimarite_zone
-    }
+    # Neutral control: decline Headlong sacrifice on both generic fighters.
+    choices = {}
     seen_condition = False
     seen_available = _available(state, subject_side, experimental)
     error = ""
