@@ -112,9 +112,12 @@ def apply_start_of_turn_exhaustion(state: BoutState, side: Side) -> None:
         state.declare_winner(state.opponent_side(side), "Exhaustion")
         return
 
-    # BEGIN APPROVED MILL/RECYCLE V1
-    if len(fighter.discard_pile) >= 7:  # fatigue threshold reduced from 9
-        # END APPROVED MILL/RECYCLE V1
+    # A nonzero Grip total that ties or leads the opponent protects against
+    # discard-pile Power fatigue. A 0-0 tie protects neither wrestler.
+    own_grip = effective_total_grip(state, side)
+    other_grip = effective_total_grip(state, state.opponent_side(side))
+    grip_protected = own_grip > 0 and own_grip >= other_grip
+    if len(fighter.discard_pile) >= 7 and not grip_protected:
         fighter.power -= 1
         state.log(f"{fighter.wrestler.name} loses 1 Power to Exhaustion.")
 
