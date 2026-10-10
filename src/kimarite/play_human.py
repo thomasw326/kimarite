@@ -8,6 +8,7 @@ Human Technique/Grip look-and-keep and card-effect choices are interactive.
 from __future__ import annotations
 
 import argparse
+import secrets
 
 from .catalog import PLAYTEST_WRESTLERS, CARD_POOL
 from .effects import ChoiceRequired, IllegalPlay
@@ -405,10 +406,13 @@ def main() -> None:
     parser.add_argument("--opponent", default="Fujinokawa", choices=sorted(PLAYTEST_WRESTLERS))
     parser.add_argument("--human-style", choices=sorted(STYLES), help="Use an experimental V5 archetype")
     parser.add_argument("--opponent-style", choices=sorted(STYLES), help="Opposing V5 archetype")
-    parser.add_argument("--seed", type=int, default=20261009)
+    parser.add_argument("--seed", type=int, default=None, help="Reproduce a particular bout; random by default")
     parser.add_argument("--ai-mode", default="tactical", choices=("tactical", "personality"))
     parser.add_argument("--max-turns", type=int, default=100)
     args = parser.parse_args()
+    if args.seed is None:
+        args.seed = secrets.randbelow(2**31)
+    print(f"Bout seed: {args.seed} (reuse with --seed {args.seed})")
     tachiai_sacrifice = None
     if args.human_style:
         from .style_builds_v5 import build_style
