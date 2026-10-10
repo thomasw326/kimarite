@@ -108,6 +108,7 @@ class BoutState:
     winning_kimarite_card_id: int | None = None
     card_play_ids: list[tuple[Side, int]] = field(default_factory=list)
     card_plays: list[tuple[Side, str]] = field(default_factory=list)
+    first_exchange_hands: dict[Side, tuple[str, ...]] = field(default_factory=dict)
     kimarite_removals: list[tuple[Side, str]] = field(default_factory=list)
     temporary_outcomes: list[tuple[Side, str, str]] = field(default_factory=list)
     headlong_decisions: list[tuple[Side, str, str, str | None]] = field(default_factory=list)
