@@ -287,3 +287,126 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
             draw_one(state, side)
     else:
         raise KeyError(f"No Exchange effect for {ident!r}")
+
+
+
+def variant_progress(state: BoutState, side: Side, identifier: str) -> float:
+    """Gradual 0..1 distance for R20 AI setup decisions; never a win ruling.
+
+    Only variant_predicate decides whether a finish actually triggers.
+    """
+    if variant_predicate(state, side, identifier):
+        return 1.0
+
+    def at_least(value: int, threshold: int, width: int = 4) -> float:
+        return max(0.0, min(1.0, 1 - max(0, threshold-value)/max(1, width)))
+
+    def at_most(value: int, threshold: int, width: int = 4) -> float:
+        return max(0.0, min(1.0, 1 - max(0, value-threshold)/max(1, width)))
+
+    def exact(value: int, threshold: int) -> float:
+        return max(0.0, 1 - abs(value - threshold) / 5)
+
+    ident, version_s = identifier.split("-", 1)
+    version = int(version_s)
+    f, o = state.fighter(side), state.opponent(side)
+    mom, pos, adv = relative_momentum(state, side), relative_position(state, side), power_advantage(state, side)
+    grip = effective_total_grip(state, side)
+    other_grip = effective_total_grip(state, state.opponent_side(side))
+    hand_diff = len(f.hand) - len(o.hand)
+    fresh_reversal = 1.0 if f.successful_reversal_this_turn else (
+        0.6 if any(t.card.name in {"Henka","Pull","Sidestep","Immovable","Kannuki"}
+                   for t in f.temporary_zone) else 0.
+    )
+
+    if ident == "YOR":
+        parts = [at_least(grip, 2 if version == 0 else 1),
+                 at_least(mom, 2 if version == 2 else 1),
+                 at_least(pos, 2)]
+    elif ident == "OSH":
+        parts = [at_least(pos, 2), at_least(mom, 1 if version == 1 else 2)]
+        if version == 1:
+            parts.append(max(at_least(adv, 1), at_least(
+                state.tachiai_spirit_advantage_a * state.sign(side), 3)))
+    elif ident == "TSU":
+        parts = [at_least(pos, 2), at_least(f.cards_played_this_turn, 3 if version in (1,2) else 4)]
+        if version == 2:
+            parts.append(at_least(mom, 1))
+    elif ident == "OTA":
+        parts = [at_least(mom, 2 if version == 2 else 1),
+                 at_least(f.power, 9 if version == 3 else 8)]
+        if version == 1:
+            parts.append(at_least(pos, 1))
+    elif ident == "YTA":
+        parts = [at_least(grip, 1 if version == 3 else 2),
+                 at_least(pos, 2), at_least(adv, 1 if version == 2 else 2)]
+    elif ident == "HAT":
+        parts = [at_most(mom, -2)]
+        if version != 3:
+            parts.append(at_least(pos, 0))
+        if version != 1:
+            parts.append(at_least(f.power, 6 if version == 3 else 5))
+    elif ident == "HIK":
+        parts = [at_least(grip, 1), at_most(mom, -2), at_least(pos, 0)]
+    elif ident == "TOT":
+        parts = [1.0 if f.total_grip == 0 else 0.0,
+                 1.0 if f.opponent_grip_reduced_this_turn else 0.0]
+    elif ident == "UTC":
+        parts = [1.0 if f.gained_momentum_this_turn else 0.0]
+        if version == 1:
+            parts.append(max(exact(pos, -3), exact(mom, -2)))
+        elif version == 2:
+            parts.append(exact(mom, -2))
+        else:
+            parts.append(exact(pos, -3))
+    elif ident == "TKT":
+        parts = [at_least(f.cards_played_this_turn, 4 if version == 3 else 3)]
+        if version != 3:
+            parts.append(at_least(mom, 2))
+            if version == 2:
+                parts.append(at_least(pos, 1))
+    elif ident == "TSR":
+        parts = [at_least(grip, 3), at_least(pos, 0),
+                 at_least(f.power, {1:5,2:7,3:9}[version])]
+    elif ident == "KOT":
+        parts = [1.0 if other_grip == 0 else at_most(other_grip, 0),
+                 at_least(mom, 1)]
+        parts.append(
+            at_least(len(f.hand), 5) if version == 1 else
+            at_least(f.power, 6) if version == 2 else
+            at_least(adv, 1)
+        )
+    elif ident == "ABI":
+        parts = [at_least(grip, 2), at_least(f.power, 9 if version == 1 else 10)]
+    elif ident in ("UWA", "SHI"):
+        hand = f.left_grip if ident == "UWA" else f.right_grip
+        parts = [at_least(int(hand), 2), at_least(mom, 1), at_least(pos, 0)]
+    elif ident == "SUK":
+        parts = [1.0 if f.total_grip == 0 else 0.0,
+                 at_least(mom, 2), at_least(hand_diff, {1:2,2:4,3:5}[version])]
+    elif ident == "TSO":
+        parts = [1.0 if f.total_grip == 0 else 0.0,
+                 at_least(mom, 2 if version == 2 else 1),
+                 at_most(adv, -3 if version == 3 else -1)]
+    elif ident == "OKD":
+        parts = [fresh_reversal, at_least(pos, 1 if version == 2 else 2),
+                 at_least(mom, 0 if version == 3 else 1)]
+    elif ident == "OKT":
+        parts = [fresh_reversal, at_least(pos, 0 if version == 2 else 1),
+                 at_least(mom, 1 if version == 3 else 2)]
+    elif ident == "KIR":
+        parts = [fresh_reversal, at_most(adv, -1), at_least(hand_diff, 1)]
+    elif ident == "UWD":
+        parts = [at_least(int(f.left_grip), 1), at_least(mom, 1),
+                 at_most(adv, -{1:1,2:3,3:5}[version])]
+    elif ident == "KAT":
+        if version == 0:
+            parts = [1.0 if f.total_grip == 0 else 0.0,
+                     at_least(mom, 1), 1.0 if f.lost_position_this_turn else 0.0]
+        else:
+            parts = [1.0 if other_grip == 0 else 0.0, at_least(mom, 1)]
+            parts.append(at_least(len(f.hand), 5) if version == 1 else
+                         at_least(hand_diff, 3 if version == 2 else 4))
+    else:
+        raise KeyError(identifier)
+    return sum(parts) / len(parts)
