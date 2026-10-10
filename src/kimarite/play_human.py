@@ -14,6 +14,7 @@ from .effects import ChoiceRequired, IllegalPlay
 from .human_bout import HumanBout
 from .models import Side
 from .setup import BoutConfig, FighterConfig
+from .styles_v5 import STYLES
 
 
 def _display(bout: HumanBout) -> None:
@@ -56,19 +57,29 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Play Kimarite against the AI")
     parser.add_argument("--human", default="Fujinokawa", choices=sorted(PLAYTEST_WRESTLERS))
     parser.add_argument("--opponent", default="Fujinokawa", choices=sorted(PLAYTEST_WRESTLERS))
+    parser.add_argument("--human-style", choices=sorted(STYLES), help="Use an experimental V5 archetype")
+    parser.add_argument("--opponent-style", choices=sorted(STYLES), help="Opposing V5 archetype")
     parser.add_argument("--seed", type=int, default=20261009)
     parser.add_argument("--ai-mode", default="tactical", choices=("tactical", "personality"))
     parser.add_argument("--max-turns", type=int, default=100)
     args = parser.parse_args()
-    bout = HumanBout.new(
-        BoutConfig(
-            FighterConfig(args.human, args.seed, ranking=1),
-            FighterConfig(args.opponent, args.seed + 101, ranking=2),
-        ),
-        human_side=Side.A,
-        ai_mode=args.ai_mode,
-        max_turns=args.max_turns,
-    )
+    if args.human_style or args.opponent_style:
+        if not (args.human_style and args.opponent_style):
+            parser.error("Provide both --human-style and --opponent-style.")
+        bout = HumanBout.new_styles(
+            args.human_style, args.opponent_style,
+            seed=args.seed, max_turns=args.max_turns,
+        )
+    else:
+        bout = HumanBout.new(
+            BoutConfig(
+                FighterConfig(args.human, args.seed, ranking=1),
+                FighterConfig(args.opponent, args.seed + 101, ranking=2),
+            ),
+            human_side=Side.A,
+            ai_mode=args.ai_mode,
+            max_turns=args.max_turns,
+        )
 
     print("KIMARITE — V5 terminal prototype")
     print("Enter a playable card number, 'pass' to end your turn, or 'quit'.")
