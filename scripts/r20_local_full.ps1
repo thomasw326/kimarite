@@ -1,4 +1,4 @@
-# Resumable R20 gauntlet launch for Windows PowerShell. Never invokes GitHub Actions.
+# Resumable R20 gauntlet launch for Windows PowerShell.
 param(
     [int] $ChunkSize = 216,
     [int] $MaxTurns = 30,
