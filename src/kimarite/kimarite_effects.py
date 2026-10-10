@@ -170,6 +170,10 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 gain_flexible_grip(state, side)
             else:
                 gain_power(state, side, 1)
+        if power_advantage(state, side) >= 3:
+            gain_momentum(state, side, 1)
+            from .rules import lose_power
+            lose_power(state, opponent_side, 1)
 
     else:
         raise KeyError(f"No Kimarite play effect registered for {card.name!r}.")
