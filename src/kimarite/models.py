@@ -78,6 +78,7 @@ class FighterState:
     first_exchange_turn: bool = True
     technique_reward_pending: bool = True
     technique_look_adjustment: int = 0
+    technique_keep_adjustment: int = 0
     spirit_reward_pending: bool = True
     bonus_turns_queued: int = 0
     lost_position_this_turn: bool = False
