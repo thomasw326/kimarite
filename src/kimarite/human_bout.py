@@ -51,6 +51,7 @@ class HumanBout:
         human_side: Side = Side.A,
         ai_mode: str = "tactical",
         max_turns: int = 100,
+        tachiai_sacrifice: int | None = None,
     ) -> "HumanBout":
         if max_turns <= 0:
             raise ValueError("max_turns must be positive")
