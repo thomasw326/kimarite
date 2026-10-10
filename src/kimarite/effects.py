@@ -321,12 +321,8 @@ def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -
 def _salt_throw(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
-    fighter = state.fighter(side)
-    if len(fighter.discard_pile) >= 7:
-        fighter.draw_pile.extend(fighter.discard_pile)
-        fighter.discard_pile.clear()
-        state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
-    add_temporary(state, side, card, phase="exchange")
+    # Salt Throw's former deck recycling has been retired.
+    return
 
 
 def _stare_down(
@@ -844,11 +840,6 @@ MILL_AMOUNTS = {
     "Tsuki": 1,
     "Shove": 1,
 }
-RECYCLE_NAMES = frozenset({
-    "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate",
-    "Morozashi", "Use the Tawara",
-})
-
 
 def mill_cards(state: BoutState, side: Side, amount: int) -> None:
     """Move up to X cards from top of Draw Pile to Discard Pile; never draw."""
@@ -859,25 +850,6 @@ def mill_cards(state: BoutState, side: Side, amount: int) -> None:
     state.log(f"{fighter.wrestler.name} mills {moved} card(s).")
 
 
-def recycle_one(state: BoutState, side: Side, context: EffectContext) -> None:
-    """Return one discarded card to bottom of Draw Pile.
-
-    An explicit discard_index selects a card when present. The AI/default
-    deterministically selects the last discarded card to avoid choice deadlocks.
-    """
-    fighter = state.fighter(side)
-    if not fighter.discard_pile:
-        return
-    selected = context.choice("recycle_discard_index")
-    if selected is None:
-        selected = len(fighter.discard_pile) - 1
-    if not isinstance(selected, int) or not 0 <= selected < len(fighter.discard_pile):
-        raise ValueError("Invalid recycling discard index.")
-    recovered = fighter.discard_pile.pop(selected)
-    fighter.draw_pile.append(recovered)
-    state.log(f"{fighter.wrestler.name} recycles {recovered.name} to the bottom of the Draw Pile.")
-
-
 def _with_resource_cost(name: str, original: ExchangeEffect) -> ExchangeEffect:
     def effect(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
         original(state, side, card, context)
@@ -885,12 +857,10 @@ def _with_resource_cost(name: str, original: ExchangeEffect) -> ExchangeEffect:
             return
         if name in MILL_AMOUNTS:
             mill_cards(state, side, MILL_AMOUNTS[name])
-        if name in RECYCLE_NAMES:
-            recycle_one(state, side, context)
     return effect
 
 
-for _name in (*MILL_AMOUNTS, *RECYCLE_NAMES):
+for _name in MILL_AMOUNTS:
     if _name not in EXCHANGE_EFFECTS:
         raise RuntimeError(f"Missing exchange effect for {_name}")
     EXCHANGE_EFFECTS[_name] = _with_resource_cost(_name, EXCHANGE_EFFECTS[_name])
@@ -899,7 +869,6 @@ for _name in (*MILL_AMOUNTS, *RECYCLE_NAMES):
 
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
-        "Salt Throw",
         "Tsuri",
         "Yori",
         "Gaburi",
