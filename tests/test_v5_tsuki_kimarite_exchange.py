@@ -16,12 +16,12 @@ def _bout(position=0, momentum=0):
     )
 
 
-def test_tsukidashi_position_advantage_draws_and_gains_momentum_not_play():
+def test_tsukidashi_position_advantage_draws_and_grants_play_not_momentum():
     state = _bout(position=1, momentum=0)
     resolve_kimarite_play_effect(state, Side.A, card_by_name("Tsukidashi"), EffectContext())
     assert len(state.fighter_a.hand) == 1
-    assert state.momentum == 1
-    assert state.fighter_a.plays_remaining == 1
+    assert state.momentum == 0
+    assert state.fighter_a.plays_remaining == 2
 
 
 def test_tsukidashi_without_position_has_no_bonus():
