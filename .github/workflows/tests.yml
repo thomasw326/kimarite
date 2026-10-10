@@ -18,25 +18,25 @@ jobs:
 
 
 
-  v5-style-baseline:
+  v5-kimarite-audit-r18:
     if: github.event_name == 'pull_request' && github.event.pull_request.number == 16
     needs: pytest
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - run: python -m pip install -e .
-      - name: Run R17 paired-seed V5 style baseline (4200 bouts)
+      - name: Run R18 V5 Kimarite audit (4200 bouts, 20 repetitions)
         run: |
-          mkdir -p artifacts
-          python -m kimarite.style_round_robin_v5 --repetitions 20 --max-turns 30 > artifacts/v5-style-r17.json
+          python -m kimarite.kimarite_audit_v5 --repetitions 20 --max-turns 30 --seed 20261010 --output artifacts/kimarite-audit-r18.json
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: v5-style-r17
-          path: artifacts/v5-style-r17.json
+          name: v5-kimarite-audit-r18
+          path: artifacts/kimarite-audit-r18.json
 
   big-test-2:
     if: github.event_name == 'pull_request' && github.event.pull_request.number == 14
