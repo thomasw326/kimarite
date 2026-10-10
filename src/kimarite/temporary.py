@@ -103,7 +103,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             state.log(f"{fighter.wrestler.name}'s Right Grip becomes DEEP.")
         elif name == "Tsuri":
             from .rules import effective_total_grip
-            if fighter.power >= 5 and effective_total_grip(state, side) >= 2:
+            if fighter.power >= 3 and effective_total_grip(state, side) >= 2:
                 gain_push(state, side, 3)
             else:
                 gain_push(state, side, 1)
