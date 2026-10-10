@@ -37,6 +37,46 @@ def _card_lookup(raw: str) -> bool:
     return True
 
 
+
+def _zone_summary(bout: HumanBout) -> None:
+    state = bout.state
+    for side, label in ((bout.human_side, "YOUR"), (state.opponent_side(bout.human_side), "OPPONENT")):
+        fighter = state.fighter(side)
+        temporary = ", ".join(entry.card.name for entry in fighter.temporary_zone) or "(empty)"
+        kimarite = ", ".join(card.name for card in fighter.kimarite_zone) or "(empty)"
+        print(f"{label} TEMPORARY: {temporary}")
+        print(f"{label} KIMARITE: {kimarite}")
+    you, them = state.fighter(bout.human_side), state.opponent(bout.human_side)
+    print(f"Discard: you {len(you.discard_pile)} / opponent {len(them.discard_pile)}")
+    print(f"Draw piles: you {len(you.draw_pile)} / opponent {len(them.draw_pile)}")
+
+
+def _discard_lookup(raw: str, bout: HumanBout) -> bool:
+    if raw != "/discard":
+        return False
+    state = bout.state
+    for side, label in ((bout.human_side, "Your"), (state.opponent_side(bout.human_side), "Opponent")):
+        cards = state.fighter(side).discard_pile
+        print(f"{label} discard ({len(cards)}): " + (", ".join(card.name for card in cards) or "(empty)"))
+    return True
+
+
+def _public_event(event: str, bout: HumanBout) -> str:
+    opponent = bout.state.opponent(bout.human_side).wrestler.name
+    if event.startswith(opponent + " draws "):
+        return f"{opponent} draws a card."
+    return event
+
+
+def _print_new_events(bout: HumanBout, seen: int) -> int:
+    events = bout.state.event_log
+    if len(events) > seen:
+        print("\n--- EVENTS SINCE LAST DECISION ---")
+        for event in events[seen:]:
+            print("  " + _public_event(event, bout))
+    return len(events)
+
+
 def _display(bout: HumanBout) -> None:
     view = bout.view()
     state = bout.state
@@ -45,6 +85,7 @@ def _display(bout: HumanBout) -> None:
     print(f"Grip: you {view.own_grip} / opponent {view.opponent_grip}")
     print(f"Your plays remaining: {view.plays_remaining}")
     print(f"Your hand: {len(view.hand)} cards | Opponent: {view.opponent_hand_size} cards")
+    _zone_summary(bout)
     print("Playable:")
     for action in bout.actions():
         card = action.card
@@ -52,7 +93,7 @@ def _display(bout: HumanBout) -> None:
     if state.event_log:
         print("Recent events:")
         for event in state.event_log[-6:]:
-            print(f"  {event}")
+            print("  " + _public_event(event, bout))
 
 
 def _ask_effect_choices(bout: HumanBout, hand_index: int) -> None:
@@ -114,15 +155,24 @@ def main() -> None:
         )
 
     print("KIMARITE — V5 terminal prototype")
-    print("Enter a card number, 'pass', 'quit', or '/oshi' to inspect Oshi.")
+    print("Enter card number, pass, quit, /cardname, or /discard.")
+    seen_events = 0
     while not bout.finished:
         if bout.pending_selection is not None:
+            seen_events = _print_new_events(bout, seen_events)
+            _zone_summary(bout)
             pending = bout.pending_selection
+            if len(pending.options) == pending.keep:
+                print(f"Automatically keeping all {pending.keep} revealed card(s).")
+                bout.choose_cards(list(range(pending.keep)))
+                continue
+            hand = bout.state.fighter(bout.human_side).hand
+            print("Current hand: " + (", ".join(c.name for c in hand) or "(empty)"))
             print(f"\nLooked at {len(pending.options)} card(s); keep exactly {pending.keep}:")
             for i, card in enumerate(pending.options):
                 print(f"  {i}: {card.name} [P{card.power} T{card.technique} S{card.spirit}]")
             raw_selection = input("Indices to keep, separated by spaces (or quit): ").strip()
-            if _card_lookup(raw_selection):
+            if _discard_lookup(raw_selection.lower(), bout) or _card_lookup(raw_selection):
                 continue
             if raw_selection.lower() in {"quit", "q"}:
                 return
@@ -132,9 +182,10 @@ def main() -> None:
             except (ValueError, IllegalPlay) as exc:
                 print(f"Selection invalid: {exc}")
             continue
+        seen_events = _print_new_events(bout, seen_events)
         _display(bout)
         raw = input("\nAction: ").strip().lower()
-        if _card_lookup(raw):
+        if _discard_lookup(raw, bout) or _card_lookup(raw):
             continue
         if raw in {"quit", "q"}:
             print("Session ended without recording a victory.")
