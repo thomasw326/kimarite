@@ -60,6 +60,7 @@ def test_tsuridashi_needs_nonnegative_position():
     s = bout()
     s.fighter_a.left_grip = GripState.DEEP
     s.fighter_a.right_grip = GripState.GRIP
+    s.fighter_a.power = 5
     s.position = -1
     assert not kimarite_is_satisfied(s, Side.A, card_by_name("Tsuridashi"))
     s.position = 0
