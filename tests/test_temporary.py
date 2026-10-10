@@ -1,5 +1,6 @@
 from kimarite.catalog import card_by_name
-from kimarite.effects import EffectContext
+import pytest
+from kimarite.effects import EffectContext, ChoiceRequired, IllegalPlay
 from kimarite.models import BoutState, Card, FighterState, GripState, Side, Wrestler
 from kimarite.playing import play_card
 from kimarite.rules import gain_push
@@ -37,32 +38,20 @@ def test_headlong_charge_sacrifices_kimarite_for_momentum_and_push():
     assert not bout.fighter_a.temporary_zone
 
 
-def test_headlong_charge_can_decline_sacrifice():
-    card = card_by_name("Headlong Charge")
-    kimarite = card_by_name("Yorikiri")
-    bout = bout_with_hand([card])
-    bout.fighter_a.kimarite_zone.append(kimarite)
-
-    play_card(
-        bout, Side.A, card,
-        context=EffectContext(choices={"sacrifice_kimarite": None}),
-    )
-
-    assert bout.momentum == 0
-    assert bout.position == 0
-    assert bout.fighter_a.kimarite_zone == [kimarite]
-    assert not bout.fighter_a.temporary_zone
-
-
-def test_headlong_charge_without_kimarite_grants_no_bonus():
+def test_headlong_charge_cannot_decline_sacrifice():
     card = card_by_name("Headlong Charge")
     bout = bout_with_hand([card])
+    bout.fighter_a.kimarite_zone.append(card_by_name("Yorikiri"))
+    with pytest.raises(ChoiceRequired):
+        play_card(bout, Side.A, card, context=EffectContext(choices={"sacrifice_kimarite": None}))
 
-    play_card(bout, Side.A, card)
 
-    assert bout.momentum == 0
-    assert bout.position == 0
-    assert not bout.fighter_a.temporary_zone
+def test_headlong_charge_without_kimarite_is_not_playable():
+    card = card_by_name("Headlong Charge")
+    bout = bout_with_hand([card])
+    with pytest.raises(IllegalPlay):
+        play_card(bout, Side.A, card)
+    assert card in bout.fighter_a.hand
 
 
 def test_attempt_two_handed_grip_resolves_at_next_turn_start():
