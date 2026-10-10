@@ -76,3 +76,9 @@ The following changes are committed on the V5 branch (no balance changes):
 - AI Use the Tawara now nominates a card through the engine's explicit search choice, rather than passing the obsolete `lose_position_for_power` key. Normal noninteractive searches retain a deterministic fallback.
 - Regression coverage added for opponent-owned human searches and AI Tawara selections.
 - **Validation:** current commits are awaiting the next CI result. No official balance baseline should run until CI is green and the pending interaction audit is reviewed.
+
+## Search keyword ruling — October 9, 2026
+
+**Approved rule:** Search is automatic. Starting at the top of the Draw Pile, take the first card matching the category named by Search (for example, Kimarite). Do not look at the deck, reveal multiple candidates, choose among matches, shuffle, or reorder other cards. If no matching card exists, nothing is moved. The found card moves to the destination specified by the calling card's effect.
+
+This supersedes previous proposals for human/AI `kimarite_index` choices and opponent-owned interactive searches. Get Underneath and Use the Tawara resolve by the same automatic topmost-Kimarite mechanism. Deferred-choice state, prompts, and AI ranking policies for Search have been removed. Regression tests enforce top-to-bottom category matching.
