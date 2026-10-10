@@ -94,9 +94,26 @@ def resolve_prepared_tachiai(
     state.tachiai_spirit_advantage_a = comparison.spirit_advantage_a
 
     # Resolve Tachiai Power modifiers before Spirit Push resistance.
+    headlong_sacrificed = {Side.A: False, Side.B: False}
     for side in (Side.A, Side.B):
         name = state.fighter(side).wrestler.prepared_tachiai_card.name
-        if name == "Nodowa":
+        if name in {"Hold Position", "Immovable"}:
+            gain_power(state, side, 2)
+        elif name == "Headlong Charge":
+            fighter = state.fighter(side)
+            choice = (sacrifice_choices or {}).get(side)
+            if choice is not None:
+                if type(choice) is not int or not 0 <= choice < len(fighter.kimarite_zone):
+                    raise ValueError("Invalid Headlong Charge sacrifice choice")
+                sacrificed = fighter.kimarite_zone.pop(choice)
+                fighter.discard_pile.append(sacrificed)
+                state.headlong_decisions.append((side, "Tachiai", "sacrifice", sacrificed.name))
+                state.log(f"{fighter.wrestler.name} sacrifices {sacrificed.name} during Tachiai.")
+                headlong_sacrificed[side] = True
+                gain_power(state, side, 1)
+            else:
+                state.headlong_decisions.append((side, "Tachiai", "decline", None))
+        elif name == "Nodowa":
             gain_power(state, side, 2)
         elif name == "Harite":
             gain_power(state, side, 1)
@@ -129,14 +146,7 @@ def resolve_prepared_tachiai(
         name = card.name
 
         if name == "Headlong Charge":
-            # An omitted choice means decline, never sacrifice automatically.
-            choice = (sacrifice_choices or {}).get(side)
-            if choice is not None:
-                if type(choice) is not int or not 0 <= choice < len(fighter.kimarite_zone):
-                    raise ValueError("Invalid Headlong Charge sacrifice choice")
-                sacrificed = fighter.kimarite_zone.pop(choice)
-                fighter.discard_pile.append(sacrificed)
-                state.log(f"{fighter.wrestler.name} sacrifices {sacrificed.name}.")
+            if headlong_sacrificed[side]:
                 momentum_delta[side] += 1
                 extra_push[side] += 1
 
@@ -255,5 +265,12 @@ def resolve_prepared_tachiai(
 
     for side in (Side.A, Side.B):
         card = state.fighter(side).wrestler.prepared_tachiai_card
-        if card.name not in PREPARED_TEMPORARY_TACHIAI:
+        if card.name == "Headlong Charge":
+            # Prepared Headlong Charge is spent, not returned to the deck.
+            # The style builder seeds this card on the bottom already.
+            fighter = state.fighter(side)
+            if card in fighter.draw_pile:
+                fighter.draw_pile.remove(card)
+            fighter.discard_pile.append(card)
+        elif card.name not in PREPARED_TEMPORARY_TACHIAI:
             state.fighter(side).draw_pile.append(card)
