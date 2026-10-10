@@ -103,7 +103,7 @@ def test_hold_position_prevents_opponent_push_while_active():
     assert bout.position == 0
 
 
-def test_use_tawara_prevents_push_without_gaining_momentum():
+def test_use_tawara_prevents_push_and_gains_momentum():
     card = card_by_name("Use the Tawara")
     bout = bout_with_hand([card])
     play_card(
@@ -116,7 +116,7 @@ def test_use_tawara_prevents_push_without_gaining_momentum():
     gain_push(bout, Side.B, 1)
 
     assert bout.position == -1
-    assert bout.momentum == 0
+    assert bout.momentum == 1
 
 
 def test_sidestep_survives_and_takes_favorable_orientation_on_momentum_tie():
