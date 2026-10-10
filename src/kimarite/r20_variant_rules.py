@@ -133,7 +133,8 @@ def _opponent_discard(state: BoutState, side: Side, context: EffectContext) -> b
 
 
 def _filtered_draw(state: BoutState, side: Side, count: int) -> None:
-    draw_from_look(state, side, look=count, keep=1, required_draws=count)
+    # Looking at up to N cards is not a requirement to have N cards left.
+    draw_from_look(state, side, look=count, keep=1, required_draws=1)
 
 
 def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -245,6 +246,15 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
         chosen = context.choice("conversion")
         if chosen not in ("position_to_momentum", "momentum_to_position"):
             chosen = ("momentum_to_position" if pos <= mom else "position_to_momentum")
+        # Neither payment may be waived. If the selected track is already at
+        # the negative cap, take the other legal payment instead.
+        if chosen == "position_to_momentum" and pos <= -3:
+            chosen = "momentum_to_position"
+        if chosen == "momentum_to_position" and mom <= -3:
+            chosen = "position_to_momentum"
+        if (chosen == "position_to_momentum" and pos <= -3) or (chosen == "momentum_to_position" and mom <= -3):
+            from .effects import IllegalPlay
+            raise IllegalPlay("R20 rear finish requires losing 1 Position or 1 Momentum.")
         if chosen == "position_to_momentum":
             lose_position(state, side, 1, source=group)
             if state.winner is None:
@@ -260,8 +270,11 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
             _filtered_draw(state, side, version)
     elif group == "UWD":
         draw_one(state, side)
-        if state.winner is None and f.left_grip is GripState.NONE and f.hand:
-            if context.choice("discard_for_grip") is not False:
+        if state.winner is None and f.hand:
+            # May discard even if Left Grip already exists. Default AI only
+            # pays the optional cost when it would establish a missing Grip.
+            use = context.choice("discard_for_grip")
+            if use is True or (use is None and f.left_grip is GripState.NONE):
                 _hand_discard(state, side, context)
                 establish_grip(state, side, "left")
     elif group == "KAT":
