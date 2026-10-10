@@ -375,6 +375,14 @@ def main() -> None:
         )
 
     print("KIMARITE — V5 terminal prototype")
+    if args.human_style and args.opponent_style:
+        from .style_builds_v5 import build_style
+        from .catalog import CARD_POOL
+        for style_name, style_seed in ((args.human_style, args.seed), (args.opponent_style, args.seed + 1009)):
+            build = build_style(style_name, seed=style_seed, ranking=1)
+            excluded = [card.name for card in CARD_POOL if card.card_id in build.excluded_ids]
+            print(f"{style_name} excluded ({len(excluded)}): " + (", ".join(excluded) or "(none)"))
+        print("Note: current V5 exclusion ranking is under review; these are actual exclusions.")
     print("Enter card number, pass, quit, /cardname, or /discard.")
     seen_events = 0
     while not bout.finished:
