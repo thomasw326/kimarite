@@ -176,7 +176,7 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
             if comparison.advantage_for(side, Stat.POWER) > 0:
                 extra_push[side] += 1
             if comparison.advantage_for(side, Stat.TECHNIQUE) > 0:
-                fighter.technique_look_adjustment += 1
+                fighter.technique_keep_adjustment += 1
             if comparison.advantage_for(side, Stat.SPIRIT) > 0:
                 momentum_delta[side] += 1
 
