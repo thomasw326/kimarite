@@ -92,7 +92,7 @@ def _katasukashi(state: BoutState, side: Side) -> bool:
     return (
         no_grip(state, side)
         and relative_momentum(state, side) >= 0
-        and (state.fighter(side).lost_position_this_turn or relative_momentum(state, state.opponent_side(side)) >= 3)
+        and state.fighter(side).lost_position_this_turn
     )
 
 
