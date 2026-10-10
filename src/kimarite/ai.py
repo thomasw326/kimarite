@@ -215,7 +215,7 @@ def _contexts_for_card(
     if card.name == "Headlong Charge":
         return [
             _context_variant(base, sacrifice_kimarite=i)
-            for i in [None] + list(range(len(fighter.kimarite_zone)))
+            for i in range(len(fighter.kimarite_zone))
         ]
 
     if card.name == "Pull":
@@ -233,7 +233,7 @@ def _contexts_for_card(
         return variants
 
     if card.name == "Ottsuke":
-        variants: list[EffectContext] = []
+        variants: list[EffectContext] = [_context_variant(base, mode="draw") ]
 
         grips = []
         if opponent.left_grip is not GripState.NONE:
