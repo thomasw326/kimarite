@@ -270,6 +270,9 @@ def main():
                             20001: Card(20001, "Oshi", 0, 0, 1),
                             20002: Card(20002, "Tsuki", 1, 0, 0),
                             20003: Card(20003, "Shove", 2, 0, 0),
+                            **{20001 + 3*i: Card(20001 + 3*i, "Oshi", 0, 0, 1) for i in range(1, 3)},
+                            **{20002 + 3*i: Card(20002 + 3*i, "Tsuki", 1, 0, 0) for i in range(1, 3)},
+                            **{20003 + 3*i: Card(20003 + 3*i, "Shove", 2, 0, 0) for i in range(1, 3)},
                         })
                         # Count every Exchange play, including generated cards.
                         for owner, cid in state.card_play_ids:
