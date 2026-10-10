@@ -1,5 +1,6 @@
 """Approved opening Power restoration and Headlong Charge choice reporting."""
 from kimarite.catalog import card_by_name
+from kimarite.models import Card
 from kimarite.models import BoutState, FighterState, Side, Wrestler
 from kimarite.tachiai import compare_tachiai
 from kimarite.tachiai_effects import resolve_prepared_tachiai
@@ -9,7 +10,7 @@ from kimarite.turns import apply_initial_power
 def _bout(prepared: str):
     k = card_by_name("Oshidashi")
     t = card_by_name(prepared)
-    blank = card_by_name("Injury")
+    blank = Card(90059, "Test Blank")
     a = Wrestler("A", 2, 2, 2, k, t, blank)
     b = Wrestler("B", 2, 2, 2, k, blank, blank)
     state = BoutState(
