@@ -87,13 +87,6 @@ def _context_for_card(
         if opponent.left_grip is not GripState.NONE and opponent.right_grip is not GripState.NONE:
             choices["grip"] = _best_grip_to_reduce(state, side)
 
-    if card.name == "Use the Tawara":
-        eligible = [i for i, c in enumerate(fighter.draw_pile) if c.is_kimarite]
-        if eligible:
-            choices["kimarite_index"] = max(
-                eligible, key=lambda i: _card_priority(fighter.draw_pile[i], state, side)
-            )
-
     if card.name == "Pull":
         choices["mode"] = "reversal" if fighter.discard_pile and relative_momentum(state, side) <= -1 else "filter"
         if choices["mode"] == "filter" and fighter.hand:
