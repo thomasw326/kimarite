@@ -111,6 +111,8 @@ class BoutState:
     kimarite_removals: list[tuple[Side, str]] = field(default_factory=list)
     temporary_outcomes: list[tuple[Side, str, str]] = field(default_factory=list)
     headlong_decisions: list[tuple[Side, str, str, str | None]] = field(default_factory=list)
+    position_loss_events: list[tuple[Side, int, str, int]] = field(default_factory=list)
+    katasukashi_win_sources: list[str] = field(default_factory=list)
     event_log: list[str] = field(default_factory=list)
 
     def fighter(self, side: Side) -> FighterState:
