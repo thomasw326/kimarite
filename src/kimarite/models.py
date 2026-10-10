@@ -101,6 +101,7 @@ class BoutState:
     side_by_side_distance: int = 0
     active_side: Side | None = None
     turn_number: int = 0
+    disable_kimarite_exchange_effects: bool = False
     winner: Side | None = None
     win_method: str | None = None
     win_source: str | None = None
