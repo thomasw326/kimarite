@@ -302,34 +302,30 @@ def _belt_slap(
 
 
 def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    grip = effective_total_grip(state, side, consume_prevention=True)
-    if grip == 1:
-        gain_push(state, side, 1)
-    elif grip == 2:
-        gain_push(state, side, 2)
-    elif grip == 3:
-        gain_push(state, side, 3)
-    elif grip >= 4:
-        gain_push(state, side, 3)
-        gain_momentum(state, side, 1)
+    if effective_total_grip(state, side, consume_prevention=True) < 1:
+        gain_flexible_grip(state, side)
+    else:
+        gain_power(state, side, 1)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
 
 
 def _yori(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if effective_total_grip(state, side, consume_prevention=True) < 1:
         gain_flexible_grip(state, side)
-        return
-    position = state.position * state.sign(side)
-    if position > 0:
-        gain_momentum(state, side, min(position, 3))
+    else:
+        gain_push(state, side, 1)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
 
 
 def _gaburi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if effective_total_grip(state, side, consume_prevention=True) < 1:
         gain_flexible_grip(state, side)
-        return
-    momentum = state.momentum * state.sign(side)
-    if momentum > 0:
-        gain_push(state, side, min(momentum, 3))
+    else:
+        gain_momentum(state, side, 1)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
 
 
 def _henka(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -821,6 +817,9 @@ for _name in (*MILL_AMOUNTS, *RECYCLE_NAMES):
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
         "Salt Throw",
+        "Tsuri",
+        "Yori",
+        "Gaburi",
         "Gain Left Grip",
         "Gain Right Grip",
         "Uwate",
