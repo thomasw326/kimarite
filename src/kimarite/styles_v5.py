@@ -303,7 +303,8 @@ _SOURCE_JSON = r'''[
       "Pull",
       "Attempt Deep Inside Grip",
       "Attempt Two-Handed Grip",
-      "Tottari"
+      "Tottari",
+      "Ottsuke"
     ],
     "weights": [
       -2,
