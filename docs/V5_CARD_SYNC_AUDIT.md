@@ -46,3 +46,11 @@ The following changes are committed on the V5 branch (no balance changes):
 - Added dedicated regression tests for Headlong Charge choices, Kimarite searches, Tottari timing, Sidestep push suppression/resolution, and Read the Move/Pull modes.
 
 **Remaining before baseline certification:** run the full suite (not yet run on these commits), resolve any failures, add human pre-bout selection and deliberate AI policies, verify Sidestep with negative-effect prevention and interrupted Temporaries, and confirm the printed Tottari window against final rules. No new balance baseline has been run.
+
+### AI choice follow-up
+
+- AI Pull now enumerates printed `filter` versus `reversal` modes rather than obsolete `pay_pull_cost` keys.
+- AI Read the Move now considers `draw` as well as each valid Temporary removal target, using explicit `mode` values.
+- Get Underneath's Exchange search no longer prompts the acting human to choose from the opponent's hidden Draw Pile. Opponent-owned search choice is still a pending dedicated interactive-controller feature; noninteractive search remains deterministic.
+- Added regression tests for both AI mode sets.
+- **Verification status:** source edits are committed, but not yet test-certified. The local runtime cannot resolve GitHub for a repository clone, and no GitHub Actions run was triggered to avoid unnecessary Actions usage.
