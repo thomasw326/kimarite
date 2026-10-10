@@ -92,7 +92,7 @@ CARD_LIBRARY_TEXT = {
   },
   "salt throw": {
     "timing": "Tachiai / Exchange",
-    "effect": "No Exchange effect (deck recycling removed).",
+    "effect": "Tachiai / Exchange: If your Discard Pile has 7+ cards, return the entire Discard Pile to the bottom of the Draw Pile. Enter a persistent Temporary; at the start of each of your turns, recycle one discarded card to the bottom of your Draw Pile.",
     "notes": ""
   },
   "stare down": {
