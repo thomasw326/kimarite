@@ -34,7 +34,7 @@ def test_headlong_decline_grants_no_bonus_and_discards_prepared_card():
     state, comparison = _bout("Headlong Charge")
     assert (card_by_name("Headlong Charge").power,
             card_by_name("Headlong Charge").technique,
-            card_by_name("Headlong Charge").spirit) == (0, 0, 4)
+            card_by_name("Headlong Charge").spirit) == (0, 0, 3)
     power = state.fighter_a.power
     resolve_prepared_tachiai(state, comparison, sacrifice_choices={Side.A: None})
     assert state.fighter_a.power == power
