@@ -110,6 +110,7 @@ class BoutState:
     card_plays: list[tuple[Side, str]] = field(default_factory=list)
     kimarite_removals: list[tuple[Side, str]] = field(default_factory=list)
     temporary_outcomes: list[tuple[Side, str, str]] = field(default_factory=list)
+    headlong_decisions: list[tuple[Side, str, str, str | None]] = field(default_factory=list)
     event_log: list[str] = field(default_factory=list)
 
     def fighter(self, side: Side) -> FighterState:
