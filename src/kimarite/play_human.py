@@ -9,12 +9,32 @@ from __future__ import annotations
 
 import argparse
 
-from .catalog import PLAYTEST_WRESTLERS
+from .catalog import PLAYTEST_WRESTLERS, CARD_POOL
 from .effects import ChoiceRequired, IllegalPlay
 from .human_bout import HumanBout
 from .models import Side
 from .setup import BoutConfig, FighterConfig
 from .styles_v5 import STYLES
+
+
+
+CARD_DESCRIPTIONS = {
+    "oshi": "Exchange: Gain 1 Push, gain 1 Play, then draw 1 card. After play, mill 1 card from the top of your Draw Pile.",
+}
+
+
+def _card_lookup(raw: str) -> bool:
+    """Show known card information without changing the bout or consuming a Play."""
+    if not raw.startswith("/"):
+        return False
+    query = raw[1:].strip().casefold()
+    card = next((c for c in CARD_POOL if c.name.casefold() == query), None)
+    if card is None:
+        print(f"Unknown card: {raw[1:]}. Try /oshi.")
+        return True
+    print(f"\n{card.name} [P{card.power} T{card.technique} S{card.spirit}]")
+    print(CARD_DESCRIPTIONS.get(query, "Card effect description not yet available in the terminal. Check the Card Library."))
+    return True
 
 
 def _display(bout: HumanBout) -> None:
@@ -94,7 +114,7 @@ def main() -> None:
         )
 
     print("KIMARITE — V5 terminal prototype")
-    print("Enter a playable card number, 'pass' to end your turn, or 'quit'.")
+    print("Enter a card number, 'pass', 'quit', or '/oshi' to inspect Oshi.")
     while not bout.finished:
         if bout.pending_selection is not None:
             pending = bout.pending_selection
@@ -102,6 +122,8 @@ def main() -> None:
             for i, card in enumerate(pending.options):
                 print(f"  {i}: {card.name} [P{card.power} T{card.technique} S{card.spirit}]")
             raw_selection = input("Indices to keep, separated by spaces (or quit): ").strip()
+            if _card_lookup(raw_selection):
+                continue
             if raw_selection.lower() in {"quit", "q"}:
                 return
             try:
@@ -112,6 +134,8 @@ def main() -> None:
             continue
         _display(bout)
         raw = input("\nAction: ").strip().lower()
+        if _card_lookup(raw):
+            continue
         if raw in {"quit", "q"}:
             print("Session ended without recording a victory.")
             return
