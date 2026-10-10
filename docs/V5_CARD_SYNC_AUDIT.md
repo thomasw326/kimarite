@@ -82,3 +82,7 @@ The following changes are committed on the V5 branch (no balance changes):
 **Approved rule:** Search is automatic. Starting at the top of the Draw Pile, take the first card matching the category named by Search (for example, Kimarite). Do not look at the deck, reveal multiple candidates, choose among matches, shuffle, or reorder other cards. If no matching card exists, nothing is moved. The found card moves to the destination specified by the calling card's effect.
 
 This supersedes previous proposals for human/AI `kimarite_index` choices and opponent-owned interactive searches. Get Underneath and Use the Tawara resolve by the same automatic topmost-Kimarite mechanism. Deferred-choice state, prompts, and AI ranking policies for Search have been removed. Regression tests enforce top-to-bottom category matching.
+
+## Approved V5 orb override — October 9, 2026
+
+At designer request, **Shiko Stomp** is **1 Power / 1 Technique / 1 Spirit** (previously 0/0/0). This is a deliberate approved balance modification in `src/kimarite/catalog.py`, not a transcription error. The frozen `data/v5_print_pool_snapshot.json` remains unchanged as a historical source snapshot; production V5 catalog takes precedence for this explicitly approved override. Shiko Stomp's persistent Temporary and Tachiai protection effects are unchanged. Any CI round robin after commit `eaf6d2c8` must be treated as a new balance version.
