@@ -110,7 +110,6 @@ def resolve_prepared_tachiai(
                 state.headlong_decisions.append((side, "Tachiai", "sacrifice", sacrificed.name))
                 state.log(f"{fighter.wrestler.name} sacrifices {sacrificed.name} during Tachiai.")
                 headlong_sacrificed[side] = True
-                gain_power(state, side, 1)
             else:
                 state.headlong_decisions.append((side, "Tachiai", "decline", None))
         elif name == "Nodowa":
