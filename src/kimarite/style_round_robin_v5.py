@@ -11,6 +11,7 @@ from itertools import combinations
 
 from .style_simulate_v5 import run_style_bout
 from .style_builds_v5 import build_style
+from .models import Side
 from .styles_v5 import STYLES
 
 
@@ -69,7 +70,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                             if result.completed:
                                 slot_outcomes[(role, c.name, "wins" if result.state.winner.value == ("A" if idx == 0 else "B") else "losses")] += 1
                 for deciding_side, phase, decision, sacrificed_name in result.state.headlong_decisions:
-                    style_name = a if deciding_side is __import__("kimarite.models", fromlist=["Side"]).Side.A else b
+                    style_name = a if deciding_side is Side.A else b
                     headlong_choice_counts[(phase, decision)] += 1
                     headlong_choice_outcomes[(phase, decision, style_name, "wins" if result.state.winner is deciding_side else "losses")] += 1
                 for played_side, card_name in result.state.card_plays:
