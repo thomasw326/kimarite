@@ -24,9 +24,9 @@ def state_with_hand(*names):
 
 
 def test_observation_hides_opponent_cards_and_is_immutable():
-    state = state_with_hand("Bad Oshi", "Oshi", "Shove")
+    state = state_with_hand("Shove", "Oshi", "Tsuki")
     view = observe(state, Side.A)
-    assert tuple(c.name for c in view.hand) == ("Bad Oshi", "Oshi", "Shove")
+    assert tuple(c.name for c in view.hand) == ("Shove", "Oshi", "Tsuki")
     assert view.opponent_hand_size == 1
     assert "Tsuppari" not in repr(view)
     assert "Harite" not in repr(view)
@@ -37,7 +37,8 @@ def test_observation_hides_opponent_cards_and_is_immutable():
 
 
 def test_choice_required_leaves_authoritative_state_unchanged():
-    state = state_with_hand("Bad Oshi", "Oshi", "Shove")
+    state = state_with_hand("Shove", "Oshi", "Tsuki")
+    state.fighter_a.played_this_turn.append(card_by_name("Oshi"))
     before = deepcopy(state)
     with pytest.raises(ChoiceRequired) as exc:
         submit_card_action(state, Side.A, 0)
@@ -49,12 +50,13 @@ def test_choice_required_leaves_authoritative_state_unchanged():
 
 
 def test_choice_can_be_retried_and_committed_once():
-    state = state_with_hand("Bad Oshi", "Oshi", "Shove")
+    state = state_with_hand("Shove", "Oshi", "Tsuki")
+    state.fighter_a.played_this_turn.append(card_by_name("Oshi"))
     assert len(legal_actions(state, Side.A)) == 3
     submit_card_action(state, Side.A, 0, choices={"hand_index": 0})
-    assert state.card_plays == [(Side.A, "Bad Oshi")]
+    assert state.card_plays == [(Side.A, "Shove")]
     assert state.fighter_a.cards_played_this_turn == 1
-    assert "Shove" in [c.name for c in state.fighter_a.hand]
+    assert "Tsuki" in [c.name for c in state.fighter_a.hand]
     assert "Oshi" in [c.name for c in state.fighter_a.discard_pile]
 
 
