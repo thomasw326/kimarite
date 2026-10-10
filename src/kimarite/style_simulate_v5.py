@@ -40,6 +40,8 @@ def run_style_bout(
             return SimulationResult(state, False, state.turn_number, "No active side")
         try:
             start_exchange_turn(state, side, comp)
+            if side not in state.first_exchange_hands and state.winner is None:
+                state.first_exchange_hands[side] = tuple(card.name for card in state.fighter(side).hand)
             if state.winner is not None:
                 break
             play_style_turn(state, side, comp, style_a if side is Side.A else style_b)
