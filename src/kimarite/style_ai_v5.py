@@ -47,6 +47,10 @@ def _four_card_setup_hold_value(state: BoutState, side: Side, card_name: str) ->
 def choose_style_play(state: BoutState, side: Side, comparison: TachiaiComparison, style: str) -> AIPlay | None:
     profile = STYLES[style]
     plays = candidate_plays(state, side, comparison)
+    # Never choose Headlong Charge decline when a Kimarite can be sacrificed.
+    if state.fighter(side).kimarite_zone:
+        plays = [p for p in plays if p.card.name != "Headlong Charge"
+                 or p.context.choices.get("sacrifice_kimarite") is not None]
     if not plays:
         return None
 
