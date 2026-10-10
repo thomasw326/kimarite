@@ -50,7 +50,7 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
     # Never choose Headlong Charge decline when a Kimarite can be sacrificed.
     if state.fighter(side).kimarite_zone:
         plays = [p for p in plays if p.card.name != "Headlong Charge"
-                 or p.context.choices.get("sacrifice_kimarite") is not None]
+                 or p.context.choice("sacrifice_kimarite") is not None]
     if not plays:
         return None
 
