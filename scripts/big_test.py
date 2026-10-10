@@ -11,7 +11,7 @@ from itertools import permutations
 from pathlib import Path
 
 from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
-from kimarite.models import BoutState, FighterState, Side, Stat, Wrestler
+from kimarite.models import BoutState, Card, FighterState, Side, Stat, Wrestler
 from kimarite.personality_ai import play_personality_turn
 from kimarite.tachiai import compare_tachiai, first_exchange_side
 from kimarite.tachiai_effects import resolve_prepared_tachiai
@@ -57,6 +57,8 @@ def make_fighter(config, rng, ranking):
 
 
 def card_origin(wrestler, card_id):
+    if card_id in {62, 20001, 20002, 20003}:
+        return "generated"
     if card_id == wrestler.starting_kimarite.card_id:
         return "starting_kimarite"
     if card_id == wrestler.prepared_tachiai_card.card_id:
@@ -263,7 +265,13 @@ def main():
                                 wrestler.top_of_deck_card, *CARD_POOL
                             )
                         }
-                        # Count every Exchange play, not just distinct card IDs.
+                        lookup.update({
+                            62: Card(62, "Power Water Cantrip"),
+                            20001: Card(20001, "Oshi", 0, 0, 1),
+                            20002: Card(20002, "Tsuki", 1, 0, 0),
+                            20003: Card(20003, "Shove", 2, 0, 0),
+                        })
+                        # Count every Exchange play, including generated cards.
                         for owner, cid in state.card_play_ids:
                             if owner is side:
                                 played_card = lookup[cid]
