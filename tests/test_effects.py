@@ -85,7 +85,7 @@ def test_regain_balance_recovers_negative_momentum():
     play_card(bout, Side.A, card)
 
     assert bout.momentum == 0
-    assert bout.fighter_a.power == 1
+    assert bout.fighter_a.power == 2
 
 
 def test_belt_slap_uses_recorded_spirit_advantage():
