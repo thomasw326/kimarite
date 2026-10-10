@@ -489,6 +489,10 @@ def _search_kimarite(state: BoutState, searched_side: Side, source: str,
     options = [i for i, card in enumerate(fighter.draw_pile) if card.is_kimarite]
     if not options:
         return
+    if state.human_choice_side is searched_side and context is None and len(options) > 1:
+        state.pending_kimarite_searches.append((searched_side, source))
+        state.log(f"{fighter.wrestler.name} must choose a Kimarite from their Draw Pile.")
+        return
     choice = None if context is None else context.choice("kimarite_index")
     if len(options) == 1:
         selected = options[0]
