@@ -96,8 +96,13 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                 wins[winner] += 1
                 losses[loser] += 1
                 pair_wins[(winner, loser)] += 1
-                finishes_by_winner[(winner, result.state.win_method or "unknown")] += 1
-                finishes[result.state.win_method or "unknown"] += 1
+                finish = result.state.win_method or "unknown"
+                if result.state.win_source == "ringout":
+                    finish = ("Ringout with Grab" if finish == "Yorikiri"
+                              else "Grabless Ringout" if finish == "Oshidashi"
+                              else finish)
+                finishes_by_winner[(winner, finish)] += 1
+                finishes[finish] += 1
     return {
         "styles": len(styles), "planned_bouts": bouts,
         "completed": sum(wins.values()),
