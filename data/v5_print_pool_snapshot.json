@@ -2,7 +2,7 @@
   "source_spreadsheet": "1JY-vPmU-yqcwYzrEugKP43JrnFGLi_UwZSFkOSqWtWI",
   "source_tab": "Playtest Print Pool V4.3 — Test",
   "source_range": "A1:M63",
-  "snapshot_purpose": "Unmodified spreadsheet card text for V5 parity audits, not a claim that engine effects are synchronized",
+  "snapshot_purpose": "Source wording snapshot for V5 parity tests; effect implementation requires separate behavioral tests",
   "cards": [
     {
       "sheet_row": 2,
@@ -14,7 +14,7 @@
       "technique": 0,
       "spirit": 1,
       "timing": "Tachiai / Exchange",
-      "effect": "Tachiai: Reveal the top card of your deck and add its Tachiai orbs. If the revealed card is Oshi, Bad Oshi, or Tsuki, continue revealing and adding orbs until you reveal a card that is none of those. Exchange: Gain 1 Play. Draw 1 card. If your Momentum is 0 or higher, gain 1 Push. Exchange: After resolving the other effects, Mill 1 (move the top card of your Draw Pile to your Discard Pile).",
+      "effect": "Tachiai: Reveal the top card of your deck and add its Tachiai orbs. If the revealed card is Oshi, or Tsuki, continue revealing and adding orbs until you reveal a card that is none of those. Exchange: Gain 1 Play. Draw 1 card. If your Momentum is 0 or higher, gain 1 Push. Exchange: After resolving the other effects, Mill 1 (move the top card of your Draw Pile to your Discard Pile).",
       "classification": "Fixed Playtest · This chat: revised"
     },
     {
@@ -40,7 +40,7 @@
       "technique": 0,
       "spirit": 0,
       "timing": "Tachiai / Exchange",
-      "effect": "Tachiai: Reveal the top card of your deck and add its Tachiai orbs. If the revealed card is Oshi, Bad Oshi, or Tsuki, continue revealing and adding orbs until you reveal a card that is none of those. Exchange: Gain 1 Play. Draw 1 card. If your Momentum is 0 or higher, reduce 1 opposing Grip by 1 level. Exchange: After resolving the other effects, Mill 1 (move the top card of your Draw Pile to your Discard Pile).",
+      "effect": "Tachiai: Reveal the top card of your deck and add its Tachiai orbs. If the revealed card is Oshi, or Tsuki, continue revealing and adding orbs until you reveal a card that is none of those. Exchange: Gain 1 Play. Draw 1 card. If your Momentum is 0 or higher, reduce 1 opposing Grip by 1 level. Exchange: After resolving the other effects, Mill 1 (move the top card of your Draw Pile to your Discard Pile).",
       "classification": "Fixed Playtest · This chat: reviewed"
     },
     {
@@ -66,7 +66,7 @@
       "technique": 0,
       "spirit": 1,
       "timing": "Tachiai / Exchange",
-      "effect": "Tachiai: Add 1 Oshi, 1 Tsuki, and 1 Shove to your Draw Pile, then shuffle it. Exchange: Gain 1 Momentum. If you have already played Oshi, Bad Oshi, Tsuki, Tsuppari, or Shove this turn, also gain 1 Push. Gain 1 Play. Draw 1 card. Exchange: After resolving the other effects, Mill 1 (move the top card of your Draw Pile to your Discard Pile).",
+      "effect": "Tachiai: Add 1 Oshi, 1 Tsuki, and 1 Shove to your Draw Pile, then shuffle it. Exchange: Gain 1 Momentum. If you have already played Oshi, Tsuki, Tsuppari, or Shove this turn, also gain 1 Push. Gain 1 Play. Draw 1 card. Exchange: After resolving the other effects, Mill 1 (move the top card of your Draw Pile to your Discard Pile).",
       "classification": "Fixed Playtest · This chat: reviewed"
     },
     {
@@ -586,7 +586,7 @@
       "technique": 0,
       "spirit": 0,
       "timing": "Tachiai / Exchange",
-      "effect": "Tachiai: Gain 1 Push. If your Position is +3 after this Push resolves, win the bout. Exchange: Gain 1 Push. If you have already played Oshi, Bad Oshi, Tsuki, or Tsuppari this turn, draw 1 card, then discard 1 card. Exchange: After resolving the other effects, Mill 1 (move the top card of your Draw Pile to your Discard Pile).",
+      "effect": "Tachiai: Gain 1 Push. If your Position is +3 after this Push resolves, win the bout. Exchange: Gain 1 Push. If you have already played Oshi, Tsuki, or Tsuppari this turn, draw 1 card, then discard 1 card. Exchange: After resolving the other effects, Mill 1 (move the top card of your Draw Pile to your Discard Pile).",
       "classification": "New Playtest · This chat: created / approved"
     },
     {
