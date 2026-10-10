@@ -58,8 +58,14 @@ def test_ai_opener_advances_to_human():
     bout = HumanBout.new(CONFIG, human_side=Side.B, max_turns=12)
     if not bout.finished:
         assert bout.awaiting_human
-        assert bout.state.active_side is Side.B
-        assert bout.pending_selection is not None
+        if bout.pending_kimarite_search is not None:
+            # AI can pause its own turn for an opponent-owned search decision.
+            assert bout.state.active_side is Side.A
+            eligible = [i for i, c in enumerate(bout.state.fighter_b.draw_pile) if c.is_kimarite]
+            bout.choose_kimarite_search(eligible[0])
+        if not bout.finished:
+            assert bout.state.active_side is Side.B
+            assert bout.pending_selection is not None
 
 
 def test_human_play_is_incremental():
