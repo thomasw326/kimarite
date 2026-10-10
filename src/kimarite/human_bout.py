@@ -42,7 +42,6 @@ class HumanBout:
     turn_started: bool = False
     stopped_reason: str | None = None
     pending_selection: CardSelection | None = None
-    ai_turn_played: bool = False
 
     @classmethod
     def new(
@@ -58,7 +57,6 @@ class HumanBout:
             raise ValueError("max_turns must be positive")
         prepared = create_prepared_bout(
             config, sacrifice_choices={human_side: tachiai_sacrifice},
-            human_choice_side=human_side,
         )
         session = cls(
             prepared.state,
@@ -84,7 +82,6 @@ class HumanBout:
         a = build_style(human_style, seed=seed, ranking=1)
         b = build_style(opponent_style, seed=seed + 1009, ranking=2)
         state = BoutState(a.fighter, b.fighter)
-        state.human_choice_side = Side.A
         comparison = compare_tachiai(a.fighter.wrestler, b.fighter.wrestler)
         apply_initial_power(state, comparison)
         resolve_prepared_tachiai(
@@ -105,46 +102,14 @@ class HumanBout:
     def view(self) -> PlayerObservation:
         return observe(self.state, self.human_side)
 
-    @property
-    def pending_kimarite_search(self) -> tuple[CardView, ...] | None:
-        if not self.state.pending_kimarite_searches:
-            return None
-        side, _ = self.state.pending_kimarite_searches[0]
-        if side is not self.human_side:
-            return None
-        return tuple(_view(card) for card in self.state.fighter(side).draw_pile if card.is_kimarite)
-
-    def choose_kimarite_search(self, index: int) -> None:
-        options = self.pending_kimarite_search
-        if options is None or not self.awaiting_human:
-            raise IllegalPlay("No Kimarite search choice is pending.")
-        eligible = [i for i, c in enumerate(self.state.fighter(self.human_side).draw_pile) if c.is_kimarite]
-        if type(index) is not int or index not in eligible:
-            raise IllegalPlay("Choose an eligible Kimarite Draw Pile index.")
-        side, source = self.state.pending_kimarite_searches.pop(0)
-        fighter = self.state.fighter(side)
-        selected = fighter.draw_pile.pop(index)
-        fighter.kimarite_zone.append(selected)
-        self.state.log(f"{fighter.wrestler.name} searches {selected.name} into the Kimarite Zone after {source}.")
-        if self.state.pending_kimarite_searches:
-            return
-        if self.ai_turn_played:
-            self.ai_turn_played = False
-            self._finish_turn()
-        if not self.finished:
-            self.advance()
-
     def actions(self):
-        if not self.awaiting_human or self.finished or self.pending_selection or self.pending_kimarite_search is not None:
+        if not self.awaiting_human or self.finished or self.pending_selection:
             return ()
         return legal_actions(self.state, self.human_side)
 
     def advance(self) -> None:
         """Run the engine and AI until a human choice or terminal state."""
         self.awaiting_human = False
-        if self.pending_kimarite_search is not None:
-            self.awaiting_human = True
-            return
         while not self.finished:
             side = self.state.active_side
             if side is None:
@@ -191,10 +156,6 @@ class HumanBout:
                 return
 
             self.ai_controller(self.state, side, self.comparison)
-            if self.pending_kimarite_search is not None:
-                self.ai_turn_played = True
-                self.awaiting_human = True
-                return
             if self.state.winner is not None:
                 break
             self._finish_turn()
