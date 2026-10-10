@@ -14,6 +14,7 @@ from .effects import ChoiceRequired, EffectContext, IllegalPlay
 from .legality import can_play_card
 from .models import BoutState, Side
 from .playing import play_card
+from .tachiai import TachiaiComparison
 
 
 @dataclass(frozen=True)
@@ -98,6 +99,7 @@ def submit_card_action(
     hand_index: int,
     *,
     choices: Mapping[str, Any] | None = None,
+    comparison: TachiaiComparison | None = None,
 ) -> None:
     """Atomically submit one card action, including its effect choices.
 
@@ -114,7 +116,7 @@ def submit_card_action(
 
     trial = deepcopy(state)
     trial_card = trial.fighter(side).hand[hand_index]
-    play_card(trial, side, trial_card, context=EffectContext(choices=dict(choices or {})))
+    play_card(trial, side, trial_card, context=EffectContext(comparison=comparison, choices=dict(choices or {})))
     # Preserve the BoutState object identity so callers can retain their handle.
     # All nested state belongs to the accepted transaction from this point on.
     state.__dict__.update(trial.__dict__)
