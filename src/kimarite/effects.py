@@ -531,20 +531,28 @@ def _read_the_move(
 
 
 def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    """Current Pull choice: setup a reversal or filter one card."""
+    if context.choice("mode") in {"filter", "draw_discard"}:
+        draw_one(state, side)
+        if state.winner is None:
+            _discard_from_hand(state, side, card, context)
+        # Pull is ordinarily a Temporary, but filter mode never enters it.
+        state.fighter(side).discard_pile.append(card)
+        return
+
     fighter = state.fighter(side)
     lose_momentum(state, side, 1)
-    lose_position(state, side, 1)
-    if fighter.discard_pile:
-        # Deterministic default prevents forcing an AI choice.
-        # Human/controller may supply a valid index to select another card.
+    if state.winner is None:
+        lose_position(state, side, 1)
+    if fighter.discard_pile and state.winner is None:
         index = context.choice("discard_index")
         if not isinstance(index, int) or not 0 <= index < len(fighter.discard_pile):
             index = len(fighter.discard_pile) - 1
         recovered = fighter.discard_pile.pop(index)
         fighter.draw_pile.insert(0, recovered)
         state.log(f"{fighter.wrestler.name} puts {recovered.name} on top of the Draw Pile.")
-    add_temporary(state, side, card, phase="exchange")
-
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
 
 
 def _power_water(
