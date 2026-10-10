@@ -165,7 +165,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 fighter.discard_pile.append(discarded)
 
     elif card.name == "Abisetaoshi":
-        if fighter.power >= 3:
+        if fighter.power >= 5:
             if effective_total_grip(state, side) == 0:
                 gain_flexible_grip(state, side)
             else:
