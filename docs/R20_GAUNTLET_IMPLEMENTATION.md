@@ -114,6 +114,14 @@ A complete all-arm schedule currently plans 90,720 bouts. Use repeated --start o
 
 **No simulation data exists for R20 yet.** The 90,720 figure is the revised planned experimental sample, not reported results.
 
+## Rare long bouts and timeout handling
+
+The first full-scale R20 run (2026-10-10) exposed a YOR-1 Shuffled bout (fixture 103-00, seed 20271310) that reached the previous 30-turn safety limit without a winner. The initial 160 smoke bouts passed. A single long bout is not itself an engine exception or a card-balance failure.
+
+The hosted tournament now uses a **60-turn safety limit** for full-scale bouts. If an exceptionally long bout still reaches the limit, its raw outcome is recorded as `Turn limit 60` and marked incomplete, without aborting the entire 1,296-bout variant batch. The report explicitly counts incomplete bouts and excludes them from win-rate and completion-rate denominators. **Actual engine exceptions, invalid outcomes or missing CSV rows still fail the batch.**
+
+The source design, variants, seeds, scheduled fixtures, and seat policy have not changed. The original red run is superseded by the [corrected R20 run](https://github.com/thomasw326/kimarite/actions/runs/38096625383).
+
 ## Public GitHub tournament
 
 The dedicated [R20 smoke-and-gauntlet workflow](https://github.com/thomasw326/kimarite/actions/workflows/r20-gauntlet.yml) runs the same 70-arm / 90,720-bout schedule on the experimental branch. Regression and 160-bout smoke checks gate a 14-shard tournament; a final job combines records into the full Starting-versus-Shuffled report. The workflow publishes both raw CSVs and processed summaries as run artifacts. Follow the [initiated run](https://github.com/thomasw326/kimarite/actions/runs/38096326198).
