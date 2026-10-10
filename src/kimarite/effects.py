@@ -514,7 +514,9 @@ def _get_underneath(
     gain_momentum(state, side, 1)
     gain_push(state, side, 1)
     if state.winner is None:
-        give_opponent_kimarite(state, side, card.name, context)
+        # The opponent owns this search choice. Do not expose their hidden
+        # Draw Pile or let the acting human pick on their behalf.
+        give_opponent_kimarite(state, side, card.name)
 
 
 def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
