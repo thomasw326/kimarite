@@ -210,10 +210,11 @@ def summarize_records(records: Iterable[BoutRecord]) -> list[dict[str, object]]:
         c["errors"] += int(bool(record.error))
         c["wins"] += int(record.subject_won)
         c["finishes"] += int(record.finished_by_tested_kimarite)
-        c["condition_attainments"] += int(record.condition_attained)
-        c["available"] += int(record.tested_card_available)
-        if record.tested_card_available and record.finished_by_tested_kimarite:
-            c["finishes_when_available"] += 1
+        if record.completed:
+            c["condition_attainments"] += int(record.condition_attained)
+            c["available"] += int(record.tested_card_available)
+            if record.tested_card_available and record.finished_by_tested_kimarite:
+                c["finishes_when_available"] += 1
     output: list[dict[str, object]] = []
     for (arm_id, placement), c in sorted(by_group.items()):
         completed = c["completed"]
