@@ -1,0 +1,148 @@
+name: R20 smoke and gauntlet
+
+on:
+  push:
+    branches:
+      - experiment/r20-generic-kimarite-gauntlet
+    paths:
+      - .github/workflows/r20-gauntlet.yml
+  workflow_dispatch:
+
+concurrency:
+  group: r20-gauntlet-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Test R20 schedule and combat rules
+        run: python -m pytest -q tests/test_r20_gauntlet.py tests/test_r20_variant_runtime.py tests/test_r20_gauntlet_report.py
+      - name: Smoke both placements, four finisher families
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/r20_smoke
+          for arm in HIK-3 OKD-1 TSO-1 KAT-1; do
+            for placement in starting shuffled; do
+              if [ "$placement" = starting ]; then offset=0; else offset=648; fi
+              python -m kimarite.r20_gauntlet_bouts --arm "$arm" --start "$offset" --count 20 --output "artifacts/r20_smoke/${arm}_${placement}.csv"
+            done
+          done
+          python - <<'PY'
+          import csv, glob
+          paths=sorted(glob.glob("artifacts/r20_smoke/*.csv"))
+          assert len(paths)==8, paths
+          for path in paths:
+              with open(path, newline="", encoding="utf-8") as stream:
+                  rows=list(csv.DictReader(stream))
+              assert len(rows)==20, (path,len(rows))
+              bad=[row for row in rows if row["error"] or row["completed"]!="True"]
+              if bad:
+                  print("FAILED",path,"bad_bouts",len(bad),"examples",bad[:3])
+                  raise SystemExit(1)
+          print("SMOKE PASSED: 160 completed R20 bouts")
+          PY
+      - name: Upload smoke records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r20-smoke-raw
+          path: artifacts/r20_smoke/
+          retention-days: 30
+
+  full:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run 5 variants x 1296 bouts (both placements)
+        env:
+          R20_SHARD: ${{ matrix.shard }}
+        run: |
+          python - <<'PY'
+          import csv, json, os, pathlib, subprocess, sys
+          p=pathlib.Path("artifacts/r20_full")
+          p.mkdir(parents=True,exist_ok=True)
+          arms=json.loads(pathlib.Path("data/r20_kimarite_arms.json").read_text())["arms"]
+          shard=int(os.environ["R20_SHARD"])
+          batch=arms[shard*5:(shard+1)*5]
+          assert len(batch)==5
+          for arm in batch:
+              aid=arm["id"]
+              path=p/f"{aid}.csv"
+              subprocess.run([sys.executable,"-m","kimarite.r20_gauntlet_bouts",
+                  "--arm",aid,"--count","1296","--output",str(path)],check=True)
+              with path.open(newline="",encoding="utf-8") as stream:
+                  rows=list(csv.DictReader(stream))
+              assert len(rows)==1296,(aid,len(rows))
+              incomplete=[r for r in rows if r["error"] or r["completed"]!="True"]
+              if incomplete:
+                  print("INCOMPLETE",aid,len(incomplete),incomplete[:3])
+                  raise SystemExit(1)
+          print("SHARD COMPLETE",shard,[a["id"] for a in batch])
+          PY
+      - name: Upload completed and diagnostic records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r20-shard-${{ matrix.shard }}
+          path: artifacts/r20_full/
+          retention-days: 30
+
+  report:
+    if: always() && needs.smoke.result == 'success'
+    needs: [smoke, full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r20-shard-*
+          path: artifacts/r20_collected
+          merge-multiple: true
+      - name: Combine and validate outcomes
+        run: |
+          python - <<'PY'
+          import csv, glob
+          paths=sorted(glob.glob("artifacts/r20_collected/*.csv"))
+          if len(paths)!=70:
+              raise SystemExit(f"Expected 70 variant CSVs; found {len(paths)}. A shard may have failed.")
+          for path in paths:
+              with open(path,newline="",encoding="utf-8") as inp:
+                  rows=list(csv.DictReader(inp))
+              if len(rows)!=1296:
+                  raise SystemExit(f"Wrong per-arm coverage: {path}, {len(rows)}")
+          print("Verified 90,720 rows across 70 arms.")
+          PY
+          python -m kimarite.r20_gauntlet_report artifacts/r20_collected/*.csv --output-dir artifacts/r20_report
+      - name: Upload final report and raw records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r20-gauntlet-final
+          path: |
+            artifacts/r20_report/
+            artifacts/r20_collected/
+          retention-days: 30
