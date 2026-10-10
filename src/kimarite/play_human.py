@@ -96,20 +96,6 @@ def main() -> None:
     print("KIMARITE — V5 terminal prototype")
     print("Enter a playable card number, 'pass' to end your turn, or 'quit'.")
     while not bout.finished:
-        if bout.pending_kimarite_search is not None:
-            options = [(i, card) for i, card in enumerate(bout.state.fighter(bout.human_side).draw_pile)
-                       if card.is_kimarite]
-            print("\nGet Underneath: select one Kimarite from your Draw Pile:")
-            for i, card in options:
-                print(f"  {i}: {card.name}")
-            raw = input("Kimarite index (or quit): ").strip().lower()
-            if raw in {"quit", "q"}:
-                return
-            try:
-                bout.choose_kimarite_search(int(raw))
-            except (ValueError, IllegalPlay) as exc:
-                print(f"Selection invalid: {exc}")
-            continue
         if bout.pending_selection is not None:
             pending = bout.pending_selection
             print(f"\nLooked at {len(pending.options)} card(s); keep exactly {pending.keep}:")
