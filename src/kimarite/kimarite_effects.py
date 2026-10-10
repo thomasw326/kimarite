@@ -61,6 +61,8 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
             add_play(state, side, 1)
 
     elif card.name == "Oshitaoshi":
+        if relative_momentum(state, side) >= 1:
+            gain_power(state, side, 1)
         if power_advantage(state, side) >= 1:
             gain_momentum(state, side, 1)
 
