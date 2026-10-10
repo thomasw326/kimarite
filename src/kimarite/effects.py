@@ -352,11 +352,10 @@ def _reset_to_neutral(
 def _regain_balance(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
-    if state.momentum * state.sign(side) < 0:
+    draw_one(state, side)
+    if state.winner is None and state.momentum * state.sign(side) < 0:
         gain_momentum(state, side, 2)
-        gain_power(state, side, 1)
-    else:
-        draw_one(state, side)
+        gain_power(state, side, 2)
 
 
 def _give_ground(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -365,8 +364,6 @@ def _give_ground(state: BoutState, side: Side, card: Card, context: EffectContex
     gain_power(state, side, 1)
     if state.winner is None:
         draw_one(state, side)
-    if state.winner is None:
-        add_temporary(state, side, card, phase="exchange")
 
 
 
@@ -435,6 +432,8 @@ def _get_underneath(
 
 def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     lose_position(state, side, 1)
+    if state.winner is None:
+        gain_momentum(state, side, 1)
     fighter = state.fighter(side)
     for index, found in enumerate(fighter.draw_pile):
         if found.is_kimarite:
