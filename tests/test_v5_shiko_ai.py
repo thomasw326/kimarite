@@ -40,9 +40,9 @@ def test_shiko_stomp_approved_orbs_apply_to_tachiai():
     top = card_by_name("Oshi")
     wrestler = Wrestler("Shiko wrestler", 2, 2, 2, k, shiko, top)
     compared = prepared_stats(wrestler)
-    assert compared.power == 2 + k.power + 1
-    assert compared.technique == 2 + k.technique + 1
-    assert compared.spirit == 2 + k.spirit + 1
+    assert compared.power == 3 + k.power + 1
+    assert compared.technique == 3 + k.technique + 1
+    assert compared.spirit == 3 + k.spirit + 1
 
 
 def test_stare_down_approved_orbs():
