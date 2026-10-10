@@ -105,7 +105,7 @@ class HumanBout:
         if not self.awaiting_human or self.finished:
             raise IllegalPlay("No human turn is waiting for a card action.")
         submit_card_action(
-            self.state, self.human_side, hand_index, choices=choices
+            self.state, self.human_side, hand_index, choices=choices, comparison=self.comparison
         )
         if self.state.winner is not None:
             self.awaiting_human = False
