@@ -422,14 +422,10 @@ def _headlong_charge(
         return
 
     choice = context.choice("sacrifice_kimarite")
-    options = [None] + list(range(len(fighter.kimarite_zone)))
+    options = list(range(len(fighter.kimarite_zone)))
 
     if choice not in options:
         raise ChoiceRequired(card.name, "sacrifice_kimarite", options)
-
-    if choice is None:
-        state.headlong_decisions.append((side, "Exchange", "decline", None))
-        return
 
     sacrificed = fighter.kimarite_zone.pop(choice)
     fighter.discard_pile.append(sacrificed)
@@ -702,12 +698,15 @@ def _ottsuke(state: BoutState, side: Side, card: Card, context: EffectContext) -
         modes.append("reduce_grip")
     if temp_targets or kimarite_targets:
         modes.append("remove_card")
-    if not modes:
-        return
+    modes.append("draw")
 
     mode = modes[0] if len(modes) == 1 else context.choice("mode")
     if mode not in modes:
         raise ChoiceRequired(card.name, "mode", modes)
+
+    if mode == "draw":
+        draw_one(state, side)
+        return
 
     if mode == "reduce_grip":
         chosen = grips[0] if len(grips) == 1 else context.choice("grip")
