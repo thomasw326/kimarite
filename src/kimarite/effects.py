@@ -335,6 +335,11 @@ def _henka(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 def _reset_to_neutral(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    for owner in (side, state.opponent_side(side)):
+        for instance in list(state.fighter(owner).temporary_zone):
+            remove_temporary(state, owner, instance, disrupted=True)
+    state.side_by_side_owner = None
+    state.side_by_side_distance = 0
     fighter = state.fighter(side)
     removed = fighter.total_grip > 0
     fighter.left_grip = GripState.NONE
