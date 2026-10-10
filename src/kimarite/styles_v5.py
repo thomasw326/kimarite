@@ -123,7 +123,7 @@ _SOURCE_JSON = r'''[
       "Belt Slap",
       "Shove",
       "Tsukidashi",
-      "Tsukitaoshi"
+      "Tsuki"
     ],
     "weights": [
       2,
