@@ -10,6 +10,7 @@ from collections import Counter
 from itertools import combinations
 
 from .style_simulate_v5 import run_style_bout
+from .style_builds_v5 import build_style
 from .styles_v5 import STYLES
 
 
@@ -30,6 +31,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
     opening_losses = Counter()
     card_plays_by_style = Counter()
     turns_by_style = Counter()
+    slot_outcomes = Counter()
     for repeat in range(repetitions):
         for pair_index, (first, second) in enumerate(combinations(styles, 2)):
             # Use one common seed for both seat assignments in a matchup.
@@ -42,6 +44,28 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                     max_turns=max_turns,
                 )
                 bouts += 1
+                # Rebuild each seeded participant for role attribution. Build inputs
+                # exactly match run_style_bout, with ranking 1/2 and seed +1009.
+                # These are observational win rates, not causal card effects.
+                builds = (
+                    build_style(a, seed=pair_seed, ranking=1),
+                    build_style(b, seed=pair_seed + 1009, ranking=2),
+                )
+                for idx, build in enumerate(builds):
+                    w = build.fighter.wrestler
+                    role_cards = (
+                        ("Starting Kimarite", (w.starting_kimarite,)),
+                        ("Tachiai", (w.prepared_tachiai_card,)),
+                        ("Top", (w.top_of_deck_card,)),
+                        ("Shuffled", tuple({
+                            card.name: card for card in build.fighter.draw_pile[1:-1]
+                        }.values())),
+                    )
+                    for role, cards in role_cards:
+                        for c in cards:
+                            slot_outcomes[(role, c.name, "appearances")] += 1
+                            if result.completed:
+                                slot_outcomes[(role, c.name, "wins" if result.state.winner.value == ("A" if idx == 0 else "B") else "losses")] += 1
                 for played_side, card_name in result.state.card_plays:
                     card_plays_by_style[(a if played_side.value == 'A' else b, card_name)] += 1
                 turns_by_style[a] += result.turns
@@ -86,6 +110,21 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
         "matchup_wins": {
             style: {opponent: pair_wins[(style, opponent)] for opponent in styles if opponent != style}
             for style in styles
+        },
+        "card_slot_outcomes": {
+            role: {
+                name: {
+                    "appearances": slot_outcomes[(role, name, "appearances")],
+                    "wins": slot_outcomes[(role, name, "wins")],
+                    "losses": slot_outcomes[(role, name, "losses")],
+                    "win_rate": round(
+                        slot_outcomes[(role, name, "wins")] /
+                        (slot_outcomes[(role, name, "wins")] + slot_outcomes[(role, name, "losses")]), 4
+                    ) if slot_outcomes[(role, name, "wins")] + slot_outcomes[(role, name, "losses")] else None,
+                }
+                for (category, name, field) in slot_outcomes if category == role
+            }
+            for role in ("Starting Kimarite", "Tachiai", "Top", "Shuffled")
         },
         "win_rates": {
             name: round(wins[name] / (wins[name] + losses[name]), 4)
