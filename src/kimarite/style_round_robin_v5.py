@@ -63,7 +63,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                         ("Tachiai", (w.prepared_tachiai_card,)),
                         ("Top", (w.top_of_deck_card,)),
                         ("Opening Hand", tuple(
-                            dict.fromkeys(result.state.first_exchange_hands.get(
+                            dict.fromkeys(getattr(result.state, "first_exchange_hands", {}).get(
                                 Side.A if idx == 0 else Side.B, ()
                             ))
                         )),
@@ -73,12 +73,13 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                     )
                     for role, cards in role_cards:
                         for c in cards:
-                            slot_outcomes[(role, c.name, "appearances")] += 1
-                            style_slot_outcomes[(w.name, role, c.name, "appearances")] += 1
+                            card_name = c if isinstance(c, str) else c.name
+                            slot_outcomes[(role, card_name, "appearances")] += 1
+                            style_slot_outcomes[(w.name, role, card_name, "appearances")] += 1
                             if result.completed:
                                 outcome = "wins" if result.state.winner.value == ("A" if idx == 0 else "B") else "losses"
-                                slot_outcomes[(role, c.name, outcome)] += 1
-                                style_slot_outcomes[(w.name, role, c.name, outcome)] += 1
+                                slot_outcomes[(role, card_name, outcome)] += 1
+                                style_slot_outcomes[(w.name, role, card_name, outcome)] += 1
                 for deciding_side, phase, decision, sacrificed_name in result.state.headlong_decisions:
                     style_name = a if deciding_side is Side.A else b
                     headlong_choice_counts[(phase, decision)] += 1
