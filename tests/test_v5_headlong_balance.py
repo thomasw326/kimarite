@@ -42,11 +42,11 @@ def test_headlong_decline_grants_no_bonus_and_discards_prepared_card():
     assert "Headlong Charge" in [c.name for c in state.fighter_a.discard_pile]
 
 
-def test_headlong_sacrifice_grants_power_momentum_and_push():
+def test_headlong_sacrifice_grants_momentum_and_push_only():
     state, comparison = _bout("Headlong Charge")
     power = state.fighter_a.power
     resolve_prepared_tachiai(state, comparison, sacrifice_choices={Side.A: 0})
-    assert state.fighter_a.power == power + 1
+    assert state.fighter_a.power == power
     assert state.headlong_decisions == [(Side.A, "Tachiai", "sacrifice", "Oshidashi")]
     assert not state.fighter_a.kimarite_zone
     assert "Oshidashi" in [c.name for c in state.fighter_a.discard_pile]
