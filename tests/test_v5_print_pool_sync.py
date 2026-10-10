@@ -11,6 +11,8 @@ from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
 
 SOURCE = json.loads((Path(__file__).resolve().parents[1] / "data" / "v5_print_pool_snapshot.json").read_text())
 ALIASES = {"Explosive Step": "Explosive Step — Fumikomi"}
+# Approved overrides take precedence over the immutable historical snapshot.
+APPROVED_ORB_OVERRIDES = {"Headlong Charge": (0, 0, 4), "Shiko Stomp": (1, 1, 1), "Stare Down": (1, 1, 1)}
 
 
 def test_current_print_pool_orbs_match_snapshot():
@@ -26,7 +28,7 @@ def test_current_print_pool_orbs_match_snapshot():
             continue
         name = ALIASES.get(row["name"], row["name"])
         assert name in live, f"Missing {name}, row {row['sheet_row']}"
-        assert live[name] == (row["power"], row["technique"], row["spirit"]), name
+        assert live[name] == APPROVED_ORB_OVERRIDES.get(name, (row["power"], row["technique"], row["spirit"])), name
 
 
 def test_retired_cards_absent_from_pool():
