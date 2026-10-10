@@ -208,7 +208,7 @@ def resolve_prepared_tachiai(
             pass
 
         elif name == "Henka":
-            if (
+            if not getattr(state, "r20_active", False) and (
                 comparison.wrestler_a.technique if side is Side.A else comparison.wrestler_b.technique
             ) > _opponent_stats(comparison, side).spirit:
                 reset_position = True
