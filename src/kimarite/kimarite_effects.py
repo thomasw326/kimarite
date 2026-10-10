@@ -45,6 +45,8 @@ def _discard_one_from_hand(state: BoutState, side: Side, card: Card, context: Ef
 
 
 def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    if state.disable_kimarite_exchange_effects:
+        return
     fighter = state.fighter(side)
     opponent_side = state.opponent_side(side)
 
