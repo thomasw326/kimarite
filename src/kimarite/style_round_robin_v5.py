@@ -174,6 +174,39 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
             }
             for style in styles
         },
+        "style_card_placement_lift": {
+            style: {
+                role: {
+                    name: {
+                        "appearances": style_slot_outcomes[(style, role, name, "appearances")],
+                        "wins": style_slot_outcomes[(style, role, name, "wins")],
+                        "losses": style_slot_outcomes[(style, role, name, "losses")],
+                        "win_rate": round(
+                            style_slot_outcomes[(style, role, name, "wins")] /
+                            (style_slot_outcomes[(style, role, name, "wins")] +
+                             style_slot_outcomes[(style, role, name, "losses")]), 4
+                        ) if (style_slot_outcomes[(style, role, name, "wins")] +
+                              style_slot_outcomes[(style, role, name, "losses")]) else None,
+                        "lift_vs_style_pp": round(
+                            100 * (
+                                style_slot_outcomes[(style, role, name, "wins")] /
+                                (style_slot_outcomes[(style, role, name, "wins")] +
+                                 style_slot_outcomes[(style, role, name, "losses")])
+                                - wins[style] / (wins[style] + losses[style])
+                            ), 2
+                        ) if (style_slot_outcomes[(style, role, name, "wins")] +
+                              style_slot_outcomes[(style, role, name, "losses")]
+                              and wins[style] + losses[style]) else None,
+                    }
+                    for name in sorted({
+                        card_name for (style_name, slot, card_name, field) in style_slot_outcomes
+                        if style_name == style and slot == role and field == "appearances"
+                    })
+                }
+                for role in ("Starting Kimarite", "Tachiai", "Top")
+            }
+            for style in styles
+        },
         "card_slot_outcomes": {
             role: {
                 name: {
