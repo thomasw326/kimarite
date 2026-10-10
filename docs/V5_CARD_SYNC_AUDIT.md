@@ -1,3 +1,13 @@
+## Stat-padding / absolute-Power threshold coupling — IMPORTANT (October 10, 2026)
+
+- The experimental universal **+2 Power, +2 Technique, +2 Spirit** was applied in `src/kimarite/tachiai.py::prepared_stats`, not to the wrestler profiles. It was intended to cushion low-Power fighters against Exhaustion.
+- **Historical mismatch:** The absolute Power requirements printed on cards were **not raised when the universal +2 was introduced**. Thus the padding unintentionally made absolute-Power conditions **two points easier** to meet relative to each wrestler's underlying build.
+- On October 10, the universal padding was removed. **The card requirements were deliberately kept at the historically approved printed numbers.** Do not automatically subtract two from them (an attempted automatic subtraction was reverted).
+- Current approved absolute thresholds: **Oshitaoshi win Power 8+; Hatakikomi win 5+; Tsuridashi win 5+; Abisetaoshi win 7+; Abisetaoshi Exchange bonus 5+; Tsuri delayed bonus 5+.** Verified against the V4.3 print-pool sheet. Tsuridashi's Power requirement was added deliberately in V4.3.
+- **Future change protocol:** Any time a flat bonus/penalty is introduced or reverted, separately enumerate and review **every absolute threshold** against the approved card library. Specify whether preserving effective difficulty requires moving the printed threshold by the same amount; never infer authorization or bulk-adjust. Differential thresholds (Power *advantage*) do not move with a symmetric stat change. Add tests and annotate simulation results by rules version.
+- R16's 4,200 bouts used padded stats: Oshitaoshi 342 finishes, Abisetaoshi 300, Hatakikomi 250, Tsuridashi 194. These outcomes are **not comparable without caution** to a flat-stat run because conditions were easier under padding.
+- Critical distinction: **Approved printed threshold** and **effective threshold under global stat padding** are not interchangeable. If restoring +2 later, either explicitly accept easier card access or approve a coordinated +2 threshold increase; do not repeat the silent mismatch.
+
 ## Current verification checkpoint (October 9, 2026)
 
 - **CI green:** test run #672 passed after deferred human-owned search support; subsequent run #676 passed after the Sidestep Temporary lock cleanup and its regression test.
