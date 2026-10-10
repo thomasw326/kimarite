@@ -17,6 +17,27 @@ jobs:
       - run: pytest -q
 
 
+
+  v5-style-baseline:
+    if: github.event_name == 'pull_request' && github.event.pull_request.number == 16
+    needs: pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run mirrored V5 style baseline (840 bouts)
+        run: |
+          mkdir -p artifacts
+          python -m kimarite.style_round_robin_v5 --repetitions 4 --max-turns 30 > artifacts/v5-style-baseline.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v5-style-baseline
+          path: artifacts/v5-style-baseline.json
+
   big-test-2:
     if: github.event_name == 'pull_request' && github.event.pull_request.number == 14
     needs: pytest
