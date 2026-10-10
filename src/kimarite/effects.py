@@ -398,18 +398,25 @@ def _headlong_charge(
 def _attempt_two_handed(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    fighter = state.fighter(side)
+    chosen = context.choice("grip")
+    if chosen not in {"left", "right"}:
+        chosen = "left" if fighter.left_grip <= fighter.right_grip else "right"
+    establish_grip(state, side, chosen)
     add_temporary(state, side, card, phase="exchange")
 
 
 def _attempt_deep_outside(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    establish_grip(state, side, "left")
     add_temporary(state, side, card, phase="exchange")
 
 
 def _attempt_deep_inside(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
+    establish_grip(state, side, "right")
     add_temporary(state, side, card, phase="exchange")
 
 
