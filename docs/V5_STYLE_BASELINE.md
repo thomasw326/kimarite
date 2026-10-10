@@ -73,3 +73,9 @@ Oshidashi 121; Katasukashi 95; Kotenage 73; Tsukiotoshi 70; Hatakikomi 62; Abise
 - Investigate the 52 opening finishes, particularly The Specialist (16 opening losses), The Technician (15) and The Arsenal (10).
 - Extend seed count / independent repetitions before approving any individual match-up adjustments.
 - Preserve frozen V4.5. PR #16 remains in draft pending design review.
+
+## Follow-up protocol: paired seeds, 4,200 bouts
+
+A new CI gate on PR #16 runs 20 repetitions × 105 unordered style pairings × 2 seat assignments = **4,200 bouts** (30-turn cap). Each pair of seat assignments shares one base seed. This corrects the earlier seed mismatch between the two legs, but **does not ensure identical card orders for each style**, because styles are independently seeded by seat in the underlying builder. Treat this as better-controlled replication, not a fully counterfactual same-deck test.
+
+Do not mix its win rates with the original 840-bout results as though they were the same experiment: the seeding policy has changed. Preserve the original report and artifact as historical snapshots. New analysis will emphasize completion rate, seat bias, interval uncertainty, matchup sample sizes, and whether the previously identified extremes persist. No automatic balance changes.
