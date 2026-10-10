@@ -90,3 +90,8 @@ At designer request, **Shiko Stomp** is **1 Power / 1 Technique / 1 Spirit** (pr
 ## Approved V5 orb override — Stare Down
 
 At designer request, **Stare Down** changes from **2 Power / 1 Technique / 2 Spirit** to **1 Power / 1 Technique / 1 Spirit**. Its Tachiai effects are unchanged. This is an explicitly approved V5 balance override; the frozen snapshot remains historical and V4.5 remains untouched. Rerun V5 balance measurements before comparing win rates.
+
+## Get Underneath — current trial and possible next nerfs
+
+- Approved trial: change printed orbs from **1 Power / 2 Technique / 0 Spirit** to **1 Power / 1 Technique / 0 Spirit**, retaining its current Tachiai and Exchange effects (+1 Momentum, +1 Push, opponent gains Kimarite search).
+- **Not approved / not implemented** for a later balance pass: restore **1/2/0** orbs but remove one or both of the Momentum/Push bonuses; alternatively make the card a vulnerable Temporary effect. Assess after fresh test results before changing.
