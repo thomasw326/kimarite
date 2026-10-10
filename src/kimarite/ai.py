@@ -421,6 +421,14 @@ def score_state(state: BoutState, side: Side) -> float:
     score -= len(opponent.hand) * 0.5
     score += fighter.plays_remaining * 0.5
 
+    # Shiko Stomp prevents a future opposing negative effect and persists
+    # until consumed. Without a state value, one-step AI treats this delayed
+    # defense as a wasted Play. Additional copies have diminishing value.
+    stomp_count = sum(t.card.name == "Shiko Stomp" for t in fighter.temporary_zone)
+    opposing_stomps = sum(t.card.name == "Shiko Stomp" for t in opponent.temporary_zone)
+    score += min(stomp_count, 1) * 17 + max(0, stomp_count - 1) * 5
+    score -= min(opposing_stomps, 1) * 13 + max(0, opposing_stomps - 1) * 4
+
     own_progress = live_kimarite_progress(state, side)
     opponent_side = state.opponent_side(side)
     opponent_future = next_turn_kimarite_state(state, opponent_side)
