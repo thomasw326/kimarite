@@ -63,6 +63,14 @@ Generates the planned mirrored fixture rows with arm, placement, profiles and se
 
 Checks the schedule and metric contract locally. Avoid GitHub Actions: the branch was committed with [skip ci].
 
+## Windows one-command smoke (local only)
+
+In a PowerShell terminal at the experimental branch checkout, run:
+
+    powershell -ExecutionPolicy Bypass -File scripts/r20_local_smoke.ps1
+
+This runs unit checks first and stops on failures. Only if they pass, it runs 160 local sample bouts across Hikiotoshi, Okuridashi, Tsukiotoshi and Katasukashi in both Starting and Shuffled placements. It then produces CSV and JSON descriptive summaries. It does not trigger GitHub Actions, and uses no Actions minutes.
+
 ## Running local batches (no GitHub Actions)
 
 Use a local Python 3.11+ checkout of this experimental branch. No changes are made to live V5 wrestlers or style assignments.
