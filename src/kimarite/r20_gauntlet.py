@@ -12,6 +12,7 @@ import json
 from collections import defaultdict
 from dataclasses import dataclass
 from itertools import permutations
+from functools import lru_cache
 from pathlib import Path
 from typing import Iterable
 
@@ -96,6 +97,7 @@ class BoutRecord:
     error: str = ""
 
 
+@lru_cache(maxsize=4)
 def load_arms(path: Path = MANIFEST_PATH) -> tuple[Arm, ...]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("schema_version") != 1:
@@ -118,6 +120,7 @@ def load_arms(path: Path = MANIFEST_PATH) -> tuple[Arm, ...]:
     return arms
 
 
+@lru_cache(maxsize=4)
 def generic_roster() -> tuple[Profile, ...]:
     return tuple(
         Profile(index, stats, order)
