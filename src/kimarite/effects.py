@@ -479,39 +479,18 @@ def _immovable(
     add_temporary(state, side, card, phase="exchange")
 
 
-def _search_kimarite(state: BoutState, searched_side: Side, source: str,
-                     context: EffectContext | None = None) -> None:
-    """Select a Kimarite from a Draw Pile; prompt when several exist.
-
-    AI callers without a context retain deterministic first-eligible selection.
-    """
+def _search_kimarite(state: BoutState, searched_side: Side, source: str) -> None:
+    """Automatically move the first eligible Kimarite from Draw Pile to zone."""
     fighter = state.fighter(searched_side)
-    options = [i for i, card in enumerate(fighter.draw_pile) if card.is_kimarite]
-    if not options:
-        return
-    if state.human_choice_side is searched_side and context is None and len(options) > 1:
-        state.pending_kimarite_searches.append((searched_side, source))
-        state.log(f"{fighter.wrestler.name} must choose a Kimarite from their Draw Pile.")
-        return
-    choice = None if context is None else context.choice("kimarite_index")
-    if len(options) == 1:
-        selected = options[0]
-    elif context is None or not context.choice("__human__"):
-        # Noninteractive AI selects deterministically, unless its controller
-        # explicitly nominates a valid eligible card.
-        selected = choice if choice in options else options[0]
-    else:
-        if choice not in options:
-            raise ChoiceRequired(source, "kimarite_index", options)
-        selected = choice
-    found = fighter.draw_pile.pop(selected)
-    fighter.kimarite_zone.append(found)
-    state.log(f"{fighter.wrestler.name} searches {found.name} into the Kimarite Zone after {source}.")
+    for index, found in enumerate(fighter.draw_pile):
+        if found.is_kimarite:
+            fighter.kimarite_zone.append(fighter.draw_pile.pop(index))
+            state.log(f"{fighter.wrestler.name} searches {found.name} into the Kimarite Zone after {source}.")
+            return
 
 
-def give_opponent_kimarite(state: BoutState, side: Side, source: str,
-                           context: EffectContext | None = None) -> None:
-    _search_kimarite(state, state.opponent_side(side), source, context)
+def give_opponent_kimarite(state: BoutState, side: Side, source: str) -> None:
+    _search_kimarite(state, state.opponent_side(side), source)
 
 
 def _get_underneath(
@@ -520,8 +499,6 @@ def _get_underneath(
     gain_momentum(state, side, 1)
     gain_push(state, side, 1)
     if state.winner is None:
-        # The opponent owns this search choice. Do not expose their hidden
-        # Draw Pile or let the acting human pick on their behalf.
         give_opponent_kimarite(state, side, card.name)
 
 
@@ -529,7 +506,7 @@ def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectCon
     lose_position(state, side, 1)
     if state.winner is None:
         gain_momentum(state, side, 1)
-    _search_kimarite(state, side, card.name, context)
+    _search_kimarite(state, side, card.name)
     add_temporary(state, side, card, phase="exchange")
 
 
