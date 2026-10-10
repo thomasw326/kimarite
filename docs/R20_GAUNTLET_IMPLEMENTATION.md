@@ -71,6 +71,16 @@ In a PowerShell terminal at the experimental branch checkout, run:
 
 This runs unit checks first and stops on failures. Only if they pass, it runs 160 local sample bouts across Hikiotoshi, Okuridashi, Tsukiotoshi and Katasukashi in both Starting and Shuffled placements. It then produces CSV and JSON descriptive summaries. It does not trigger GitHub Actions, and uses no Actions minutes.
 
+## Smoke-and-go full tournament (Windows local)
+
+Run from a PowerShell session in the experimental branch checkout:
+
+    powershell -ExecutionPolicy Bypass -File scripts/r20_local_full.ps1
+
+This command runs the R20 unit tests and 160 smoke bouts first. It **stops without starting the full tournament** if tests fail, any smoke bout is incomplete, or any smoke error is recorded. If clean, it runs the 90,720-bout single-seat schedule in **216-bout checkpoint chunks**, saving the raw CSVs to artifacts/r20_full. Rerunning the command resumes existing verified checkpoint files; a seed, chunk-size, max-turns or frozen design-catalogue mismatch halts rather than mixing incompatible data. On completion, variant_placement_summary.csv, generic_profile_breakdown.csv, seat_diagnostics.csv, errors_and_incomplete.csv and report.json appear in artifacts/r20_full/report.
+
+The script is local only: it doesn't invoke GitHub Actions or alter V5 wrestler builds. It has not been executed in the current assistant environment because that environment cannot clone or run the connected GitHub checkout.
+
 ## Running local batches (no GitHub Actions)
 
 Use a local Python 3.11+ checkout of this experimental branch. No changes are made to live V5 wrestlers or style assignments.
