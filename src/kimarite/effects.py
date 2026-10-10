@@ -431,10 +431,12 @@ def _headlong_charge(
         raise ChoiceRequired(card.name, "sacrifice_kimarite", options)
 
     if choice is None:
+        state.headlong_decisions.append((side, "Exchange", "decline", None))
         return
 
     sacrificed = fighter.kimarite_zone.pop(choice)
     fighter.discard_pile.append(sacrificed)
+    state.headlong_decisions.append((side, "Exchange", "sacrifice", sacrificed.name))
     state.log(f"{fighter.wrestler.name} sacrifices {sacrificed.name}.")
 
     gain_momentum(state, side, 1)
