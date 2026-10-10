@@ -40,6 +40,7 @@ def remove_temporary(
     instance: TemporaryInstance,
     *,
     disrupted: bool,
+    completed: bool = False,
 ) -> Card:
     fighter = state.fighter(side)
     if instance not in fighter.temporary_zone:
@@ -66,6 +67,11 @@ def remove_temporary(
             gain_momentum(state, state.opponent_side(side), 2)
 
     fighter.discard_pile.append(card)
+    if (getattr(state, "r20_active", False) and completed and not disrupted
+            and card.name in {"Henka", "Pull", "Sidestep", "Immovable", "Kannuki"}):
+        fighter.successful_reversal_this_turn = True
+        state.reversal_completions.append((side, card.name, state.turn_number))
+        state.log(f"{card.name} successfully completes its Reversal.")
     state.temporary_outcomes.append(
         (side, card.name, "disrupted" if disrupted else "survived")
     )
@@ -123,6 +129,9 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name == "Immovable":
             if not instance.opponent_gained_push_while_active:
                 gain_momentum(state, side, 2)
+        elif name == "Henka" and getattr(state, "r20_active", False):
+            from .effects import draw_one
+            draw_one(state, side)
         elif name == "Pull":
             state.momentum = -state.momentum
             state.log(f"{fighter.wrestler.name} reverses Momentum with surviving Pull.")
@@ -159,4 +168,4 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         else:
             raise KeyError(f"No start-of-turn Temporary resolution for {name!r}.")
 
-        remove_temporary(state, side, instance, disrupted=False)
+        remove_temporary(state, side, instance, disrupted=False, completed=True)
