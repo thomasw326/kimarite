@@ -33,6 +33,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
     card_plays_by_style = Counter()
     turns_by_style = Counter()
     slot_outcomes = Counter()
+    katasukashi_trigger_sources = Counter()
     headlong_choice_counts = Counter()
     headlong_choice_outcomes = Counter()
     for repeat in range(repetitions):
@@ -73,6 +74,9 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                     style_name = a if deciding_side is Side.A else b
                     headlong_choice_counts[(phase, decision)] += 1
                     headlong_choice_outcomes[(phase, decision, style_name, "wins" if result.state.winner is deciding_side else "losses")] += 1
+                if result.completed and result.state.win_method == "Katasukashi":
+                    for source in result.state.katasukashi_win_sources or ["unattributed"]:
+                        katasukashi_trigger_sources[source] += 1
                 for played_side, card_name in result.state.card_plays:
                     card_plays_by_style[(a if played_side.value == 'A' else b, card_name)] += 1
                 turns_by_style[a] += result.turns
@@ -118,6 +122,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
             style: {opponent: pair_wins[(style, opponent)] for opponent in styles if opponent != style}
             for style in styles
         },
+        "katasukashi_position_loss_triggers": dict(katasukashi_trigger_sources),
         "headlong_charge_ai_choices": {
             phase: {
                 decision: {
