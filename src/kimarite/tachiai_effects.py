@@ -186,7 +186,7 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
             pass
 
         elif name == "Henka":
-            if comparison.advantage_for(side, Stat.TECHNIQUE) > 0 and (
+            if (
                 comparison.wrestler_a.technique if side is Side.A else comparison.wrestler_b.technique
             ) > _opponent_stats(comparison, side).spirit:
                 reset_position = True
