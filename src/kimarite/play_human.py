@@ -268,7 +268,7 @@ CARD_LIBRARY_TEXT = {
   "abisetaoshi": {
     "timing": "Start & End of Turn",
     "effect": "Win: Grip 2+ · Power 9+. Exchange: If your Power is 6+, gain 1 flexible Grip if you have no usable Grip; otherwise gain 1 Power.",
-    "notes": "No Momentum win prerequisite and no Power Advantage Exchange rider. Printed orbs: 3 Power."
+    "notes": ""
   },
   "shove": {
     "timing": "Tachiai / Exchange",
