@@ -302,7 +302,9 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
             raise IllegalPlay("Uwate's selected card cannot currently be played.")
 
     keep_and_bottom(fighter, looked, [chosen])
+    state.log(f"{fighter.wrestler.name} looks at {len(looked)} card(s) with Uwate and adds {chosen.name} to hand.")
     if deep:
+        state.log(f"{fighter.wrestler.name} plays {chosen.name} for free with Deep Left Grip.")
         play_card(state, side, chosen, context=context)
 
 
