@@ -203,6 +203,34 @@ def _contexts_for_card(
     opponent = state.opponent(side)
     fighter = state.fighter(side)
 
+    if card.name.startswith("R20:"):
+        # Explore each legal choice for experimental cards, so the gauntlet's
+        # automatic player doesn't accidentally test only a default branch.
+        from .r20_variant_rules import arm_id
+        variant = arm_id(card)
+        family, number = variant.split("-", 1)
+        if family in {"OKD", "OKT"}:
+            return [
+                _context_variant(base, conversion="position_to_momentum"),
+                _context_variant(base, conversion="momentum_to_position"),
+            ]
+        if family == "HAT" or variant == "KAT-0":
+            return [
+                _context_variant(base, use_optional=False),
+                _context_variant(base, use_optional=True),
+            ]
+        if family == "UWD":
+            return [
+                _context_variant(base, discard_for_grip=False),
+                _context_variant(base, discard_for_grip=True),
+            ]
+        if family == "KOT":
+            return [
+                _context_variant(base, cycle_if_no_grip=False),
+                _context_variant(base, cycle_if_no_grip=True),
+            ]
+        return [base]
+
     if card.name == "Tsuki":
         grips = []
         if opponent.left_grip is not GripState.NONE:
