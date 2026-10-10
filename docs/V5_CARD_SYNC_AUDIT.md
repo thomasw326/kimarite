@@ -16,16 +16,18 @@ This is **a rules-parity effort, not a balance-tuning pass**. The pre-sync 840-b
 - Immediate/delayed Tsuri, Yori, Gaburi and Attempt Grip card timing
 - Regain Balance, Give Ground, Use the Tawara, Reset to Neutral, Read the Move and Pull core Exchange effect changes
 - Current Kimarite orb/threshold revisions and recent printed play-effect changes
+- Uwate now looks at cards equal to total Grip, draws a choice normally or plays a legal choice free when Deep Left Grip; human selections prompt and roll back safely
+- Generated Power Water Cantrips exhaust instead of moving to Discard; Stare Down grants an extra kept card
+- Printed Oshi-family duplicate copies removed and deck construction upgraded to the full card pool
 - Generated-card recognition in the Big Test reporting output
 
 ## Still requires precise behavioral parity work
 
-1. **Uwate:** Look at X = Total Grip, choose a card; when Left Grip is Deep, play it without using a Play. Current old shortcut is not compliant.
-2. **Headlong Charge (Tachiai):** Sacrificing a Kimarite must be optional and controllable; the current automated opening assumes sacrifice whenever one is available.
-3. **Kimarite searches and player choices:** Get Underneath currently selects the first eligible opposing Kimarite; Use the Tawara similarly uses a deterministic search. Human and AI decisions need explicit selection where the rules grant a choice.
-4. **Read the Move and Pull:** Both modes exist, but the automatic/controller choice policy should be reviewed and tested for the intended human interface.
-5. **Tottari:** The exact trigger window for an opponent's prevented/reduced Grip attempt needs a dedicated audit and tests.
-6. **Sidestep, prevention, Temporary interaction:** Verify complete interactions with the current approved text before using this as the new official balance baseline.
+1. **Headlong Charge (Tachiai):** Sacrificing a Kimarite must be optional and controllable; the current automated opening assumes sacrifice whenever one is available.
+2. **Kimarite searches and player choices:** Get Underneath currently selects the first eligible opposing Kimarite; Use the Tawara similarly uses a deterministic search. Human and AI decisions need explicit selection where the rules grant a choice.
+3. **Read the Move and Pull:** Both modes exist, but the automatic/controller choice policy should be reviewed and tested for the intended human interface.
+4. **Tottari:** The exact trigger window for an opponent's prevented/reduced Grip attempt needs a dedicated audit and tests.
+5. **Sidestep, prevention, Temporary interaction:** Verify complete interactions with the current approved text before using this as the new official balance baseline.
 
 ## Balance/testing gate
 
