@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .effects import draw_one
+from .effects import draw_one, give_opponent_kimarite
 from .models import BoutState, Side, Stat, Card
 from .prevention import prevent_negative_effect
 from .rules import establish_grip, gain_momentum, gain_power, lose_power
@@ -179,9 +179,6 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
             if comparison.advantage_for(side, Stat.SPIRIT) > 0:
                 momentum_delta[side] += 1
 
-        elif name == "Power Water":
-            _shuffle_generated(state, side, [Card(62, "Power Water Cantrip") for _ in range(3)])
-
         elif name == "Belt Slap":
             pass
 
@@ -189,22 +186,15 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
             pass
 
         elif name == "Henka":
-            opponent = _opponent_stats(comparison, side)
-            triggered = False
-            if opponent.power >= 7:
-                momentum_delta[side] += 1
-                triggered = True
-            if opponent.spirit >= 7:
-                momentum_delta[side] += 1
-                triggered = True
-            if triggered:
+            if comparison.advantage_for(side, Stat.TECHNIQUE) > 0 and (
+                comparison.wrestler_a.technique if side is Side.A else comparison.wrestler_b.technique
+            ) > _opponent_stats(comparison, side).spirit:
                 reset_position = True
-            else:
-                momentum_delta[opponent_side] += 3
 
         elif name == "Get Underneath":
-            if power_push_received[side] <= 1:
-                momentum_delta[side] += 1
+            momentum_delta[side] += 1
+            extra_push[side] += 1
+            give_opponent_kimarite(state, side, name)
 
         elif name == "Sidestep":
             if comparison.spirit_winner is opponent_side:
