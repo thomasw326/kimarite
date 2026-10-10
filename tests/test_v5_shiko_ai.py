@@ -43,3 +43,8 @@ def test_shiko_stomp_approved_orbs_apply_to_tachiai():
     assert compared.power == 2 + 2 + k.power + 1
     assert compared.technique == 2 + 2 + k.technique + 1
     assert compared.spirit == 2 + 2 + k.spirit + 1
+
+
+def test_stare_down_approved_orbs():
+    card = card_by_name("Stare Down")
+    assert (card.power, card.technique, card.spirit) == (1, 1, 1)
