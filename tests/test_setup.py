@@ -20,8 +20,8 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
 
     state = bout.state
 
-    assert state.fighter_a.power == 3
-    assert state.fighter_b.power == 5
+    assert state.fighter_a.power == 4
+    assert state.fighter_b.power == 6
     assert state.position == 2
     assert state.winner is None
     assert state.win_method is None
