@@ -161,7 +161,7 @@ def main():
     opening_uses = Counter()
     finish_events = Counter()
 
-    with (output / "bouts.csv").open("w", newline="") as file:
+    with (output / "bouts.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("batch_id", "a", "b", "seed", "winner", "method",
                          "win_category", "winning_card_origin", "winner_grip",
@@ -292,7 +292,7 @@ def main():
                                 cards[key]["bouts"] += 1
                                 cards[key]["wins"] += int(won)
 
-    with (output / "card_activity.csv").open("w", newline="") as file:
+    with (output / "card_activity.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("event", "card", "origin", "count"))
         for (role, card), tally in sorted(assignments.items()):
@@ -308,19 +308,19 @@ def main():
     assert sum(opening_uses.values()) == 2 * errors["completed"]
     assert sum(tally["bouts"] for (role, card), tally in assignments.items() if role == "starting_card") == sum(opening_uses.values())
 
-    with (output / "kimarite_finishes_by_origin.csv").open("w", newline="") as file:
+    with (output / "kimarite_finishes_by_origin.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("kimarite", "origin", "finishes"))
         for (card, origin), count in sorted(kimarite_origins.items()):
             writer.writerow((card, origin, count["wins"]))
-    with (output / "card_play_by_origin.csv").open("w", newline="") as file:
+    with (output / "card_play_by_origin.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("card", "origin", "bouts_played", "wins", "win_rate"))
         for (card, origin), count in sorted(played_origins.items()):
             n = count["bouts"]
             writer.writerow((card, origin, n, count["wins"],
                              count["wins"] / n if n else ""))
-    with (output / "stat_advantages.csv").open("w", newline="") as file:
+    with (output / "stat_advantages.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("stat", "signed_advantage", "bouts", "wins", "win_rate"))
         for (stat, advantage), count in sorted(advantage_results.items()):
@@ -328,7 +328,7 @@ def main():
             writer.writerow((stat, advantage, n, count["wins"],
                              count["wins"] / n if n else ""))
 
-    with (output / "wrestlers.csv").open("w", newline="") as file:
+    with (output / "wrestlers.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("wrestler", "power", "technique", "spirit",
                          "primary", "secondary", "tertiary", "bouts", "wins", "win_rate"))
@@ -336,26 +336,26 @@ def main():
             n = bouts[name]
             writer.writerow((name, *stats, *(p.value for p in priority),
                              n, wins[name], wins[name] / n if n else ""))
-    with (output / "cards.csv").open("w", newline="") as file:
+    with (output / "cards.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("card", "outcome", "priority_slot", "priority_stat",
                          "bouts", "wins", "win_rate"))
         for key, tally in sorted(cards.items(), key=lambda x: x[0][:3]):
             n = tally["bouts"]
             writer.writerow((*key, n, tally["wins"], tally["wins"] / n if n else ""))
-    with (output / "card_assignments.csv").open("w", newline="") as file:
+    with (output / "card_assignments.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("role", "card", "bouts", "wins", "win_rate"))
         for key, tally in sorted(assignments.items()):
             n = tally["bouts"]
             writer.writerow((*key, n, tally["wins"], tally["wins"] / n))
-    with (output / "wrestler_cohorts.csv").open("w", newline="") as file:
+    with (output / "wrestler_cohorts.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("group", "value_1", "value_2", "value_3", "bouts", "wins", "win_rate"))
         for key, tally in sorted(cohorts.items(), key=lambda item: str(item[0])):
             n = tally["bouts"]
             writer.writerow((*key, *([""] * (4 - len(key))), n, tally["wins"], tally["wins"] / n))
-    with (output / "win_conditions.csv").open("w", newline="") as file:
+    with (output / "win_conditions.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(("win_category", "bouts"))
         writer.writerows(sorted(outcomes.items()))

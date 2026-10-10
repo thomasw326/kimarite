@@ -83,7 +83,7 @@ def main():
             header = ("stat", "signed_advantage")
         else:
             header = ("win_category",)
-        with (destination / filename).open("w", newline="") as handle:
+        with (destination / filename).open("w", newline="", encoding="utf-8") as handle:
             writer = csv.writer(handle)
             if filename == "win_conditions.csv":
                 writer.writerow((*header, "bouts"))

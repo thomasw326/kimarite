@@ -12,9 +12,9 @@ def test_fujinokawa_vs_tochinoshin_prepared_totals_match_playtest():
         comparison.wrestler_a.power,
         comparison.wrestler_a.technique,
         comparison.wrestler_a.spirit,
-    ) == (4, 1, 9)
+    ) == (6, 3, 11)
     assert (
         comparison.wrestler_b.power,
         comparison.wrestler_b.technique,
         comparison.wrestler_b.spirit,
-    ) == (5, 7, 0)
+    ) == (7, 9, 2)

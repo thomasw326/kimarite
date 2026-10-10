@@ -61,11 +61,8 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
             draw_from_look(state, side, look=2, keep=1, required_draws=2)
 
     elif card.name == "Tsukiotoshi":
-        if _optional(context, "use_optional", card):
-            gain_momentum(state, opponent_side, 1)
-            add_play(state, side, 1)
+        if relative_position(state, side) < 0:
             draw_one(state, side)
-            _bottom_one_from_hand(state, side, card, context)
 
     elif card.name == "Tottari":
         opponent = state.opponent(side)
@@ -88,6 +85,10 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         if relative_momentum(state, side) >= 0:
             establish_grip(state, side, "left")
 
+    elif card.name == "Shitatenage":
+        if relative_momentum(state, side) >= 0:
+            establish_grip(state, side, "right")
+
     elif card.name == "Hatakikomi":
         if _optional(context, "use_optional", card):
             gain_momentum(state, opponent_side, 1)
@@ -106,9 +107,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 draw_one(state, side)
 
     elif card.name == "Hikiotoshi":
-        if _optional(context, "use_optional", card):
-            gain_momentum(state, opponent_side, 1)
-            draw_one(state, side)
+        draw_from_look(state, side, look=2, keep=1)
 
     elif card.name == "Tsukitaoshi":
         if relative_momentum(state, side) >= 1:
@@ -148,7 +147,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 fighter.discard_pile.append(discarded)
 
     elif card.name == "Abisetaoshi":
-        if fighter.power >= 5:
+        if fighter.power >= 7:
             if effective_total_grip(state, side) == 0:
                 gain_flexible_grip(state, side)
             else:

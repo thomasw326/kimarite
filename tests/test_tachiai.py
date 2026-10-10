@@ -20,9 +20,9 @@ def test_tachiai_uses_base_stats_starting_kimarite_and_prepared_card():
 
     result = compare_tachiai(a, b)
 
-    assert result.wrestler_a.power == 4
-    assert result.wrestler_a.technique == 3
-    assert result.wrestler_a.spirit == 4
+    assert result.wrestler_a.power == 6
+    assert result.wrestler_a.technique == 5
+    assert result.wrestler_a.spirit == 6
     assert result.power_advantage_a == -1
     assert result.technique_advantage_a == 1
     assert result.spirit_advantage_a == 1
@@ -86,3 +86,49 @@ def test_first_exchange_priority_technique_then_spirit_then_power():
     comparison = compare_tachiai(a, b)
 
     assert first_exchange_side(comparison, a, b) is Side.B
+
+
+def test_nodowa_power_applies_before_spirit_push_resistance():
+    from kimarite.catalog import card_by_name
+    from kimarite.tachiai_effects import resolve_prepared_tachiai
+
+    blank = Card(9901, "Blank")
+    nodowa = card_by_name("Nodowa")
+
+    a = Wrestler("A", 0, 0, 5, blank, blank, blank)
+    b = Wrestler("B", 0, 0, 0, blank, nodowa, blank)
+
+    comparison = compare_tachiai(a, b)
+    state = BoutState(FighterState(a), FighterState(b))
+    resolve_prepared_tachiai(state, comparison)
+
+    assert state.fighter_b.power == 2
+    assert state.position == 1
+
+
+def test_harite_power_applies_before_spirit_push_resistance():
+    from kimarite.catalog import card_by_name
+    from kimarite.tachiai_effects import resolve_prepared_tachiai
+
+    blank = Card(9902, "Blank")
+    harite = card_by_name("Harite")
+
+    a = Wrestler("A", 0, 0, 5, blank, blank, blank)
+    b = Wrestler("B", 0, 0, 0, blank, harite, blank)
+
+    comparison = compare_tachiai(a, b)
+    state = BoutState(FighterState(a), FighterState(b))
+    resolve_prepared_tachiai(state, comparison)
+
+    assert state.fighter_b.power == 1
+    assert state.fighter_a.power == -1
+    assert state.position == 0
+
+    # Without Harite's Power modifiers, the same printed-orb
+    # comparison would produce incoming Spirit Push.
+    baseline = BoutState(FighterState(a), FighterState(b))
+    from kimarite.tachiai import apply_tachiai_power_push
+    _, baseline_push = apply_tachiai_power_push(baseline, comparison)
+
+    assert baseline_push > 0
+    assert state.position < baseline_push

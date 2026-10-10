@@ -64,7 +64,7 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
     # the same wrestler, conversion would loop forever; that is an immediate win.
     if _track_at_favorable_cap(state, side, next_kind):
         losing_side = state.opponent_side(side)
-        if kind == "push" and _has_temporary(state, losing_side, "Use the Tawara"):
+        if kind == "push" and any(_has_temporary(state, losing_side, n) for n in ("Use the Tawara", "Give Ground")):
             state.log(
                 f"Use the Tawara prevents {state.fighter(losing_side).wrestler.name} "
                 "from losing to Push."
@@ -148,6 +148,11 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0:
         return
 
+    # Use the Tawara prevents incoming Push from moving its owner.
+    if any(_has_temporary(state, defending_side, n) for n in ("Use the Tawara", "Give Ground")):
+        state.log(f"No Push Temporary prevents {amount} incoming Push.")
+        return
+
     # Sidestep only breaks after Push has survived prevention/suppression.
     _break_sidestep_from_push(state, side)
 
@@ -155,9 +160,6 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
         instance.opponent_gained_push_while_active = True
 
     _resolve_shared_track_gain(state, side, amount, "push")
-
-    if _has_temporary(state, defending_side, "Use the Tawara"):
-        gain_momentum(state, defending_side, 1)
 
 
 def gain_position(state: BoutState, side: Side, amount: int) -> None:

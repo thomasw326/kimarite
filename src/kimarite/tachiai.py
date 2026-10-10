@@ -55,9 +55,9 @@ def prepared_stats(wrestler: Wrestler) -> TachiaiStats:
         wrestler.prepared_tachiai_card,
     )
     return TachiaiStats(
-        power=wrestler.base_power + sum(card.power for card in cards),
-        technique=wrestler.base_technique + sum(card.technique for card in cards),
-        spirit=wrestler.base_spirit + sum(card.spirit for card in cards),
+        power=wrestler.base_power + 2 + sum(card.power for card in cards),
+        technique=wrestler.base_technique + 2 + sum(card.technique for card in cards),
+        spirit=wrestler.base_spirit + 2 + sum(card.spirit for card in cards),
     )
 
 
@@ -162,8 +162,13 @@ def apply_tachiai_power_push(
 
     advantage = abs(comparison.spirit_advantage_a)
     defender = state.opponent_side(winner)
+    # Prepared-card orbs are already included in the comparison.
+    # Fighter Power changes are applied separately during Tachiai.
+    base_advantage = comparison.advantage_for(defender, Stat.POWER)
+    defender_delta = state.fighter(defender).power
+    winner_delta = state.fighter(winner).power
     resistance = technique_thresholds(
-        comparison.advantage_for(defender, Stat.POWER)
+        base_advantage + defender_delta - winner_delta
     )
     push = max(0, push_from_power_advantage(advantage) - resistance - max(0, reduction))
     apply_tachiai_push(state, winner, push)

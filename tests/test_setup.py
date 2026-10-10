@@ -20,8 +20,8 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
 
     state = bout.state
 
-    assert state.fighter_a.power == 4
-    assert state.fighter_b.power == 5
+    assert state.fighter_a.power == 6
+    assert state.fighter_b.power == 7
     assert state.position == 3
     assert state.winner is Side.A
     assert state.win_method == "Oshidashi"
@@ -32,11 +32,11 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
 
     assert state.fighter_a.draw_pile[0].name == "Oshi"
     assert state.fighter_b.draw_pile[0].name == "Morozashi"
-    assert state.fighter_a.draw_pile[-1].name == "Stare Down"
-    assert state.fighter_b.draw_pile[-1].name == "Gain Right Grip"
+    assert state.fighter_a.draw_pile[-1].name == "Reset to Neutral"
+    assert state.fighter_b.draw_pile[-1].name == "Tsuppari"
 
 
-def test_headlong_charge_prepared_card_enters_temporary_not_bottom():
+def test_headlong_charge_prepared_card_does_not_enter_temporary():
     bout = create_prepared_bout(
         BoutConfig(
             FighterConfig("Houdan", 11, ranking=1),
@@ -45,11 +45,10 @@ def test_headlong_charge_prepared_card_enters_temporary_not_bottom():
     )
     state = bout.state
 
-    assert any(
-        instance.card.name == "Headlong Charge"
+    assert all(
+        instance.card.name != "Headlong Charge"
         for instance in state.fighter_a.temporary_zone
     )
-    assert state.fighter_a.draw_pile[-1].name != "Headlong Charge"
 
 
 def test_shiko_stomp_prepared_card_starts_in_temporary_and_persists():

@@ -18,31 +18,51 @@ def bout_with_hand(cards):
     )
 
 
-def test_headlong_charge_stays_only_in_temporary_zone_after_play():
+def test_headlong_charge_sacrifices_kimarite_for_momentum_and_push():
     card = card_by_name("Headlong Charge")
+    kimarite = card_by_name("Yorikiri")
     bout = bout_with_hand([card])
+    bout.fighter_a.kimarite_zone.append(kimarite)
 
-    play_card(bout, Side.A, card)
-
-    assert [x.card.name for x in bout.fighter_a.temporary_zone] == ["Headlong Charge"]
-    assert card not in bout.fighter_a.discard_pile
-
-
-def test_headlong_disruption_sets_momentum_to_negative_three():
-    card = card_by_name("Headlong Charge")
-    bout = bout_with_hand([card])
-    play_card(bout, Side.A, card)
-    instance = bout.fighter_a.temporary_zone[0]
-
-    remove_temporary(bout, Side.A, instance, disrupted=True)
-
-    assert bout.momentum == -3  # V4.3 sets relative Momentum to -3
-    assert card in bout.fighter_a.discard_pile
-    assert bout.temporary_outcomes[-1] == (
-        Side.A,
-        "Headlong Charge",
-        "disrupted",
+    play_card(
+        bout, Side.A, card,
+        context=EffectContext(choices={"sacrifice_kimarite": 0}),
     )
+
+    assert bout.momentum == 1
+    assert bout.position == 1
+    assert bout.fighter_a.kimarite_zone == []
+    assert kimarite in bout.fighter_a.discard_pile
+    assert card in bout.fighter_a.discard_pile
+    assert not bout.fighter_a.temporary_zone
+
+
+def test_headlong_charge_can_decline_sacrifice():
+    card = card_by_name("Headlong Charge")
+    kimarite = card_by_name("Yorikiri")
+    bout = bout_with_hand([card])
+    bout.fighter_a.kimarite_zone.append(kimarite)
+
+    play_card(
+        bout, Side.A, card,
+        context=EffectContext(choices={"sacrifice_kimarite": None}),
+    )
+
+    assert bout.momentum == 0
+    assert bout.position == 0
+    assert bout.fighter_a.kimarite_zone == [kimarite]
+    assert not bout.fighter_a.temporary_zone
+
+
+def test_headlong_charge_without_kimarite_grants_no_bonus():
+    card = card_by_name("Headlong Charge")
+    bout = bout_with_hand([card])
+
+    play_card(bout, Side.A, card)
+
+    assert bout.momentum == 0
+    assert bout.position == 0
+    assert not bout.fighter_a.temporary_zone
 
 
 def test_attempt_two_handed_grip_resolves_at_next_turn_start():
@@ -83,7 +103,7 @@ def test_hold_position_prevents_opponent_push_while_active():
     assert bout.position == 0
 
 
-def test_use_tawara_converts_opponent_push_to_momentum():
+def test_use_tawara_prevents_push_without_gaining_momentum():
     card = card_by_name("Use the Tawara")
     bout = bout_with_hand([card])
     play_card(
@@ -96,7 +116,7 @@ def test_use_tawara_converts_opponent_push_to_momentum():
     gain_push(bout, Side.B, 1)
 
     assert bout.position == -1
-    assert bout.momentum == 1
+    assert bout.momentum == 0
 
 
 def test_sidestep_survives_and_takes_favorable_orientation_on_momentum_tie():

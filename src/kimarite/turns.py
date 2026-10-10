@@ -94,7 +94,9 @@ def apply_start_of_turn_exhaustion(state: BoutState, side: Side) -> None:
         state.declare_winner(state.opponent_side(side), "Exhaustion")
         return
 
-    if len(fighter.discard_pile) >= 10:
+    # BEGIN APPROVED MILL/RECYCLE V1
+    if len(fighter.discard_pile) >= 7:  # fatigue threshold reduced from 9
+        # END APPROVED MILL/RECYCLE V1
         fighter.power -= 1
         state.log(f"{fighter.wrestler.name} loses 1 Power to Exhaustion.")
 

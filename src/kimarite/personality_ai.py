@@ -12,12 +12,23 @@ from .playing import play_card
 from .tachiai import TachiaiComparison
 
 
+# Optional override for selection only; wrestler attributes and stats stay unchanged.
+POWER_GRAPPLER_ORB_PRIORITY = False
+
+
 def choose_personality_play(
     state: BoutState, side: Side, comparison: TachiaiComparison,
 ) -> AIPlay | None:
     plays = candidate_plays(state, side, comparison)
     if not plays:
         return None
+
+    # Avoid voluntarily losing Position with either retreat card at our edge.
+    # With a shared signed track, -3 relative Position is our own edge.
+    if state.position * state.sign(side) <= -3:
+        plays = [p for p in plays if p.card.name not in {"Use the Tawara", "Give Ground"}]
+        if not plays:
+            return None
 
     current_score = score_state(state, side)
     # Don't willingly lose immediately or take a catastrophically harmful move.
@@ -33,12 +44,17 @@ def choose_personality_play(
     candidates = winning or safe
 
     wrestler = state.fighter(side).wrestler
+    if POWER_GRAPPLER_ORB_PRIORITY:
+        from .models import Stat
+        priorities = (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT)
+    else:
+        priorities = (wrestler.primary, wrestler.secondary, wrestler.tertiary)
     return max(
         candidates,
         key=lambda play: (
-            play.card.orbs(wrestler.primary),
-            play.card.orbs(wrestler.secondary),
-            play.card.orbs(wrestler.tertiary),
+            play.card.orbs(priorities[0]),
+            play.card.orbs(priorities[1]),
+            play.card.orbs(priorities[2]),
             play.score,
             -play.card.card_id,
         ),

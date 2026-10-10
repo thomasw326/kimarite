@@ -73,7 +73,7 @@ def _oshitaoshi(state: BoutState, side: Side) -> bool:
     return (
         relative_momentum(state, side) >= 1
         and relative_position(state, side) >= 1
-        and state.fighter(side).power >= 8
+        and state.fighter(side).power >= 10
     )
 
 
@@ -89,6 +89,7 @@ def _katasukashi(state: BoutState, side: Side) -> bool:
     return (
         no_grip(state, side)
         and state.fighter(side).lost_position_this_turn
+        and relative_momentum(state, side) >= 1
     )
 
 
@@ -116,11 +117,20 @@ def _uwatenage(state: BoutState, side: Side) -> bool:
     )
 
 
+def _shitatenage(state: BoutState, side: Side) -> bool:
+    return (
+        effective_total_grip(state, side) > 0
+        and state.fighter(side).right_grip is GripState.DEEP
+        and relative_momentum(state, side) >= 1
+        and relative_position(state, side) >= 0
+    )
+
+
 def _hatakikomi(state: BoutState, side: Side) -> bool:
     return (
         relative_momentum(state, side) <= -2
         and relative_position(state, side) >= 0
-        and state.fighter(side).power >= 5
+        and state.fighter(side).power >= 7
     )
 
 
@@ -155,7 +165,7 @@ def _abisetaoshi(state: BoutState, side: Side) -> bool:
     return (
         effective_total_grip(state, side) >= 2
         and relative_momentum(state, side) >= 1
-        and state.fighter(side).power >= 7
+        and state.fighter(side).power >= 9
     )
 
 
@@ -169,6 +179,7 @@ KIMARITE_PREDICATES: dict[str, Predicate] = {
     "Tsukiotoshi": _tsukiotoshi,
     "Tottari": _tottari,
     "Uwatenage": _uwatenage,
+    "Shitatenage": _shitatenage,
     "Hatakikomi": _hatakikomi,
     "Hikiotoshi": _hikiotoshi,
     "Tsukitaoshi": _tsukitaoshi,

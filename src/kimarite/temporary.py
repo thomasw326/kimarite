@@ -48,15 +48,7 @@ def remove_temporary(
     card = instance.card
 
     if disrupted:
-        if card.name == "Headlong Charge":
-            state.momentum = -3 * state.sign(side)
-            opponent = state.opponent(side)
-            for index, found in enumerate(opponent.draw_pile):
-                if found.is_kimarite:
-                    opponent.hand.append(opponent.draw_pile.pop(index))
-                    state.log(f"{opponent.wrestler.name} Searches for {found.name}.")
-                    break
-        elif card.name in {
+        if card.name in {
             "Attempt Two-Handed Grip",
             "Attempt Deep Outside Grip",
             "Attempt Deep Inside Grip",
@@ -86,6 +78,11 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         # Shiko Stomp explicitly does not leave at the start of the owner's turn.
         if name == "Shiko Stomp":
             continue
+        if name == "Salt Throw":
+            if fighter.discard_pile:
+                fighter.draw_pile.append(fighter.discard_pile.pop())
+                state.log(f"{fighter.wrestler.name} recycles one card with Salt Throw.")
+            continue
 
         if name == "Attempt Two-Handed Grip":
             establish_grip(state, side, "left")
@@ -103,9 +100,10 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             if not instance.opponent_gained_push_while_active:
                 gain_momentum(state, side, 2)
         elif name == "Pull":
-            state.momentum *= -1
-            state.log(f"{fighter.wrestler.name} reverses Momentum.")
-        elif name == "Use the Tawara":
+            state.momentum = state.sign(side) * abs(state.momentum)
+            state.position = state.sign(side) * abs(state.position)
+            state.log(f"{fighter.wrestler.name} takes favorable absolute Momentum and Position.")
+        elif name in {"Use the Tawara", "Give Ground"}:
             pass
         elif name == "Kannuki":
             opponent_side = state.opponent_side(side)
@@ -119,7 +117,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
                 reduce_grip(state, opponent_side, hand="right")
         elif name == "Morozashi":
             gain_push(state, side, 1)
-        elif name in {"Headlong Charge", "Get Underneath", "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
+        elif name in {"Get Underneath", "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
             pass
         elif name == "Sidestep":
             distance = state.side_by_side_distance

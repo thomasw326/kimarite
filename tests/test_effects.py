@@ -19,17 +19,19 @@ def bout_with_hand(cards):
     )
 
 
-def test_oshi_draws_and_discards_without_push_or_play():
+def test_oshi_gains_push_and_play_and_draws():
     oshi = card_by_name("Oshi")
     bout = bout_with_hand([oshi])
+    bout.momentum = 1
 
     play_card(bout, Side.A, oshi)
 
-    assert bout.position == 0
-    assert bout.fighter_a.plays_remaining == 1
+    assert bout.position == 1
+    assert bout.fighter_a.plays_remaining == 2
     assert bout.fighter_a.cards_played_this_turn == 1
-    assert bout.fighter_a.hand == []
-    assert [c.name for c in bout.fighter_a.discard_pile] == ["Draw A", "Oshi"]
+    assert [c.name for c in bout.fighter_a.hand] == ["Draw A"]
+    assert [c.name for c in bout.fighter_a.discard_pile] == ["Draw B", "Oshi"]
+    assert bout.fighter_a.draw_pile == []  # Oshi mills after drawing
 
 
 def test_tsuppari_chains_after_oshi():
@@ -38,7 +40,7 @@ def test_tsuppari_chains_after_oshi():
     bout = bout_with_hand([oshi, tsuppari])
     bout.fighter_a.draw_pile = [Card(8101, "Draw A"), Card(8102, "Draw B")]
 
-    play_card(bout, Side.A, oshi, context=EffectContext(choices={"hand_index": 1}))
+    play_card(bout, Side.A, oshi)
     play_card(bout, Side.A, tsuppari)
 
     assert bout.momentum == 1
@@ -50,6 +52,7 @@ def test_tsuppari_chains_after_oshi():
 def test_tsuki_requires_choice_only_when_both_opposing_grips_exist():
     tsuki = card_by_name("Tsuki")
     bout = bout_with_hand([tsuki])
+    bout.momentum = 1
     bout.fighter_b.left_grip = GripState.GRIP
     bout.fighter_b.right_grip = GripState.DEEP
 

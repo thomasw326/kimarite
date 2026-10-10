@@ -15,35 +15,27 @@ def bout():
     return BoutState(FighterState(a), FighterState(b))
 
 
-def test_search_directly_removes_first_kimarite_preserving_order():
-    s = bout()
-    first, second, third = (card_by_name("Oshi"), card_by_name("Tsuridashi"), card_by_name("Tsuki"))
-    s.fighter_b.draw_pile = [first, second, third]
-    add_temporary(s, Side.A, card_by_name("Headlong Charge"), phase="exchange")
-    s.momentum = 2
-    remove_temporary(s, Side.A, s.fighter_a.temporary_zone[0], disrupted=True)
-    assert s.momentum == -3
-    assert s.fighter_b.hand == [second]
-    assert s.fighter_b.draw_pile == [first, third]
-
-
-def test_search_no_target_is_harmless():
-    s = bout()
-    s.fighter_b.draw_pile = [card_by_name("Oshi")]
-    add_temporary(s, Side.A, card_by_name("Headlong Charge"), phase="exchange")
-    remove_temporary(s, Side.A, s.fighter_a.temporary_zone[0], disrupted=True)
-    assert s.fighter_b.hand == []
-    assert len(s.fighter_b.draw_pile) == 1
-
-
 def test_hikiotoshi_draw_no_grip():
     s = bout()
-    s.fighter_a.draw_pile = [card_by_name("Oshi")]
-    resolve_kimarite_play_effect(s, Side.A, card_by_name("Hikiotoshi"), EffectContext(choices={"use_optional": True}))
-    assert s.momentum == -1
-    assert len(s.fighter_a.hand) == 1
-    assert s.fighter_a.total_grip == 0
+    s.fighter_a.draw_pile = [
+        card_by_name("Oshi"),
+        card_by_name("Tsuki"),
+    ]
 
+    resolve_kimarite_play_effect(
+        s,
+        Side.A,
+        card_by_name("Hikiotoshi"),
+        EffectContext(),
+    )
+
+    assert s.momentum == 0
+    assert len(s.fighter_a.hand) == 1
+    assert len(s.fighter_a.draw_pile) == 1
+    assert {
+        s.fighter_a.hand[0].name,
+        s.fighter_a.draw_pile[0].name,
+    } == {"Oshi", "Tsuki"}
 
 def test_morozashi_survival_only_push():
     s = bout()
@@ -53,14 +45,15 @@ def test_morozashi_survival_only_push():
     assert s.momentum == 0
 
 
-def test_oshi_draw_and_discard_no_play_or_push():
+def test_oshi_push_play_draw():
     s = bout()
+    s.momentum = 1
     s.fighter_a.draw_pile = [card_by_name("Tsuki")]
     resolve_exchange_effect(s, Side.A, card_by_name("Oshi"), EffectContext())
-    assert s.fighter_a.hand == []
-    assert s.fighter_a.discard_pile[0].name == "Tsuki"
-    assert s.fighter_a.plays_remaining == 2
-    assert s.position == 0
+    assert [card.name for card in s.fighter_a.hand] == ["Tsuki"]
+    assert s.fighter_a.discard_pile == []
+    assert s.fighter_a.plays_remaining == 3
+    assert s.position == 1
 
 
 def test_tsuridashi_needs_nonnegative_position():

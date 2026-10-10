@@ -7,13 +7,13 @@ from .models import Card, Stat, Wrestler
 
 # Current shuffled AI-vs-AI pool snapshot. IDs match Goldfish Data.
 CARD_POOL: tuple[Card, ...] = (
-    Card(1, "Oshi", 1, 0, 0),
-    Card(2, "Oshi", 1, 0, 0),
+    Card(1, "Oshi", 0, 0, 1),
+    Card(2, "Oshi", 0, 0, 1),
     Card(3, "Tsuki", 1, 0, 0),
     Card(4, "Tsuki", 1, 0, 0),
     Card(5, "Tsuppari", 2, 0, 1),
     Card(6, "Tsuppari", 2, 0, 1),
-    Card(7, "Headlong Charge", 2, 0, 0),
+    Card(7, "Headlong Charge", 0, 0, 3),
     Card(8, "Nodowa", 2, 0, 0),
     Card(9, "Harite", 2, 0, 1),
     Card(10, "Gain Left Grip", 0, 3, 0),
@@ -24,10 +24,10 @@ CARD_POOL: tuple[Card, ...] = (
     Card(15, "Attempt Deep Outside Grip", 0, 3, 1),
     Card(16, "Attempt Deep Inside Grip", 0, 3, 1),
     Card(17, "Shiko Stomp", 2, 0, 3),
-    Card(18, "Salt Throw", 1, 0, 4),
+    Card(18, "Salt Throw", 1, 1, 3),
     Card(19, "Stare Down", 2, 1, 2),
     Card(20, "Power Water", 1, 2, 2),
-    Card(21, "Belt Slap", 3, 0, 2),
+    Card(21, "Belt Slap", 2, 0, 3),
     Card(22, "Tsuri", 1, 3, 0),
     Card(23, "Yori", 1, 2, 1),
     Card(24, "Gaburi", 1, 2, 1),
@@ -40,8 +40,8 @@ CARD_POOL: tuple[Card, ...] = (
     Card(31, "Read the Move", 0, 1, 2),
     Card(32, "Reset to Neutral", 0, 2, 1),
     Card(33, "Regain Balance", 1, 1, 2),
-    Card(34, "Sidestep", 0, 1, 2),
-    Card(35, "Use the Tawara", 0, 1, 2),
+    Card(34, "Sidestep", 0, 3, 0),
+    Card(35, "Use the Tawara", 0, 3, 0),
     Card(36, "Kannuki", 2, 1, 0),
     Card(37, "Morozashi", 0, 3, 0),
     Card(38, "Yorikiri", 1, 1, 1, True),
@@ -49,7 +49,7 @@ CARD_POOL: tuple[Card, ...] = (
     Card(40, "Tsukidashi", 1, 0, 2, True),
     Card(41, "Oshitaoshi", 3, 0, 0, True),
     Card(42, "Yoritaoshi", 2, 1, 0, True),
-    Card(43, "Give Ground", 1, 0, 2),
+    Card(43, "Give Ground", 0, 2, 1),
     Card(44, "Uwatenage", 0, 2, 1, True),
     Card(45, "Hatakikomi", 1, 0, 2, True),
     # Big Test 2: include the eight starting-only Kimarite in every deck role.
@@ -61,6 +61,12 @@ CARD_POOL: tuple[Card, ...] = (
     Card(51, "Tsuridashi", 2, 1, 0, True),
     Card(52, "Kotenage", 1, 2, 0, True),
     Card(53, "Abisetaoshi", 2, 1, 0, True),
+    Card(54, "Shove", 2, 0, 0),
+    Card(55, "Explosive Step — Fumikomi", 0, 0, 3),
+    Card(56, "Big Tsuki", 1, 0, 0),
+    Card(57, "Bad Oshi", 0, 0, 1),
+    Card(58, "Shitatenage", 0, 2, 1, True),
+    Card(59, "Injury", 0, 0, 0),
 )
 
 
@@ -82,6 +88,7 @@ STARTING_KIMARITE: tuple[Card, ...] = (
     Card(1013, "Abisetaoshi", 2, 1, 0, True),
     Card(1014, "Yoritaoshi", 2, 1, 0, True),
     Card(1015, "Tsukidashi", 1, 0, 2, True),
+    Card(1016, "Shitatenage", 0, 2, 1, True),
 )
 
 

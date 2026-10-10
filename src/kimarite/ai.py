@@ -112,7 +112,6 @@ def _context_for_card(
 
     if card.name in {"Nodowa", "Read the Move"} and opponent.temporary_zone:
         priority = {
-            "Headlong Charge": 100,
             "Morozashi": 90,
             "Kannuki": 85,
             "Attempt Two-Handed Grip": 80,
@@ -158,7 +157,7 @@ def _context_for_card(
             if opponent.left_grip is not GripState.NONE and opponent.right_grip is not GripState.NONE:
                 choices["grip"] = _best_grip_to_reduce(state, side)
 
-    if card.name in {"Katasukashi", "Hikiotoshi", "Hatakikomi", "Tsukiotoshi"}:
+    if card.name in {"Katasukashi", "Hatakikomi"}:
         # AI accepts optional tactical conversion when the cost will not create
         # an immediate severe Momentum deficit.
         choices["use_optional"] = relative_momentum(state, side) >= -1
@@ -216,10 +215,10 @@ def _contexts_for_card(
         if len(grips) > 1:
             return [_context_variant(base, grip=grip) for grip in grips]
 
-    if card.name == "Use the Tawara":
+    if card.name == "Headlong Charge":
         return [
-            _context_variant(base, lose_position_for_power=False),
-            _context_variant(base, lose_position_for_power=True),
+            _context_variant(base, sacrifice_kimarite=i)
+            for i in [None] + list(range(len(fighter.kimarite_zone)))
         ]
 
     if card.name == "Pull":
@@ -339,13 +338,13 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     elif card.name == "Tsukidashi":
         parts = [_nonnegative(momentum), _at_least(position, 2), _at_least(fighter.cards_played_this_turn, 4)]
     elif card.name == "Oshitaoshi":
-        parts = [_at_least(momentum, 1), _at_least(position, 1), _at_least(fighter.power, 8)]
+        parts = [_at_least(momentum, 1), _at_least(position, 1), _at_least(fighter.power, 10)]
     elif card.name == "Yoritaoshi":
         parts = [_at_least(grip, 2), _at_least(position, 2), _at_least(power_adv, 3)]
     elif card.name == "Katasukashi":
         parts = [
             1.0 if fighter.total_grip == 0 else 0.0,
-            _nonnegative(position),
+            _at_least(momentum, 1),
             1.0 if fighter.lost_position_this_turn else 0.0,
         ]
     elif card.name == "Tsukiotoshi":
@@ -364,7 +363,7 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
             _nonnegative(position),
         ]
     elif card.name == "Hatakikomi":
-        parts = [_at_most(momentum, -2), _nonnegative(position), _at_least(fighter.power, 5)]
+        parts = [_at_most(momentum, -2), _nonnegative(position), _at_least(fighter.power, 7)]
     elif card.name == "Hikiotoshi":
         parts = [_at_most(momentum, -2), _nonnegative(position), _at_least(grip, 1)]
     elif card.name == "Tsukitaoshi":
@@ -379,7 +378,7 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
             _at_least(len(fighter.hand), 3),
         ]
     elif card.name == "Abisetaoshi":
-        parts = [_at_least(grip, 2), _at_least(momentum, 1), _at_least(fighter.power, 7)]
+        parts = [_at_least(grip, 2), _at_least(momentum, 1), _at_least(fighter.power, 9)]
     else:
         return 0.0
 
