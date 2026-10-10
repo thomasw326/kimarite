@@ -22,6 +22,9 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
     finishes = Counter()
     unresolved = Counter()
     bouts = 0
+    opening_finishes = 0
+    first_side_wins = 0
+    incomplete_by_style = Counter()
     for repeat in range(repetitions):
         for pair_index, (first, second) in enumerate(combinations(styles, 2)):
             for leg, (a, b) in enumerate(((first, second), (second, first))):
@@ -32,7 +35,13 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                 bouts += 1
                 if not result.completed:
                     unresolved[result.unsupported_reason or "incomplete"] += 1
+                    incomplete_by_style[a] += 1
+                    incomplete_by_style[b] += 1
                     continue
+                if result.turns == 0:
+                    opening_finishes += 1
+                if result.state.winner.value == "A":
+                    first_side_wins += 1
                 winner = a if result.state.winner.value == "A" else b
                 loser = b if result.state.winner.value == "A" else a
                 wins[winner] += 1
@@ -42,6 +51,9 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
         "styles": len(styles), "planned_bouts": bouts,
         "completed": sum(wins.values()),
         "unresolved": dict(unresolved),
+        "incomplete_by_style": dict(incomplete_by_style),
+        "opening_finishes": opening_finishes,
+        "first_side_wins": first_side_wins,
         "win_rates": {
             name: round(wins[name] / (wins[name] + losses[name]), 4)
             if wins[name] + losses[name] else None for name in styles
