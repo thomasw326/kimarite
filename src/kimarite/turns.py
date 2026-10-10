@@ -194,7 +194,11 @@ def start_exchange_turn(
     """
     state.active_side = side
     state.turn_number += 1
+    # Preserve the opponent's prevented/reduced Grip attempt until Tottari's
+    # start-of-turn check; ordinary turn counters still reset immediately.
+    grip_event_for_tottari = state.fighter(side).opponent_grip_reduced_this_turn
     reset_turn_events(state, side)
+    state.fighter(side).opponent_grip_reduced_this_turn = grip_event_for_tottari
 
     fighter = state.fighter(side)
     if fighter.first_exchange_turn:
@@ -203,6 +207,8 @@ def start_exchange_turn(
             return []
 
     check_kimarite_zone(state, side, choose_kimarite=choose_kimarite)
+    # Do not carry last turn's event into this turn's end-of-turn check.
+    fighter.opponent_grip_reduced_this_turn = False
     if state.winner is not None:
         return []
 
