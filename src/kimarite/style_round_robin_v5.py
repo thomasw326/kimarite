@@ -33,6 +33,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
     card_plays_by_style = Counter()
     turns_by_style = Counter()
     slot_outcomes = Counter()
+    style_slot_outcomes = Counter()
     katasukashi_trigger_sources = Counter()
     headlong_choice_counts = Counter()
     headlong_choice_outcomes = Counter()
@@ -68,8 +69,11 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                     for role, cards in role_cards:
                         for c in cards:
                             slot_outcomes[(role, c.name, "appearances")] += 1
+                            style_slot_outcomes[(w.name, role, c.name, "appearances")] += 1
                             if result.completed:
-                                slot_outcomes[(role, c.name, "wins" if result.state.winner.value == ("A" if idx == 0 else "B") else "losses")] += 1
+                                outcome = "wins" if result.state.winner.value == ("A" if idx == 0 else "B") else "losses"
+                                slot_outcomes[(role, c.name, outcome)] += 1
+                                style_slot_outcomes[(w.name, role, c.name, outcome)] += 1
                 for deciding_side, phase, decision, sacrificed_name in result.state.headlong_decisions:
                     style_name = a if deciding_side is Side.A else b
                     headlong_choice_counts[(phase, decision)] += 1
@@ -146,6 +150,29 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                 for decision in ("sacrifice", "decline")
             }
             for phase in ("Tachiai", "Exchange")
+        },
+        "style_card_slot_outcomes": {
+            style: {
+                role: {
+                    name: {
+                        "appearances": style_slot_outcomes[(style, role, name, "appearances")],
+                        "wins": style_slot_outcomes[(style, role, name, "wins")],
+                        "losses": style_slot_outcomes[(style, role, name, "losses")],
+                        "win_rate": round(
+                            style_slot_outcomes[(style, role, name, "wins")] /
+                            (style_slot_outcomes[(style, role, name, "wins")] +
+                             style_slot_outcomes[(style, role, name, "losses")]), 4
+                        ) if (style_slot_outcomes[(style, role, name, "wins")] +
+                              style_slot_outcomes[(style, role, name, "losses")]) else None,
+                    }
+                    for name in sorted({
+                        card_name for (style_name, slot, card_name, field) in style_slot_outcomes
+                        if style_name == style and slot == role and field == "appearances"
+                    })
+                }
+                for role in ("Starting Kimarite", "Tachiai", "Top", "Shuffled")
+            }
+            for style in styles
         },
         "card_slot_outcomes": {
             role: {
