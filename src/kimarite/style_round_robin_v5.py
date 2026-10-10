@@ -62,6 +62,11 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                         ("Starting Kimarite", (w.starting_kimarite,)),
                         ("Tachiai", (w.prepared_tachiai_card,)),
                         ("Top", (w.top_of_deck_card,)),
+                        ("Opening Hand", tuple(
+                            dict.fromkeys(result.state.first_exchange_hands.get(
+                                Side.A if idx == 0 else Side.B, ()
+                            ))
+                        )),
                         ("Shuffled", tuple({
                             card.name: card for card in build.fighter.draw_pile[1:-1]
                         }.values())),
@@ -170,7 +175,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                         if style_name == style and slot == role and field == "appearances"
                     })
                 }
-                for role in ("Starting Kimarite", "Tachiai", "Top", "Shuffled")
+                for role in ("Starting Kimarite", "Tachiai", "Top", "Opening Hand", "Shuffled")
             }
             for style in styles
         },
@@ -203,7 +208,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                         if style_name == style and slot == role and field == "appearances"
                     })
                 }
-                for role in ("Starting Kimarite", "Tachiai", "Top")
+                for role in ("Starting Kimarite", "Tachiai", "Top", "Opening Hand")
             }
             for style in styles
         },
@@ -220,7 +225,7 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                 }
                 for (category, name, field) in slot_outcomes if category == role
             }
-            for role in ("Starting Kimarite", "Tachiai", "Top", "Shuffled")
+            for role in ("Starting Kimarite", "Tachiai", "Top", "Opening Hand", "Shuffled")
         },
         "win_rates": {
             name: round(wins[name] / (wins[name] + losses[name]), 4)
