@@ -279,7 +279,7 @@ def _salt_throw(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
-    if len(fighter.discard_pile) >= 9:
+    if len(fighter.discard_pile) >= 7:
         fighter.draw_pile.extend(fighter.discard_pile)
         fighter.discard_pile.clear()
         state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
@@ -536,7 +536,7 @@ def _power_water(
     fighter = state.fighter(side)
     cantrips = [
         Card(62, "Power Water Cantrip")
-        for _ in range(3)
+        for _ in range(6)
     ]
 
     # Derive a reproducible shuffle from the current bout state.
@@ -554,7 +554,7 @@ def _power_water(
 
     fighter.draw_pile.extend(cantrips)
     random.Random(seed).shuffle(fighter.draw_pile)
-    state.log(f"{fighter.wrestler.name} shuffles 3 Power Water Cantrips into the Draw Pile.")
+    state.log(f"{fighter.wrestler.name} shuffles 6 Power Water Cantrips into the Draw Pile.")
 
 
 def _power_water_cantrip(
