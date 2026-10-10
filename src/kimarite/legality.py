@@ -24,9 +24,9 @@ def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
 
     if card.name == "Morozashi":
         return (
-            (fighter.left_grip is GripState.GRIP and fighter.right_grip is GripState.NONE)
+            (fighter.left_grip is not GripState.NONE and fighter.right_grip is GripState.NONE)
             or
-            (fighter.right_grip is GripState.GRIP and fighter.left_grip is GripState.NONE)
+            (fighter.right_grip is not GripState.NONE and fighter.left_grip is GripState.NONE)
         )
 
     if card.name == "Sidestep":
