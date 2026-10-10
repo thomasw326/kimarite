@@ -28,6 +28,8 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
     pair_wins = Counter()
     finishes_by_winner = Counter()
     opening_losses = Counter()
+    card_plays_by_style = Counter()
+    turns_by_style = Counter()
     for repeat in range(repetitions):
         for pair_index, (first, second) in enumerate(combinations(styles, 2)):
             for leg, (a, b) in enumerate(((first, second), (second, first))):
@@ -36,6 +38,10 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                     max_turns=max_turns,
                 )
                 bouts += 1
+                for played_side, card_name in result.state.card_plays:
+                    card_plays_by_style[(a if played_side.value == 'A' else b, card_name)] += 1
+                turns_by_style[a] += result.turns
+                turns_by_style[b] += result.turns
                 if not result.completed:
                     unresolved[result.unsupported_reason or "incomplete"] += 1
                     incomplete_by_style[a] += 1
@@ -61,6 +67,14 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
         "opening_finishes": opening_finishes,
         "first_side_wins": first_side_wins,
         "opening_losses_by_style": dict(opening_losses),
+        "exchange_plays_by_style": {
+            style: {card: count for (name, card), count in card_plays_by_style.items() if name == style}
+            for style in styles
+        },
+        "average_bout_turns_by_style": {
+            style: round(turns_by_style[style] / (2 * (len(styles) - 1) * repetitions), 2)
+            for style in styles
+        },
         "wins_by_finish_and_style": {
             style: {finish: count for (name, finish), count in finishes_by_winner.items() if name == style}
             for style in styles
