@@ -9,7 +9,7 @@ from .temporary import add_temporary
 
 
 PREPARED_TEMPORARY_TACHIAI = frozenset({"Shiko Stomp"})
-REVEAL_FAMILY = frozenset({"Oshi", "Tsuki", "Big Tsuki"})
+REVEAL_FAMILY = frozenset({"Oshi", "Tsuki"})
 
 
 def _reveal_tachiai_orbs(state: BoutState, comparison: TachiaiComparison) -> None:
