@@ -34,3 +34,15 @@ def test_sidestep_resolves_unfavorable_with_opponent_orientation():
     resolve_start_of_turn_temporaries(state, Side.A)
     assert state.position == -2
     assert state.side_by_side_owner is None
+
+
+def test_sidestep_disruption_releases_push_lock():
+    from kimarite.temporary import remove_temporary
+    state = make_bout()
+    resolve_exchange_effect(state, Side.A, card_by_name("Sidestep"), EffectContext())
+    instance = state.fighter_a.temporary_zone[0]
+    remove_temporary(state, Side.A, instance, disrupted=True)
+    assert state.side_by_side_owner is None
+    assert state.side_by_side_distance == 0
+    gain_push(state, Side.B, 1)
+    assert state.position == -1
