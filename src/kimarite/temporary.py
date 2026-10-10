@@ -86,6 +86,11 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         # Shiko Stomp explicitly does not leave at the start of the owner's turn.
         if name == "Shiko Stomp":
             continue
+        if name == "Salt Throw":
+            if fighter.discard_pile:
+                fighter.draw_pile.append(fighter.discard_pile.pop())
+                state.log(f"{fighter.wrestler.name} recycles one card with Salt Throw.")
+            continue
 
         if name == "Attempt Two-Handed Grip":
             establish_grip(state, side, "left")
