@@ -31,7 +31,8 @@ class PreparedBout:
 
 
 def create_prepared_bout(
-    config: BoutConfig, *, sacrifice_choices: dict[Side, int | None] | None = None
+    config: BoutConfig, *, sacrifice_choices: dict[Side, int | None] | None = None,
+    human_choice_side: Side | None = None
 ) -> PreparedBout:
     template_a = PLAYTEST_WRESTLERS[config.fighter_a.wrestler_name]
     template_b = PLAYTEST_WRESTLERS[config.fighter_b.wrestler_name]
@@ -62,6 +63,7 @@ def create_prepared_bout(
         ),
     )
 
+    state.human_choice_side = human_choice_side
     comparison = compare_tachiai(wrestler_a, wrestler_b)
     apply_initial_power(state, comparison)
     resolve_prepared_tachiai(state, comparison, sacrifice_choices=sacrifice_choices)
