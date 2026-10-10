@@ -68,3 +68,22 @@ def test_tawara_can_select_later_kimarite():
     )
     assert [c.name for c in state.fighter_a.kimarite_zone] == ["Oshidashi"]
     assert len(state.fighter_a.temporary_zone) == 1
+
+
+def test_ai_tawara_search_uses_explicit_choice():
+    state = make_bout()
+    state.fighter_a.draw_pile = [
+        card_by_name("Yorikiri"), card_by_name("Oshi"), card_by_name("Oshidashi")
+    ]
+    resolve_exchange_effect(
+        state, Side.A, card_by_name("Use the Tawara"),
+        EffectContext(choices={"kimarite_index": 2}),
+    )
+    assert [c.name for c in state.fighter_a.kimarite_zone] == ["Oshidashi"]
+
+
+def test_ai_tawara_search_defaults_to_first_eligible():
+    state = make_bout()
+    state.fighter_a.draw_pile = [card_by_name("Yorikiri"), card_by_name("Oshidashi")]
+    resolve_exchange_effect(state, Side.A, card_by_name("Use the Tawara"), EffectContext())
+    assert [c.name for c in state.fighter_a.kimarite_zone] == ["Yorikiri"]
