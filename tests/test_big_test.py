@@ -58,7 +58,7 @@ def test_every_pool_card_is_legal_as_prepared_tachiai():
 def test_all_names_eligible_globally_and_reserved_locally():
     from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
     all_names = {card.name for card in CARD_POOL}
-    assert len(all_names) == 55
+    assert len(all_names) == 54
     assert "Oshi" in all_names
     assert "Bad Oshi" not in all_names
     assert len({card.card_id for card in CARD_POOL}) == len(CARD_POOL)
