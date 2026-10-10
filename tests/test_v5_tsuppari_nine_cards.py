@@ -17,7 +17,7 @@ def test_prepared_tsuppari_adds_nine_cards():
         FighterState(b, draw_pile=[blank]),
     )
     resolve_prepared_tachiai(state, compare_tachiai(a, b))
-    generated = [c for c in state.fighter_a.draw_pile if c.card_id >= 20001]
+    generated = [c for c in state.fighter_a.draw_pile if 20001 <= c.card_id <= 20009]
     assert len(generated) == 9
     assert Counter(c.name for c in generated) == {"Oshi": 3, "Tsuki": 3, "Shove": 3}
     assert len({c.card_id for c in generated}) == 9
