@@ -52,5 +52,7 @@ def play_card(
         card,
         context or EffectContext(),
     )
-    if card.name not in TEMPORARY_CARD_NAMES:
+    if card.name == "Power Water Cantrip":
+        state.log("Power Water Cantrip is exhausted and removed from the bout.")
+    elif card.name not in TEMPORARY_CARD_NAMES:
         fighter.discard_pile.append(card)
