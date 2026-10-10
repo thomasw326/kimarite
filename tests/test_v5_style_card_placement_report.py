@@ -17,6 +17,8 @@ def test_style_card_slot_report_groups_and_lift(monkeypatch):
         for role, cards in slots.items():
             for card in cards.values():
                 assert card["wins"] + card["losses"] <= card["appearances"]
+        assert "Opening Hand" in slots
+        assert "Opening Hand" in result["style_card_placement_lift"][style]
         lifted = result["style_card_placement_lift"][style]
         for role in ("Starting Kimarite", "Tachiai", "Top"):
             assert set(lifted[role]) == set(slots[role])
