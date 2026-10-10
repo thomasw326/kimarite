@@ -169,7 +169,7 @@ def _abisetaoshi(state: BoutState, side: Side) -> bool:
     return (
         effective_total_grip(state, side) >= 2
         and relative_momentum(state, side) >= 1
-        and state.fighter(side).power >= 7
+        and state.fighter(side).power >= 8
     )
 
 
