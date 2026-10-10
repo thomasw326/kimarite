@@ -67,3 +67,23 @@ def test_seat_mirroring_keeps_each_identity_deck_fixed():
     assert card_a == card_b
     assert a.fighter(side_a).draw_pile == b.fighter(side_b).draw_pile
     assert a.opponent(side_a).draw_pile == b.opponent(side_b).draw_pile
+
+def test_henka_prevents_only_first_point_of_incoming_push():
+    from kimarite.rules import gain_push
+    state, _ = sample()
+    add_temporary(state, Side.A, Card(629, "Henka", 0, 4, 0), phase="exchange")
+    gain_push(state, Side.B, 2)
+    assert state.position == -1
+    gain_push(state, Side.B, 1)
+    assert state.position == -2
+
+
+def test_paid_rear_conversion_is_not_optional():
+    state, _ = sample("OKD-2")
+    state.momentum, state.position = 1, 1
+    card = build_variant_card("OKD-2", card_id=65001)
+    variant_exchange(state, Side.A, card, EffectContext(
+        choices={"conversion": "momentum_to_position"}
+    ))
+    assert state.momentum == 0
+    assert state.position == 3
