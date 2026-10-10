@@ -57,7 +57,7 @@ class Arm:
 
 @dataclass(frozen=True)
 class Fixture:
-    """One paired setup, independent of R20 variant or seat orientation."""
+    """One reproducible matchup, independent of R20 variant or seat."""
 
     fixture_id: str
     subject_index: int
@@ -159,28 +159,31 @@ def schedule(
     seed: int = 20261010,
     opponent_offsets: tuple[int, ...] = DEFAULT_OPPONENT_OFFSETS,
 ) -> Iterable[ScheduledBout]:
-    """Return mirror-paired fixtures; only a diagnostic role for seat order.
+    """One bout per matchup, with seats distributed evenly across fixtures.
 
-    The game is almost fully symmetric. Rotating A/B detects unexpected
-    first-mover/tie resolution effects, but seat position is NOT our primary
-    explanatory variable. Seeds, opponent fixtures, and subject stat builds are
-    held fixed across the arms of each Kimarite.
+    The nearly symmetric game does not warrant mirrored seat rematches.
+    Assign half of each opponent rotation to A and half to B using fixed
+    parity. All variants and placements share the exact same fixture/seat
+    pairs and seeds; this preserves comparable tests without double-running.
     """
     fixed = fixtures(seed=seed, opponent_offsets=opponent_offsets)
     for arm in arms:
         for placement in PLACEMENTS:
             for fixture in fixed:
-                for subject_seat in ("A", "B"):
-                    yield ScheduledBout(
-                        arm_id=arm.arm_id,
-                        kimarite=arm.kimarite,
-                        placement=placement,
-                        fixture_id=fixture.fixture_id,
-                        subject_index=fixture.subject_index,
-                        opponent_index=fixture.opponent_index,
-                        subject_seat=subject_seat,
-                        seed=fixture.seed,
-                    )
+                # Every opponent offset appears equally often in both seats
+                # because our 108-profile roster contains an even count.
+                offset_index = int(fixture.fixture_id.rsplit("-", 1)[1])
+                subject_seat = "A" if (fixture.subject_index + offset_index) % 2 == 0 else "B"
+                yield ScheduledBout(
+                    arm_id=arm.arm_id,
+                    kimarite=arm.kimarite,
+                    placement=placement,
+                    fixture_id=fixture.fixture_id,
+                    subject_index=fixture.subject_index,
+                    opponent_index=fixture.opponent_index,
+                    subject_seat=subject_seat,
+                    seed=fixture.seed,
+                )
 
 
 def _ratio(numerator: int, denominator: int) -> float | None:
@@ -247,21 +250,23 @@ def summarize_records(records: Iterable[BoutRecord]) -> list[dict[str, object]]:
 
 def plan_summary(arms: tuple[Arm, ...], samples_per_build: int) -> dict[str, object]:
     roster_count = len(generic_roster())
-    per_arm_per_placement = roster_count * samples_per_build * 2
+    per_arm_per_placement = roster_count * samples_per_build
     return {
         "experiment": "R20 generic Kimarite gauntlet",
-        "mode": "schedule-only; variant-aware R20 combat implementation pending",
+        "mode": "single-seat fixture schedule; opt-in local R20 combat adapter",
         "number_of_variants": len(arms),
         "number_of_kimarite": len({a.kimarite for a in arms}),
         "generic_stat_priority_profiles": roster_count,
         "opponent_samples_per_profile": samples_per_build,
-        "seat_orientations": 2,
+        "seat_orientations_per_fixture": 1,
+        "seat_distribution": "half Side A, half Side B across fixtures",
         "placements": list(PLACEMENTS),
         "bouts_per_arm_per_placement": per_arm_per_placement,
         "planned_bouts": len(arms) * len(PLACEMENTS) * per_arm_per_placement,
         "seat_policy": (
-            "Seat A/B is a mirrored symmetry diagnostic; only uncommon opening "
-            "ties or first-mover tie-breaks are expected to matter."
+            "Single fixture per matchup; subject seats alternate deterministically "
+            "across profiles/opponent offsets. No seat rematches; only rare ties "
+            "or first-mover tie-breaks are expected to matter."
         ),
     }
 
@@ -272,12 +277,11 @@ def main() -> None:
     parser.add_argument("--plan-csv", type=Path,
                         help="Write every scheduled bout to CSV; no bouts are run")
     parser.add_argument("--run", action="store_true",
-                        help="Reserved until R20 variant-aware engine is verified")
+                        help="Use r20_gauntlet_bouts module for local combat runs" )
     args = parser.parse_args()
     if args.run:
         parser.error(
-            "R20 win predicates/Exchange effects are not yet implemented for "
-            "every arm. Refusing misleading simulation results."
+            "Use python -m kimarite.r20_gauntlet_bouts to run bounded local R20 bouts."
         )
     arms = load_arms()
     plan = plan_summary(arms, len(DEFAULT_OPPONENT_OFFSETS))
