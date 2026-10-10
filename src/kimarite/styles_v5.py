@@ -302,7 +302,6 @@ _SOURCE_JSON = r'''[
       "Hikiotoshi",
       "Pull",
       "Attempt Deep Inside Grip",
-      "Attempt Two-Handed Grip",
       "Tottari",
       "Ottsuke"
     ],
