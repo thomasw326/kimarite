@@ -42,3 +42,29 @@ def test_get_underneath_forces_opponent_kimarite_search():
     assert state.position == 1
     assert not state.fighter_a.temporary_zone
     assert [c.name for c in state.fighter_b.kimarite_zone] == ["Yorikiri"]
+
+
+def test_get_underneath_can_select_later_kimarite():
+    state = make_bout()
+    state.fighter_b.draw_pile = [
+        card_by_name("Yorikiri"), card_by_name("Oshi"), card_by_name("Oshidashi")
+    ]
+    resolve_exchange_effect(
+        state, Side.A, card_by_name("Get Underneath"),
+        EffectContext(choices={"kimarite_index": 2}),
+    )
+    assert [c.name for c in state.fighter_b.kimarite_zone] == ["Oshidashi"]
+    assert [c.name for c in state.fighter_b.draw_pile] == ["Yorikiri", "Oshi"]
+
+
+def test_tawara_can_select_later_kimarite():
+    state = make_bout()
+    state.fighter_a.draw_pile = [
+        card_by_name("Yorikiri"), card_by_name("Oshi"), card_by_name("Oshidashi")
+    ]
+    resolve_exchange_effect(
+        state, Side.A, card_by_name("Use the Tawara"),
+        EffectContext(choices={"kimarite_index": 2}),
+    )
+    assert [c.name for c in state.fighter_a.kimarite_zone] == ["Oshidashi"]
+    assert len(state.fighter_a.temporary_zone) == 1
