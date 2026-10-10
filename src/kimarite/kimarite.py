@@ -101,7 +101,7 @@ def _tsukiotoshi(state: BoutState, side: Side) -> bool:
     opponent = state.opponent(side)
     return (
         fighter.gained_momentum_this_turn
-        and (relative_position(state, side) <= -3 or relative_momentum(state, side) <= -2)
+        and (relative_position(state, side) == -3 or relative_momentum(state, side) == -2)
     )
 
 
