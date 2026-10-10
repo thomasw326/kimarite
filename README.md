@@ -27,10 +27,10 @@ python -m pytest -q
 
 The rules engine remains shared across tactical AI, personality AI, automated simulation, and human actions. Human card and keep/bottom choices use transactional execution so invalid input does not corrupt the bout state.
 
-## Current development roadmap
+## Experimental 15-style AI\n\nThe V5 branch also contains all 15 Sumo Styles from the live card-library sheet. The new builder selects favored starting cards with weighted randomness, excludes seven eligible low-affinity cards at base difficulty, and preserves required Grip setup. The style AI prioritizes wins and recovery from dangerous Position/Momentum before its favorite cards. These modules are **opt-in** and do not replace the existing 30-wrestler balance fixtures.\n\nRun a mirrored 15-style test locally (210 bouts per repetition):\n\n```powershell\npython -m kimarite.style_round_robin_v5 --repetitions 1\n```\n\n## Current development roadmap
 
 1. Complete and validate the human-vs-AI bout lifecycle.
-2. Introduce the 15 style-aware AI opponents with weighted preferred cards and Kimarite.
+2. Validate the new 15 style-aware AI opponents and improve their decision priorities.
 3. Add survival-first AI priorities for dangerous Position and Momentum.
 4. Compare deterministic AI-vs-AI runs for balance without changing approved card rules unnecessarily.
 
