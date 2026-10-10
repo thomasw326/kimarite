@@ -117,9 +117,8 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             if not instance.opponent_gained_push_while_active:
                 gain_momentum(state, side, 2)
         elif name == "Pull":
-            state.momentum = state.sign(side) * abs(state.momentum)
-            state.position = state.sign(side) * abs(state.position)
-            state.log(f"{fighter.wrestler.name} takes favorable absolute Momentum and Position.")
+            state.momentum = -state.momentum
+            state.log(f"{fighter.wrestler.name} reverses Momentum with surviving Pull.")
         elif name in {"Use the Tawara", "Give Ground"}:
             pass
         elif name == "Kannuki":
