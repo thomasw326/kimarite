@@ -16,15 +16,16 @@ def fighter(name):
 def test_approved_orbs_and_uncapped_power():
     assert (card_by_name("Headlong Charge").power, card_by_name("Headlong Charge").technique, card_by_name("Headlong Charge").spirit) == (0, 0, 3)
     a = card_by_name("Abisetaoshi")
-    assert (a.power, a.technique, a.spirit) == (2, 1, 0)
+    assert (a.power, a.technique, a.spirit) == (3, 0, 0)
     assert (push_from_power_advantage(1), push_from_power_advantage(3),
             push_from_power_advantage(5), push_from_power_advantage(7)) == (1, 2, 3, 4)
 
 
-def test_tsuridashi_total_grip_three_no_power():
+def test_tsuridashi_total_grip_three_and_power_five():
     s = BoutState(fighter("A"), fighter("B"))
     s.fighter_a.left_grip = GripState.DEEP
     s.fighter_a.right_grip = GripState.GRIP
+    s.fighter_a.power = 5
     assert kimarite_is_satisfied(s, Side.A, card_by_name("Tsuridashi"))
     s.fighter_a.right_grip = GripState.NONE
     assert not kimarite_is_satisfied(s, Side.A, card_by_name("Tsuridashi"))
@@ -63,6 +64,8 @@ def test_approved_kinematic_finishes():
 
 def test_regain_balance_conditional_power():
     s = BoutState(fighter("A"), fighter("B"), momentum=-1)
+    s.fighter_a.draw_pile = [card_by_name("Oshi")]
     resolve_exchange_effect(s, Side.A, card_by_name("Regain Balance"), EffectContext())
     assert s.momentum == 1
-    assert s.fighter_a.power == 1
+    assert s.fighter_a.power == 2
+    assert len(s.fighter_a.hand) == 1
