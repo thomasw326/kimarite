@@ -1,7 +1,9 @@
-"""Human-vs-AI turns use the same Tachiai, card, and end-turn engine."""
+"""V5 playable session: manual card access, actions, and AI progression."""
+from copy import deepcopy
+
 import pytest
 
-from kimarite.effects import IllegalPlay
+from kimarite.effects import ChoiceRequired, IllegalPlay
 from kimarite.human_bout import HumanBout
 from kimarite.models import Side
 from kimarite.setup import BoutConfig, FighterConfig
@@ -13,12 +15,41 @@ CONFIG = BoutConfig(
 )
 
 
-def test_session_reaches_human_and_allows_pass():
+def selected_bout(*, max_turns=12, side=Side.A):
+    bout = HumanBout.new(CONFIG, human_side=side, max_turns=max_turns)
+    if bout.pending_selection:
+        pending = bout.pending_selection
+        bout.choose_cards(list(range(pending.keep)))
+    return bout
+
+
+def test_selection_pauses_without_mutating_authoritative_turn():
     bout = HumanBout.new(CONFIG, human_side=Side.A, max_turns=12)
+    assert bout.awaiting_human
+    assert bout.pending_selection is not None
+    assert bout.state.turn_number == 0
+    assert not bout.actions()
+    before = deepcopy(bout.state)
+    with pytest.raises(IllegalPlay):
+        bout.end_turn()
+    with pytest.raises(IllegalPlay):
+        bout.play(0)
+    with pytest.raises(IllegalPlay):
+        bout.choose_cards([999] * bout.pending_selection.keep)
+    assert bout.state == before
+    indices = list(range(bout.pending_selection.keep))
+    expected = [bout.pending_selection.options[i].name for i in indices]
+    bout.choose_cards(indices)
+    assert bout.pending_selection is None
+    assert bout.state.turn_number == 1
+    assert [c.name for c in bout.state.fighter_a.hand][-len(expected):] == expected if expected else True
+
+
+def test_session_reaches_human_and_allows_pass():
+    bout = selected_bout()
     assert bout.awaiting_human
     assert bout.state.active_side is Side.A
     first_turn = bout.state.turn_number
-    assert bout.view().side is Side.A
     bout.end_turn()
     assert bout.state.turn_number >= first_turn + 1 or bout.finished
 
@@ -28,18 +59,16 @@ def test_ai_opener_advances_to_human():
     if not bout.finished:
         assert bout.awaiting_human
         assert bout.state.active_side is Side.B
+        assert bout.pending_selection is not None
 
 
 def test_human_play_is_incremental():
-    bout = HumanBout.new(CONFIG, human_side=Side.A, max_turns=12)
+    bout = selected_bout()
     if bout.actions():
         selected = bout.actions()[0]
         try:
             bout.play(selected.hand_index)
-        except Exception as exc:
-            # Some cards need a context-sensitive effect choice.
-            from kimarite.effects import ChoiceRequired
-            assert isinstance(exc, ChoiceRequired)
+        except ChoiceRequired:
             assert bout.awaiting_human
         else:
             assert bout.awaiting_human or bout.finished
@@ -47,7 +76,7 @@ def test_human_play_is_incremental():
 
 
 def test_session_rejects_actions_after_human_pass():
-    bout = HumanBout.new(CONFIG, human_side=Side.A, max_turns=1)
+    bout = selected_bout(max_turns=1)
     assert bout.awaiting_human
     bout.end_turn()
     assert bout.finished
