@@ -35,3 +35,14 @@ This is **a rules-parity effort, not a balance-tuning pass**. The pre-sync 840-b
 - Preserve `local/v45-card-sync` unchanged.
 - Do not infer balance from seed-matched comparisons until card effects and pool composition are confirmed.
 - Show complete balance and matchup results to the designer; **no card/stat/rule balancing changes without explicit approval**.
+
+## Follow-up parity implementation (October 9, 2026)
+
+The following changes are committed on the V5 branch (no balance changes):
+
+- Headlong Charge Tachiai now accepts an explicit optional per-side sacrifice index; absent/None means decline. The entry point is wired at engine level; interactive pre-bout prompting and AI selection remain to be integrated.
+- Exchange Get Underneath and Use the Tawara now accept `kimarite_index` when multiple Kimarite are eligible. The normal human Exchange action supports choices; default engine/AI search behavior remains deterministic, and Tachiai Get Underneath still invokes the default selection path.
+- Tottari's opponent Grip-event flag is preserved through the next start-of-turn Kimarite check and cleared afterward, preventing stale eligibility at the end of that turn.
+- Added dedicated regression tests for Headlong Charge choices, Kimarite searches, Tottari timing, Sidestep push suppression/resolution, and Read the Move/Pull modes.
+
+**Remaining before baseline certification:** run the full suite (not yet run on these commits), resolve any failures, add human pre-bout selection and deliberate AI policies, verify Sidestep with negative-effect prevention and interrupted Temporaries, and confirm the printed Tottari window against final rules. No new balance baseline has been run.
