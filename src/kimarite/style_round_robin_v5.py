@@ -25,6 +25,9 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
     opening_finishes = 0
     first_side_wins = 0
     incomplete_by_style = Counter()
+    pair_wins = Counter()
+    finishes_by_winner = Counter()
+    opening_losses = Counter()
     for repeat in range(repetitions):
         for pair_index, (first, second) in enumerate(combinations(styles, 2)):
             for leg, (a, b) in enumerate(((first, second), (second, first))):
@@ -40,12 +43,15 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
                     continue
                 if result.turns == 0:
                     opening_finishes += 1
+                    opening_losses[b if result.state.winner.value == "A" else a] += 1
                 if result.state.winner.value == "A":
                     first_side_wins += 1
                 winner = a if result.state.winner.value == "A" else b
                 loser = b if result.state.winner.value == "A" else a
                 wins[winner] += 1
                 losses[loser] += 1
+                pair_wins[(winner, loser)] += 1
+                finishes_by_winner[(winner, result.state.win_method or "unknown")] += 1
                 finishes[result.state.win_method or "unknown"] += 1
     return {
         "styles": len(styles), "planned_bouts": bouts,
@@ -54,6 +60,15 @@ def run_round_robin(*, repetitions: int = 1, seed: int = 20261009, max_turns: in
         "incomplete_by_style": dict(incomplete_by_style),
         "opening_finishes": opening_finishes,
         "first_side_wins": first_side_wins,
+        "opening_losses_by_style": dict(opening_losses),
+        "wins_by_finish_and_style": {
+            style: {finish: count for (name, finish), count in finishes_by_winner.items() if name == style}
+            for style in styles
+        },
+        "matchup_wins": {
+            style: {opponent: pair_wins[(style, opponent)] for opponent in styles if opponent != style}
+            for style in styles
+        },
         "win_rates": {
             name: round(wins[name] / (wins[name] + losses[name]), 4)
             if wins[name] + losses[name] else None for name in styles
