@@ -14,6 +14,36 @@ from .styles_v5 import STYLES, preference_bonus
 from .tachiai import TachiaiComparison
 
 
+# Draw + Play cards can be held across turns. Their main tactical use is
+# extending a later sequence to four played cards for the Tsuki Kimarite.
+DRAW_AND_PLAY = frozenset({"Oshi", "Tsuki", "Tsuppari", "Power Water Cantrip"})
+
+
+def _four_card_setup_hold_value(state: BoutState, side: Side, card_name: str) -> float:
+    """Reward retaining a cycling card when a four-card finish is within reach.
+
+    This estimates next-turn potential rather than looking into a hidden draw.
+    Immediate wins are still scored in a higher tier by choose_style_play.
+    """
+    if card_name not in DRAW_AND_PLAY:
+        return 0.0
+    fighter = state.fighter(side)
+    if len(fighter.draw_pile) == 0:
+        return 0.0
+    kimarite = {card.name for card in fighter.kimarite_zone}
+    momentum = relative_momentum(state, side)
+    position = relative_position(state, side)
+    has_tsukidashi = "Tsukidashi" in kimarite and position >= 1
+    has_tsukitaoshi = "Tsukitaoshi" in kimarite and momentum >= 1
+    if not (has_tsukidashi or has_tsukitaoshi):
+        return 0.0
+    # If already partway into a four-card sequence this turn, let the
+    # existing win/progress scorer prioritize finishing it immediately.
+    if fighter.cards_played_this_turn >= 2:
+        return 0.0
+    return 35.0 if position >= 2 or momentum >= 2 else 22.0
+
+
 def choose_style_play(state: BoutState, side: Side, comparison: TachiaiComparison, style: str) -> AIPlay | None:
     profile = STYLES[style]
     plays = candidate_plays(state, side, comparison)
@@ -52,8 +82,9 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
 
         # Affinity is a preference after survival, not an instruction to lose.
         affinity = preference_bonus(profile, candidate.card.name) * 4
+        setup_hold = _four_card_setup_hold_value(state, side, candidate.card.name)
         scored.append((
-            tier, candidate.score + danger_score + affinity,
+            tier, candidate.score + danger_score + affinity - setup_hold,
             preference_bonus(profile, candidate.card.name), -candidate.card.card_id,
             candidate,
         ))
