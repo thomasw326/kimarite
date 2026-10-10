@@ -51,7 +51,7 @@ def test_choice_required_leaves_authoritative_state_unchanged():
 def test_choice_can_be_retried_and_committed_once():
     state = state_with_hand("Bad Oshi", "Oshi", "Shove")
     assert len(legal_actions(state, Side.A)) == 3
-    submit_card_action(state, Side.A, 0, choices={"hand_index": 1})
+    submit_card_action(state, Side.A, 0, choices={"hand_index": 0})
     assert state.card_plays == [(Side.A, "Bad Oshi")]
     assert state.fighter_a.cards_played_this_turn == 1
     assert "Shove" in [c.name for c in state.fighter_a.hand]
