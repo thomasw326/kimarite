@@ -1,6 +1,6 @@
 """Targeted V5 Kimarite audit with explicit per-role denominators.
 
-Run: python -m kimarite.kimarite_audit_v5 --repetitions 32 --max-turns 30 --output artifacts/kimarite-audit.json
+Run: python -m kimarite.kimarite_audit_v5 --repetitions 20 --max-turns 30 --output artifacts/kimarite-audit.json
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from .style_simulate_v5 import run_style_bout
 from .styles_v5 import STYLES
 
 
-def audit(*, repetitions: int = 32, seed: int = 20261010, max_turns: int = 30) -> dict:
+def audit(*, repetitions: int = 20, seed: int = 20261010, max_turns: int = 30) -> dict:
     if repetitions < 1:
         raise ValueError("repetitions must be positive")
     kimarite_names = sorted({c.name for c in CARD_POOL if c.is_kimarite})
@@ -83,8 +83,12 @@ def audit(*, repetitions: int = 32, seed: int = 20261010, max_turns: int = 30) -
         record["trigger_per_feature_rate"] = rate(get("trigger_wins"), get("featured"))
         record["trigger_per_start_rate"] = rate(get("starting_trigger_wins"), get("starting"))
         record["final_zone_win_rate"] = rate(get("final_zone_wins"), get("final_zone"))
-        record["nonstarting_trigger_per_feature_rate"] = rate(
-            get("nonstarting_trigger_wins"), get("featured") - get("starting"))
+        record["shuffled"] = get("featured") - get("starting")
+        record["shuffled_wins"] = get("featured_wins") - get("starting_wins")
+        record["shuffled_win_rate"] = rate(record["shuffled_wins"], record["shuffled"])
+        record["shuffled_trigger_wins"] = get("nonstarting_trigger_wins")
+        record["shuffled_trigger_rate"] = rate(record["shuffled_trigger_wins"], record["shuffled"])
+        record["nonstarting_trigger_per_feature_rate"] = record["shuffled_trigger_rate"]
         report.append(record)
     return {"planned_bouts": bouts, "completed": bouts - sum(incomplete.values()),
             "incomplete": dict(incomplete), "repetitions": repetitions,
@@ -98,7 +102,7 @@ def audit(*, repetitions: int = 32, seed: int = 20261010, max_turns: int = 30) -
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Targeted V5 Kimarite denominators and triggers")
-    parser.add_argument("--repetitions", type=int, default=32)
+    parser.add_argument("--repetitions", type=int, default=20)
     parser.add_argument("--seed", type=int, default=20261010)
     parser.add_argument("--max-turns", type=int, default=30)
     parser.add_argument("--output", default="artifacts/kimarite-audit-v5.json")
