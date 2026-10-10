@@ -421,12 +421,27 @@ def _immovable(
     add_temporary(state, side, card, phase="exchange")
 
 
+def give_opponent_kimarite(state: BoutState, side: Side, source: str) -> None:
+    """A Get Underneath opponent searches the Draw Pile for a Kimarite.
+
+    This prototype deterministically chooses the earliest eligible Kimarite.
+    It goes straight to their Kimarite Zone, not their hand.
+    """
+    opponent = state.opponent(side)
+    for index, found in enumerate(opponent.draw_pile):
+        if found.is_kimarite:
+            opponent.kimarite_zone.append(opponent.draw_pile.pop(index))
+            state.log(f"{opponent.wrestler.name} searches {found.name} into the Kimarite Zone after {source}.")
+            break
+
+
 def _get_underneath(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     gain_momentum(state, side, 1)
     gain_push(state, side, 1)
-    add_temporary(state, side, card, phase="exchange")
+    if state.winner is None:
+        give_opponent_kimarite(state, side, card.name)
 
 
 def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -830,7 +845,6 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Hold Position",
         "Immovable",
         "Pull",
-        "Get Underneath",
         "Sidestep",
         "Use the Tawara",
         "Kannuki",
