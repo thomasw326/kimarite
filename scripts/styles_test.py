@@ -79,9 +79,9 @@ def make_fighter(config, rng, ranking, difficulty=0, enable_stat_boosts=False):
     top_card = rng.choices(top_options, weights=list(range(len(top_options), 0, -1)))[0]
     reserved = {kimarite.name, tachiai.name, top_card.name}
     pool = [c for c in CARD_POOL if c.name not in reserved]
-    # Difficulty 0 does not trim; increasing difficulty cuts progressively
+    # Difficulty 0 trims seven worst-fit cards; negative levels restore them
     # more of the least compatible cards, without touching opening choices.
-    removed = least_useful(pool, name, difficulty)
+    removed = least_useful(pool, name, 7 + difficulty)
     pool = [c for c in pool if c.card_id not in removed]
     rng.shuffle(pool)
     adjusted_stats = boosted_stats(stats, order, difficulty, enabled=enable_stat_boosts)
@@ -163,7 +163,7 @@ def main():
     parser.add_argument("--stat-boosts", action="store_true",
                         help="Opt into seven-step stat boosts (OFF by default)")
     parser.add_argument("--difficulty", type=int, default=0,
-                        help="Number of lowest-affinity deck cards removed per AI wrestler")
+                        help="Deck focus: 0 removes 7 worst-fit cards, positive removes more, negative restores cards")
     parser.add_argument("--max-pairs", type=int, default=None,
                         help="Number of unique round-robin pairs (105 pairs = 210 mirrored bouts)")
     parser.add_argument("--output-dir", default="big_test_artifacts")
@@ -181,8 +181,6 @@ def main():
         parser.error("--batch-id must be >= 0")
     if args.max_pairs is not None and args.max_pairs < 1:
         parser.error("--max-pairs must be >= 1")
-    if args.difficulty < 0:
-        parser.error('--difficulty must be >= 0')
     if args.repetitions < 1:
         parser.error("--repetitions must be >= 1")
     output = Path(args.output_dir)
