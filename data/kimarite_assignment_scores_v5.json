@@ -7,9 +7,9 @@
     "grip",
     "momentum",
     "push",
-    "card_access"
+    "tachiai"
   ],
-  "scale": "0–5; design-estimated assignment affinity; not validated against bout outcomes",
+  "scale": "Power/Spirit/Technique/Grip/Momentum/Push: provisional 0–5 fit; Tachiai: 1 = long game, 5 = opening.",
   "source_sheet": "https://docs.google.com/spreadsheets/d/1JY-vPmU-yqcwYzrEugKP43JrnFGLi_UwZSFkOSqWtWI/edit?gid=993340856",
   "cards": [
     {
@@ -22,9 +22,10 @@
         "grip": 4,
         "momentum": 1,
         "push": 1,
-        "card_access": 0
+        "tachiai": 3
       },
-      "status": "R20 preferred — confirm"
+      "status": "R20 preferred — confirm",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Hatakikomi",
@@ -36,9 +37,10 @@
         "grip": 0,
         "momentum": 4,
         "push": 1,
-        "card_access": 1
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Hikiotoshi",
@@ -50,9 +52,10 @@
         "grip": 3,
         "momentum": 4,
         "push": 1,
-        "card_access": 4
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Katasukashi",
@@ -64,9 +67,10 @@
         "grip": 0,
         "momentum": 3,
         "push": 0,
-        "card_access": 5
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Kirikaeshi",
@@ -78,9 +82,10 @@
         "grip": 1,
         "momentum": 2,
         "push": 0,
-        "card_access": 4
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "provisional"
     },
     {
       "name": "Kotenage",
@@ -92,9 +97,10 @@
         "grip": 4,
         "momentum": 2,
         "push": 0,
-        "card_access": 3
+        "tachiai": 5
       },
-      "status": "R20 baseline — unresolved"
+      "status": "R20 baseline — unresolved",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Okuridashi",
@@ -106,9 +112,10 @@
         "grip": 0,
         "momentum": 4,
         "push": 5,
-        "card_access": 0
+        "tachiai": 2
       },
-      "status": "R20 chosen reference — confirm"
+      "status": "R20 chosen reference — confirm",
+      "tachiai_source": "provisional"
     },
     {
       "name": "Okuritaoshi",
@@ -120,9 +127,10 @@
         "grip": 0,
         "momentum": 5,
         "push": 4,
-        "card_access": 0
+        "tachiai": 2
       },
-      "status": "R20 chosen reference — confirm"
+      "status": "R20 chosen reference — confirm",
+      "tachiai_source": "provisional"
     },
     {
       "name": "Oshidashi",
@@ -134,9 +142,10 @@
         "grip": 0,
         "momentum": 5,
         "push": 5,
-        "card_access": 0
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Oshitaoshi",
@@ -148,9 +157,10 @@
         "grip": 0,
         "momentum": 3,
         "push": 5,
-        "card_access": 0
+        "tachiai": 3
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Shitatenage",
@@ -162,9 +172,10 @@
         "grip": 5,
         "momentum": 3,
         "push": 1,
-        "card_access": 0
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Sukuinage",
@@ -176,9 +187,10 @@
         "grip": 0,
         "momentum": 4,
         "push": 0,
-        "card_access": 5
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "provisional"
     },
     {
       "name": "Tottari",
@@ -190,9 +202,10 @@
         "grip": 5,
         "momentum": 1,
         "push": 0,
-        "card_access": 4
+        "tachiai": 3
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Tsukidashi",
@@ -204,9 +217,10 @@
         "grip": 0,
         "momentum": 3,
         "push": 5,
-        "card_access": 4
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Tsukiotoshi",
@@ -218,9 +232,10 @@
         "grip": 0,
         "momentum": 3,
         "push": 2,
-        "card_access": 2
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Tsukitaoshi",
@@ -232,9 +247,10 @@
         "grip": 0,
         "momentum": 4,
         "push": 4,
-        "card_access": 4
+        "tachiai": 3
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Tsuridashi",
@@ -246,9 +262,10 @@
         "grip": 5,
         "momentum": 3,
         "push": 2,
-        "card_access": 0
+        "tachiai": 3
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Utchari",
@@ -260,9 +277,10 @@
         "grip": 0,
         "momentum": 5,
         "push": 0,
-        "card_access": 4
+        "tachiai": 4
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "provisional"
     },
     {
       "name": "Uwatedashinage",
@@ -274,9 +292,10 @@
         "grip": 5,
         "momentum": 3,
         "push": 0,
-        "card_access": 4
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "provisional"
     },
     {
       "name": "Uwatenage",
@@ -288,9 +307,10 @@
         "grip": 5,
         "momentum": 3,
         "push": 0,
-        "card_access": 1
+        "tachiai": 1
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Yorikiri",
@@ -302,9 +322,10 @@
         "grip": 5,
         "momentum": 3,
         "push": 5,
-        "card_access": 0
+        "tachiai": 2
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     },
     {
       "name": "Yoritaoshi",
@@ -316,9 +337,11 @@
         "grip": 4,
         "momentum": 3,
         "push": 4,
-        "card_access": 0
+        "tachiai": 1
       },
-      "status": "Selected — designer"
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
     }
-  ]
+  ],
+  "tachiai_source": "16 from historical V4.3 Card Affinity ratings, 6 explicitly provisional estimates; review scores prior to final automated assignment."
 }
