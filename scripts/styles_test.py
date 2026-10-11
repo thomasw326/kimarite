@@ -1,4 +1,4 @@
-"""30-wrestler Sumo Styles Big Test. Run with python scripts/big_test.py."""
+"""15-archetype Sumo Styles Big Test. Run with python scripts/styles_test.py."""
 from __future__ import annotations
 
 import argparse
@@ -12,6 +12,7 @@ from pathlib import Path
 
 from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
 from kimarite.affinity_v5 import preferred, least_useful
+from kimarite.styles_v5 import STYLES
 from kimarite.models import BoutState, FighterState, Side, Stat, Wrestler
 from kimarite.personality_ai import play_personality_turn
 from kimarite.tachiai import compare_tachiai, first_exchange_side
@@ -30,70 +31,30 @@ ORDERS = tuple(permutations(Stat))
 
 
 
-# Fixed 30-wrestler roster from Sumo Styles, 2026-10-09.
-# name, stats, primary, secondary, kimarite, support cards (three)
-STYLE_DATA = (
-    ("Heavy Hitter A", (4,0,2), "Power", "Spirit", "Oshidashi", "Oshi", "Nodowa", "Hold Position"),
-    ("Heavy Hitter B", (4,0,2), "Power", "Spirit", "Oshitaoshi", "Oshi", "Harite", "Immovable"),
-    ("Bulldozer A", (3,0,3), "Power", "Spirit", "Oshidashi", "Oshi", "Belt Slap", "Shove"),
-    ("Bulldozer B", (3,0,3), "Power", "Spirit", "Oshitaoshi", "Oshi", "Salt Throw", "Kannuki"),
-    ("Charger A", (2,0,4), "Spirit", "Power", "Oshidashi", "Explosive Step — Fumikomi", "Get Underneath", "Tsuppari"),
-    ("Charger B", (2,0,4), "Spirit", "Power", "Yoritaoshi", "Headlong Charge", "Yori", "Belt Slap"),
-    ("Pressure Fighter A", (3,0,3), "Spirit", "Power", "Tsukidashi", "Oshi", "Big Tsuki", "Tsuppari"),
-    ("Pressure Fighter B", (3,0,3), "Spirit", "Power", "Tsukitaoshi", "Bad Oshi", "Shove", "Tsuki"),
-    ("Power Grappler A", (4,2,0), "Power", "Technique", "Tsuridashi", "Tsuri", "Shitate", "Harite"),
-    ("Power Grappler B", (4,2,0), "Power", "Technique", "Abisetaoshi", "Gaburi", "Yori", "Morozashi"),
-    ("Unorthodox Powerhouse A", (3,3,0), "Power", "Technique", "Hatakikomi", "Henka", "Read the Move", "Nodowa"),
-    ("Unorthodox Powerhouse B", (3,3,0), "Power", "Technique", "Kotenage", "Sidestep", "Ottsuke", "Tsuki"),
-    ("The Technician A", (2,4,0), "Technique", "Power", "Uwatenage", "Gain Left Grip", "Uwate", "Morozashi"),
-    ("The Technician B", (2,4,0), "Technique", "Power", "Shitatenage", "Gain Right Grip", "Shitate", "Sidestep"),
-    ("The Arsenal A", (3,3,0), "Technique", "Power", "Uwatenage", "Gaburi", "Gain Left Grip", "Kotenage"),
-    ("The Arsenal B", (3,3,0), "Technique", "Power", "Shitatenage", "Gaburi", "Gain Right Grip", "Tsuridashi"),
-    ("Mawashi Specialist A", (1,4,1), "Technique", "Spirit", "Shitatenage", "Gain Right Grip", "Shitate", "Yori"),
-    ("Mawashi Specialist B", (1,4,1), "Technique", "Spirit", "Shitatenage", "Gain Right Grip", "Attempt Deep Inside Grip", "Yorikiri"),
-    ("Opportunist A", (1,3,2), "Technique", "Spirit", "Hatakikomi", "Tottari", "Stare Down", "Kannuki"),
-    ("Opportunist B", (1,3,2), "Technique", "Spirit", "Hikiotoshi", "Yorikiri", "Stare Down", "Ottsuke"),
-    ("Fast Grappler A", (1,1,4), "Spirit", "Technique", "Yorikiri", "Gain Left Grip", "Yori", "Belt Slap"),
-    ("Fast Grappler B", (1,1,4), "Spirit", "Technique", "Yorikiri", "Gain Right Grip", "Gaburi", "Explosive Step — Fumikomi"),
-    ("Disruptor A", (1,2,3), "Spirit", "Technique", "Kotenage", "Ottsuke", "Read the Move", "Give Ground"),
-    ("Disruptor B", (1,2,3), "Spirit", "Technique", "Tottari", "Kannuki", "Tsuki", "Sidestep"),
-    ("Mountain A", (4,1,1), "Power", "Power", "Oshitaoshi", "Hold Position", "Kannuki", "Nodowa"),
-    ("Mountain B", (4,1,1), "Power", "Power", "Abisetaoshi", "Hold Position", "Immovable", "Harite"),
-    ("The Specialist A", (1,4,1), "Technique", "Technique", "Katasukashi", "Use the Tawara", "Sidestep", "Henka"),
-    ("The Specialist B", (1,4,1), "Technique", "Technique", "Tsukiotoshi", "Use the Tawara", "Sidestep", "Reset to Neutral"),
-    ("Speed Demon A", (1,1,4), "Spirit", "Spirit", "Oshidashi", "Explosive Step — Fumikomi", "Headlong Charge", "Pull"),
-    ("Speed Demon B", (1,1,4), "Spirit", "Spirit", "Oshidashi", "Explosive Step — Fumikomi", "Belt Slap", "Regain Balance"),
-)
-STYLE_BY_NAME = {row[0]: row for row in STYLE_DATA}
-ROLE_COUNTS = defaultdict(int)
-
-
+# One wrestler per archetype; starting cards are generated from affinity.
+# Difficulty is a deck-pruning setting, NOT a separate wrestler.
 def roster():
-    stat_by_name = {s.value.lower(): s for s in Stat}
+    stat_by_name = {x.value.lower(): x for x in Stat}
     result = []
-    for name, stats, primary, secondary, *_ in STYLE_DATA:
-        first = stat_by_name[primary.lower()]
-        second = stat_by_name[secondary.lower()]
-        # Keep the sheet's repeated priority for specialists; third is the unused stat.
-        third = next((s for s in Stat if s not in (first, second)), first)
-        result.append((name, stats, (first, second, third)))
+    for name, profile in STYLES.items():
+        primary = stat_by_name[profile.primary.lower()]
+        secondary = stat_by_name[profile.secondary.lower()]
+        tertiary = next((x for x in Stat if x not in (primary, secondary)), primary)
+        result.append((name, profile.stats, (primary, secondary, tertiary)))
     return result
 
 
 def validate_style_cards():
-    by_name = {c.name: c for c in CARD_POOL}
-    kimarite_names = {c.name for c in STARTING_KIMARITE}
-    missing = []
-    for name, _, _, _, kimarite, *supports in STYLE_DATA:
-        if kimarite not in kimarite_names:
-            missing.append(f'{name}: Kimarite {kimarite!r} missing from STARTING_KIMARITE')
-        for support in supports:
-            if support not in by_name:
-                missing.append(f'{name}: support {support!r} missing from CARD_POOL')
-        if len(set(supports)) != 3 or kimarite in supports:
-            missing.append(f'{name}: designated cards are not four distinct names')
-    if missing:
-        raise SystemExit('Roster cannot run until catalog matches the sheet:\n' + '\n'.join(missing))
+    names = {c.name for c in STARTING_KIMARITE}
+    if not names:
+        raise SystemExit("No starter Kimarite in catalog")
+    if len(STYLES) != 15:
+        raise SystemExit(f"Expected 15 Sumo Styles; found {len(STYLES)}")
+    for name in STYLES:
+        if len(preferred(STARTING_KIMARITE, name, 3)) < 3:
+            raise SystemExit(f"{name}: need three eligible Kimarite")
+        if len(preferred([c for c in CARD_POOL if not c.is_kimarite], name, 7)) < 7:
+            raise SystemExit(f"{name}: need seven eligible non-Kimarite")
 
 
 def make_fighter(config, rng, ranking, difficulty=0):
@@ -200,7 +161,7 @@ def main():
     parser.add_argument("--difficulty", type=int, default=0,
                         help="Number of lowest-affinity deck cards removed per AI wrestler")
     parser.add_argument("--max-pairs", type=int, default=None,
-                        help="Number of unique round-robin pairs (3000 pairs = 6000 mirrored bouts)")
+                        help="Number of unique round-robin pairs (105 pairs = 210 mirrored bouts)")
     parser.add_argument("--output-dir", default="big_test_artifacts")
     parser.add_argument("--seed", type=int, default=20261008)
     parser.add_argument("--batch-id", type=int, default=0)
@@ -224,7 +185,7 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     validate_style_cards()
     configs = roster()
-    assert len(configs) == 30
+    assert len(configs) == 15
     schedule = round_robin_pairs(len(configs), args.seed)
     selected_pairs = schedule[:args.max_pairs]
     planned_bouts = args.repetitions * len(selected_pairs) * 2
