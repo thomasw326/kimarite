@@ -95,6 +95,8 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
         raise ValueError("Not an experimental R21 kimarite")
     if state.disable_kimarite_exchange_effects:
         return
+    if identifier == "R21-R24-UWD-NE":
+        return
     if identifier in {"R21-OKD-RS", "R21-OKT-RS"}:
         search_for_reversal(state.fighter(side))
         return
