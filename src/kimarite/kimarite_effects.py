@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, draw_one
-from .kimarite import power_advantage, relative_momentum, relative_position
+from .kimarite import no_grip, power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
-from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, gain_power, lose_momentum, reduce_grip
+from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, lose_momentum, reduce_grip, establish_grip
 from .selection import ai_look_keep
 
 
@@ -51,8 +51,9 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     opponent_side = state.opponent_side(side)
 
     if card.name == "Yorikiri":
-        if relative_position(state, side) >= 0:
-            gain_flexible_grip(state, side)
+        if effective_total_grip(state, side) >= 2:
+            from .rules import gain_push
+            gain_push(state, side, 1)
 
     elif card.name == "Oshidashi":
         if relative_position(state, side) >= 1:
@@ -71,19 +72,19 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
             gain_momentum(state, side, 1)
 
     elif card.name == "Yoritaoshi":
-        if power_advantage(state, side) >= 1:
-            gain_flexible_grip(state, side)
-        if fighter.total_grip >= 1:
+        if effective_total_grip(state, side) >= 1:
             gain_power(state, side, 1)
 
     elif card.name == "Katasukashi":
-        if _optional(context, "use_optional", card):
-            lose_momentum(state, side, 1)
-            draw_from_look(state, side, look=2, keep=1, required_draws=2)
+        if relative_momentum(state, side) >= 1 and fighter.discard_pile:
+            options = list(range(len(fighter.discard_pile)))
+            index = options[0] if len(options) == 1 else context.choice("discard_index")
+            if index not in options:
+                raise ChoiceRequired(card.name, "discard_index", options)
+            fighter.hand.append(fighter.discard_pile.pop(index))
 
     elif card.name == "Tsukiotoshi":
-        if relative_position(state, side) < 0:
-            draw_one(state, side)
+        add_play(state, side, 1)
 
     elif card.name == "Tottari":
         opponent = state.opponent(side)
@@ -107,8 +108,8 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
             establish_grip(state, side, "left")
 
     elif card.name == "Shitatenage":
-        if relative_momentum(state, side) >= 0:
-            establish_grip(state, side, "right")
+        if fighter.right_grip is not GripState.NONE:
+            gain_momentum(state, side, 1)
 
     elif card.name == "Hatakikomi":
         if _optional(context, "use_optional", card):
@@ -128,7 +129,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 draw_one(state, side)
 
     elif card.name == "Hikiotoshi":
-        draw_from_look(state, side, look=2, keep=1)
+        draw_from_look(state, side, look=3, keep=1)
 
     elif card.name == "Tsukitaoshi":
         add_play(state, side, 1)
@@ -165,6 +166,38 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                     raise ChoiceRequired(card.name, "hand_index", options)
                 discarded = fighter.hand.pop(index)
                 fighter.discard_pile.append(discarded)
+
+    elif card.name == "Kirikaeshi":
+        draw_one(state, side)
+
+    elif card.name in {"Okuridashi", "Okuritaoshi"}:
+        mode = context.choice("mode")
+        if mode not in {"position_to_momentum", "momentum_to_position"}:
+            raise ChoiceRequired(card.name, "mode", ["position_to_momentum", "momentum_to_position"])
+        if mode == "position_to_momentum":
+            lose_position(state, side, 1, source=card.name)
+            gain_momentum(state, side, 2)
+        else:
+            lose_momentum(state, side, 1)
+            gain_position(state, side, 2)
+
+    elif card.name == "Sukuinage":
+        if no_grip(state, side):
+            draw_one(state, side)
+
+    elif card.name == "Utchari":
+        if relative_position(state, side) < 0:
+            draw_from_look(state, side, look=2, keep=1)
+
+    elif card.name == "Uwatedashinage":
+        draw_one(state, side)
+        if fighter.hand:
+            value = context.choice("discard_for_grip")
+            if value is None:
+                raise ChoiceRequired(card.name, "discard_for_grip", [True, False])
+            if value:
+                _discard_one_from_hand(state, side, card, context)
+                establish_grip(state, side, "left")
 
     elif card.name == "Abisetaoshi":
         if fighter.power >= 6:
