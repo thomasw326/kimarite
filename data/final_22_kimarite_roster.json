@@ -44,9 +44,7 @@
     "R21-TSR-C7",
     "R21-R25-UWD-M2-EX",
     "R21-YOR-C3",
-    "R21-YTA-C3"
-  ],
-  "open": [
+    "R21-YTA-C3",
     "R21-HIK-C2-MN3",
     "R21-KAT-H5-T2",
     "R21-KIR-P3-HA3",
@@ -57,7 +55,8 @@
     "R21-UTC-F2-MN2",
     "R21-UWA-C1-M2"
   ],
-  "status": "Frozen design roster; existing designer approvals tracked separately (13 approved / 9 pending)",
+  "open": [],
+  "status": "DESIGNER FINALIZED — all 22 builds",
   "baseline": "R22 full roster, R23 orb updates, R25 Uwatedashinage revision",
-  "notes": "The five R23 orbs are present on the current manifest. R25 restores Uwatedashinage Exchange and uses Momentum >=2. All 22 are frozen selections; 9 are not individually bold-approved."
+  "notes": "All 22 finalized by designer October 11 2026. Proceed to traditional 15-wrestler test as a separate experiment. No 15-wrestler outcomes inferred from neutral gauntlet."
 }
