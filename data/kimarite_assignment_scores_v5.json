@@ -1,0 +1,324 @@
+{
+  "schema_version": 1,
+  "axes": [
+    "power",
+    "spirit",
+    "technique",
+    "grip",
+    "momentum",
+    "push",
+    "card_access"
+  ],
+  "scale": "0–5; design-estimated assignment affinity; not validated against bout outcomes",
+  "source_sheet": "https://docs.google.com/spreadsheets/d/1JY-vPmU-yqcwYzrEugKP43JrnFGLi_UwZSFkOSqWtWI/edit?gid=993340856",
+  "cards": [
+    {
+      "name": "Abisetaoshi",
+      "variant": "ABI-2",
+      "scores": {
+        "power": 5,
+        "spirit": 0,
+        "technique": 1,
+        "grip": 4,
+        "momentum": 1,
+        "push": 1,
+        "card_access": 0
+      },
+      "status": "R20 preferred — confirm"
+    },
+    {
+      "name": "Hatakikomi",
+      "variant": "R21-HAT-C3",
+      "scores": {
+        "power": 3,
+        "spirit": 3,
+        "technique": 2,
+        "grip": 0,
+        "momentum": 4,
+        "push": 1,
+        "card_access": 1
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Hikiotoshi",
+      "variant": "R21-HIK-C2",
+      "scores": {
+        "power": 1,
+        "spirit": 2,
+        "technique": 4,
+        "grip": 3,
+        "momentum": 4,
+        "push": 1,
+        "card_access": 4
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Katasukashi",
+      "variant": "R21-KAT-H5",
+      "scores": {
+        "power": 0,
+        "spirit": 1,
+        "technique": 5,
+        "grip": 0,
+        "momentum": 3,
+        "push": 0,
+        "card_access": 5
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Kirikaeshi",
+      "variant": "R21-KIR-P3",
+      "scores": {
+        "power": 0,
+        "spirit": 1,
+        "technique": 5,
+        "grip": 1,
+        "momentum": 2,
+        "push": 0,
+        "card_access": 4
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Kotenage",
+      "variant": "KOT-1",
+      "scores": {
+        "power": 2,
+        "spirit": 1,
+        "technique": 4,
+        "grip": 4,
+        "momentum": 2,
+        "push": 0,
+        "card_access": 3
+      },
+      "status": "R20 baseline — unresolved"
+    },
+    {
+      "name": "Okuridashi",
+      "variant": "OKD-2",
+      "scores": {
+        "power": 1,
+        "spirit": 3,
+        "technique": 4,
+        "grip": 0,
+        "momentum": 4,
+        "push": 5,
+        "card_access": 0
+      },
+      "status": "R20 chosen reference — confirm"
+    },
+    {
+      "name": "Okuritaoshi",
+      "variant": "OKT-2",
+      "scores": {
+        "power": 2,
+        "spirit": 4,
+        "technique": 3,
+        "grip": 0,
+        "momentum": 5,
+        "push": 4,
+        "card_access": 0
+      },
+      "status": "R20 chosen reference — confirm"
+    },
+    {
+      "name": "Oshidashi",
+      "variant": "OSH-3",
+      "scores": {
+        "power": 4,
+        "spirit": 5,
+        "technique": 0,
+        "grip": 0,
+        "momentum": 5,
+        "push": 5,
+        "card_access": 0
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Oshitaoshi",
+      "variant": "R21-OTA-C1",
+      "scores": {
+        "power": 5,
+        "spirit": 3,
+        "technique": 0,
+        "grip": 0,
+        "momentum": 3,
+        "push": 5,
+        "card_access": 0
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Shitatenage",
+      "variant": "R21-SHI-C3",
+      "scores": {
+        "power": 2,
+        "spirit": 1,
+        "technique": 4,
+        "grip": 5,
+        "momentum": 3,
+        "push": 1,
+        "card_access": 0
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Sukuinage",
+      "variant": "R21-SUK-P3",
+      "scores": {
+        "power": 1,
+        "spirit": 2,
+        "technique": 4,
+        "grip": 0,
+        "momentum": 4,
+        "push": 0,
+        "card_access": 5
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Tottari",
+      "variant": "R21-TOT-NS",
+      "scores": {
+        "power": 1,
+        "spirit": 1,
+        "technique": 5,
+        "grip": 5,
+        "momentum": 1,
+        "push": 0,
+        "card_access": 4
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Tsukidashi",
+      "variant": "R21-TSU-C1",
+      "scores": {
+        "power": 3,
+        "spirit": 5,
+        "technique": 2,
+        "grip": 0,
+        "momentum": 3,
+        "push": 5,
+        "card_access": 4
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Tsukiotoshi",
+      "variant": "R21-TSO-C3",
+      "scores": {
+        "power": 1,
+        "spirit": 2,
+        "technique": 3,
+        "grip": 0,
+        "momentum": 3,
+        "push": 2,
+        "card_access": 2
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Tsukitaoshi",
+      "variant": "R21-TKT-C1",
+      "scores": {
+        "power": 3,
+        "spirit": 5,
+        "technique": 2,
+        "grip": 0,
+        "momentum": 4,
+        "push": 4,
+        "card_access": 4
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Tsuridashi",
+      "variant": "R21-TSR-P6",
+      "scores": {
+        "power": 5,
+        "spirit": 1,
+        "technique": 2,
+        "grip": 5,
+        "momentum": 3,
+        "push": 2,
+        "card_access": 0
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Utchari",
+      "variant": "R21-UTC-F2",
+      "scores": {
+        "power": 0,
+        "spirit": 4,
+        "technique": 5,
+        "grip": 0,
+        "momentum": 5,
+        "push": 0,
+        "card_access": 4
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Uwatedashinage",
+      "variant": "R21-UWD-C5",
+      "scores": {
+        "power": 1,
+        "spirit": 2,
+        "technique": 5,
+        "grip": 5,
+        "momentum": 3,
+        "push": 0,
+        "card_access": 4
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Uwatenage",
+      "variant": "R21-UWA-C1",
+      "scores": {
+        "power": 1,
+        "spirit": 1,
+        "technique": 5,
+        "grip": 5,
+        "momentum": 3,
+        "push": 0,
+        "card_access": 1
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Yorikiri",
+      "variant": "R21-YOR-C3",
+      "scores": {
+        "power": 3,
+        "spirit": 2,
+        "technique": 3,
+        "grip": 5,
+        "momentum": 3,
+        "push": 5,
+        "card_access": 0
+      },
+      "status": "Selected — designer"
+    },
+    {
+      "name": "Yoritaoshi",
+      "variant": "R21-YTA-C3",
+      "scores": {
+        "power": 5,
+        "spirit": 2,
+        "technique": 2,
+        "grip": 4,
+        "momentum": 3,
+        "push": 4,
+        "card_access": 0
+      },
+      "status": "Selected — designer"
+    }
+  ]
+}
