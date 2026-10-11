@@ -82,7 +82,7 @@ def run_batch(start_pair: int, end_pair: int, repetitions: int, seed: int, max_t
                     winner = (a if result.state.winner is Side.A else
                               b if result.state.winner is Side.B else "")
                     writer.writerow((pair_index,repeat,a,b,winner,result.state.win_method or "",
-                                     result.completed,result.turns,result.error or ""))
+                                     result.completed,result.turns,result.unsupported_reason or ""))
     print(json.dumps({"start_pair":start_pair,"end_pair":end_pair,
                        "repetitions":repetitions,"bouts":(end_pair-start_pair)*2*repetitions,
                        "output":str(output)}))
