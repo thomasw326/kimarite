@@ -2,7 +2,7 @@ name: B3 Spirit Push Scaling - 15 style affinity full 22
 on:
   push:
     branches: [experiment/b3-spirit-push-scaling]
-    paths: [".github/workflows/r26-affinity-full22.yml"]
+    paths: [".github/workflows/r26-affinity-full22.yml", "src/kimarite/tachiai.py", "tests/test_tachiai.py"]
   workflow_dispatch:
 jobs:
   smoke:
