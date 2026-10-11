@@ -67,7 +67,7 @@ def remove_temporary(
             gain_momentum(state, state.opponent_side(side), 2)
 
     fighter.discard_pile.append(card)
-    if (getattr(state, "r20_active", False) and completed and not disrupted
+    if (completed and not disrupted
             and card.name in {"Henka", "Pull", "Sidestep", "Immovable", "Kannuki"}):
         fighter.successful_reversal_this_turn = True
         state.reversal_completions.append((side, card.name, state.turn_number))
