@@ -235,6 +235,26 @@ def _contexts_for_card(
             ]
         return [base]
 
+    if card.name in {"Okuridashi", "Okuritaoshi"}:
+        return [
+            _context_variant(base, mode="position_to_momentum"),
+            _context_variant(base, mode="momentum_to_position"),
+        ]
+
+    if card.name == "Uwatedashinage":
+        options = [_context_variant(base, discard_for_grip=False)]
+        if fighter.hand or fighter.draw_pile:
+            options.append(_context_variant(
+                base, discard_for_grip=True,
+                hand_index=_best_hand_index(state, side, prefer_discard=True),
+            ))
+        return options
+
+    if card.name == "Katasukashi":
+        if fighter.discard_pile:
+            return [_context_variant(base, discard_index=_best_discard_index(state, side))]
+        return [base]
+
     if card.name == "Tsuki":
         grips = []
         if opponent.left_grip is not GripState.NONE:
