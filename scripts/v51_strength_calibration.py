@@ -8,7 +8,7 @@ import csv
 from collections import Counter
 from pathlib import Path
 
-from scripts.styles_test import roster, run_one
+from styles_test import roster, run_one
 
 
 def main():
