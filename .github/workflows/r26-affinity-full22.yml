@@ -1,7 +1,7 @@
-name: B2 Technique Nerf - 15 style affinity full 22
+name: B3 Spirit Push Scaling - 15 style affinity full 22
 on:
   push:
-    branches: [experiment/b2-technique-nerf]
+    branches: [experiment/b3-spirit-push-scaling]
     paths: [".github/workflows/r26-affinity-full22.yml"]
   workflow_dispatch:
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - name: Validate complete card pool, 22 selected Kimarite, AI affinity and real bout
         run: |
-          python -m pytest -q tests/test_r21_search.py tests/test_v5_style_ai.py tests/test_v51_power_additions.py
+          python -m pytest -q tests/test_tachiai.py tests/test_r21_search.py tests/test_v5_style_ai.py tests/test_v51_power_additions.py
           python - <<'PY'
           import inspect
           from kimarite import r26_style_final22 as r26
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b2-smoke
+          name: b3-smoke
           path: artifacts/r26_smoke.csv
 
   full:
@@ -87,7 +87,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b2-shard-${{ matrix.shard }}
+          name: b3-shard-${{ matrix.shard }}
           path: artifacts/r26/
           retention-days: 30
 
@@ -102,7 +102,7 @@ jobs:
           python-version: "3.11"
       - uses: actions/download-artifact@v4
         with:
-          pattern: b2-shard-*
+          pattern: b3-shard-*
           path: artifacts/r26_collected
           merge-multiple: true
       - name: Verify 15-style 8400 complete mirrored bouts and summarize
@@ -136,5 +136,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b2-final-report
+          name: b3-final-report
           path: artifacts/r26_report/
