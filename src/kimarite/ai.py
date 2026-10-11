@@ -203,11 +203,15 @@ def _contexts_for_card(
     opponent = state.opponent(side)
     fighter = state.fighter(side)
 
-    if card.name.startswith("R20:"):
-        # Explore each legal choice for experimental cards, so the gauntlet's
-        # automatic player doesn't accidentally test only a default branch.
-        from .r20_variant_rules import arm_id
-        variant = arm_id(card)
+    if card.name.startswith(("R20:", "R21:")):
+        # Both experimental gauntlets use the same deterministic AI choice
+        # enumeration, without changing normal V5 card evaluation.
+        if card.name.startswith("R21:"):
+            from .r21_variant_rules import arm_id
+            variant = arm_id(card).replace("R21-", "", 1)
+        else:
+            from .r20_variant_rules import arm_id
+            variant = arm_id(card)
         family, number = variant.split("-", 1)
         if family in {"OKD", "OKT"}:
             return [
@@ -344,6 +348,9 @@ def _nonnegative(value: int) -> float:
 
 def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     """Return 0..1 progress toward one live Kimarite."""
+    if card.name.startswith("R21:"):
+        from .r21_variant_rules import arm_id, variant_progress
+        return variant_progress(state, side, arm_id(card))
     if card.name.startswith("R20:"):
         from .r20_variant_rules import arm_id, variant_progress
         return variant_progress(state, side, arm_id(card))
