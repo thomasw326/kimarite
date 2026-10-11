@@ -12,6 +12,7 @@ from pathlib import Path
 
 from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
 from kimarite.affinity_v5 import preferred, least_useful
+from kimarite.stat_boosts import boosted_stats
 from kimarite.styles_v5 import STYLES
 from kimarite.models import BoutState, FighterState, Side, Stat, Wrestler
 from kimarite.personality_ai import play_personality_turn
@@ -57,7 +58,7 @@ def validate_style_cards():
             raise SystemExit(f"{name}: need seven eligible non-Kimarite")
 
 
-def make_fighter(config, rng, ranking, difficulty=0):
+def make_fighter(config, rng, ranking, difficulty=0, enable_stat_boosts=False):
     """Construct an archetype using live V5 preference rankings.
 
     The starting Kimarite comes from the top three eligible Kimarite.
@@ -83,7 +84,8 @@ def make_fighter(config, rng, ranking, difficulty=0):
     removed = least_useful(pool, name, difficulty)
     pool = [c for c in pool if c.card_id not in removed]
     rng.shuffle(pool)
-    wrestler = Wrestler(name, *stats, kimarite, tachiai, top_card,
+    adjusted_stats = boosted_stats(stats, order, difficulty, enabled=enable_stat_boosts)
+    wrestler = Wrestler(name, *adjusted_stats, kimarite, tachiai, top_card,
                         primary=order[0], secondary=order[1], tertiary=order[2],
                         ranking=ranking)
     return FighterState(wrestler, draw_pile=[top_card, *pool],
@@ -99,9 +101,9 @@ def card_origin(wrestler, card_id):
     return "shuffled_remainder"
 
 
-def run_one(a, b, seed, max_turns, *, neutral_opening_position=False, difficulty=0):
+def run_one(a, b, seed, max_turns, *, neutral_opening_position=False, difficulty=0, enable_stat_boosts=False):
     rng = random.Random(seed)
-    state = BoutState(make_fighter(a, rng, 1, difficulty), make_fighter(b, rng, 2, difficulty))
+    state = BoutState(make_fighter(a, rng, 1, difficulty, enable_stat_boosts), make_fighter(b, rng, 2, difficulty, enable_stat_boosts))
     comparison = compare_tachiai(state.fighter_a.wrestler, state.fighter_b.wrestler)
     apply_initial_power(state, comparison)
     resolve_prepared_tachiai(state, comparison)
@@ -158,6 +160,8 @@ def main():
     parser.add_argument("--repetitions", type=int, default=1,
                         help="Mirrored bouts per distinct pairing, per repetition")
     parser.add_argument("--max-turns", type=int, default=100)
+    parser.add_argument("--stat-boosts", action="store_true",
+                        help="Opt into seven-step stat boosts (OFF by default)")
     parser.add_argument("--difficulty", type=int, default=0,
                         help="Number of lowest-affinity deck cards removed per AI wrestler")
     parser.add_argument("--max-pairs", type=int, default=None,
@@ -222,6 +226,7 @@ def main():
                         a, b, seed, args.max_turns,
                         neutral_opening_position=args.neutral_opening_position,
                         difficulty=args.difficulty,
+                        enable_stat_boosts=args.stat_boosts,
                     )
                     errors[error or "completed"] += 1
                     processed = sum(errors.values())
