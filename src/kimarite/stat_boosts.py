@@ -21,8 +21,7 @@ def boosted_stats(stats, priorities, difficulty: int, *, enabled: bool = False):
     """
     if not enabled:
         return tuple(stats)
-    if difficulty < 0:
-        raise ValueError("difficulty must be nonnegative")
+    # Negative difficulty softens the deck only; it never reduces base stats.\n    difficulty = max(0, difficulty)
     from .models import Stat
     indices = {Stat.POWER: 0, Stat.TECHNIQUE: 1, Stat.SPIRIT: 2}
     chosen = []
