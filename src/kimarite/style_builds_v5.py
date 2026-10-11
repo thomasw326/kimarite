@@ -1,7 +1,8 @@
 """Seeded Sumo Style starter and exclusion selections (experimental V5)."""
 import random
 from dataclasses import dataclass
-from .catalog import CARD_POOL
+from .catalog import CARD_POOL, STARTING_KIMARITE
+from .affinity_v5 import preferred, least_useful
 from .exclusions import UNIVERSALLY_PROTECTED_IDS
 from .models import FighterState, Wrestler, Stat
 from .styles_v5 import STYLES, preference_bonus, resolve_card
@@ -862,23 +863,18 @@ class StyleBuild:
 def build_style(style: str, seed: int = 0, ranking: int = 1, difficulty: int = 0) -> StyleBuild:
     profile = STYLES[style]
     rng = random.Random(seed)
-    kimarite = resolve_card(rng.choices(profile.starting_kimarite, weights=[2, 1])[0])
-    basics = list({c.name: c for c in reversed(CARD_POOL) if not c.is_kimarite}.values())
-
-    def pick(options):
-        return rng.choices(options, weights=[1 + 3 * preference_bonus(profile, c.name) for c in options])[0]
-
-    tachiai = pick(basics)
-    top = pick([c for c in basics if c.name != tachiai.name])
+    kimarite_options = preferred(STARTING_KIMARITE, style, 3)
+    kimarite = rng.choices(kimarite_options, weights=list(range(len(kimarite_options), 0, -1)))[0]
+    basics = preferred([c for c in CARD_POOL if not c.is_kimarite], style, 7)
+    tachiai = rng.choices(basics, weights=list(range(len(basics), 0, -1)))[0]
+    top_options = [c for c in basics if c.name != tachiai.name]
+    top = rng.choices(top_options, weights=list(range(len(top_options), 0, -1)))[0]
     reserved = {kimarite.name, tachiai.name, top.name}
     eligible = [
         c for c in CARD_POOL
         if c.name not in reserved and c.card_id not in UNIVERSALLY_PROTECTED_IDS
     ]
-    scores = STYLE_CARD_SCORES[style]
-    eligible.sort(key=lambda c: (scores.get(c.name, 0), c.name.casefold(), c.card_id))
-    count = max(0, min(len(eligible), 7 + difficulty))
-    excluded = frozenset(c.card_id for c in eligible[:count])
+    excluded = least_useful(eligible, style, difficulty)
     remainder = [c for c in CARD_POOL if c.name not in reserved and c.card_id not in excluded]
     rng.shuffle(remainder)
     third = next((s for s in Stat if s.value not in {profile.primary, profile.secondary}), Stat(profile.primary))
