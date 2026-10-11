@@ -25,7 +25,7 @@ jobs:
           from kimarite.styles_v5 import STYLES
           from kimarite.style_ai_v5 import choose_style_play
           assert len(STYLES) == 15
-          for name in ("Driving Force", "Crushing Pressure"):
+          for name in ("Driving Force — Power Payoff", "Crushing Pressure — Power Crusher"):
               assert any(c.name == name for c in CARD_POOL), name
               assert any(affinity(style, name) != 0 for style in STYLES), name
           import inspect
