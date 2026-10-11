@@ -1,4 +1,4 @@
-"""R26: finalized 22 Kimarite x complete basics in mirrored affinity-led 15-style bouts.
+"""B4: 20 eligible Kimarite (excluding Abisetaoshi/Kirikaeshi) in mirrored affinity-led 15-style bouts.
 
 Does not change live catalogue. Installs an isolated in-process R21 card map
 before constructing styles, preserving usual affinity under the Kimarite family name.
@@ -23,8 +23,12 @@ def install_final22() -> None:
     arms = {a.arm_id: a for a in load_arms()}
     assert all(i in arms for i in roster["arms"])
     assert len({arms[i].kimarite for i in roster["arms"]}) == 22
-    final_by_family = {arms[i].kimarite: i for i in roster["arms"]}
-    variant_by_name = {"R21:" + ident: arms[ident].kimarite for ident in roster["arms"]}
+    excluded_families = {"Abisetaoshi", "Kirikaeshi"}
+    final_by_family = {arms[i].kimarite: i for i in roster["arms"]
+                       if arms[i].kimarite not in excluded_families}
+    assert len(final_by_family) == 20
+    variant_by_name = {"R21:" + ident: arms[ident].kimarite for ident in roster["arms"]
+                       if arms[ident].kimarite not in excluded_families}
     old_affinity = affinity_v5.affinity
 
     def family_affinity(style: str, name: str) -> int:
@@ -43,11 +47,18 @@ def install_final22() -> None:
         return tuple(build_variant_card(final_by_family[c.name], card_id=c.card_id)
                      if c.is_kimarite else c for c in cards)
 
-    new_pool = convert(catalog.CARD_POOL)
-    new_starting = convert(catalog.STARTING_KIMARITE)
+    # Exclude both families from the whole draw pool as well as starting choices.
+    # Affinity ranking then promotes the next eligible choices automatically.
+    new_pool = convert(c for c in catalog.CARD_POOL
+                       if not (c.is_kimarite and c.name in excluded_families))
+    new_starting = convert(c for c in catalog.STARTING_KIMARITE
+                           if c.name not in excluded_families)
     assert {c.name for c in new_pool if c.is_kimarite} == set(variant_by_name)
-    assert len(new_starting) == 22
+    assert len(new_starting) == 20
     assert all(c.name in {x.name for x in new_pool} for c in new_starting)
+    assert all(not c.is_kimarite or c.name in set(variant_by_name)
+               for c in new_pool)
+    assert excluded_families.isdisjoint({c.name for c in new_pool})
     assert {"Driving Force — Power Payoff", "Crushing Pressure — Power Crusher"}.issubset({x.name for x in new_pool})
     assert sum(not x.is_kimarite for x in new_pool) == sum(not x.is_kimarite for x in catalog.CARD_POOL)
     style_builds_v5.CARD_POOL = new_pool
