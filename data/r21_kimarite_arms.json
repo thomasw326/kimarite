@@ -1115,6 +1115,17 @@
       "role": "R22 carried-forward R20 build",
       "review_status": "R24 test candidate — no Exchange; untested",
       "test_axis": "Exchange removal only vs R23"
+    },
+    {
+      "id": "R21-R25-UWD-M2-EX",
+      "family": "Uwatedashinage",
+      "r20_reference": "UWD-3",
+      "orbs": "🟢🟢",
+      "win": "Left (outside) Grip ≥1 · Momentum ≥2 · Own Power at least 5 below opponent Power",
+      "effect": "Draw 1 card. You may discard 1 card; if you do, establish Left Grip.",
+      "role": "R22 carried-forward R20 build",
+      "review_status": "R25 designer candidate, untested",
+      "test_axis": "R22 consolidated 22-build roster"
     }
   ]
 }
