@@ -1,4 +1,6 @@
-"""Personality-first Exchange AI, separate from the tactical baseline.
+"""LEGACY V4.5 personality-first Exchange AI. NOT FOR V5 STYLE BALANCE TESTING.
+
+V5 15-style tests MUST use style_ai_v5.play_style_turn instead.
 
 Priorities dominate ordinary card selection; tactical intelligence is reserved
 for immediate wins, avoiding catastrophically bad moves, and final ties.
@@ -65,6 +67,9 @@ def play_personality_turn(
     state: BoutState, side: Side, comparison: TachiaiComparison,
     *, max_cards: int = 20,
 ) -> list[str]:
+    from .styles_v5 import STYLES
+    if state.fighter(side).wrestler.name in STYLES:
+        raise RuntimeError("Obsolete orb-first personality AI forbidden for V5 styles: use style_ai_v5.play_style_turn")
     played: list[str] = []
     for _ in range(max_cards):
         if state.winner is not None or state.fighter(side).plays_remaining <= 0:
