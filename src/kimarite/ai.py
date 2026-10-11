@@ -381,54 +381,57 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     grip = effective_total_grip(state, side)
     power_adv = fighter.power - opponent.power
 
+    hand_adv = len(fighter.hand) - len(opponent.hand)
+    reversal = 1.0 if fighter.successful_reversal_this_turn else 0.0
     if card.name == "Yorikiri":
-        parts = [_at_least(grip, 2), _at_least(momentum, 1), _at_least(position, 2)]
+        parts = [_at_least(grip, 1), _at_least(momentum, 1), _at_least(position, 2)]
     elif card.name == "Oshidashi":
-        parts = [_at_least(power_adv, 3), _at_least(momentum, 1), _at_least(position, 2)]
+        parts = [_at_least(momentum, 2), _at_least(position, 2)]
     elif card.name == "Tsukidashi":
-        parts = [_nonnegative(momentum), _at_least(position, 2), _at_least(fighter.cards_played_this_turn, 4)]
+        parts = [_at_least(position, 2), _at_least(fighter.cards_played_this_turn, 3)]
     elif card.name == "Oshitaoshi":
-        parts = [_at_least(momentum, 1), _at_least(position, 1), _at_least(fighter.power, 10)]
+        parts = [_at_least(momentum, 1), _at_least(position, 1), _at_least(fighter.power, 8)]
     elif card.name == "Yoritaoshi":
-        parts = [_at_least(grip, 2), _at_least(position, 2), _at_least(power_adv, 3)]
+        parts = [_at_least(grip, 1), _at_least(position, 2), _at_least(power_adv, 2)]
     elif card.name == "Katasukashi":
-        parts = [
-            1.0 if fighter.total_grip == 0 else 0.0,
-            _at_least(momentum, 1),
-            1.0 if fighter.lost_position_this_turn else 0.0,
-        ]
+        parts = [1.0 if effective_total_grip(state, state.opponent_side(side)) == 0 else 0.0,
+                 _at_least(momentum, 1), _at_least(hand_adv, 5)]
     elif card.name == "Tsukiotoshi":
-        discard_diff = len(opponent.discard_pile) - len(fighter.discard_pile)
-        parts = [_at_most(position, -2), _at_least(discard_diff, 3)]
+        parts = [1.0 if grip == 0 else 0.0, _at_least(momentum, 1), _at_most(power_adv, -3)]
     elif card.name == "Tottari":
-        parts = [
-            1.0 if fighter.total_grip == 0 else 0.0,
-            1.0 if fighter.opponent_grip_reduced_this_turn else 0.0,
-            _at_least(momentum, 2),
-        ]
+        parts = [1.0 if grip == 0 else 0.0, 1.0 if fighter.opponent_grip_reduced_this_turn else 0.0]
     elif card.name == "Uwatenage":
-        parts = [
-            1.0 if fighter.left_grip is GripState.DEEP and grip > 0 else 0.0,
-            _at_least(momentum, 1),
-            _nonnegative(position),
-        ]
+        parts = [1.0 if fighter.left_grip is GripState.DEEP and grip > 0 else 0.0,
+                 _at_least(momentum, 1), _nonnegative(position)]
+    elif card.name == "Shitatenage":
+        parts = [1.0 if fighter.right_grip is GripState.DEEP and grip > 0 else 0.0,
+                 _at_least(momentum, 1), _nonnegative(position)]
     elif card.name == "Hatakikomi":
-        parts = [_at_most(momentum, -2), _nonnegative(position), _at_least(fighter.power, 7)]
+        parts = [_at_most(momentum, -2), _at_least(fighter.power, 6)]
     elif card.name == "Hikiotoshi":
         parts = [_at_most(momentum, -2), _nonnegative(position), _at_least(grip, 1)]
     elif card.name == "Tsukitaoshi":
-        parts = [_at_least(momentum, 2), _nonnegative(position), _at_least(fighter.cards_played_this_turn, 4)]
+        parts = [_at_least(momentum, 2), _at_least(fighter.cards_played_this_turn, 3)]
     elif card.name == "Tsuridashi":
-        parts = [_at_least(grip, 3), _nonnegative(position)]
+        parts = [_at_least(grip, 3), _nonnegative(position), _at_least(fighter.power, 6)]
     elif card.name == "Kotenage":
-        opponent_grip = effective_total_grip(state, state.opponent_side(side))
-        parts = [
-            1.0 if opponent_grip == 0 else max(0.0, 1.0 - opponent_grip / 4.0),
-            _at_least(momentum, 1),
-            _at_least(len(fighter.hand), 3),
-        ]
+        parts = [1.0 if effective_total_grip(state, state.opponent_side(side)) == 0 else 0.0,
+                 _at_least(momentum, 1), _at_least(len(fighter.hand), 5)]
     elif card.name == "Abisetaoshi":
-        parts = [_at_least(grip, 2), _at_least(momentum, 1), _at_least(fighter.power, 9)]
+        parts = [_at_least(grip, 2), _at_least(fighter.power, 10)]
+    elif card.name == "Kirikaeshi":
+        parts = [_at_most(power_adv, -3), _at_least(hand_adv, 1), reversal]
+    elif card.name == "Okuridashi":
+        parts = [reversal, _at_least(position, 1), _at_least(momentum, 1)]
+    elif card.name == "Okuritaoshi":
+        parts = [reversal, _nonnegative(position), _at_least(momentum, 2)]
+    elif card.name == "Sukuinage":
+        parts = [1.0 if grip == 0 else 0.0, _at_least(momentum, 2), _at_least(hand_adv, 3)]
+    elif card.name == "Utchari":
+        parts = [1.0 if fighter.gained_momentum_this_turn else 0.0, _at_most(position, -3)]
+    elif card.name == "Uwatedashinage":
+        parts = [1.0 if fighter.left_grip is not GripState.NONE and grip > 0 else 0.0,
+                 _at_least(momentum, 1), _at_most(power_adv, -5)]
     else:
         return 0.0
 
