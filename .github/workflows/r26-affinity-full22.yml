@@ -1,7 +1,7 @@
-name: R26 15 style affinity smart AI full 22 Kimarite big batch
+name: B2 Technique Nerf - 15 style affinity full 22
 on:
   push:
-    branches: [experiment/r26-affinity-15-style-full22]
+    branches: [experiment/b2-technique-nerf]
     paths: [".github/workflows/r26-affinity-full22.yml"]
   workflow_dispatch:
 jobs:
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r26-smoke
+          name: b2-smoke
           path: artifacts/r26_smoke.csv
 
   full:
@@ -87,7 +87,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r26-shard-${{ matrix.shard }}
+          name: b2-shard-${{ matrix.shard }}
           path: artifacts/r26/
           retention-days: 30
 
@@ -102,7 +102,7 @@ jobs:
           python-version: "3.11"
       - uses: actions/download-artifact@v4
         with:
-          pattern: r26-shard-*
+          pattern: b2-shard-*
           path: artifacts/r26_collected
           merge-multiple: true
       - name: Verify 15-style 8400 complete mirrored bouts and summarize
@@ -136,5 +136,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: r26-final-report
+          name: b2-final-report
           path: artifacts/r26_report/
