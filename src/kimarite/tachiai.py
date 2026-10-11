@@ -74,10 +74,10 @@ def compare_tachiai(wrestler_a: Wrestler, wrestler_b: Wrestler) -> TachiaiCompar
 
 
 def push_from_power_advantage(advantage: int) -> int:
-    """Legacy 1/3/5/7 Push thresholds, now driven by Spirit advantage."""
+    """Spirit Push thresholds: 1, 4, 7, 10, 13..."""
     if advantage <= 0:
         return 0
-    return (advantage + 1) // 2
+    return 1 + (advantage - 1) // 3
 
 
 def technique_thresholds(advantage: int) -> int:
