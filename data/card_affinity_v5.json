@@ -726,6 +726,30 @@
         1,
         2
       ]
+    },
+    {
+      "name": "Driving Force — Power Payoff",
+      "type": "Non-Kimarite",
+      "ratings": [
+        5,
+        2,
+        2,
+        1,
+        4,
+        5
+      ]
+    },
+    {
+      "name": "Crushing Pressure — Power Crusher",
+      "type": "Non-Kimarite",
+      "ratings": [
+        5,
+        1,
+        2,
+        1,
+        2,
+        2
+      ]
     }
   ]
 }
