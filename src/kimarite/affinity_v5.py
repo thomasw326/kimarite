@@ -24,7 +24,8 @@ def archetype(name: str) -> str:
 
 def affinity(style: str, card_name: str) -> int:
     profile = STYLES[archetype(style)]
-    ratings = _ratings().get(card_name)
+    aliases = {"Explosive Step — Fumikomi": "Explosive Step"}
+    ratings = _ratings().get(aliases.get(card_name, card_name))
     if ratings is None:
         # Unrated cards are neutral, not automatically low-priority.
         return 0
