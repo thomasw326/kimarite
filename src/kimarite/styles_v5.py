@@ -2,7 +2,7 @@
 
 The weights and Top 7 are read from columns U:Z and AB:AH, respectively,
 on 2026-10-09. Preserve sheet spellings; map aliases only at catalog lookup.
-This module intentionally does not alter the V4.5 fixed 30-wrestler tester.
+The Sumo Styles tester uses one generated wrestler per archetype; A/B variants are obsolete.
 """
 from __future__ import annotations
 
