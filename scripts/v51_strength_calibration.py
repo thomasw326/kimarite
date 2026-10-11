@@ -26,6 +26,9 @@ def main():
     output = Path(args.output_dir)
     output.mkdir(parents=True, exist_ok=True)
     wins, bouts, errors = Counter(), Counter(), Counter()
+    finishers_played, finishers_won = Counter(), Counter()
+    from kimarite.catalog import STARTING_KIMARITE
+    finisher_names = {c.name for c in STARTING_KIMARITE}
     with (output / "bouts.csv").open("w", newline="", encoding="utf8") as file:
         writer = csv.writer(file)
         writer.writerow(("a_style", "a_difficulty", "b_style", "b_difficulty", "seed", "winner", "method", "turns", "error"))
@@ -38,6 +41,12 @@ def main():
             winner = state.winner.value if state.winner else ""
             writer.writerow((a[0], da, b[0], db, seed, winner, state.win_method or "", state.turn_number, error or ""))
             errors[error or "completed"] += 1
+            # Include both pre-zoned starting finishers and later Kimarite plays.
+            for fighter in (state.fighter_a, state.fighter_b):
+                finishers_played[fighter.wrestler.starting_kimarite.name] += 1
+            finishers_played.update(name for _, name in state.card_plays if name in finisher_names)
+            if state.win_source == "kimarite" and state.win_method in finisher_names:
+                finishers_won[state.win_method] += 1
             if error is None and winner:
                 bouts[i] += 1
                 bouts[j] += 1
@@ -51,6 +60,12 @@ def main():
         for i, (style, level) in enumerate(players):
             n = bouts[i]
             writer.writerow((style[0], level, n, wins[i], wins[i] / n if n else ""))
+    with (output / "finisher_conversion.csv").open("w", newline="", encoding="utf8") as file:
+        writer = csv.writer(file)
+        writer.writerow(("kimarite", "entries_into_play", "successful_finishes", "finish_per_entry_ratio"))
+        for name in sorted(finisher_names):
+            n = finishers_played[name]
+            writer.writerow((name, n, finishers_won[name], finishers_won[name] / n if n else ""))
     print(f"25,200 bouts: {dict(errors)}", flush=True)
     if errors != Counter({"completed": 25200}) or any(bouts[i] != 224 for i in range(225)):
         raise RuntimeError(f"Round robin incomplete: {dict(errors)}")
