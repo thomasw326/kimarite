@@ -645,7 +645,7 @@
       "family": "Shitatenage",
       "role": "Mirror-pair control",
       "r20_reference": "SHI-3",
-      "orbs": "🟢🟢🟠",
+      "orbs": "🟢🟢",
       "win": "Deep Right Grip · Momentum ≥1 · Position ≥0",
       "effect": "EXCHANGE (Have Right Grip (normal or Deep)): Gain 1 Momentum",
       "test_axis": "Gain Momentum with Right Grip",
@@ -655,7 +655,7 @@
       "r20_reference_start_win": "49.7%",
       "r20_reference_shuffled_win": "50.0%",
       "r20_reference_wins_through_turn4": "41",
-      "review_status": "Proposal — not approved",
+      "review_status": "Proposal — not approved; R23 orange orb removal / untested",
       "source_link": "https://docs.google.com/spreadsheets/d/1JY-vPmU-yqcwYzrEugKP43JrnFGLi_UwZSFkOSqWtWI/edit?gid=1168699165&range=A53:R53",
       "focus_metrics": "Starting vs Shuffled; early ≤4; direct finishes"
     },
@@ -1010,28 +1010,28 @@
       "family": "Uwatenage",
       "role": "V5.2 designer-requested balance retest",
       "r20_reference": "UWA-1",
-      "orbs": "🟢🟢🟠",
+      "orbs": "🟢🟢",
       "win": "Deep Left Grip; Momentum ≥2; Position ≥0",
       "effect": "EXCHANGE (Momentum ≥0): Establish Left Grip",
       "test_axis": "Designer revision",
       "question": "NEW V5.2 matched-fixture balance; 49–52% target",
       "tier": "Experimental",
       "engine_work": "Isolated R21 variant runtime",
-      "review_status": "Proposed / untested"
+      "review_status": "Proposed / untested; R23 orange orb removal / untested"
     },
     {
       "id": "R21-KIR-P3-HA3",
       "family": "Kirikaeshi",
       "role": "V5.2 designer-requested balance retest",
       "r20_reference": "KIR-1",
-      "orbs": "🟢🟢🟠",
+      "orbs": "🟢🟢",
       "win": "Opponent Power ≥ own Power +3; own hand size ≥ opponent hand size +3; successful Reversal this turn",
       "effect": "EXCHANGE: Draw 1 card",
       "test_axis": "Designer revision",
       "question": "NEW V5.2 matched-fixture balance; 49–52% target",
       "tier": "Experimental",
       "engine_work": "Isolated R21 variant runtime",
-      "review_status": "Proposed / untested"
+      "review_status": "Proposed / untested; R23 orange orb removal / untested"
     },
     {
       "id": "R21-KAT-H5-T2",
@@ -1076,22 +1076,22 @@
       "id": "R21-R22-TSO-2",
       "family": "Tsukiotoshi",
       "r20_reference": "TSO-2",
-      "orbs": "🟣🟢🟠",
+      "orbs": "🟣🟢",
       "win": "No own Grip · Momentum ≥2 · Own Power < opponent Power",
       "effect": "Gain +1 Play this turn",
       "role": "R22 carried-forward R20 build",
-      "review_status": "Designer bold approved / or open baseline",
+      "review_status": "Designer bold approved / or open baseline; R23 orange orb removal / untested",
       "test_axis": "R22 consolidated 22-build roster"
     },
     {
       "id": "R21-R22-UWD-3",
       "family": "Uwatedashinage",
       "r20_reference": "UWD-3",
-      "orbs": "🟢🟢🟠",
+      "orbs": "🟢🟢",
       "win": "Left (outside) Grip ≥1 · Momentum ≥1 · Own Power at least 5 below opponent Power",
       "effect": "Draw 1 card. You may discard 1 card; if you do, establish Left Grip.",
       "role": "R22 carried-forward R20 build",
-      "review_status": "Designer bold approved / or open baseline",
+      "review_status": "Designer bold approved / or open baseline; R23 orange orb removal / untested",
       "test_axis": "R22 consolidated 22-build roster"
     },
     {
