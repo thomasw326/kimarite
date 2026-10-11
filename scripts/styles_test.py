@@ -101,9 +101,11 @@ def card_origin(wrestler, card_id):
     return "shuffled_remainder"
 
 
-def run_one(a, b, seed, max_turns, *, neutral_opening_position=False, difficulty=0, enable_stat_boosts=False):
+def run_one(a, b, seed, max_turns, *, neutral_opening_position=False, difficulty=0, opponent_difficulty=None, enable_stat_boosts=False):
     rng = random.Random(seed)
-    state = BoutState(make_fighter(a, rng, 1, difficulty, enable_stat_boosts), make_fighter(b, rng, 2, difficulty, enable_stat_boosts))
+    if opponent_difficulty is None:
+        opponent_difficulty = difficulty
+    state = BoutState(make_fighter(a, rng, 1, difficulty, enable_stat_boosts), make_fighter(b, rng, 2, opponent_difficulty, enable_stat_boosts))
     comparison = compare_tachiai(state.fighter_a.wrestler, state.fighter_b.wrestler)
     apply_initial_power(state, comparison)
     resolve_prepared_tachiai(state, comparison)
@@ -162,6 +164,8 @@ def main():
     parser.add_argument("--max-turns", type=int, default=100)
     parser.add_argument("--stat-boosts", action="store_true",
                         help="Opt into seven-step stat boosts (OFF by default)")
+    parser.add_argument("--difficulty-sweep", action="store_true",
+                        help="Assign the 15 styles difficulties -7 to +7, rotating per repetition")
     parser.add_argument("--difficulty", type=int, default=0,
                         help="Deck focus: 0 removes 7 worst-fit cards, positive removes more, negative restores cards")
     parser.add_argument("--max-pairs", type=int, default=None,
@@ -191,6 +195,10 @@ def main():
     schedule = round_robin_pairs(len(configs), args.seed)
     selected_pairs = schedule[:args.max_pairs]
     planned_bouts = args.repetitions * len(selected_pairs) * 2
+    # One difficulty per style in each repetition; rotate to avoid conflating
+    # a strong archetype with a particular difficulty.
+    def difficulty_for(style_index, repetition):
+        return -7 + ((style_index + repetition) % 15) if args.difficulty_sweep else args.difficulty
     bouts = Counter()
     wins = Counter()
     cards = defaultdict(lambda: Counter())
@@ -214,16 +222,19 @@ def main():
                          "a_start_card", "a_top_card", "b_stats", "b_priorities",
                          "b_kimarite", "b_start_card", "b_top_card",
                          "power_advantage_a", "technique_advantage_a",
-                         "spirit_advantage_a"))
+                         "spirit_advantage_a", "a_difficulty", "b_difficulty"))
         for repeat in range(args.repetitions):
             for pair_idx, (i, j) in enumerate(selected_pairs):
                 for orientation, (left, right) in enumerate(((i, j), (j, i))):
                     seed = args.seed + args.batch_id * 1_000_000_000 + repeat * 20000 + pair_idx * 2 + orientation
                     a, b = configs[left], configs[right]
+                    a_difficulty = difficulty_for(left, repeat)
+                    b_difficulty = difficulty_for(right, repeat)
                     state, available, played, error = run_one(
                         a, b, seed, args.max_turns,
                         neutral_opening_position=args.neutral_opening_position,
-                        difficulty=args.difficulty,
+                        difficulty=a_difficulty,
+                        opponent_difficulty=b_difficulty,
                         enable_stat_boosts=args.stat_boosts,
                     )
                     errors[error or "completed"] += 1
@@ -283,7 +294,8 @@ def main():
                                      *metadata(wa), *metadata(wb),
                                      comparison.power_advantage_a,
                                      comparison.technique_advantage_a,
-                                     comparison.spirit_advantage_a))
+                                     comparison.spirit_advantage_a,
+                                     a_difficulty, b_difficulty))
                     if state.winner is None:
                         continue
                     for side, config in ((Side.A, a), (Side.B, b)):
