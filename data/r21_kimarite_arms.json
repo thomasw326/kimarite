@@ -1104,6 +1104,17 @@
       "role": "R22 carried-forward R20 build",
       "review_status": "Designer bold approved / or open baseline",
       "test_axis": "R22 consolidated 22-build roster"
+    },
+    {
+      "id": "R21-R24-UWD-NE",
+      "family": "Uwatedashinage",
+      "r20_reference": "UWD-3",
+      "orbs": "🟢🟢",
+      "win": "Left (outside) Grip ≥1 · Momentum ≥1 · Own Power at least 5 below opponent Power",
+      "effect": "EXCHANGE: None",
+      "role": "R22 carried-forward R20 build",
+      "review_status": "R24 test candidate — no Exchange; untested",
+      "test_axis": "Exchange removal only vs R23"
     }
   ]
 }
