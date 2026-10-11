@@ -38,7 +38,10 @@ def play_card(
 
     if card.is_kimarite:
         fighter.kimarite_zone.append(card)
-        if getattr(state, "r20_active", False) and card.name.startswith("R20:"):
+        if getattr(state, "r20_active", False) and card.name.startswith("R21:"):
+            from .r21_variant_rules import variant_exchange
+            variant_exchange(state, side, card, context or EffectContext())
+        elif getattr(state, "r20_active", False) and card.name.startswith("R20:"):
             from .r20_variant_rules import variant_exchange
             variant_exchange(state, side, card, context or EffectContext())
         else:
