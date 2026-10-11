@@ -1,0 +1,31 @@
+name: v5.1 difficulty sweep
+
+on:
+  push:
+    branches: [release/v5.1]
+    paths:
+      - ".github/workflows/v51-difficulty-sweep.yml"
+  workflow_dispatch:
+
+jobs:
+  v51-sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Validate V5.1 pool and difficulty contracts
+        run: python -m pytest tests/test_v51_release.py -q
+      - name: Smoke test of 15 styles and one difficulty rotation
+        run: python scripts/styles_test.py --difficulty-sweep --repetitions 1 --output-dir artifacts/v51_smoke
+      - name: Full 15-rotation difficulty sweep (3150 mirrored bouts)
+        run: python scripts/styles_test.py --difficulty-sweep --repetitions 15 --output-dir artifacts/v51_full
+      - name: Upload detailed bout, card, and wrestler results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v51-difficulty-sweep
+          path: artifacts/
