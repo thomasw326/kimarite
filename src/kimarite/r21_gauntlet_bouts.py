@@ -122,9 +122,9 @@ def prepare_fixture(arm: Arm, bout: ScheduledBout) -> tuple[BoutState, Card, Sid
         arm=None, ranking=bout.opponent_index + 1,
     )
     if bout.subject_seat == "A":
-        state, side = BoutState(subject, opponent, r21_active=True), Side.A
+        state, side = BoutState(subject, opponent, r20_active=True), Side.A
     elif bout.subject_seat == "B":
-        state, side = BoutState(opponent, subject, r21_active=True), Side.B
+        state, side = BoutState(opponent, subject, r20_active=True), Side.B
     else:
         raise ValueError("Unknown seat")
     if arm.arm_id == "R21-HIK-RS" and bout.placement == "starting":
@@ -246,7 +246,7 @@ def execute_batch(
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arm", action="append", default=[], dest="arms",
-                        help="Arm ID to run; omit for all 70")
+                        help="Arm ID to run; omit for all 50")
     parser.add_argument("--start", type=int, default=0)
     parser.add_argument("--count", type=int, default=100,
                         help="Safety-bounded number of bouts in this local batch")
