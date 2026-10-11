@@ -1,0 +1,28 @@
+name: V5.1 strength calibration
+
+on:
+  push:
+    branches: [release/v5.1]
+    paths:
+      - ".github/workflows/v51-strength-calibration.yml"
+      - "scripts/v51_strength_calibration.py"
+  workflow_dispatch:
+
+jobs:
+  strength-calibration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Compare 225 builds to common difficulty-0 reference roster
+        run: python scripts/v51_strength_calibration.py --repetitions 3 --output-dir artifacts/v51_strength_calibration
+      - name: Upload strength curves and direct matchup grid
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v51-strength-calibration
+          path: artifacts/v51_strength_calibration/
