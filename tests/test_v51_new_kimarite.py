@@ -101,3 +101,33 @@ def test_new_draw_and_grip_exchange_effects():
                                  EffectContext(choices={"discard_for_grip": True, "hand_index": 0}))
     assert s.fighter_a.left_grip is GripState.GRIP
     assert not s.fighter_a.hand
+
+
+def test_normal_v51_surviving_reversal_sets_event_without_r20_flag():
+    from kimarite.temporary import add_temporary, resolve_start_of_turn_temporaries
+    s, _ = bout()
+    card = card_by_name("Pull")
+    assert not s.r20_active
+    add_temporary(s, Side.A, card, phase="exchange")
+    resolve_start_of_turn_temporaries(s, Side.A)
+    assert s.fighter_a.successful_reversal_this_turn
+    assert any(event[1] == "Pull" for event in s.reversal_completions)
+
+
+def test_normal_v51_start_turn_can_win_with_completed_reversal():
+    from kimarite.temporary import add_temporary
+    from kimarite.turns import start_exchange_turn
+    from kimarite.tachiai import compare_tachiai
+    s, blank = bout()
+    finisher = card_by_name("Okuridashi")
+    s.fighter_a.kimarite_zone.append(finisher)
+    s.position = 1
+    s.momentum = 1
+    s.fighter_a.first_exchange_turn = False
+    s.fighter_a.draw_pile = [blank, blank, blank]
+    add_temporary(s, Side.A, card_by_name("Pull"), phase="exchange")
+    compare = compare_tachiai(s.fighter_a.wrestler, s.fighter_b.wrestler)
+    start_exchange_turn(s, Side.A, compare)
+    assert s.fighter_a.successful_reversal_this_turn
+    assert s.winner is Side.A
+    assert s.win_method == "Okuridashi"
