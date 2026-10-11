@@ -1,0 +1,533 @@
+{
+  "source": "Current Sumo Styles archetypes; supersedes legacy real-wrestler roster for future assignment work",
+  "source_sheet": "https://docs.google.com/spreadsheets/d/1JY-vPmU-yqcwYzrEugKP43JrnFGLi_UwZSFkOSqWtWI/edit?gid=1892339025",
+  "matching_sheet": "https://docs.google.com/spreadsheets/d/1JY-vPmU-yqcwYzrEugKP43JrnFGLi_UwZSFkOSqWtWI/edit?gid=1796744882",
+  "status": "provisional scores; existing assigned Kimarite unchanged",
+  "styles": [
+    {
+      "archetype": "Heavy Hitter",
+      "base_stats": {
+        "power": 4,
+        "technique": 0,
+        "spirit": 2
+      },
+      "primary": "Power",
+      "secondary": "Spirit",
+      "preferred_tachiai": "Power",
+      "current_kimarite": "Oshidashi",
+      "style_weights": {
+        "power": 2,
+        "spirit": -1,
+        "technique": -2,
+        "grip": -2,
+        "momentum": 0,
+        "push": 2
+      },
+      "provisional_timing_preference": 3,
+      "ranked_kimarite": [
+        {
+          "name": "Oshitaoshi",
+          "score": 27.5
+        },
+        {
+          "name": "Oshidashi",
+          "score": 22.5
+        },
+        {
+          "name": "Tsukitaoshi",
+          "score": 15.5
+        }
+      ]
+    },
+    {
+      "archetype": "Bulldozer",
+      "base_stats": {
+        "power": 3,
+        "technique": 0,
+        "spirit": 3
+      },
+      "primary": "Power",
+      "secondary": "Spirit",
+      "preferred_tachiai": "Spirit",
+      "current_kimarite": "Oshidashi",
+      "style_weights": {
+        "power": 1,
+        "spirit": 2,
+        "technique": -2,
+        "grip": -2,
+        "momentum": 2,
+        "push": 2
+      },
+      "provisional_timing_preference": 5,
+      "ranked_kimarite": [
+        {
+          "name": "Oshidashi",
+          "score": 26.5
+        },
+        {
+          "name": "Oshitaoshi",
+          "score": 20.5
+        },
+        {
+          "name": "Tsukitaoshi",
+          "score": 18.5
+        }
+      ]
+    },
+    {
+      "archetype": "Charger",
+      "base_stats": {
+        "power": 2,
+        "technique": 0,
+        "spirit": 4
+      },
+      "primary": "Spirit",
+      "secondary": "Power",
+      "preferred_tachiai": "Spirit",
+      "current_kimarite": "Oshidashi",
+      "style_weights": {
+        "power": 1,
+        "spirit": 3,
+        "technique": -2,
+        "grip": -1,
+        "momentum": 2,
+        "push": 2
+      },
+      "provisional_timing_preference": 5,
+      "ranked_kimarite": [
+        {
+          "name": "Oshidashi",
+          "score": 25.5
+        },
+        {
+          "name": "Oshitaoshi",
+          "score": 17.5
+        },
+        {
+          "name": "Tsukitaoshi",
+          "score": 17.5
+        }
+      ]
+    },
+    {
+      "archetype": "Pressure Fighter",
+      "base_stats": {
+        "power": 3,
+        "technique": 0,
+        "spirit": 3
+      },
+      "primary": "Spirit",
+      "secondary": "Power",
+      "preferred_tachiai": "Power",
+      "current_kimarite": "Tsukidashi",
+      "style_weights": {
+        "power": 2,
+        "spirit": 1,
+        "technique": -2,
+        "grip": -3,
+        "momentum": 1,
+        "push": 2
+      },
+      "provisional_timing_preference": 4,
+      "ranked_kimarite": [
+        {
+          "name": "Oshitaoshi",
+          "score": 28
+        },
+        {
+          "name": "Oshidashi",
+          "score": 27.5
+        },
+        {
+          "name": "Tsukidashi",
+          "score": 21
+        }
+      ]
+    },
+    {
+      "archetype": "Power Grappler",
+      "base_stats": {
+        "power": 4,
+        "technique": 2,
+        "spirit": 0
+      },
+      "primary": "Power",
+      "secondary": "Technique",
+      "preferred_tachiai": "Power",
+      "current_kimarite": "Tsuridashi",
+      "style_weights": {
+        "power": 2,
+        "spirit": -2,
+        "technique": 0,
+        "grip": 2,
+        "momentum": 0,
+        "push": 0
+      },
+      "provisional_timing_preference": 2,
+      "ranked_kimarite": [
+        {
+          "name": "Tsuridashi",
+          "score": 18.5
+        },
+        {
+          "name": "Abisetaoshi",
+          "score": 17
+        },
+        {
+          "name": "Shitatenage",
+          "score": 13.5
+        }
+      ]
+    },
+    {
+      "archetype": "Unorthodox Powerhouse",
+      "base_stats": {
+        "power": 3,
+        "technique": 3,
+        "spirit": 0
+      },
+      "primary": "Power",
+      "secondary": "Technique",
+      "preferred_tachiai": "Technique",
+      "current_kimarite": "Hatakikomi",
+      "style_weights": {
+        "power": 2,
+        "spirit": -2,
+        "technique": 2,
+        "grip": -1,
+        "momentum": 0,
+        "push": 0
+      },
+      "provisional_timing_preference": 3,
+      "ranked_kimarite": [
+        {
+          "name": "Abisetaoshi",
+          "score": 12.5
+        },
+        {
+          "name": "Tsuridashi",
+          "score": 11.5
+        },
+        {
+          "name": "Katasukashi",
+          "score": 10
+        }
+      ]
+    },
+    {
+      "archetype": "The Technician",
+      "base_stats": {
+        "power": 2,
+        "technique": 4,
+        "spirit": 0
+      },
+      "primary": "Technique",
+      "secondary": "Power",
+      "preferred_tachiai": "Technique",
+      "current_kimarite": "Uwatenage",
+      "style_weights": {
+        "power": 1,
+        "spirit": -2,
+        "technique": 3,
+        "grip": 1,
+        "momentum": 0,
+        "push": -1
+      },
+      "provisional_timing_preference": 1,
+      "ranked_kimarite": [
+        {
+          "name": "Uwatenage",
+          "score": 22
+        },
+        {
+          "name": "Uwatedashinage",
+          "score": 16
+        },
+        {
+          "name": "Tottari",
+          "score": 15.5
+        }
+      ]
+    },
+    {
+      "archetype": "The Arsenal",
+      "base_stats": {
+        "power": 3,
+        "technique": 3,
+        "spirit": 0
+      },
+      "primary": "Technique",
+      "secondary": "Power",
+      "preferred_tachiai": "Power",
+      "current_kimarite": "Uwatenage",
+      "style_weights": {
+        "power": 1,
+        "spirit": -1,
+        "technique": 2,
+        "grip": 1,
+        "momentum": 0,
+        "push": -1
+      },
+      "provisional_timing_preference": 2,
+      "ranked_kimarite": [
+        {
+          "name": "Uwatedashinage",
+          "score": 15.5
+        },
+        {
+          "name": "Uwatenage",
+          "score": 15.5
+        },
+        {
+          "name": "Shitatenage",
+          "score": 14.5
+        }
+      ]
+    },
+    {
+      "archetype": "Mawashi Specialist",
+      "base_stats": {
+        "power": 0,
+        "technique": 4,
+        "spirit": 2
+      },
+      "primary": "Technique",
+      "secondary": "Spirit",
+      "preferred_tachiai": "Technique",
+      "current_kimarite": "Shitatenage",
+      "style_weights": {
+        "power": -1,
+        "spirit": 0,
+        "technique": 2,
+        "grip": 2,
+        "momentum": 0,
+        "push": -1
+      },
+      "provisional_timing_preference": 2,
+      "ranked_kimarite": [
+        {
+          "name": "Uwatedashinage",
+          "score": 20.5
+        },
+        {
+          "name": "Shitatenage",
+          "score": 18
+        },
+        {
+          "name": "Tottari",
+          "score": 18
+        }
+      ]
+    },
+    {
+      "archetype": "Opportunist",
+      "base_stats": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 3
+      },
+      "primary": "Technique",
+      "secondary": "Spirit",
+      "preferred_tachiai": "Spirit",
+      "current_kimarite": "Hatakikomi",
+      "style_weights": {
+        "power": -2,
+        "spirit": 1,
+        "technique": 2,
+        "grip": -1,
+        "momentum": -2,
+        "push": 0
+      },
+      "provisional_timing_preference": 3,
+      "ranked_kimarite": [
+        {
+          "name": "Kirikaeshi",
+          "score": 17
+        },
+        {
+          "name": "Katasukashi",
+          "score": 16
+        },
+        {
+          "name": "Tottari",
+          "score": 15.5
+        }
+      ]
+    },
+    {
+      "archetype": "Fast Grappler",
+      "base_stats": {
+        "power": 0,
+        "technique": 2,
+        "spirit": 4
+      },
+      "primary": "Spirit",
+      "secondary": "Technique",
+      "preferred_tachiai": "Spirit",
+      "current_kimarite": "Yorikiri",
+      "style_weights": {
+        "power": -2,
+        "spirit": 2,
+        "technique": 0,
+        "grip": 2,
+        "momentum": 2,
+        "push": 1
+      },
+      "provisional_timing_preference": 4,
+      "ranked_kimarite": [
+        {
+          "name": "Utchari",
+          "score": 10.5
+        },
+        {
+          "name": "Yorikiri",
+          "score": 8
+        },
+        {
+          "name": "Tsukitaoshi",
+          "score": 6
+        }
+      ]
+    },
+    {
+      "archetype": "Disruptor",
+      "base_stats": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 3
+      },
+      "primary": "Spirit",
+      "secondary": "Technique",
+      "preferred_tachiai": "Technique",
+      "current_kimarite": "Kotenage",
+      "style_weights": {
+        "power": -2,
+        "spirit": 0,
+        "technique": 2,
+        "grip": -2,
+        "momentum": 2,
+        "push": -1
+      },
+      "provisional_timing_preference": 3,
+      "ranked_kimarite": [
+        {
+          "name": "Utchari",
+          "score": 28
+        },
+        {
+          "name": "Katasukashi",
+          "score": 24
+        },
+        {
+          "name": "Sukuinage",
+          "score": 22
+        }
+      ]
+    },
+    {
+      "archetype": "Mountain",
+      "base_stats": {
+        "power": 4,
+        "technique": 1,
+        "spirit": 1
+      },
+      "primary": "Power",
+      "secondary": "Power",
+      "preferred_tachiai": "Power",
+      "current_kimarite": "Oshitaoshi",
+      "style_weights": {
+        "power": 3,
+        "spirit": -2,
+        "technique": -1,
+        "grip": -2,
+        "momentum": -2,
+        "push": 1
+      },
+      "provisional_timing_preference": 2,
+      "ranked_kimarite": [
+        {
+          "name": "Oshitaoshi",
+          "score": 23.5
+        },
+        {
+          "name": "Abisetaoshi",
+          "score": 19
+        },
+        {
+          "name": "Oshidashi",
+          "score": 13.5
+        }
+      ]
+    },
+    {
+      "archetype": "The Specialist",
+      "base_stats": {
+        "power": 1,
+        "technique": 4,
+        "spirit": 1
+      },
+      "primary": "Technique",
+      "secondary": "Technique",
+      "preferred_tachiai": "Technique",
+      "current_kimarite": "Katasukashi",
+      "style_weights": {
+        "power": -1,
+        "spirit": -1,
+        "technique": 2,
+        "grip": -1,
+        "momentum": 0,
+        "push": -1
+      },
+      "provisional_timing_preference": 1,
+      "ranked_kimarite": [
+        {
+          "name": "Katasukashi",
+          "score": 21.5
+        },
+        {
+          "name": "Kirikaeshi",
+          "score": 19
+        },
+        {
+          "name": "Uwatenage",
+          "score": 16.5
+        }
+      ]
+    },
+    {
+      "archetype": "Speed Demon",
+      "base_stats": {
+        "power": 1,
+        "technique": 1,
+        "spirit": 4
+      },
+      "primary": "Spirit",
+      "secondary": "Spirit",
+      "preferred_tachiai": "Spirit",
+      "current_kimarite": "Oshidashi",
+      "style_weights": {
+        "power": -2,
+        "spirit": 2,
+        "technique": -2,
+        "grip": -2,
+        "momentum": 2,
+        "push": 2
+      },
+      "provisional_timing_preference": 5,
+      "ranked_kimarite": [
+        {
+          "name": "Oshidashi",
+          "score": 23.5
+        },
+        {
+          "name": "Tsukitaoshi",
+          "score": 18.5
+        },
+        {
+          "name": "Okuritaoshi",
+          "score": 16
+        }
+      ]
+    }
+  ]
+}
