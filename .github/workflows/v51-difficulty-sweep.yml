@@ -8,6 +8,9 @@ on:
       - "scripts/styles_test.py"
       - "tests/test_v51_release.py"
       - "src/kimarite/catalog.py"
+      - "src/kimarite/effects.py"
+      - "src/kimarite/ai.py"
+      - "data/card_pool_v5_1.json"
   workflow_dispatch:
 
 jobs:

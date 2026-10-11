@@ -235,6 +235,14 @@ def _contexts_for_card(
             ]
         return [base]
 
+    if card.name in {"Driving Force — Power Payoff", "Crushing Pressure — Power Crusher"}:
+        eligible = fighter.power >= 7
+        if card.name == "Crushing Pressure — Power Crusher":
+            eligible = eligible and (fighter.power - opponent.power >= 3)
+        effect_mode = "power_payoff" if card.name == "Driving Force — Power Payoff" else "power_crusher"
+        return ([_context_variant(base, mode=effect_mode), _context_variant(base, mode="draw")]
+                if eligible else [_context_variant(base, mode="draw")])
+
     if card.name in {"Okuridashi", "Okuritaoshi"}:
         return [
             _context_variant(base, mode="position_to_momentum"),

@@ -1,15 +1,15 @@
 {
-  "version": "5.1",
-  "status": "release candidate (implementation committed, tests pending)",
+  "version": "5.1 + Power Additions (candidate)",
+  "status": "61-card comparison candidate: two approved Power additions; baseline 59-card V5.1 preserved in Git history",
   "source": {
     "non_kimarite": "Playtest Pool 5.0 (PR17+) (37 active non-Kimarite)",
     "kimarite": "Selected Kimarite V5 (22 selected versions)",
     "affinity": "Card Affinity — Current V5 (six axes)"
   },
   "counts": {
-    "non_kimarite": 37,
+    "non_kimarite": 39,
     "kimarite": 22,
-    "printed_pool": 59
+    "printed_pool": 61
   },
   "cards": [
     {
@@ -572,6 +572,28 @@
       "orbs": "🟣🟣🟢",
       "text": "WIN: Grip ≥ 1; Position ≥ 2; your Power exceeds your opponent's by ≥ 2.\nEXCHANGE: If Total Grip ≥ 1, gain 1 Power.",
       "variant": "R21-YTA-C3"
+    },
+    {
+      "name": "Driving Force — Power Payoff",
+      "id": 11007,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 2,
+        "technique": 0,
+        "spirit": 1
+      },
+      "text": "Choose: If your Power is 7+, gain 2 Push and 1 Momentum; OR draw 1 card."
+    },
+    {
+      "name": "Crushing Pressure — Power Crusher",
+      "id": 11008,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 3,
+        "technique": 0,
+        "spirit": 0
+      },
+      "text": "Choose: If your Power is 7+ and your Power Advantage is 3+, gain 1 Momentum and your opponent loses 2 Power; OR draw 1 card."
     }
   ]
 }

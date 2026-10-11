@@ -796,7 +796,40 @@ def _sidestep(
     )
     add_temporary(state, side, card, phase="exchange")
 
+def _driving_force(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    mode = context.choice("mode")
+    if mode not in ("power_payoff", "draw"):
+        raise ChoiceRequired(card.name, "mode", ["power_payoff", "draw"] if state.fighter(side).power >= 7 else ["draw"])
+    if mode == "power_payoff":
+        if state.fighter(side).power < 7:
+            raise IllegalPlay("Driving Force requires Power 7+ for its Push payoff.")
+        gain_push(state, side, 2)
+        if state.winner is None:
+            gain_momentum(state, side, 1)
+    else:
+        draw_one(state, side)
+
+
+def _crushing_pressure(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    mode = context.choice("mode")
+    eligible = state.fighter(side).power >= 7 and (
+        state.fighter(side).power - state.opponent(side).power >= 3
+    )
+    if mode not in ("power_crusher", "draw"):
+        raise ChoiceRequired(card.name, "mode", ["power_crusher", "draw"] if eligible else ["draw"])
+    if mode == "power_crusher":
+        if not eligible:
+            raise IllegalPlay("Crushing Pressure requires Power 7+ and Power Advantage 3+.")
+        gain_momentum(state, side, 1)
+        if state.winner is None and not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose 2 Power"):
+            lose_power(state, state.opponent_side(side), 2)
+    else:
+        draw_one(state, side)
+
+
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
+    "Driving Force — Power Payoff": _driving_force,
+    "Crushing Pressure — Power Crusher": _crushing_pressure,
     "Injury": lambda state, side, card, context: None,
     "Oshi": _oshi,
     "Shove": _shove,

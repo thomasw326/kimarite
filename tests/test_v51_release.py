@@ -18,10 +18,10 @@ MANIFEST = json.loads((ROOT / "data" / "card_pool_v5_1.json").read_text(encoding
 
 
 def test_release_pool_exactly_matches_manifest():
-    assert MANIFEST["version"] == "5.1"
+    assert MANIFEST["version"].startswith("5.1")
     assert len(STYLES) == 15
-    assert len(CARD_POOL) == 59
-    assert sum(not card.is_kimarite for card in CARD_POOL) == 37
+    assert len(CARD_POOL) == 61
+    assert sum(not card.is_kimarite for card in CARD_POOL) == 39
     assert sum(card.is_kimarite for card in CARD_POOL) == 22
     expected_names = {entry["name"] for entry in MANIFEST["cards"]}
     assert {card.name for card in CARD_POOL} == expected_names
