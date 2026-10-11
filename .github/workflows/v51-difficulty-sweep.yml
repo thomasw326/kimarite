@@ -7,6 +7,7 @@ on:
       - ".github/workflows/v51-difficulty-sweep.yml"
       - "scripts/styles_test.py"
       - "tests/test_v51_release.py"
+      - "src/kimarite/catalog.py"
   workflow_dispatch:
 
 jobs:

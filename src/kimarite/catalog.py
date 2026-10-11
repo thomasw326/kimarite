@@ -61,12 +61,12 @@ CARD_POOL: tuple[Card, ...] = (
     Card(54, "Shove", 2, 0, 0),
     Card(55, "Explosive Step — Fumikomi", 0, 0, 3),
     Card(58, "Shitatenage", 0, 2, 1, True),
-    Card(59, "Kirikaeshi", 0, 2, 1, True),
-    Card(60, "Okuridashi", 0, 1, 2, True),
-    Card(61, "Okuritaoshi", 1, 0, 2, True),
-    Card(62, "Sukuinage", 1, 1, 1, True),
-    Card(63, "Utchari", 0, 2, 0, True),
-    Card(64, "Uwatedashinage", 0, 2, 1, True),
+    Card(11001, "Kirikaeshi", 0, 2, 1, True),
+    Card(11002, "Okuridashi", 0, 1, 2, True),
+    Card(11003, "Okuritaoshi", 1, 0, 2, True),
+    Card(11004, "Sukuinage", 1, 1, 1, True),
+    Card(11005, "Utchari", 0, 2, 0, True),
+    Card(11006, "Uwatedashinage", 0, 2, 1, True),
 )
 
 
