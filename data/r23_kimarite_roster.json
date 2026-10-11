@@ -1,0 +1,21 @@
+{
+  "experiment": "R23 five orange-orb removals",
+  "baseline": "R22",
+  "ai": "V5.2 tactical neutral style=None",
+  "bouts_per_card": 1296,
+  "arms": [
+    "R21-SHI-C3",
+    "R21-R22-TSO-2",
+    "R21-R22-UWD-3",
+    "R21-KIR-P3-HA3",
+    "R21-UWA-C1-M2"
+  ],
+  "expected_orbs": {
+    "R21-SHI-C3": "🟢🟢",
+    "R21-R22-TSO-2": "🟣🟢",
+    "R21-R22-UWD-3": "🟢🟢",
+    "R21-KIR-P3-HA3": "🟢🟢",
+    "R21-UWA-C1-M2": "🟢🟢"
+  },
+  "note": "Only printed orbs change vs R22. Same seed 20261010, fixtures and placements. Existing 22-card R22 report remains historical."
+}
