@@ -61,6 +61,12 @@ CARD_POOL: tuple[Card, ...] = (
     Card(54, "Shove", 2, 0, 0),
     Card(55, "Explosive Step — Fumikomi", 0, 0, 3),
     Card(58, "Shitatenage", 0, 2, 1, True),
+    Card(59, "Kirikaeshi", 0, 2, 1, True),
+    Card(60, "Okuridashi", 0, 1, 2, True),
+    Card(61, "Okuritaoshi", 1, 0, 2, True),
+    Card(62, "Sukuinage", 1, 1, 1, True),
+    Card(63, "Utchari", 0, 2, 0, True),
+    Card(64, "Uwatedashinage", 0, 2, 1, True),
 )
 
 
@@ -83,6 +89,12 @@ STARTING_KIMARITE: tuple[Card, ...] = (
     Card(1014, "Yoritaoshi", 2, 1, 0, True),
     Card(1015, "Tsukidashi", 1, 0, 2, True),
     Card(1016, "Shitatenage", 0, 2, 1, True),
+    Card(1017, "Kirikaeshi", 0, 2, 1, True),
+    Card(1018, "Okuridashi", 0, 1, 2, True),
+    Card(1019, "Okuritaoshi", 1, 0, 2, True),
+    Card(1020, "Sukuinage", 1, 1, 1, True),
+    Card(1021, "Utchari", 0, 2, 0, True),
+    Card(1022, "Uwatedashinage", 0, 2, 1, True),
 )
 
 
