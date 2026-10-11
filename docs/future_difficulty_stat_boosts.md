@@ -1,22 +1,33 @@
-# Optional difficulty-based stat boosting (NOT ENABLED)
+# Optional difficulty stat boosts — seven-step cycle
 
-Status: **future design option / OFF by default**. Recorded 2026-10-10.
+Status: **implemented as an opt-in design rule; OFF by default.**
 
-The design discussed a **seven-step difficulty cycle** for wrestler base stats. A difference of **7 difficulty levels** should correspond to **one full additional stat point**. The intermediate steps should cycle through a progression rather than adding a full stat every level.
+Every **7 difficulty levels** produce a full **+1 to all three base stats** relative to the previous seven-level block. Intermediate steps distribute boosts according to the wrestler's **primary / secondary / tertiary stat priorities**, not dynamically re-sort the numerical stats after boosting.
 
-This is **separate from the currently active affinity-based deck pruning**:
-- There are exactly **15 wrestler archetypes**, not A/B variants.
-- Current difficulty controls removal of low-affinity cards from the same archetype's deck.
-- **No base stat increase is currently applied** by `build_style()` or the 15-style round-robin tester.
-- Enabling a future stat progression must require an explicit opt-in setting, default `false` (for example `enable_stat_boosts=False` or `--stat-boosts`). Never infer it from difficulty alone.
+| Difficulty remainder (mod 7) | Boosts within the cycle |
+|---|---|
+| 0 | None |
+| 1 | Tertiary (lowest priority) |
+| 2 | Secondary |
+| 3 | Primary (highest priority) |
+| 4 | Secondary + Tertiary (both other than primary) |
+| 5 | Primary + Tertiary |
+| 6 | Primary + Secondary |
+| 7 (next cycle's 0) | All three, +1 each |
 
-## Unresolved before implementation
+Implementation formula for nonnegative integer difficulty `d`:
 
-The exact order of the seven intermediate stat-cycle steps, which stat receives points for each archetype, and the interaction with stat caps are **not yet specified in this note**. Retrieve prior detailed design decisions if available; do not invent a progression or silently change the six-orb stat builds.
+- `full_cycles, remainder = divmod(d, 7)`
+- Begin with `base_power/base_technique/base_spirit + full_cycles` each.
+- Apply the extra boosts for the remainder in the table.
 
-## Acceptance criteria when enabled
+Example: Difficulty 7 = base + (1,1,1); difficulty 8 = base + (1,1,1) plus tertiary; difficulty 14 = base + (2,2,2).
 
-1. With the toggle OFF, base stats match today's builds at every difficulty.
-2. With the toggle ON, progression is deterministic and uses the agreed seven-step cycle; difficulty values seven apart differ by precisely one full stat-point progression.
-3. Applies to the same 15 archetypes without creating additional wrestlers.
-4. Tests separately report stat-boost setting and deck-pruning difficulty to prevent confusion.
+**Important interpretation:** "lowest / secondary / highest" here is anchored to the wrestler's assigned *tertiary / secondary / primary* priorities. Do not recalculate relative numeric lows and highs each step; otherwise the intended seven-step pattern can change unexpectedly.
+
+## Default-off policy
+
+- Exactly **15 wrestler archetypes**; difficulty doesn't create A/B wrestlers.
+- `enable_stat_boosts=False` by default. Stat boosting must never turn on merely because difficulty increases.
+- Affinity-based deck pruning is separate, and may be enabled for difficulty even when stat boosts are OFF.
+- Current base builds and stat caps should not be silently changed. If cap rules conflict with optional boosts, discuss before adopting boosted results into canonical balance testing.
