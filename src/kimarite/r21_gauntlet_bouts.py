@@ -13,7 +13,7 @@ import random
 from dataclasses import dataclass
 from pathlib import Path
 
-from .ai import play_ai_turn
+from .style_ai_v5 import play_style_turn
 from .catalog import CARD_POOL, STARTING_KIMARITE
 from .models import BoutState, Card, FighterState, Side, Wrestler
 from .r21_gauntlet import (
@@ -169,7 +169,7 @@ def run_fixture(arm: Arm, bout: ScheduledBout, *, max_turns: int = 30) -> Gauntl
             seen_available |= _available(state, subject_side, experimental)
             if state.winner is not None:
                 break
-            play_ai_turn(state, side, cmp)
+            play_style_turn(state, side, cmp, style=None)
             seen_condition |= variant_predicate(state, subject_side, arm.arm_id)
             seen_available |= _available(state, subject_side, experimental)
             if state.winner is not None:
