@@ -239,6 +239,14 @@ def start_exchange_turn(
         if state.winner is not None:
             return []
 
+    # Surviving Reversal Temporaries can complete in normal V5.1 bouts.
+    # They resolve after the legacy opening Kimarite check, so check again
+    # before exhaustion or drawing; otherwise all Reversal finishers are inert.
+    if fighter.successful_reversal_this_turn:
+        check_kimarite_zone(state, side, choose_kimarite=choose_kimarite)
+        if state.winner is not None:
+            return []
+
     apply_start_of_turn_exhaustion(state, side)
     if state.winner is not None:
         return []
