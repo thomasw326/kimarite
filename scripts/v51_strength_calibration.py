@@ -69,6 +69,33 @@ def main():
                     n = counts[(i, d, j, "bouts")]
                     wins = counts[(i, d, j, "wins")]
                     w.writerow((config[0], d, ref[0], n, wins, wins / n if n else ""))
+    # Direct Mountain-vs-Speed Demon cross-difficulty grid, each side
+    # facing the other at all 15 difficulty levels, in mirrored orientations.
+    mountain = next(config for config in configs if config[0] == "Mountain")
+    speed = next(config for config in configs if config[0] == "Speed Demon")
+    with (out / "mountain_vs_speed_demon.csv").open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(("mountain_difficulty", "speed_demon_difficulty", "bouts", "mountain_wins", "mountain_win_rate", "errors"))
+        for dm in range(-7, 8):
+            for ds in range(-7, 8):
+                n = wins = failures = 0
+                for rep in range(args.repetitions):
+                    for orientation in (0, 1):
+                        seed = args.seed + 100_000_000 + (dm + 7) * 10000 + (ds + 7) * 100 + rep * 2 + orientation
+                        if orientation == 0:
+                            bout, _, _, error = run_one(mountain, speed, seed, args.max_turns, difficulty=dm, opponent_difficulty=ds)
+                            mountain_win = bout.winner is not None and bout.winner.value == "A"
+                        else:
+                            bout, _, _, error = run_one(speed, mountain, seed, args.max_turns, difficulty=ds, opponent_difficulty=dm)
+                            mountain_win = bout.winner is not None and bout.winner.value == "B"
+                        if error is not None or bout.winner is None:
+                            failures += 1
+                        else:
+                            n += 1
+                            wins += int(mountain_win)
+                w.writerow((dm, ds, n, wins, wins / n if n else "", failures))
+                if failures:
+                    errors["direct_comparison_failures"] += failures
     print(f"Completed {total:,} scheduled bouts. Outcomes: {dict(errors)}", flush=True)
     if any(k != "completed" for k in errors):
         raise RuntimeError(f"Some bouts failed or hit turn limit: {dict(errors)}")
