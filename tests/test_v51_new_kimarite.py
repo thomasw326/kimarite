@@ -122,7 +122,7 @@ def test_normal_v51_start_turn_can_win_with_completed_reversal():
     finisher = card_by_name("Okuridashi")
     s.fighter_a.kimarite_zone.append(finisher)
     s.position = 1
-    s.momentum = 1
+    s.momentum = -1  # Surviving Pull flips Momentum to +1.
     s.fighter_a.first_exchange_turn = False
     s.fighter_a.draw_pile = [blank, blank, blank]
     add_temporary(s, Side.A, card_by_name("Pull"), phase="exchange")
