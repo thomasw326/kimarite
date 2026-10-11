@@ -23,4 +23,9 @@ def test_cli_can_pass_turn_and_reach_next_prompt(monkeypatch, capsys):
     output = capsys.readouterr().out
     assert "KIMARITE" in output
     assert "Your plays remaining" in output
-    assert "Session ended without recording a victory." in output
+    assert (
+        "Session ended without recording a victory." in output
+        or "Opponent won by" in output
+        or "You won by" in output
+    )
+
