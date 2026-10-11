@@ -1,0 +1,731 @@
+{
+  "source": "Card Affinity — Current V5",
+  "updated": "2026-10-10",
+  "styles": [
+    "Heavy Hitter",
+    "Bulldozer",
+    "Charger",
+    "Pressure Fighter",
+    "Power Grappler",
+    "Unorthodox Powerhouse",
+    "The Technician",
+    "The Arsenal",
+    "Mawashi Specialist",
+    "Opportunist",
+    "Fast Grappler",
+    "Disruptor",
+    "Mountain",
+    "The Specialist",
+    "Speed Demon"
+  ],
+  "cards": [
+    {
+      "name": "Oshi",
+      "type": "Non-Kimarite",
+      "ratings": [
+        4,
+        4,
+        4,
+        2,
+        5,
+        5
+      ]
+    },
+    {
+      "name": "Oshidashi",
+      "type": "Kimarite",
+      "ratings": [
+        5,
+        3,
+        2,
+        2,
+        4,
+        5
+      ]
+    },
+    {
+      "name": "Tsuki",
+      "type": "Non-Kimarite",
+      "ratings": [
+        4,
+        4,
+        4,
+        1,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "Tsuppari",
+      "type": "Non-Kimarite",
+      "ratings": [
+        5,
+        3,
+        3,
+        2,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "Stare Down",
+      "type": "Non-Kimarite",
+      "ratings": [
+        4,
+        4,
+        4,
+        2,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "Regain Balance",
+      "type": "Non-Kimarite",
+      "ratings": [
+        4,
+        2,
+        5,
+        1,
+        4,
+        2
+      ]
+    },
+    {
+      "name": "Get Underneath",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        2,
+        5,
+        2,
+        5,
+        3
+      ]
+    },
+    {
+      "name": "Reset to Neutral",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        3,
+        5,
+        1,
+        4,
+        2
+      ]
+    },
+    {
+      "name": "Shiko Stomp",
+      "type": "Non-Kimarite",
+      "ratings": [
+        5,
+        3,
+        5,
+        3,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "Tsukidashi",
+      "type": "Kimarite",
+      "ratings": [
+        4,
+        4,
+        3,
+        1,
+        3,
+        3
+      ]
+    },
+    {
+      "name": "Tsukitaoshi",
+      "type": "Kimarite",
+      "ratings": [
+        4,
+        4,
+        3,
+        1,
+        3,
+        3
+      ]
+    },
+    {
+      "name": "Nodowa",
+      "type": "Non-Kimarite",
+      "ratings": [
+        5,
+        3,
+        4,
+        2,
+        2,
+        4
+      ]
+    },
+    {
+      "name": "Hatakikomi",
+      "type": "Kimarite",
+      "ratings": [
+        4,
+        4,
+        5,
+        2,
+        3,
+        3
+      ]
+    },
+    {
+      "name": "Explosive Step",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        4,
+        3,
+        3,
+        5,
+        4
+      ]
+    },
+    {
+      "name": "Shove",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        3,
+        2,
+        2,
+        3,
+        5
+      ]
+    },
+    {
+      "name": "Belt Slap",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        4,
+        2,
+        2,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "Yorikiri",
+      "type": "Kimarite",
+      "ratings": [
+        4,
+        5,
+        5,
+        5,
+        5,
+        5
+      ]
+    },
+    {
+      "name": "Hold Position",
+      "type": "Non-Kimarite",
+      "ratings": [
+        5,
+        2,
+        3,
+        3,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "Read the Move",
+      "type": "Non-Kimarite",
+      "ratings": [
+        2,
+        1,
+        5,
+        3,
+        5,
+        3
+      ]
+    },
+    {
+      "name": "Sukuinage",
+      "type": "Kimarite",
+      "ratings": [
+        2,
+        2,
+        5,
+        1,
+        3,
+        2
+      ]
+    },
+    {
+      "name": "Immovable",
+      "type": "Non-Kimarite",
+      "ratings": [
+        5,
+        3,
+        3,
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "name": "Kannuki",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        2,
+        5,
+        1,
+        2,
+        2
+      ]
+    },
+    {
+      "name": "Kotenage",
+      "type": "Kimarite",
+      "ratings": [
+        3,
+        2,
+        5,
+        1,
+        3,
+        1
+      ]
+    },
+    {
+      "name": "Uwatenage",
+      "type": "Kimarite",
+      "ratings": [
+        4,
+        2,
+        5,
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "Okuritaoshi",
+      "type": "Kimarite",
+      "ratings": [
+        4,
+        4,
+        5,
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "name": "Okuridashi",
+      "type": "Kimarite",
+      "ratings": [
+        4,
+        4,
+        5,
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "name": "Ottsuke",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        2,
+        5,
+        2,
+        4,
+        1
+      ]
+    },
+    {
+      "name": "Headlong Charge",
+      "type": "Non-Kimarite",
+      "ratings": [
+        2,
+        5,
+        3,
+        3,
+        5,
+        3
+      ]
+    },
+    {
+      "name": "Harite",
+      "type": "Non-Kimarite",
+      "ratings": [
+        5,
+        3,
+        2,
+        2,
+        2,
+        3
+      ]
+    },
+    {
+      "name": "Tottari",
+      "type": "Kimarite",
+      "ratings": [
+        2,
+        2,
+        5,
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "name": "Salt Throw",
+      "type": "Non-Kimarite",
+      "ratings": [
+        2,
+        5,
+        5,
+        2,
+        3,
+        2
+      ]
+    },
+    {
+      "name": "Give Ground",
+      "type": "Non-Kimarite",
+      "ratings": [
+        4,
+        2,
+        4,
+        2,
+        3,
+        1
+      ]
+    },
+    {
+      "name": "Use the Tawara",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        2,
+        5,
+        2,
+        3,
+        1
+      ]
+    },
+    {
+      "name": "Sidestep",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        1,
+        5,
+        2,
+        3,
+        1
+      ]
+    },
+    {
+      "name": "Uwate",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        3,
+        4,
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "Gain Right Grip",
+      "type": "Non-Kimarite",
+      "ratings": [
+        4,
+        3,
+        5,
+        5,
+        3,
+        4
+      ]
+    },
+    {
+      "name": "Gaburi",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        4,
+        4,
+        5,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "Henka",
+      "type": "Non-Kimarite",
+      "ratings": [
+        2,
+        1,
+        5,
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "name": "Gain Left Grip",
+      "type": "Non-Kimarite",
+      "ratings": [
+        4,
+        3,
+        4,
+        5,
+        3,
+        4
+      ]
+    },
+    {
+      "name": "Utchari",
+      "type": "Kimarite",
+      "ratings": [
+        2,
+        3,
+        5,
+        2,
+        3,
+        1
+      ]
+    },
+    {
+      "name": "Tsukiotoshi",
+      "type": "Kimarite",
+      "ratings": [
+        2,
+        3,
+        5,
+        2,
+        2,
+        1
+      ]
+    },
+    {
+      "name": "Power Water",
+      "type": "Non-Kimarite",
+      "ratings": [
+        4,
+        2,
+        5,
+        4,
+        3,
+        2
+      ]
+    },
+    {
+      "name": "Oshitaoshi",
+      "type": "Kimarite",
+      "ratings": [
+        5,
+        3,
+        3,
+        4,
+        2,
+        3
+      ]
+    },
+    {
+      "name": "Hikiotoshi",
+      "type": "Kimarite",
+      "ratings": [
+        2,
+        4,
+        5,
+        4,
+        2,
+        4
+      ]
+    },
+    {
+      "name": "Yori",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        4,
+        4,
+        5,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "Katasukashi",
+      "type": "Kimarite",
+      "ratings": [
+        2,
+        2,
+        5,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "Tsuridashi",
+      "type": "Kimarite",
+      "ratings": [
+        5,
+        2,
+        3,
+        5,
+        3,
+        3
+      ]
+    },
+    {
+      "name": "Shitatenage",
+      "type": "Kimarite",
+      "ratings": [
+        2,
+        3,
+        5,
+        5,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "Yoritaoshi",
+      "type": "Kimarite",
+      "ratings": [
+        4,
+        2,
+        4,
+        5,
+        2,
+        4
+      ]
+    },
+    {
+      "name": "Tsuri",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        1,
+        4,
+        5,
+        2,
+        4
+      ]
+    },
+    {
+      "name": "Morozashi",
+      "type": "Non-Kimarite",
+      "ratings": [
+        2,
+        2,
+        5,
+        5,
+        2,
+        4
+      ]
+    },
+    {
+      "name": "Shitate",
+      "type": "Non-Kimarite",
+      "ratings": [
+        2,
+        2,
+        5,
+        5,
+        2,
+        4
+      ]
+    },
+    {
+      "name": "Pull",
+      "type": "Non-Kimarite",
+      "ratings": [
+        2,
+        1,
+        5,
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "Kirikaeshi",
+      "type": "Kimarite",
+      "ratings": [
+        0,
+        1,
+        5,
+        1,
+        2,
+        0
+      ]
+    },
+    {
+      "name": "Abisetaoshi",
+      "type": "Kimarite",
+      "ratings": [
+        5,
+        2,
+        2,
+        5,
+        3,
+        2
+      ]
+    },
+    {
+      "name": "Attempt Deep Outside Grip",
+      "type": "Non-Kimarite",
+      "ratings": [
+        3,
+        3,
+        4,
+        4,
+        2,
+        2
+      ]
+    },
+    {
+      "name": "Uwatedashinage",
+      "type": "Kimarite",
+      "ratings": [
+        2,
+        3,
+        5,
+        5,
+        3,
+        3
+      ]
+    },
+    {
+      "name": "Attempt Deep Inside Grip",
+      "type": "Non-Kimarite",
+      "ratings": [
+        1,
+        3,
+        4,
+        5,
+        1,
+        2
+      ]
+    },
+    {
+      "name": "Attempt Two-Handed Grip",
+      "type": "Non-Kimarite",
+      "ratings": [
+        1,
+        3,
+        4,
+        5,
+        1,
+        2
+      ]
+    }
+  ]
+}
