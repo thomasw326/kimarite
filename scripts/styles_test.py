@@ -11,6 +11,7 @@ from itertools import permutations
 from pathlib import Path
 
 from kimarite.catalog import CARD_POOL, STARTING_KIMARITE
+from kimarite.affinity_v5 import preferred, least_useful
 from kimarite.models import BoutState, FighterState, Side, Stat, Wrestler
 from kimarite.personality_ai import play_personality_turn
 from kimarite.tachiai import compare_tachiai, first_exchange_side
@@ -95,20 +96,31 @@ def validate_style_cards():
         raise SystemExit('Roster cannot run until catalog matches the sheet:\n' + '\n'.join(missing))
 
 
-def make_fighter(config, rng, ranking):
+def make_fighter(config, rng, ranking, difficulty=0):
+    """Construct an archetype using live V5 preference rankings.
+
+    The starting Kimarite comes from the top three eligible Kimarite.
+    The Tachiai and top-of-deck cards come from the top seven non-Kimarite.
+    Difficulty trims the lowest-affinity *unreserved* card instances.
+    """
     name, stats, order = config
-    row = STYLE_BY_NAME[name]
     by_name = {c.name: c for c in CARD_POOL}
-    kimarite = next(c for c in STARTING_KIMARITE if c.name == row[4])
-    supports = row[5:8]
-    rotation = ROLE_COUNTS[name] % 6
-    ROLE_COUNTS[name] += 1
-    roles = tuple(permutations(supports))[rotation]
-    tachiai = by_name[roles[0]]
-    top_card = by_name[roles[1]]
-    # Third support is in CARD_POOL exactly once, shuffled with all unreserved cards.
+    kimarite_options = preferred(STARTING_KIMARITE, name, 3)
+    if not kimarite_options:
+        raise ValueError(f"No eligible Kimarite for {name}")
+    kimarite = rng.choices(kimarite_options, weights=list(range(len(kimarite_options), 0, -1)))[0]
+    basic_options = preferred([c for c in CARD_POOL if not c.is_kimarite], name, 7)
+    if len(basic_options) < 2:
+        raise ValueError(f"Insufficient non-Kimarite options for {name}")
+    tachiai = rng.choices(basic_options, weights=list(range(len(basic_options), 0, -1)))[0]
+    top_options = [c for c in basic_options if c.name != tachiai.name]
+    top_card = rng.choices(top_options, weights=list(range(len(top_options), 0, -1)))[0]
     reserved = {kimarite.name, tachiai.name, top_card.name}
     pool = [c for c in CARD_POOL if c.name not in reserved]
+    # Difficulty 0 does not trim; increasing difficulty cuts progressively
+    # more of the least compatible cards, without touching opening choices.
+    removed = least_useful(pool, name, difficulty)
+    pool = [c for c in pool if c.card_id not in removed]
     rng.shuffle(pool)
     wrestler = Wrestler(name, *stats, kimarite, tachiai, top_card,
                         primary=order[0], secondary=order[1], tertiary=order[2],
@@ -126,9 +138,9 @@ def card_origin(wrestler, card_id):
     return "shuffled_remainder"
 
 
-def run_one(a, b, seed, max_turns, *, neutral_opening_position=False):
+def run_one(a, b, seed, max_turns, *, neutral_opening_position=False, difficulty=0):
     rng = random.Random(seed)
-    state = BoutState(make_fighter(a, rng, 1), make_fighter(b, rng, 2))
+    state = BoutState(make_fighter(a, rng, 1, difficulty), make_fighter(b, rng, 2, difficulty))
     comparison = compare_tachiai(state.fighter_a.wrestler, state.fighter_b.wrestler)
     apply_initial_power(state, comparison)
     resolve_prepared_tachiai(state, comparison)
@@ -185,6 +197,8 @@ def main():
     parser.add_argument("--repetitions", type=int, default=1,
                         help="Mirrored bouts per distinct pairing, per repetition")
     parser.add_argument("--max-turns", type=int, default=100)
+    parser.add_argument("--difficulty", type=int, default=0,
+                        help="Number of lowest-affinity deck cards removed per AI wrestler")
     parser.add_argument("--max-pairs", type=int, default=None,
                         help="Number of unique round-robin pairs (3000 pairs = 6000 mirrored bouts)")
     parser.add_argument("--output-dir", default="big_test_artifacts")
@@ -202,6 +216,8 @@ def main():
         parser.error("--batch-id must be >= 0")
     if args.max_pairs is not None and args.max_pairs < 1:
         parser.error("--max-pairs must be >= 1")
+    if args.difficulty < 0:
+        parser.error('--difficulty must be >= 0')
     if args.repetitions < 1:
         parser.error("--repetitions must be >= 1")
     output = Path(args.output_dir)
@@ -244,6 +260,7 @@ def main():
                     state, available, played, error = run_one(
                         a, b, seed, args.max_turns,
                         neutral_opening_position=args.neutral_opening_position,
+                        difficulty=args.difficulty,
                     )
                     errors[error or "completed"] += 1
                     processed = sum(errors.values())
