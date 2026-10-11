@@ -15,7 +15,7 @@ from kimarite.affinity_v5 import preferred, least_useful
 from kimarite.stat_boosts import boosted_stats
 from kimarite.styles_v5 import STYLES
 from kimarite.models import BoutState, FighterState, Side, Stat, Wrestler
-from kimarite.personality_ai import play_personality_turn
+from kimarite.style_ai_v5 import play_style_turn
 from kimarite.tachiai import compare_tachiai, first_exchange_side
 from kimarite.tachiai_effects import resolve_prepared_tachiai
 from kimarite.turns import apply_initial_power, end_exchange_turn, start_exchange_turn
@@ -129,7 +129,7 @@ def run_one(a, b, seed, max_turns, *, neutral_opening_position=False, difficulty
                 break
             available[side].update(card.name for card in state.fighter(side).hand)
             before = len(state.card_plays)
-            play_personality_turn(state, side, comparison)
+            play_style_turn(state, side, comparison, state.fighter(side).wrestler.name)
             played[side].update(
                 name for owner, name in state.card_plays[before:] if owner is side
             )
@@ -182,9 +182,9 @@ def main():
     parser.add_argument("--neutral-opening-position", action="store_true",
                         help="Reset Position to 0 after Tachiai, before Exchange")
     args = parser.parse_args()
-    from kimarite import personality_ai
-    personality_ai.POWER_GRAPPLER_ORB_PRIORITY = (args.ai_style == "power-grappler")
-    print(f"Exchange AI style: {args.ai_style}", flush=True)
+    if args.ai_style != "normal":
+        parser.error("Legacy power-grappler orb-priority AI is retired; V5 style-aware AI is mandatory")
+    print("Exchange AI: V5 style-aware tactical+card preference", flush=True)
     if args.batch_id < 0:
         parser.error("--batch-id must be >= 0")
     if args.max_pairs is not None and args.max_pairs < 1:
