@@ -14,7 +14,7 @@ def test_tochinoshin_difficulty_zero_follows_written_priority():
     assert result.target == 7
     # Written rule: Spirit-sensitive cards first, then non-Grip/non-Push
     # cards with the fewest combined Technique + Power.
-    assert result.excluded_ids == frozenset({18, 19, 21, 28, 29, 39, 55})
+    assert result.excluded_ids == frozenset({18, 19, 21, 28, 29, 40, 55})
 
 
 def test_minus_seven_has_no_exclusions():

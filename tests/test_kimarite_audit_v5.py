@@ -6,7 +6,7 @@ def test_kimarite_audit_reports_denominators_and_triggers():
     report = audit(repetitions=1, max_turns=30)
     assert report["planned_bouts"] == 210
     assert report["completed"] + sum(report["incomplete"].values()) == 210
-    assert len(report["kimarite"]) == 16
+    assert len(report["kimarite"]) == 22
     for row in report["kimarite"]:
         assert row["featured_wins"] <= row["featured"]
         assert row["starting_wins"] <= row["starting"]

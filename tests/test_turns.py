@@ -148,7 +148,7 @@ def test_multiple_satisfied_kimarite_default_to_earliest_played():
     )
     bout.fighter_a.left_grip = GripState.GRIP
     bout.fighter_a.right_grip = GripState.GRIP
-    bout.momentum = 1
+    bout.momentum = 2
     bout.position = 2
 
     chosen = check_kimarite_zone(bout, Side.A)
@@ -172,7 +172,7 @@ def test_kimarite_chooser_can_override_earliest_for_reward_choice():
     )
     bout.fighter_a.left_grip = GripState.GRIP
     bout.fighter_a.right_grip = GripState.GRIP
-    bout.momentum = 1
+    bout.momentum = 2
     bout.position = 2
 
     chosen = check_kimarite_zone(

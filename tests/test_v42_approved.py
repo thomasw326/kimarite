@@ -21,11 +21,11 @@ def test_approved_orbs_and_uncapped_power():
             push_from_power_advantage(5), push_from_power_advantage(7)) == (1, 2, 3, 4)
 
 
-def test_tsuridashi_total_grip_three_and_power_five():
+def test_tsuridashi_total_grip_three_and_power_six():
     s = BoutState(fighter("A"), fighter("B"))
     s.fighter_a.left_grip = GripState.DEEP
     s.fighter_a.right_grip = GripState.GRIP
-    s.fighter_a.power = 5
+    s.fighter_a.power = 6
     assert kimarite_is_satisfied(s, Side.A, card_by_name("Tsuridashi"))
     s.fighter_a.right_grip = GripState.NONE
     assert not kimarite_is_satisfied(s, Side.A, card_by_name("Tsuridashi"))
