@@ -144,14 +144,18 @@ def run_one(a, b, seed, max_turns, *, neutral_opening_position=False, difficulty
 
 def round_robin_pairs(config_count: int, seed: int):
     """Every round pairs every config once; all opponents occur exactly once."""
-    if config_count < 2 or config_count % 2:
-        raise ValueError("Round-robin requires an even number of configurations")
+    if config_count < 2:
+        raise ValueError("Round-robin requires at least two configurations")
     players = list(range(config_count))
     random.Random(seed).shuffle(players)
+    if config_count % 2:
+        players.append(None)  # A bye is not a wrestler or a matchup.
     pairs = []
-    for _ in range(config_count - 1):
-        for index in range(config_count // 2):
-            pairs.append((players[index], players[-1 - index]))
+    for _ in range(len(players) - 1):
+        for index in range(len(players) // 2):
+            left, right = players[index], players[-1 - index]
+            if left is not None and right is not None:
+                pairs.append((left, right))
         # Circle method: hold the first player fixed and rotate the rest.
         players = [players[0], players[-1], *players[1:-1]]
     return pairs

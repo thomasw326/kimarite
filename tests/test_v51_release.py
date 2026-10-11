@@ -67,3 +67,11 @@ def test_optional_stat_boosts_off_by_default():
 
 def test_affinity_still_scores_catalog_alias():
     assert affinity("Speed Demon", "Explosive Step — Fumikomi") == affinity("Speed Demon", "Explosive Step")
+
+
+def test_fifteen_style_round_robin_has_105_unique_matchups():
+    from scripts.styles_test import round_robin_pairs
+    pairs = round_robin_pairs(15, 20261010)
+    assert len(pairs) == 105
+    assert len({frozenset(pair) for pair in pairs}) == 105
+    assert {i for a, b in pairs for i in (a, b)} == set(range(15))

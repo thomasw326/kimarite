@@ -5,6 +5,8 @@ on:
     branches: [release/v5.1]
     paths:
       - ".github/workflows/v51-difficulty-sweep.yml"
+      - "scripts/styles_test.py"
+      - "tests/test_v51_release.py"
   workflow_dispatch:
 
 jobs:
