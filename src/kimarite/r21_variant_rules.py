@@ -105,7 +105,7 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
     # YTA-H1 combines the tested YTA-1 Exchange with YTA-3's win.
     reference = "YTA-1" if identifier == "R21-YTA-H1" else _references()[identifier]
     original = Card(card.card_id, "R20:" + reference,
-                    card.power_orbs, card.technique_orbs, card.spirit_orbs, True)
+                    card.power, card.technique, card.spirit, True)
     _r20_exchange(state, side, original, context)
 
 def variant_progress(state: BoutState, side: Side, identifier: str) -> float:
