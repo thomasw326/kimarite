@@ -10,7 +10,8 @@ from .ai import AIPlay, candidate_plays, relative_momentum, relative_position, s
 from .effects import ChoiceRequired, IllegalPlay
 from .models import BoutState, Side
 from .playing import play_card
-from .styles_v5 import STYLES, preference_bonus
+from .styles_v5 import STYLES
+from .affinity_v5 import affinity as card_affinity
 from .tachiai import TachiaiComparison
 
 
@@ -45,7 +46,8 @@ def _four_card_setup_hold_value(state: BoutState, side: Side, card_name: str) ->
 
 
 def choose_style_play(state: BoutState, side: Side, comparison: TachiaiComparison, style: str) -> AIPlay | None:
-    profile = STYLES[style]
+    if style not in STYLES:
+        raise ValueError(f"Unknown V5 style: {style}")
     plays = candidate_plays(state, side, comparison)
     # Never choose Headlong Charge decline when a Kimarite can be sacrificed.
     if state.fighter(side).kimarite_zone:
@@ -85,11 +87,13 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
             danger_score -= 30 * (-1 - after_momentum)
 
         # Affinity is a preference after survival, not an instruction to lose.
-        affinity = preference_bonus(profile, candidate.card.name) * 4
+        # Current 61-card six-axis ratings, including new Power payoff cards.
+        # Scaled like the former rank bonus while preserving tactical scoring.
+        affinity = card_affinity(style, candidate.card.name) * 4
         setup_hold = _four_card_setup_hold_value(state, side, candidate.card.name)
         scored.append((
             tier, candidate.score + danger_score + affinity - setup_hold,
-            preference_bonus(profile, candidate.card.name), -candidate.card.card_id,
+            card_affinity(style, candidate.card.name), -candidate.card.card_id,
             candidate,
         ))
 
