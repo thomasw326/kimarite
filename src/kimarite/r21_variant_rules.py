@@ -67,6 +67,8 @@ def variant_predicate(state: BoutState, side: Side, identifier: str) -> bool:
         return reversal and adv <= -3 and hand_adv >= 3
     if identifier == "R21-UTC-F2-MN2":
         return f.gained_momentum_this_turn and pos == -3 and mom <= -2
+    if identifier == "R21-R25-UWD-M2-EX":
+        return f.left_grip.value >= 1 and grip > 0 and mom >= 2 and adv <= -5
     if identifier == "R21-UWA-C1-M2":
         return f.left_grip is GripState.DEEP and grip > 0 and mom >= 2 and pos >= 0
     if identifier == "R21-TSR-P6":
