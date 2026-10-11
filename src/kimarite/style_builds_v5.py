@@ -875,7 +875,7 @@ def build_style(style: str, seed: int = 0, ranking: int = 1, difficulty: int = 0
         c for c in CARD_POOL
         if c.name not in reserved and c.card_id not in UNIVERSALLY_PROTECTED_IDS
     ]
-    excluded = least_useful(eligible, style, difficulty)
+    excluded = least_useful(eligible, style, 7 + difficulty)
     remainder = [c for c in CARD_POOL if c.name not in reserved and c.card_id not in excluded]
     rng.shuffle(remainder)
     third = next((s for s in Stat if s.value not in {profile.primary, profile.secondary}), Stat(profile.primary))
