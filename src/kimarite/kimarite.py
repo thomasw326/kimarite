@@ -47,29 +47,15 @@ def no_grip(state: BoutState, side: Side) -> bool:
 
 
 def _yorikiri(state: BoutState, side: Side) -> bool:
-    return (
-        effective_total_grip(state, side) >= 2
-        and relative_momentum(state, side) >= 1
-        and relative_position(state, side) >= 2
-    )
+    return (effective_total_grip(state, side) >= 1 and relative_momentum(state, side) >= 1 and relative_position(state, side) >= 2)
 
 
 def _oshidashi(state: BoutState, side: Side) -> bool:
-    return (
-        relative_position(state, side) >= 2
-        and relative_momentum(state, side) >= 1
-        and (
-            power_advantage(state, side) >= 1
-            or state.tachiai_spirit_advantage_a * state.sign(side) >= 3
-        )
-    )
+    return relative_position(state, side) >= 2 and relative_momentum(state, side) >= 2
 
 
 def _tsukidashi(state: BoutState, side: Side) -> bool:
-    return (
-        relative_position(state, side) >= 2
-        and state.fighter(side).cards_played_this_turn >= 4
-    )
+    return relative_position(state, side) >= 2 and state.fighter(side).cards_played_this_turn >= 3
 
 
 def _oshitaoshi(state: BoutState, side: Side) -> bool:
@@ -81,28 +67,15 @@ def _oshitaoshi(state: BoutState, side: Side) -> bool:
 
 
 def _yoritaoshi(state: BoutState, side: Side) -> bool:
-    return (
-        effective_total_grip(state, side) >= 2
-        and relative_position(state, side) >= 2
-        and power_advantage(state, side) >= 2
-    )
+    return (effective_total_grip(state, side) >= 1 and relative_position(state, side) >= 2 and power_advantage(state, side) >= 2)
 
 
 def _katasukashi(state: BoutState, side: Side) -> bool:
-    return (
-        no_grip(state, side)
-        and relative_momentum(state, side) >= 1
-        and state.fighter(side).lost_position_this_turn
-    )
+    return (no_grip(state, state.opponent_side(side)) and relative_momentum(state, side) >= 1 and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 5)
 
 
 def _tsukiotoshi(state: BoutState, side: Side) -> bool:
-    fighter = state.fighter(side)
-    opponent = state.opponent(side)
-    return (
-        fighter.gained_momentum_this_turn
-        and (relative_position(state, side) == -3 or relative_momentum(state, side) == -2)
-    )
+    return (no_grip(state, side) and relative_momentum(state, side) >= 1 and power_advantage(state, side) <= -3)
 
 
 def _tottari(state: BoutState, side: Side) -> bool:
@@ -130,11 +103,7 @@ def _shitatenage(state: BoutState, side: Side) -> bool:
 
 
 def _hatakikomi(state: BoutState, side: Side) -> bool:
-    return (
-        relative_momentum(state, side) <= -2
-        and relative_position(state, side) >= 0
-        and state.fighter(side).power >= 5
-    )
+    return relative_momentum(state, side) <= -2 and state.fighter(side).power >= 6
 
 
 def _hikiotoshi(state: BoutState, side: Side) -> bool:
@@ -146,15 +115,11 @@ def _hikiotoshi(state: BoutState, side: Side) -> bool:
 
 
 def _tsukitaoshi(state: BoutState, side: Side) -> bool:
-    return (
-        relative_momentum(state, side) >= 2
-        and state.fighter(side).cards_played_this_turn >= 4
-    )
+    return relative_momentum(state, side) >= 2 and state.fighter(side).cards_played_this_turn >= 3
 
 
 def _tsuridashi(state: BoutState, side: Side) -> bool:
-    return (effective_total_grip(state, side) >= 3 and relative_position(state, side) >= 0
-            and state.fighter(side).power >= 5)
+    return (effective_total_grip(state, side) >= 3 and relative_position(state, side) >= 0 and state.fighter(side).power >= 6)
 
 
 def _kotenage(state: BoutState, side: Side) -> bool:
@@ -166,13 +131,48 @@ def _kotenage(state: BoutState, side: Side) -> bool:
 
 
 def _abisetaoshi(state: BoutState, side: Side) -> bool:
-    return (
-        effective_total_grip(state, side) >= 2
-        and state.fighter(side).power >= 9
-    )
+    return effective_total_grip(state, side) >= 2 and state.fighter(side).power >= 10
+
+
+def _kirikaeshi(state: BoutState, side: Side) -> bool:
+    f = state.fighter(side)
+    return (power_advantage(state, side) <= -3 and len(f.hand) > len(state.opponent(side).hand)
+            and f.successful_reversal_this_turn)
+
+
+def _okuridashi(state: BoutState, side: Side) -> bool:
+    return (state.fighter(side).successful_reversal_this_turn
+            and relative_position(state, side) >= 1 and relative_momentum(state, side) >= 1)
+
+
+def _okuritaoshi(state: BoutState, side: Side) -> bool:
+    return (state.fighter(side).successful_reversal_this_turn
+            and relative_position(state, side) >= 0 and relative_momentum(state, side) >= 2)
+
+
+def _sukuinage(state: BoutState, side: Side) -> bool:
+    return (no_grip(state, side) and relative_momentum(state, side) >= 2
+            and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 3)
+
+
+def _utchari(state: BoutState, side: Side) -> bool:
+    return state.fighter(side).gained_momentum_this_turn and relative_position(state, side) == -3
+
+
+def _uwatedashinage(state: BoutState, side: Side) -> bool:
+    return (state.fighter(side).left_grip is not GripState.NONE
+            and effective_total_grip(state, side) > 0
+            and relative_momentum(state, side) >= 1
+            and power_advantage(state, side) <= -5)
 
 
 KIMARITE_PREDICATES: dict[str, Predicate] = {
+    "Uwatedashinage": _uwatedashinage,
+    "Utchari": _utchari,
+    "Sukuinage": _sukuinage,
+    "Okuritaoshi": _okuritaoshi,
+    "Okuridashi": _okuridashi,
+    "Kirikaeshi": _kirikaeshi,
     "Yorikiri": _yorikiri,
     "Oshidashi": _oshidashi,
     "Tsukidashi": _tsukidashi,
