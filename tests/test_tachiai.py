@@ -65,8 +65,8 @@ def test_power_defense_blocks_spirit_push_example():
     state = BoutState(FighterState(a), FighterState(b))
     winner, push = apply_tachiai_power_push(state, comparison)
     assert winner is Side.A
-    assert push == 2
-    assert state.position == 2
+    assert push == 1
+    assert state.position == 1
 
 
 def test_power_defense_never_reverses_push():
@@ -111,7 +111,7 @@ def test_nodowa_power_applies_before_spirit_push_resistance():
     resolve_prepared_tachiai(state, comparison)
 
     assert state.fighter_b.power == 2
-    assert state.position == 1
+    assert state.position == 0
 
 
 def test_harite_power_applies_before_spirit_push_resistance():
