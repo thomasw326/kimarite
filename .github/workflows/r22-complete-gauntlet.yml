@@ -41,7 +41,7 @@ jobs:
           assert arms["R21-UTC-F2-MN2"].orbs=="🟢🟢"
           assert arms["R21-KAT-H5-T2"].orbs=="🟢🟢"
           assert build_variant_card("R21-OKD-RS",card_id=57001).technique==1
-          assert "shuffle" not in inspect.getsource(search_draw_pile_first)
+          assert "fighter.draw_pile.pop(index)" in inspect.getsource(search_draw_pile_first)
           print("R22 roster/AI/no-affinity/search implementation guards PASS")
           PY
           python -m pytest -q tests/test_r21_search.py tests/test_r20_variant_runtime.py
