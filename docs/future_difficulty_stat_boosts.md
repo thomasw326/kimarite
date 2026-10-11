@@ -31,3 +31,9 @@ Example: Difficulty 7 = base + (1,1,1); difficulty 8 = base + (1,1,1) plus terti
 - `enable_stat_boosts=False` by default. Stat boosting must never turn on merely because difficulty increases.
 - Affinity-based deck pruning is separate, and may be enabled for difficulty even when stat boosts are OFF.
 - Current base builds and stat caps should not be silently changed. If cap rules conflict with optional boosts, discuss before adopting boosted results into canonical balance testing.
+
+## Negative difficulty and deck pruning (approved 2026-10-10)
+
+At difficulty 0, exclude the **7 lowest-affinity eligible cards** from each archetype's draw pile. Every +1 difficulty excludes one additional lowest-affinity card; every −1 restores one. Difficulty −7 or below excludes zero. The starting Kimarite, prepared Tachiai, top-deck card and universal exclusions remain protected. This replaces the temporary experimental behavior where difficulty zero excluded none.
+
+Optional stat boosts are independent and OFF by default. When explicitly enabled, negative difficulty gives **no negative stat penalties**: calculate boosts at max(0, difficulty). This negative-level interaction may be revised if a different stat penalty system is approved.
