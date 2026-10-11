@@ -18,6 +18,7 @@ from .r20_variant_rules import (
 from .r21_gauntlet import load_arms
 from .r21_search import search_for_reversal
 from .rules import effective_total_grip
+from .models import GripState
 
 PREFIX = "R21:"
 
@@ -58,6 +59,16 @@ def variant_predicate(state: BoutState, side: Side, identifier: str) -> bool:
     reversal = bool(f.successful_reversal_this_turn)
 
     # All these checks retain their unaffected requirements from the R20 spec.
+    if identifier == "R21-HIK-C2-MN3":
+        return grip >= 1 and mom <= -3 and pos >= 0
+    if identifier == "R21-KAT-H5-T2":
+        return other_grip == 0 and mom >= 1 and hand_adv >= 5
+    if identifier == "R21-KIR-P3-HA3":
+        return reversal and adv <= -3 and hand_adv >= 3
+    if identifier == "R21-UTC-F2-MN2":
+        return f.gained_momentum_this_turn and pos == -3 and mom <= -2
+    if identifier == "R21-UWA-C1-M2":
+        return f.left_grip is GripState.DEEP and grip > 0 and mom >= 2 and pos >= 0
     if identifier == "R21-TSR-P6":
         return grip >= 3 and pos >= 0 and f.power >= 6
     if identifier == "R21-SUK-P3":
@@ -83,6 +94,22 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
     if identifier is None:
         raise ValueError("Not an experimental R21 kimarite")
     if state.disable_kimarite_exchange_effects:
+        return
+    if identifier in {"R21-OKD-RS", "R21-OKT-RS"}:
+        search_for_reversal(state.fighter(side))
+        return
+    if identifier == "R21-KAT-H5-T2":
+        if relative_momentum(state, side) >= 1:
+            fighter = state.fighter(side)
+            if fighter.discard_pile:
+                selected = context.choice("discard_index")
+                if not isinstance(selected, int) or not 0 <= selected < len(fighter.discard_pile):
+                    selected = len(fighter.discard_pile) - 1
+                fighter.hand.append(fighter.discard_pile.pop(selected))
+        return
+    if identifier == "R21-UTC-F2-MN2":
+        if relative_position(state, side) < 0:
+            draw_from_look(state, side, look=2, keep=1, required_draws=1)
         return
     if identifier == "R21-HIK-RS":
         search_for_reversal(state.fighter(side))
