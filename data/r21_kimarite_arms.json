@@ -1060,6 +1060,50 @@
       "tier": "Experimental",
       "engine_work": "Isolated R21 variant runtime",
       "review_status": "Proposed / untested"
+    },
+    {
+      "id": "R21-R22-ABI-1",
+      "family": "Abisetaoshi",
+      "r20_reference": "ABI-1",
+      "orbs": "🟣🟣🟣",
+      "win": "Total Grip ≥2 · Power ≥9",
+      "effect": "At Power ≥6: if no usable Grip, gain 1 flexible Grip; otherwise gain 1 Power",
+      "role": "R22 carried-forward R20 build",
+      "review_status": "Designer bold approved / or open baseline",
+      "test_axis": "R22 consolidated 22-build roster"
+    },
+    {
+      "id": "R21-R22-TSO-2",
+      "family": "Tsukiotoshi",
+      "r20_reference": "TSO-2",
+      "orbs": "🟣🟢🟠",
+      "win": "No own Grip · Momentum ≥2 · Own Power < opponent Power",
+      "effect": "Gain +1 Play this turn",
+      "role": "R22 carried-forward R20 build",
+      "review_status": "Designer bold approved / or open baseline",
+      "test_axis": "R22 consolidated 22-build roster"
+    },
+    {
+      "id": "R21-R22-UWD-3",
+      "family": "Uwatedashinage",
+      "r20_reference": "UWD-3",
+      "orbs": "🟢🟢🟠",
+      "win": "Left (outside) Grip ≥1 · Momentum ≥1 · Own Power at least 5 below opponent Power",
+      "effect": "Draw 1 card. You may discard 1 card; if you do, establish Left Grip.",
+      "role": "R22 carried-forward R20 build",
+      "review_status": "Designer bold approved / or open baseline",
+      "test_axis": "R22 consolidated 22-build roster"
+    },
+    {
+      "id": "R21-R22-OSH-3",
+      "family": "Oshidashi",
+      "r20_reference": "OSH-3",
+      "orbs": "🟣🟣🟠",
+      "win": "Position 2+ · Momentum 2+",
+      "effect": "Gain 1 Momentum",
+      "role": "R22 carried-forward R20 build",
+      "review_status": "Designer bold approved / or open baseline",
+      "test_axis": "R22 consolidated 22-build roster"
     }
   ]
 }
