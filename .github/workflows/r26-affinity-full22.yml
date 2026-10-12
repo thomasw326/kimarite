@@ -1,8 +1,8 @@
-name: B4 20 Kimarite - No Abisetaoshi or Kirikaeshi
+name: B5 120-card affinity decks - 20 Kimarite
 on:
   push:
-    branches: [experiment/b4-20-kimarite]
-    paths: [".github/workflows/r26-affinity-full22.yml", "src/kimarite/r26_style_final22.py", "tests/test_tachiai.py"]
+    branches: [experiment/b5-top30-plus-top10]
+    paths: [".github/workflows/r26-affinity-full22.yml", "src/kimarite/r26_style_final22.py", "src/kimarite/style_builds_v5.py", "tests/test_tachiai.py"]
   workflow_dispatch:
 jobs:
   smoke:
@@ -25,6 +25,17 @@ jobs:
           from kimarite.styles_v5 import STYLES
           r26.install_final22()
           assert len(STYLES)==15
+          assert style_builds_v5.B5_LARGE_AFFINITY_DECK
+          for name in STYLES:
+              build=style_builds_v5.build_style(name,seed=23)
+              fighter=build.fighter
+              cards=[*fighter.draw_pile,fighter.wrestler.prepared_tachiai_card]
+              assert len(cards)==120,(name,len(cards))
+              from collections import Counter
+              counts=Counter(c.name for c in cards)
+              assert len(counts)==30,(name,len(counts))
+              assert sorted(counts.values())==[3]*20+[6]*10,(name,counts)
+              assert len({c.card_id for c in cards})==120,(name,"duplicate physical IDs")
           assert len(style_builds_v5.STARTING_KIMARITE)==20
           banned={"Abisetaoshi","Kirikaeshi"}
           assert banned.isdisjoint({c.name for c in style_builds_v5.CARD_POOL})
@@ -51,7 +62,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b4-smoke
+          name: b5-smoke
           path: artifacts/r26_smoke.csv
 
   full:
@@ -94,7 +105,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b4-shard-${{ matrix.shard }}
+          name: b5-shard-${{ matrix.shard }}
           path: artifacts/r26/
           retention-days: 30
 
@@ -109,7 +120,7 @@ jobs:
           python-version: "3.11"
       - uses: actions/download-artifact@v4
         with:
-          pattern: b4-shard-*
+          pattern: b5-shard-*
           path: artifacts/r26_collected
           merge-multiple: true
       - name: Verify 15-style 8400 complete mirrored bouts and summarize
@@ -143,5 +154,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b4-final-report
+          name: b5-final-report
           path: artifacts/r26_report/
