@@ -79,6 +79,16 @@ def install_final22() -> None:
     style_ai_v5.card_affinity = family_affinity
 
 
+
+def display_card_name(name: str) -> str:
+    """Resolve R21 simulator IDs to human-readable Kimarite names in output only."""
+    if not name.startswith("R21:"):
+        return name
+    from .r21_gauntlet import load_arms
+    variants = {f"R21:{arm.arm_id}": arm.kimarite for arm in load_arms()}
+    return variants.get(name, name)
+
+
 def run_batch(start_pair: int, end_pair: int, repetitions: int, seed: int, max_turns: int, output: Path) -> None:
     from .style_simulate_v5 import run_style_bout
     from .styles_v5 import STYLES
@@ -107,7 +117,7 @@ def run_batch(start_pair: int, end_pair: int, repetitions: int, seed: int, max_t
                     result = run_style_bout(a,b,seed=pair_seed,max_turns=max_turns,experimental_final22=True)
                     winner = (a if result.state.winner is Side.A else
                               b if result.state.winner is Side.B else "")
-                    writer.writerow((pair_index,repeat,a,b,winner,result.state.win_method or "",
+                    writer.writerow((pair_index,repeat,a,b,winner,display_card_name(result.state.win_method or ""),
                                      result.completed,result.turns,result.unsupported_reason or ""))
                     if not result.completed:
                         continue
@@ -127,7 +137,7 @@ def run_batch(start_pair: int, end_pair: int, repetitions: int, seed: int, max_t
                         for kind, cards in events.items():
                             for name, count in cards.items():
                                 details.writerow((pair_index,repeat,a,b,style,opponent,won,
-                                                  name,kind,count,state.win_method or "",result.turns))
+                                                  display_card_name(name),kind,count,display_card_name(state.win_method or ""),result.turns))
                         # Finishing method already recorded in the bout-level CSV.
                         # Do not treat finishing-only observations as card win-rate denominators.
     print(json.dumps({"start_pair":start_pair,"end_pair":end_pair,
