@@ -123,6 +123,7 @@ class BoutState:
     position_loss_events: list[tuple[Side, int, str, int]] = field(default_factory=list)
     katasukashi_win_sources: list[str] = field(default_factory=list)
     event_log: list[str] = field(default_factory=list)
+    v6_opening_committed: bool = False  # Explicit V6 phase guard; legacy bouts unaffected.
 
     def fighter(self, side: Side) -> FighterState:
         return self.fighter_a if side is Side.A else self.fighter_b
