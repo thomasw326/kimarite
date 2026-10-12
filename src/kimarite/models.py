@@ -86,6 +86,10 @@ class FighterState:
     gained_push_this_turn: bool = False
     gained_momentum_this_turn: bool = False
     successful_reversal_this_turn: bool = False
+    # Opt-in V6 opening: committed cards are an inert history; ordinary cards
+    # are exhausted for the bout, while Kimarite remain in kimarite_zone.
+    tachiai_committed: list[Card] = field(default_factory=list)
+    exhausted_cards: list[Card] = field(default_factory=list)
 
     @property
     def total_grip(self) -> int:
