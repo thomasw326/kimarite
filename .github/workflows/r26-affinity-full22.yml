@@ -43,7 +43,8 @@ jobs:
               assert len({c.card_id for c in cards})==39,(name,"duplicate physical IDs")
               assert fighter.wrestler.starting_kimarite.card_id not in {c.card_id for c in cards}
           assert len(style_builds_v5.STARTING_KIMARITE)==22
-          restored={"Abisetaoshi","Kirikaeshi"}
+          restored={"R21:R21-R22-ABI-1","R21:R21-KIR-P3-HA3"}
+          assert len({c.name for c in style_builds_v5.CARD_POOL if c.is_kimarite})==22
           assert restored.issubset({c.name for c in style_builds_v5.CARD_POOL})
           assert restored.issubset({c.name for c in style_builds_v5.STARTING_KIMARITE})
           for style in STYLES:
