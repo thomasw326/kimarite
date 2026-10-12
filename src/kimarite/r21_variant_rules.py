@@ -58,6 +58,22 @@ def variant_predicate(state: BoutState, side: Side, identifier: str) -> bool:
     other_grip = effective_total_grip(state, state.opponent_side(side))
     reversal = bool(f.successful_reversal_this_turn)
 
+    # B7 approved balance pass; override the selected R21 roster predicates.
+    if identifier == "R21-R22-ABI-1":
+        return grip >= 2 and f.power >= 10 and mom >= 1
+    if identifier == "R21-KIR-P3-HA3":
+        return reversal and adv <= -3 and hand_adv >= 3
+    if identifier == "R21-KOT-R1":
+        return other_grip == 0 and mom >= 3 and len(f.hand) >= 6
+    if identifier == "R21-TSU-C1":
+        return pos >= 2 and f.cards_played_this_turn >= 3 and mom >= 0
+    if identifier == "R21-R22-TSO-2":
+        return f.total_grip == 0 and mom >= 1 and adv <= -2
+    if identifier == "R21-R25-UWD-M2-EX":
+        return f.left_grip.value >= 1 and grip > 0 and mom >= 1 and adv <= -4
+    if identifier == "R21-UWA-C1-M2":
+        return f.left_grip is GripState.DEEP and grip > 0 and mom >= 1
+
     # All these checks retain their unaffected requirements from the R20 spec.
     if identifier == "R21-HIK-C2-MN3":
         return grip >= 1 and mom <= -3 and pos >= 0
