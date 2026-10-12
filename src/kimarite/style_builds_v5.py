@@ -5,7 +5,7 @@ from .catalog import CARD_POOL, STARTING_KIMARITE
 from .affinity_v5 import preferred, least_useful
 from .stat_boosts import boosted_stats
 from .exclusions import UNIVERSALLY_PROTECTED_IDS
-from .models import FighterState, Wrestler, Stat
+from .models import Card, FighterState, Wrestler, Stat
 from .styles_v5 import STYLES, preference_bonus, resolve_card
 
 
@@ -855,6 +855,10 @@ STYLE_CARD_SCORES = {
 }
 
 
+# B5-only toggle: isolated experiment, never enabled for production style builds.
+B5_LARGE_AFFINITY_DECK = False
+
+
 @dataclass(frozen=True)
 class StyleBuild:
     fighter: FighterState
@@ -875,9 +879,40 @@ def build_style(style: str, seed: int = 0, ranking: int = 1, difficulty: int = 0
         c for c in CARD_POOL
         if c.name not in reserved and c.card_id not in UNIVERSALLY_PROTECTED_IDS
     ]
-    excluded = least_useful(eligible, style, 7 + difficulty)
-    remainder = [c for c in CARD_POOL if c.name not in reserved and c.card_id not in excluded]
-    rng.shuffle(remainder)
+    if B5_LARGE_AFFINITY_DECK:
+        # 30 unique affinity favorites, 3 copies each; top 10 gain 3 extra
+        # copies (120 physical cards including the prepared card).
+        # Keep original opening rules and ensure both opening basics occur in
+        # the selected 30 without requiring a card outside the deck.
+        # Variant Kimarite names are translated by the installed preferred().
+        ranked = preferred([c for c in CARD_POOL if c.name != kimarite.name], style, len(CARD_POOL))
+        selected = list(ranked[:30])
+        for opening in (tachiai, top):
+            if not any(c.name == opening.name for c in selected):
+                selected.pop()
+                selected.append(opening)
+        # Select top ten by the same affinity order after inserting must-have openings.
+        selected = preferred(selected, style, 30)
+        assert len(selected) == 30 and len({c.name for c in selected}) == 30
+        copies = []
+        for i, card in enumerate(selected):
+            for occurrence in range(6 if i < 10 else 3):
+                copies.append(Card(2_000_000 + i * 10 + occurrence, card.name,
+                                   card.power, card.technique, card.spirit, card.is_kimarite))
+        assert len(copies) == 120
+        top_copy = next(c for c in copies if c.name == top.name)
+        prepared_copy = next(c for c in copies if c.name == tachiai.name)
+        copies.remove(top_copy)
+        copies.remove(prepared_copy)
+        rng.shuffle(copies)
+        remainder = copies
+        top = top_copy
+        tachiai = prepared_copy
+        excluded = frozenset()
+    else:
+        excluded = least_useful(eligible, style, 7 + difficulty)
+        remainder = [c for c in CARD_POOL if c.name not in reserved and c.card_id not in excluded]
+        rng.shuffle(remainder)
     third = next((s for s in Stat if s.value not in {profile.primary, profile.secondary}), Stat(profile.primary))
     adjusted_stats = boosted_stats(profile.stats, (Stat(profile.primary), Stat(profile.secondary), third), difficulty, enabled=enable_stat_boosts)
     wrestler = Wrestler(
@@ -885,7 +920,9 @@ def build_style(style: str, seed: int = 0, ranking: int = 1, difficulty: int = 0
         primary=Stat(profile.primary), secondary=Stat(profile.secondary),
         tertiary=third, ranking=ranking,
     )
+    draw_pile = ([top, *remainder] if B5_LARGE_AFFINITY_DECK
+                 else [top, *remainder, tachiai])
     return StyleBuild(
-        FighterState(wrestler, draw_pile=[top, *remainder, tachiai], kimarite_zone=[kimarite]),
+        FighterState(wrestler, draw_pile=draw_pile, kimarite_zone=[kimarite]),
         excluded,
     )
