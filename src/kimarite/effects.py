@@ -119,10 +119,16 @@ def tachiai_comparisons_won(context: EffectContext, side: Side) -> int:
 
 
 def _oshi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    # Discard is the cost for the entire Exchange effect, including milling.
+    if not state.fighter(side).hand:
+        return
+    _discard_from_hand(state, side, card, context)
     gain_push(state, side, 1)
-    add_play(state, side)
     if state.winner is None:
+        add_play(state, side)
         draw_one(state, side)
+    if state.winner is None:
+        mill_cards(state, side, 1)
 
 
 def _discard_from_hand(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -150,7 +156,6 @@ def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     before = state.momentum * state.sign(side)
-    gain_momentum(state, side, 1)
     if before <= 0:
         gain_push(state, side, 1)
 
@@ -327,6 +332,7 @@ def _salt_throw(
         fighter.discard_pile.clear()
         state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
     add_temporary(state, side, card, phase="exchange")
+    add_play(state, side, 1)
 
 
 def _stare_down(
@@ -478,13 +484,15 @@ def _immovable(
     add_temporary(state, side, card, phase="exchange")
 
 
-def _search_kimarite(state: BoutState, searched_side: Side, source: str) -> None:
+def _search_kimarite(state: BoutState, searched_side: Side, source: str, *, to_hand: bool = False) -> None:
     """Automatically move the first eligible Kimarite from Draw Pile to zone."""
     fighter = state.fighter(searched_side)
     for index, found in enumerate(fighter.draw_pile):
         if found.is_kimarite:
-            fighter.kimarite_zone.append(fighter.draw_pile.pop(index))
-            state.log(f"{fighter.wrestler.name} searches {found.name} into the Kimarite Zone after {source}.")
+            destination = fighter.hand if to_hand else fighter.kimarite_zone
+            destination.append(fighter.draw_pile.pop(index))
+            zone = "hand" if to_hand else "Kimarite Zone"
+            state.log(f"{fighter.wrestler.name} searches {found.name} into the {zone} after {source}.")
             return
 
 
@@ -505,7 +513,7 @@ def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectCon
     lose_position(state, side, 1, source="Use the Tawara")
     if state.winner is None:
         gain_momentum(state, side, 1)
-    _search_kimarite(state, side, card.name)
+    _search_kimarite(state, side, card.name, to_hand=True)
     add_temporary(state, side, card, phase="exchange")
 
 
@@ -634,6 +642,7 @@ def _power_water(
     fighter.draw_pile.extend(cantrips)
     random.Random(seed).shuffle(fighter.draw_pile)
     state.log(f"{fighter.wrestler.name} shuffles 6 Power Water Cantrips into the Draw Pile.")
+    add_play(state, side, 1)
 
 
 def _power_water_cantrip(
@@ -803,7 +812,7 @@ def _driving_force(state: BoutState, side: Side, card: Card, context: EffectCont
     if mode == "power_payoff":
         if state.fighter(side).power < 7:
             raise IllegalPlay("Driving Force requires Power 7+ for its Push payoff.")
-        gain_push(state, side, 2)
+        gain_push(state, side, 1)
         if state.winner is None:
             gain_momentum(state, side, 1)
     else:
@@ -821,8 +830,8 @@ def _crushing_pressure(state: BoutState, side: Side, card: Card, context: Effect
         if not eligible:
             raise IllegalPlay("Crushing Pressure requires Power 7+ and Power Advantage 3+.")
         gain_momentum(state, side, 1)
-        if state.winner is None and not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose 2 Power"):
-            lose_power(state, state.opponent_side(side), 2)
+        if state.winner is None and not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose 1 Power"):
+            lose_power(state, state.opponent_side(side), 1)
     else:
         draw_one(state, side)
 
@@ -876,7 +885,6 @@ MILL_AMOUNTS = {
     "Headlong Charge": 2,
     "Explosive Step — Fumikomi": 2,
     "Tsuppari": 1,
-    "Oshi": 1,
     "Tsuki": 1,
     "Shove": 1,
 }
