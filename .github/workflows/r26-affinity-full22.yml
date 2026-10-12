@@ -1,4 +1,4 @@
-name: B5 120-card affinity decks - 20 Kimarite
+name: B5 40-card affinity decks - 20 Kimarite
 on:
   push:
     branches: [experiment/b5-top30-plus-top10]
@@ -25,17 +25,17 @@ jobs:
           from kimarite.styles_v5 import STYLES
           r26.install_final22()
           assert len(STYLES)==15
-          assert style_builds_v5.B5_LARGE_AFFINITY_DECK
+          assert style_builds_v5.B5_WEIGHTED_AFFINITY_DECK
           for name in STYLES:
               build=style_builds_v5.build_style(name,seed=23)
               fighter=build.fighter
               cards=[*fighter.draw_pile,fighter.wrestler.prepared_tachiai_card]
-              assert len(cards)==120,(name,len(cards))
+              assert len(cards)==40,(name,len(cards))
               from collections import Counter
               counts=Counter(c.name for c in cards)
               assert len(counts)==30,(name,len(counts))
-              assert sorted(counts.values())==[3]*20+[6]*10,(name,counts)
-              assert len({c.card_id for c in cards})==120,(name,"duplicate physical IDs")
+              assert sorted(counts.values())==[1]*20+[2]*10,(name,counts)
+              assert len({c.card_id for c in cards})==40,(name,"duplicate physical IDs")
           assert len(style_builds_v5.STARTING_KIMARITE)==20
           banned={"Abisetaoshi","Kirikaeshi"}
           assert banned.isdisjoint({c.name for c in style_builds_v5.CARD_POOL})
@@ -80,7 +80,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -e .
-      - name: Run 1200 mirrored affinity bouts per shard, full final22 deck
+      - name: Run 3600 mirrored affinity bouts per shard, full final22 deck
         env:
           SHARD: ${{ matrix.shard }}
         run: |
@@ -90,7 +90,7 @@ jobs:
           shard=int(os.environ["SHARD"])
           subprocess.run([sys.executable,"-m","kimarite.r26_style_final22",
               "--start-pair",str(shard*15),"--end-pair",str((shard+1)*15),
-              "--repetitions","40","--seed","20261011",
+              "--repetitions","120","--seed","20261011",
               "--max-turns","100","--output",f"artifacts/r26/shard-{shard}.csv"],check=True)
           PY
           python - <<'PY'
@@ -98,9 +98,9 @@ jobs:
           files=glob.glob("artifacts/r26/*.csv")
           assert len(files)==1
           rows=list(csv.DictReader(open(files[0])))
-          assert len(rows)==1200
+          assert len(rows)==3600
           assert not [r for r in rows if r["completed"]!="True" or r["error"]],[r for r in rows if r["completed"]!="True" or r["error"]][:3]
-          print("1200 full-card-set bouts verified")
+          print("3600 full-card-set bouts verified")
           PY
       - uses: actions/upload-artifact@v4
         if: always()
@@ -123,7 +123,7 @@ jobs:
           pattern: b5-shard-*
           path: artifacts/r26_collected
           merge-multiple: true
-      - name: Verify 15-style 8400 complete mirrored bouts and summarize
+      - name: Verify 15-style 25200 complete mirrored bouts and summarize
         run: |
           python - <<'PY'
           import csv,glob,collections,json
@@ -132,7 +132,7 @@ jobs:
           rows=[]
           for f in files:
               with open(f,newline="") as h: rows.extend(csv.DictReader(h))
-          assert len(rows)==8400,len(rows)
+          assert len(rows)==25200,len(rows)
           assert all(x["completed"]=="True" and not x["error"] for x in rows)
           per_style=collections.Counter()
           wins=collections.Counter()
@@ -143,7 +143,7 @@ jobs:
               wins[x["winner"]]+=1
               methods[x["win_method"]]+=1
           assert len(per_style)==15
-          assert all(v==1120 for v in per_style.values()),per_style
+          assert all(v==3360 for v in per_style.values()),per_style
           result={"bouts":len(rows),"win_rates":{s:round(wins[s]/per_style[s],4) for s in per_style},
                   "wins":dict(wins),"finishes":dict(methods),"sample_per_style":dict(per_style)}
           import pathlib
