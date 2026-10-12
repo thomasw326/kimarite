@@ -19,6 +19,7 @@ PAIRS = tuple(combinations(STYLES, 2))
 BASE_SEED = 20261012
 CARD_COUNT_FIELDS = (
     "deck_bouts", "deck_wins", "deck_copies",
+    "excluded_bouts", "excluded_wins", "excluded_copies",
     "first_exchange_hand_bouts", "first_exchange_hand_wins",
     "starting_kimarite_bouts", "starting_kimarite_wins",
     "prepared_tachiai_bouts", "prepared_tachiai_wins",
@@ -74,12 +75,46 @@ def mark_event(stats, style, opponent, card, prefix, won, occurrences=1):
 
 def run_shard(start, stop, output):
     from kimarite.models import Side
-    from kimarite.style_builds_v5 import build_style, CARD_POOL, STARTING_KIMARITE
+    from kimarite import style_builds_v5, style_simulate_v5, style_ai_v5
     from kimarite.style_simulate_v5 import run_style_bout
     from kimarite.styles_v5 import STYLES as FULL_STYLES
 
     alias = install()
-    from kimarite import style_builds_v5
+    # B7 uses a fixed 40-card build and does not apply difficulty. Preserve
+    # the exact opening selections and original deck ordering, then exclude
+    # precisely 14 lowest-affinity REMAINING physical card instances.
+    # This is not the historical 7 + difficulty interpretation.
+    baseline_build_style = style_builds_v5.build_style
+
+    def build_affinity_14(style, *args, **kwargs):
+        build = baseline_build_style(style, *args, **kwargs)
+        fighter = build.fighter
+        original = list(fighter.draw_pile)
+        assert len(original) == 38, (style, len(original))
+        protected = fighter.wrestler.top_of_deck_card.card_id
+        assert original[0].card_id == protected
+        eligible = [c for c in original if c.card_id != protected]
+        ranked = sorted(
+            eligible,
+            key=lambda c: (
+                style_ai_v5.card_affinity(style, c.name), c.name, c.card_id,
+            ),
+        )
+        removed = ranked[:14]
+        ids = frozenset(c.card_id for c in removed)
+        assert len(ids) == 14 and len(ranked) == 37
+        fighter.draw_pile = [c for c in original if c.card_id not in ids]
+        assert len(fighter.draw_pile) == 24
+        assert fighter.draw_pile[0].card_id == protected
+        # Track removed physical copies, not just unique card titles.
+        fighter.affinity_excluded_names = tuple(c.name for c in removed)
+        fighter.affinity_excluded_ids = ids
+        return style_builds_v5.StyleBuild(
+            fighter, build.excluded_ids | ids,
+        )
+
+    style_builds_v5.build_style = build_affinity_14
+    style_simulate_v5.build_style = build_affinity_14
     catalog_names = sorted({
         canonical(c.name, alias)
         for c in (*style_builds_v5.CARD_POOL, *style_builds_v5.STARTING_KIMARITE)
@@ -146,7 +181,7 @@ def run_shard(start, stop, output):
                         # Reconstruct the INITIAL inventory using exactly the
                         # same seeded builder as run_style_bout. Observational;
                         # this does not change the simulated bout.
-                        initial = build_style(
+                        initial = style_builds_v5.build_style(
                             style, seed=(pair_seed if side is Side.A else pair_seed + 1009),
                             ranking=(1 if side is Side.A else 2), difficulty=0,
                         ).fighter
@@ -158,7 +193,13 @@ def run_shard(start, stop, output):
                             iw.starting_kimarite, iw.prepared_tachiai_card,
                             *initial.draw_pile,
                         ]
-                        assert len(inventory) == 40, (style, len(inventory))
+                        assert len(inventory) == 26, (style, len(inventory))
+                        excluded = Counter(canonical(c, alias) for c in initial.affinity_excluded_names)
+                        assert sum(excluded.values()) == 14, (style, excluded)
+                        assert not set(initial.affinity_excluded_ids) & {c.card_id for c in inventory}
+                        for card, copies in excluded.items():
+                            mark_event(stats, style, opponent, card, "excluded", won)
+                            add_metric(stats, style, opponent, card, "excluded_copies", copies)
                         assert len({c.card_id for c in inventory}) == 40
                         pool = Counter(canonical(c.name, alias) for c in inventory)
                         for card, copies in pool.items():
@@ -220,8 +261,11 @@ def run_shard(start, stop, output):
         "completed": count - len(failures), "errors": len(failures),
         "roster": STYLES, "pairs": PAIRS,
         "seed": BASE_SEED, "repetitions": stop - start,
-        "rules": "B7/R26 final 22, V5.2 style AI + affinity, 40-card composition, difficulty 0",
+        "rules": "B7/R26 final 22, V5.2 style AI + affinity, 40-card composition before 14 affinity exclusions",
         "not_new_tachiai_rules": True,
+        "exclusions_per_deck": 14,
+        "excluded_by": "14 lowest B7/V5.2 per-wrestler affinity scores; physical card instances; protect original opening assignments",
+        "physical_cards_after_exclusions": 26,
         "catalog_card_names": len(catalog_names),
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2))
@@ -249,6 +293,8 @@ def report(root, output, expected):
         repetition_ranges.add(a)
         assert b - a == 1000 and meta["bouts"] == 6000
         assert meta["completed"] == 6000 and meta["errors"] == 0
+        assert meta["exclusions_per_deck"] == 14
+        assert meta["physical_cards_after_exclusions"] == 26
         with (directory / "bouts.csv").open(newline="", encoding="utf-8") as f:
             rows = list(csv.DictReader(f))
         assert len(rows) == 6000
@@ -283,7 +329,7 @@ def report(root, output, expected):
     # Output detailed counts and descriptive observational rates.
     output_cards = output / "card_success_rates.csv"
     extra_fields = (
-        "deck_win_pct", "first_exchange_hand_win_pct",
+        "deck_win_pct", "excluded_win_pct", "first_exchange_hand_win_pct",
         "starting_kimarite_win_pct", "prepared_tachiai_win_pct",
         "top_deck_win_pct", "played_win_pct",
         "played_bouts_per_100_deck_bouts",
@@ -303,7 +349,7 @@ def report(root, output, expected):
             data = cards[key]
             x = {k: data[k] for k in CARD_COUNT_FIELDS}
             for event in (
-                "deck", "first_exchange_hand", "starting_kimarite",
+                "deck", "excluded", "first_exchange_hand", "starting_kimarite",
                 "prepared_tachiai", "top_deck", "played",
             ):
                 x[event + "_win_pct"] = pct(
@@ -323,8 +369,11 @@ def report(root, output, expected):
 
     result = {
         "source": "B7/R26 commit c9d3d21c8ccbb7d880fd3265507d56a3ab94ceaa",
-        "rules": "V5.2 tactical style_ai_v5 + six-axis affinity; final 22 Kimarite; fixed 40 physical card deck; difficulty 0",
+        "rules": "V5.2 tactical style_ai_v5 + six-axis affinity; final 22 Kimarite; fixed 40 physical cards minus 14 lowest-affinity = 26 cards",
         "new_tachiai_commit_retain_rules": False,
+        "exclusions_per_deck": 14,
+        "removal_policy": "14 lowest per-style affinity-scored physical cards, after protected opening assignments",
+        "physical_cards_after_exclusions": 26,
         "bouts": expected,
         "repetitions_per_pair": expected // 6,
         "bouts_per_pair": expected // 3,
@@ -348,7 +397,7 @@ def report(root, output, expected):
     }
     (output / "summary.json").write_text(json.dumps(result, indent=2))
     lines = [
-        "# Three-style V5.2 affinity audit",
+        "# Three-style V5.2 affinity audit — 14 card exclusions",
         f"{expected:,} completed bouts; {expected // 3:,} per matchup; {expected * 2 // 3:,} appearances per wrestler.",
         "",
         "## Wrestlers",
@@ -369,7 +418,9 @@ def report(root, output, expected):
     lines += [
         "", "## Card analytics definitions",
         "- See card_success_rates.csv: one row per style/opponent/card, style overall, and pooled total.",
-        "- deck_bouts: wrestler bouts where at least one physical copy was in its original 40-card build.",
+        "- deck_bouts: wrestler bouts where at least one physical copy was present in the 26-card post-exclusion build.",
+        "- excluded_bouts / excluded_copies: occurrences and physical copies removed from the initial 40-card build.",
+        "- Exclusions are the 14 lowest B7/V5.2 per-wrestler affinity physical cards in the remaining draw pile, with opening assignments protected.",
         "- deck_copies: physical copies summed across those wrestler bouts.",
         "- first_exchange_hand_bouts: card observed in the recorded first Exchange hand (not every later draw).",
         "- starting_kimarite_bouts: card assigned as an opening Kimarite in the Kimarite Zone.",
@@ -381,6 +432,7 @@ def report(root, output, expected):
         "- Blank percentage means no qualifying observations; card rows with zero exposure are kept.",
         "- These tests use CURRENT B7 rules, not the proposed three-card commit/retain Tachiai rules.",
         "- This is a within-trio ranking only; do not compare its win rates as if they were 15-style results.",
+        "- Baseline run has 40 physical cards; this variant has 26 physical cards (14 excluded).",
     ]
     (output / "summary.md").write_text("\n".join(lines) + "\n")
     print(json.dumps(result, indent=2), flush=True)
