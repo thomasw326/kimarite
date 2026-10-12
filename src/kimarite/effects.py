@@ -332,7 +332,8 @@ def _salt_throw(
         fighter.discard_pile.clear()
         state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
     add_temporary(state, side, card, phase="exchange")
-    add_play(state, side, 1)
+    if context.comparison is None:
+        add_play(state, side, 1)
 
 
 def _stare_down(
