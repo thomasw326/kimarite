@@ -5,7 +5,6 @@ are explicitly marked xfail so the audit does not pretend they're passing.
 """
 from __future__ import annotations
 
-import pytest
 from kimarite.ai import candidate_plays
 from kimarite.catalog import card_by_name
 from kimarite.effects import EffectContext, resolve_exchange_effect
@@ -172,16 +171,38 @@ def test_b7_tsukiotoshi_requires_no_grip_momentum1_power_disadvantage2():
     assert not variant_predicate(s,Side.A,ident)
 
 
-@pytest.mark.xfail(strict=True,reason="BUG: earlier UWD return uses Momentum >=1 and Power disadv >=4; approved R25 requires >=2 and >=5")
-def test_b7_uwatedashinage_rejects_earlier_weaker_requirement():
-    s=variant(grip_left=1,momentum=1,power_a=0,power_b=4)
-    assert not variant_predicate(s,Side.A,"R21-R25-UWD-M2-EX")
+def test_b7_uwatedashinage_rejects_both_independent_weak_thresholds():
+    ident = "R21-R25-UWD-M2-EX"
+    # At least five lower in Power, at least two Momentum, and a Left Grip.
+    assert not variant_predicate(
+        variant(grip_left=1, momentum=1, power_a=0, power_b=5),
+        Side.A, ident
+    )
+    assert not variant_predicate(
+        variant(grip_left=1, momentum=2, power_a=0, power_b=4),
+        Side.A, ident
+    )
+    assert not variant_predicate(
+        variant(grip_left=0, grip_right=1, momentum=2, power_a=0, power_b=5),
+        Side.A, ident
+    )
 
 
-@pytest.mark.xfail(strict=True,reason="BUG: earlier Uwatenage return ignores Position and accepts Momentum >=1; approved spec requires >=2 and Position >=0")
-def test_b7_uwatenage_rejects_momentum1_and_negative_position():
-    s=variant(grip_left=2,momentum=1,position=-1)
-    assert not variant_predicate(s,Side.A,"R21-UWA-C1-M2")
+def test_b7_uwatenage_rejects_both_independent_weak_thresholds():
+    ident = "R21-UWA-C1-M2"
+    # Deep Left Grip, Momentum >= 2, Position >= 0.
+    assert not variant_predicate(
+        variant(grip_left=2, momentum=1, position=0),
+        Side.A, ident
+    )
+    assert not variant_predicate(
+        variant(grip_left=2, momentum=2, position=-1),
+        Side.A, ident
+    )
+    assert not variant_predicate(
+        variant(grip_left=1, momentum=2, position=0),
+        Side.A, ident
+    )
 
 
 def test_b7_approved_uwd_and_uwa_requirements_do_hold_at_strict_thresholds():
