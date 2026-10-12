@@ -154,3 +154,13 @@ def test_v6_spirit_initiative_overrides_higher_opponent_technique():
     assert first_exchange_side_v6(
         opening, state.fighter_a.wrestler, state.fighter_b.wrestler,
     ) is Side.A
+
+
+def test_retain_all_still_consumes_once_per_bout_opening():
+    state = ready()
+    commit_opening(state, OpeningCommitment(()), OpeningCommitment(()))
+    assert state.v6_opening_committed
+    before = deepcopy(state)
+    with pytest.raises(ValueError, match="already resolved"):
+        commit_opening(state, OpeningCommitment(()), OpeningCommitment(()))
+    assert state == before
