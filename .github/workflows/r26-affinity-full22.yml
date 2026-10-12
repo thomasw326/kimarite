@@ -30,17 +30,18 @@ jobs:
               build=style_builds_v5.build_style(name,seed=23)
               fighter=build.fighter
               cards=[*fighter.draw_pile,fighter.wrestler.prepared_tachiai_card]
-              assert len(cards)==40,(name,len(cards))
+              assert len(cards)==39,(name,len(cards))
               from collections import Counter
               counts=Counter(c.name for c in cards)
-              assert len(counts)==30,(name,len(counts))
+              assert len(counts)==29,(name,len(counts))
               assert sum(c.is_kimarite for c in cards)==9,(name,"draw pile Kimarite")
               assert fighter.wrestler.starting_kimarite.is_kimarite
               assert sum(c.is_kimarite for c in cards)+1==10
               assert sum(v==2 for k,v in counts.items() if not any(c.name==k and c.is_kimarite for c in cards))==10
               assert not any(v>1 for k,v in counts.items() if any(c.name==k and c.is_kimarite for c in cards))
-              assert sorted(counts.values())==[1]*20+[2]*10,(name,counts)
-              assert len({c.card_id for c in cards})==40,(name,"duplicate physical IDs")
+              assert sorted(counts.values())==[1]*19+[2]*10,(name,counts)
+              assert len({c.card_id for c in cards})==39,(name,"duplicate physical IDs")
+              assert fighter.wrestler.starting_kimarite.card_id not in {c.card_id for c in cards}
           assert len(style_builds_v5.STARTING_KIMARITE)==20
           banned={"Abisetaoshi","Kirikaeshi"}
           assert banned.isdisjoint({c.name for c in style_builds_v5.CARD_POOL})
