@@ -171,6 +171,11 @@ def resolve_prepared_tachiai(
                 establish_grip(state, side, "right")
 
         elif name == "Salt Throw":
+            # Salt Throw gains its bonus Play only in the Exchange.
+            resolve_exchange_effect(state, side, card, EffectContext(comparison=comparison))
+            state.fighter(side).plays_remaining -= 1
+
+        elif name == "Power Water":
             resolve_exchange_effect(state, side, card, EffectContext(comparison=comparison))
 
         elif name == "Tsuppari":
