@@ -1,7 +1,7 @@
-name: B5 40-card affinity decks - 20 Kimarite
+name: B6 10 Kimarite 30 basic cards - card analytics
 on:
   push:
-    branches: [experiment/b5-top30-plus-top10]
+    branches: [experiment/b6-ten-kimarite-thirty-basics]
     paths: [".github/workflows/r26-affinity-full22.yml", "src/kimarite/r26_style_final22.py", "src/kimarite/style_builds_v5.py", "tests/test_tachiai.py"]
   workflow_dispatch:
 jobs:
@@ -25,7 +25,7 @@ jobs:
           from kimarite.styles_v5 import STYLES
           r26.install_final22()
           assert len(STYLES)==15
-          assert style_builds_v5.B5_WEIGHTED_AFFINITY_DECK
+          assert style_builds_v5.B6_FIXED_COMPOSITION_DECK
           for name in STYLES:
               build=style_builds_v5.build_style(name,seed=23)
               fighter=build.fighter
@@ -34,6 +34,11 @@ jobs:
               from collections import Counter
               counts=Counter(c.name for c in cards)
               assert len(counts)==30,(name,len(counts))
+              assert sum(c.is_kimarite for c in cards)==9,(name,"draw pile Kimarite")
+              assert fighter.wrestler.starting_kimarite.is_kimarite
+              assert sum(c.is_kimarite for c in cards)+1==10
+              assert sum(v==2 for k,v in counts.items() if not any(c.name==k and c.is_kimarite for c in cards))==10
+              assert not any(v>1 for k,v in counts.items() if any(c.name==k and c.is_kimarite for c in cards))
               assert sorted(counts.values())==[1]*20+[2]*10,(name,counts)
               assert len({c.card_id for c in cards})==40,(name,"duplicate physical IDs")
           assert len(style_builds_v5.STARTING_KIMARITE)==20
@@ -57,13 +62,17 @@ jobs:
           rows=list(csv.DictReader(open("artifacts/r26_smoke.csv")))
           assert len(rows)==2
           assert all(r["completed"]=="True" and not r["error"] for r in rows),rows
+          card_rows=list(csv.DictReader(open("artifacts/r26_smoke_cards.csv")))
+          assert card_rows and any(r["kind"]=="played" for r in card_rows),card_rows[:5]
           print("R26 mirrored smoke passed")
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b5-smoke
-          path: artifacts/r26_smoke.csv
+          name: b6-smoke
+          path: |
+            artifacts/r26_smoke.csv
+            artifacts/r26_smoke_cards.csv
 
   full:
     needs: smoke
@@ -95,17 +104,21 @@ jobs:
           PY
           python - <<'PY'
           import csv,glob
-          files=glob.glob("artifacts/r26/*.csv")
+          files=glob.glob("artifacts/r26/shard-*.csv")
           assert len(files)==1
           rows=list(csv.DictReader(open(files[0])))
           assert len(rows)==3600
           assert not [r for r in rows if r["completed"]!="True" or r["error"]],[r for r in rows if r["completed"]!="True" or r["error"]][:3]
-          print("3600 full-card-set bouts verified")
+          detail=glob.glob("artifacts/r26/shard-*_cards.csv")
+          assert len(detail)==1
+          with open(detail[0],newline="") as h: card_rows=list(csv.DictReader(h))
+          assert card_rows and all(r["card"] for r in card_rows)
+          print("3600 bouts plus card-level rows verified",len(card_rows))
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b5-shard-${{ matrix.shard }}
+          name: b6-shard-${{ matrix.shard }}
           path: artifacts/r26/
           retention-days: 30
 
@@ -120,14 +133,14 @@ jobs:
           python-version: "3.11"
       - uses: actions/download-artifact@v4
         with:
-          pattern: b5-shard-*
+          pattern: b6-shard-*
           path: artifacts/r26_collected
           merge-multiple: true
       - name: Verify 15-style 25200 complete mirrored bouts and summarize
         run: |
           python - <<'PY'
           import csv,glob,collections,json
-          files=glob.glob("artifacts/r26_collected/*.csv")
+          files=glob.glob("artifacts/r26_collected/shard-[0-9].csv")
           assert len(files)==7,len(files)
           rows=[]
           for f in files:
@@ -149,10 +162,34 @@ jobs:
           import pathlib
           pathlib.Path("artifacts/r26_report").mkdir(parents=True,exist_ok=True)
           pathlib.Path("artifacts/r26_report/summary.json").write_text(json.dumps(result,indent=2))
+          # Card-conditioned win rate: P(win | selected/seen/played card).
+          # Distinct bouts, not duplicate plays, are the denominator.
+          card_files=glob.glob("artifacts/r26_collected/shard-*_cards.csv")
+          assert len(card_files)==7,len(card_files)
+          metrics=collections.defaultdict(lambda:[0,0,0])
+          for file in card_files:
+              with open(file,newline="") as handle:
+                  seen=set()
+                  for rec in csv.DictReader(handle):
+                      key=(rec["style"],rec["card"],rec["kind"],file,rec["pair"],rec["repetition"],rec["seat_a"],rec["seat_b"])
+                      if key in seen: continue
+                      seen.add(key)
+                      bucket=metrics[(rec["style"],rec["card"],rec["kind"])]
+                      bucket[0]+=1
+                      bucket[1]+=int(rec["won"])
+                      bucket[2]+=int(rec["count"])
+          output=pathlib.Path("artifacts/r26_report/card_win_rates.csv")
+          with output.open("w",newline="") as handle:
+              writer=csv.writer(handle)
+              writer.writerow(("style","card","event","bouts_with_event","wins_with_event","win_rate","total_occurrences"))
+              for (style,card,event),(n,w,occ) in sorted(metrics.items()):
+                  writer.writerow((style,card,event,n,w,round(w/n,5),occ))
+          result["card_analytics"]={"records":sum(v[0] for v in metrics.values()),"rows":len(metrics),"file":str(output)}
+          pathlib.Path("artifacts/r26_report/summary.json").write_text(json.dumps(result,indent=2))
           print(json.dumps(result,indent=2))
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b5-final-report
+          name: b6-final-report
           path: artifacts/r26_report/
