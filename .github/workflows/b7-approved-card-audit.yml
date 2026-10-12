@@ -1,0 +1,33 @@
+name: B7 approved-card executable audit
+
+on:
+  push:
+    branches: [audit/v52-b7-reviewed-card-execution]
+    paths:
+      - ".github/workflows/b7-approved-card-audit.yml"
+      - "tests/test_b7_runtime_audit.py"
+  workflow_dispatch:
+
+jobs:
+  reviewed-card-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Verify approved B7 effects, active simulator dispatch and known threshold gaps
+        run: |
+          python -m pytest -v -rx \
+            tests/test_b7_runtime_audit.py \
+            tests/test_v51_power_additions.py \
+            tests/test_v5_shiko_playability.py \
+            | tee b7_audit_results.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b7-card-runtime-audit
+          path: b7_audit_results.txt
+          retention-days: 60
