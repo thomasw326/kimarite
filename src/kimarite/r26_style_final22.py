@@ -1,4 +1,4 @@
-"""B4: 20 eligible Kimarite (excluding Abisetaoshi/Kirikaeshi) in mirrored affinity-led 15-style bouts.
+"""B5: B4 20 Kimarite with 120-card, top-30-affinity weighted draw piles.
 
 Does not change live catalogue. Installs an isolated in-process R21 card map
 before constructing styles, preserving usual affinity under the Kimarite family name.
@@ -61,6 +61,7 @@ def install_final22() -> None:
     assert excluded_families.isdisjoint({c.name for c in new_pool})
     assert {"Driving Force — Power Payoff", "Crushing Pressure — Power Crusher"}.issubset({x.name for x in new_pool})
     assert sum(not x.is_kimarite for x in new_pool) == sum(not x.is_kimarite for x in catalog.CARD_POOL)
+    style_builds_v5.B5_LARGE_AFFINITY_DECK = True
     style_builds_v5.CARD_POOL = new_pool
     style_builds_v5.STARTING_KIMARITE = new_starting
     style_builds_v5.preferred = preferred
