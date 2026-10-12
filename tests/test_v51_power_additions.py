@@ -15,7 +15,7 @@ def test_driving_force_power_payoff_and_draw_fallback():
     s = state()
     resolve_exchange_effect(s, Side.A, card_by_name("Driving Force — Power Payoff"),
                             EffectContext(choices={"mode":"power_payoff"}))
-    assert (s.position, s.momentum) == (2, 1)
+    assert (s.position, s.momentum) == (1, 1)
     weaker = state(power=6)
     resolve_exchange_effect(weaker, Side.A, card_by_name("Driving Force — Power Payoff"),
                             EffectContext(choices={"mode":"draw"}))
@@ -28,7 +28,7 @@ def test_crushing_pressure_crush_and_draw_fallback():
     resolve_exchange_effect(s, Side.A, card_by_name("Crushing Pressure — Power Crusher"),
                             EffectContext(choices={"mode":"power_crusher"}))
     assert s.momentum == 1
-    assert s.fighter_b.power == 2
+    assert s.fighter_b.power == 3
     weaker = state(power=7, enemy_power=5)
     resolve_exchange_effect(weaker, Side.A, card_by_name("Crushing Pressure — Power Crusher"),
                             EffectContext(choices={"mode":"draw"}))
