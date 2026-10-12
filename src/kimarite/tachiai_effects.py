@@ -42,7 +42,7 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> in
 
 
 def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) -> None:
-    """Resolve the original playtest wrestlers prepared Tachiai cards."""
+    """Resolve prepared Tachiai cards, including cards without a Tachiai-specific effect."""
     for side in (Side.A, Side.B):
         _activate_prebout_shiko(state, side)
 
@@ -155,7 +155,10 @@ def resolve_prepared_tachiai(state: BoutState, comparison: TachiaiComparison) ->
             gain_power(state, side, 1)
 
         else:
-            raise KeyError(f"Prepared Tachiai effect for {name!r} is not registered.")
+            # All legal prepared cards contribute their printed orbs through
+            # compare_tachiai. Cards with no Tachiai text have no additional
+            # opening effect; their Exchange effect is NOT triggered here.
+            state.log(f"{name} has no additional Tachiai effect.")
 
     net_momentum = momentum_delta[Side.A] - momentum_delta[Side.B]
     if net_momentum > 0:

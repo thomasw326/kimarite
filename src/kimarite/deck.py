@@ -33,7 +33,7 @@ def build_seeded_deck(
     remainder = [
         card
         for card in CARD_POOL
-        if card.name not in reserved_names and card.card_id not in excluded_ids
+        if card.card_id <= 45 and card.name not in reserved_names and card.card_id not in excluded_ids
     ]
     remainder.sort(key=lambda card: sheet_seed_key(card.card_id, seed))
 

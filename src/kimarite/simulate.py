@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .ai import play_ai_turn
+from .personality_ai import play_personality_turn
 from .models import BoutState, Side
 from .setup import BoutConfig, PreparedBout, create_prepared_bout
 from .turns import end_exchange_turn, start_exchange_turn
@@ -20,7 +21,10 @@ def run_bout(
     config: BoutConfig,
     *,
     max_turns: int = 100,
+    ai_mode: str = "tactical",
 ) -> SimulationResult:
+    if ai_mode not in {"tactical", "personality"}:
+        raise ValueError(f"Unknown AI mode: {ai_mode}")
     prepared: PreparedBout = create_prepared_bout(config)
     state = prepared.state
     comparison = prepared.comparison
@@ -56,7 +60,10 @@ def run_bout(
                 turns=state.turn_number,
             )
 
-        play_ai_turn(state, side, comparison)
+        if ai_mode == "personality":
+            play_personality_turn(state, side, comparison)
+        else:
+            play_ai_turn(state, side, comparison)
 
         if state.winner is not None:
             return SimulationResult(
