@@ -1,0 +1,25 @@
+name: PF B7 approved throw-rule smoke
+
+on:
+  push:
+    branches:
+      - "fix/v52-pf-b7-throw-thresholds"
+      - "experiment/v52-pressure-draft40-vs-random13"
+    paths:
+      - "src/kimarite/r21_variant_rules.py"
+      - "tests/test_b7_runtime_audit.py"
+      - ".github/workflows/pf-b7-throw-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Verify B7 card rules through real play and both throw boundaries
+        run: python -m pytest -v tests/test_b7_runtime_audit.py tests/test_v51_power_additions.py tests/test_v5_shiko_playability.py

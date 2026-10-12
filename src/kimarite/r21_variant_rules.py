@@ -69,11 +69,10 @@ def variant_predicate(state: BoutState, side: Side, identifier: str) -> bool:
         return pos >= 2 and f.cards_played_this_turn >= 3 and mom >= 0
     if identifier == "R21-R22-TSO-2":
         return f.total_grip == 0 and mom >= 1 and adv <= -2
-    if identifier == "R21-R25-UWD-M2-EX":
-        return f.left_grip.value >= 1 and grip > 0 and mom >= 1 and adv <= -4
-    if identifier == "R21-UWA-C1-M2":
-        return f.left_grip is GripState.DEEP and grip > 0 and mom >= 1
-
+    # R25 Uwatedashinage and M2 Uwatenage are checked below using the
+    # approved stricter thresholds.  Do not reintroduce the old B7 returns:
+    # they accepted weaker conditions and bypassed the final card wording.
+    #
     # All these checks retain their unaffected requirements from the R20 spec.
     if identifier == "R21-HIK-C2-MN3":
         return grip >= 1 and mom <= -3 and pos >= 0
