@@ -2,7 +2,7 @@ name: B7 revised 22 Kimarite - 15 wrestler 25200 bouts
 on:
   push:
     branches: [experiment/b7-reviewed-22-kimarite]
-    paths: [".github/workflows/r26-affinity-full22.yml", "src/kimarite/r26_style_final22.py", "src/kimarite/r21_variant_rules.py", "src/kimarite/effects.py", "src/kimarite/tachiai_effects.py"]
+    paths: [".github/workflows/r26-affinity-full22.yml", "src/kimarite/r26_style_final22.py", "src/kimarite/r21_variant_rules.py", "src/kimarite/effects.py", "src/kimarite/tachiai_effects.py", "tests/test_v51_power_additions.py"]
   workflow_dispatch:
 jobs:
   smoke:
