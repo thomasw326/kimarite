@@ -200,7 +200,7 @@ def run_shard(start, stop, output):
                         for card, copies in excluded.items():
                             mark_event(stats, style, opponent, card, "excluded", won)
                             add_metric(stats, style, opponent, card, "excluded_copies", copies)
-                        assert len({c.card_id for c in inventory}) == 40
+                        assert len({c.card_id for c in inventory}) == 26
                         pool = Counter(canonical(c.name, alias) for c in inventory)
                         for card, copies in pool.items():
                             mark_event(stats, style, opponent, card, "deck", won)
