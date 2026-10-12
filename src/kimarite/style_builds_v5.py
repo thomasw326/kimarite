@@ -856,7 +856,7 @@ STYLE_CARD_SCORES = {
 
 
 # B5-only toggle: isolated experiment, never enabled for production style builds.
-B5_WEIGHTED_AFFINITY_DECK = False
+B6_FIXED_COMPOSITION_DECK = False
 
 
 @dataclass(frozen=True)
@@ -868,48 +868,49 @@ class StyleBuild:
 def build_style(style: str, seed: int = 0, ranking: int = 1, difficulty: int = 0, *, enable_stat_boosts: bool = False) -> StyleBuild:
     profile = STYLES[style]
     rng = random.Random(seed)
-    kimarite_options = preferred(STARTING_KIMARITE, style, 3)
-    kimarite = rng.choices(kimarite_options, weights=list(range(len(kimarite_options), 0, -1)))[0]
-    basics = preferred([c for c in CARD_POOL if not c.is_kimarite], style, 7)
-    tachiai = rng.choices(basics, weights=list(range(len(basics), 0, -1)))[0]
-    top_options = [c for c in basics if c.name != tachiai.name]
-    top = rng.choices(top_options, weights=list(range(len(top_options), 0, -1)))[0]
-    reserved = {kimarite.name, tachiai.name, top.name}
-    eligible = [
-        c for c in CARD_POOL
-        if c.name not in reserved and c.card_id not in UNIVERSALLY_PROTECTED_IDS
-    ]
-    if B5_WEIGHTED_AFFINITY_DECK:
-        # 30 unique affinity favorites, 1 copy each; top 10 gain 1 extra
-        # copy (40 physical cards including the prepared card).
-        # Keep original opening rules and ensure both opening basics occur in
-        # the selected 30 without requiring a card outside the deck.
-        # Variant Kimarite names are translated by the installed preferred().
-        ranked = preferred([c for c in CARD_POOL if c.name != kimarite.name], style, len(CARD_POOL))
-        selected = list(ranked[:30])
-        for opening in (tachiai, top):
-            if not any(c.name == opening.name for c in selected):
-                selected.pop()
-                selected.append(opening)
-        # Select top ten by the same affinity order after inserting must-have openings.
-        selected = preferred(selected, style, 30)
-        assert len(selected) == 30 and len({c.name for c in selected}) == 30
-        copies = []
-        for i, card in enumerate(selected):
-            for occurrence in range(2 if i < 10 else 1):
-                copies.append(Card(2_000_000 + i * 10 + occurrence, card.name,
-                                   card.power, card.technique, card.spirit, card.is_kimarite))
-        assert len(copies) == 40
-        top_copy = next(c for c in copies if c.name == top.name)
-        prepared_copy = next(c for c in copies if c.name == tachiai.name)
-        copies.remove(top_copy)
-        copies.remove(prepared_copy)
-        rng.shuffle(copies)
-        remainder = copies
-        top = top_copy
-        tachiai = prepared_copy
+    if B6_FIXED_COMPOSITION_DECK:
+        # Exactly 40 physical cards INCLUDING the starting Kimarite:
+        # 10 unique Kimarite + 20 unique basics + 10 duplicate top-10 basics.
+        kimarite_ten = preferred(STARTING_KIMARITE, style, 10)
+        basic_twenty = preferred([c for c in CARD_POOL if not c.is_kimarite], style, 20)
+        basic_ten = basic_twenty[:10]
+        assert len(kimarite_ten) == 10 and len(basic_twenty) == 20
+        # Preserve weighted top-three starter selection, restricted to the ten.
+        kimarite_options = kimarite_ten[:3]
+        kimarite = rng.choices(kimarite_options, weights=[3, 2, 1])[0]
+        # Both openings selected exclusively from the doubled top-ten basics.
+        tachiai = rng.choices(basic_ten, weights=list(range(10, 0, -1)))[0]
+        top_options = [c for c in basic_ten if c.name != tachiai.name]
+        top = rng.choices(top_options, weights=list(range(len(top_options), 0, -1)))[0]
+        physical = []
+        for index, card in enumerate([*kimarite_ten, *basic_twenty]):
+            copies = 1 if card.is_kimarite else (2 if card in basic_ten else 1)
+            for duplicate in range(copies):
+                physical.append(Card(3_000_000 + index * 10 + duplicate,
+                                     card.name, card.power, card.technique,
+                                     card.spirit, card.is_kimarite))
+        assert len(physical) == 40
+        starter_copy = next(c for c in physical if c.name == kimarite.name)
+        prepared_copy = next(c for c in physical if c.name == tachiai.name)
+        top_copy = next(c for c in physical if c.name == top.name)
+        for selected in (starter_copy, prepared_copy, top_copy):
+            physical.remove(selected)
+        rng.shuffle(physical)
+        kimarite, tachiai, top = starter_copy, prepared_copy, top_copy
+        remainder = physical
         excluded = frozenset()
     else:
+        kimarite_options = preferred(STARTING_KIMARITE, style, 3)
+        kimarite = rng.choices(kimarite_options, weights=list(range(len(kimarite_options), 0, -1)))[0]
+        basics = preferred([c for c in CARD_POOL if not c.is_kimarite], style, 7)
+        tachiai = rng.choices(basics, weights=list(range(len(basics), 0, -1)))[0]
+        top_options = [c for c in basics if c.name != tachiai.name]
+        top = rng.choices(top_options, weights=list(range(len(top_options), 0, -1)))[0]
+        reserved = {kimarite.name, tachiai.name, top.name}
+        eligible = [
+            c for c in CARD_POOL
+            if c.name not in reserved and c.card_id not in UNIVERSALLY_PROTECTED_IDS
+        ]
         excluded = least_useful(eligible, style, 7 + difficulty)
         remainder = [c for c in CARD_POOL if c.name not in reserved and c.card_id not in excluded]
         rng.shuffle(remainder)
@@ -920,7 +921,7 @@ def build_style(style: str, seed: int = 0, ranking: int = 1, difficulty: int = 0
         primary=Stat(profile.primary), secondary=Stat(profile.secondary),
         tertiary=third, ranking=ranking,
     )
-    draw_pile = ([top, *remainder] if B5_WEIGHTED_AFFINITY_DECK
+    draw_pile = ([top, *remainder] if B6_FIXED_COMPOSITION_DECK
                  else [top, *remainder, tachiai])
     return StyleBuild(
         FighterState(wrestler, draw_pile=draw_pile, kimarite_zone=[kimarite]),
