@@ -106,7 +106,7 @@ jobs:
           PY
           python - <<'PY'
           import csv,glob
-          files=glob.glob("artifacts/r26/shard-*.csv")
+          files=glob.glob("artifacts/r26/shard-[0-9].csv")
           assert len(files)==1
           rows=list(csv.DictReader(open(files[0])))
           assert len(rows)==3600
