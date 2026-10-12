@@ -45,8 +45,17 @@ def install_final22() -> None:
         return frozenset(c.card_id for c in options[:max(0, count)])
 
     def convert(cards):
-        return tuple(build_variant_card(final_by_family[c.name], card_id=c.card_id)
-                     if c.is_kimarite else c for c in cards)
+        from .models import Card
+        result = []
+        for c in cards:
+            if c.is_kimarite:
+                converted = build_variant_card(final_by_family[c.name], card_id=c.card_id)
+                if c.name == "Kotenage":
+                    converted = Card(c.card_id, converted.name, 1, 2, 0, True)
+                result.append(converted)
+            else:
+                result.append(c)
+        return tuple(result)
 
     # Exclude both families from the whole draw pool as well as starting choices.
     # Affinity ranking then promotes the next eligible choices automatically.
