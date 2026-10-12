@@ -175,3 +175,29 @@ def commit_opening(
         f"{len(result_b.committed)}."
     )
     return OpeningResolution(comparison=comparison, side_a=result_a, side_b=result_b)
+
+
+def first_exchange_side_v6(
+    opening: OpeningResolution, wrestler_a, wrestler_b,
+) -> Side:
+    """V6 opening priority: Spirit, then Power, Technique, and ranking.
+
+    Legacy first_exchange_side() used Technique first. The V6 order matches
+    the current game-design document while leaving B7 simulations untouched.
+    """
+    diff = opening.comparison
+    for value in (
+        diff.spirit_advantage_a,
+        diff.power_advantage_a,
+        diff.technique_advantage_a,
+    ):
+        if value > 0:
+            return Side.A
+        if value < 0:
+            return Side.B
+    if wrestler_a.ranking is not None and wrestler_b.ranking is not None:
+        if wrestler_a.ranking < wrestler_b.ranking:
+            return Side.A
+        if wrestler_b.ranking < wrestler_a.ranking:
+            return Side.B
+    raise ValueError("Opening priority tied; distinct wrestler ranks are required.")
