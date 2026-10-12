@@ -1,4 +1,4 @@
-"""B5: B4 20 Kimarite with 40-card, top-30-affinity weighted draw piles.
+"""B6: 10 Kimarite + 20 basics + 10 duplicate basics, with card-level bout logging.
 
 Does not change live catalogue. Installs an isolated in-process R21 card map
 before constructing styles, preserving usual affinity under the Kimarite family name.
@@ -61,7 +61,7 @@ def install_final22() -> None:
     assert excluded_families.isdisjoint({c.name for c in new_pool})
     assert {"Driving Force — Power Payoff", "Crushing Pressure — Power Crusher"}.issubset({x.name for x in new_pool})
     assert sum(not x.is_kimarite for x in new_pool) == sum(not x.is_kimarite for x in catalog.CARD_POOL)
-    style_builds_v5.B5_WEIGHTED_AFFINITY_DECK = True
+    style_builds_v5.B6_FIXED_COMPOSITION_DECK = True
     style_builds_v5.CARD_POOL = new_pool
     style_builds_v5.STARTING_KIMARITE = new_starting
     style_builds_v5.preferred = preferred
@@ -81,7 +81,11 @@ def run_batch(start_pair: int, end_pair: int, repetitions: int, seed: int, max_t
     assert len(pairs) == 105
     assert 0 <= start_pair < end_pair <= len(pairs)
     output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("w", newline="", encoding="utf-8") as f:
+    detail_output = output.with_name(output.stem + "_cards.csv")
+    with output.open("w", newline="", encoding="utf-8") as f, detail_output.open("w", newline="", encoding="utf-8") as df: 
+        details = csv.writer(df)
+        details.writerow(("pair","repetition","seat_a","seat_b","style","opponent",
+                          "won","card","kind","count","win_method","turns"))
         writer = csv.writer(f)
         writer.writerow(("pair","repetition","seat_a","seat_b","winner","win_method",
                          "completed","turns","error"))
@@ -95,6 +99,34 @@ def run_batch(start_pair: int, end_pair: int, repetitions: int, seed: int, max_t
                               b if result.state.winner is Side.B else "")
                     writer.writerow((pair_index,repeat,a,b,winner,result.state.win_method or "",
                                      result.completed,result.turns,result.unsupported_reason or ""))
+                    if not result.completed:
+                        continue
+                    state = result.state
+                    for side, style, opponent in ((Side.A,a,b),(Side.B,b,a)):
+                        fighter = state.fighter(side)
+                        won = int(state.winner is side)
+                        # Card appearance in the actual opening, actual play events,
+                        # and winning Kimarite. One row per observed card / event type.
+                        events = {
+                            "played": Counter(card.name for owner, card in state.card_plays if owner is side),
+                            "opening_hand": Counter(state.first_exchange_hands.get(side, ())),
+                            "starting_kimarite": Counter([fighter.wrestler.starting_kimarite.name]),
+                            "prepared_tachiai": Counter([fighter.wrestler.prepared_tachiai_card.name]),
+                            "top_deck": Counter([fighter.wrestler.top_of_deck_card.name]),
+                        }
+                        for kind, cards in events.items():
+                            for name, count in cards.items():
+                                details.writerow((pair_index,repeat,a,b,style,opponent,won,
+                                                  name,kind,count,state.win_method or "",result.turns))
+                        if won and state.winning_kimarite_card_id is not None:
+                            from .catalog import card_by_id
+                            try:
+                                finishing_card = card_by_id(state.winning_kimarite_card_id)
+                                details.writerow((pair_index,repeat,a,b,style,opponent,won,
+                                                  finishing_card.name,"winning_kimarite",1,
+                                                  state.win_method or "",result.turns))
+                            except KeyError:
+                                pass
     print(json.dumps({"start_pair":start_pair,"end_pair":end_pair,
                        "repetitions":repetitions,"bouts":(end_pair-start_pair)*2*repetitions,
                        "output":str(output)}))
