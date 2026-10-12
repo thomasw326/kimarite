@@ -23,16 +23,17 @@ def install_final22() -> None:
     arms = {a.arm_id: a for a in load_arms()}
     assert all(i in arms for i in roster["arms"])
     assert len({arms[i].kimarite for i in roster["arms"]}) == 22
-    excluded_families = {"Abisetaoshi", "Kirikaeshi"}
+    excluded_families = set()
     final_by_family = {arms[i].kimarite: i for i in roster["arms"]
                        if arms[i].kimarite not in excluded_families}
-    assert len(final_by_family) == 20
+    assert len(final_by_family) == 22
     variant_by_name = {"R21:" + ident: arms[ident].kimarite for ident in roster["arms"]
                        if arms[ident].kimarite not in excluded_families}
     old_affinity = affinity_v5.affinity
 
     def family_affinity(style: str, name: str) -> int:
-        return old_affinity(style, variant_by_name.get(name, name))
+        base = old_affinity(style, variant_by_name.get(name, name))
+        return base + (10 if style == "Pressure Fighter" and name == "Power Water" else 0)
 
     def preferred(cards, style, limit):
         unique = {variant_by_name.get(c.name, c.name): c for c in cards}
@@ -54,7 +55,7 @@ def install_final22() -> None:
     new_starting = convert(c for c in catalog.STARTING_KIMARITE
                            if c.name not in excluded_families)
     assert {c.name for c in new_pool if c.is_kimarite} == set(variant_by_name)
-    assert len(new_starting) == 20
+    assert len(new_starting) == 22
     assert all(c.name in {x.name for x in new_pool} for c in new_starting)
     assert all(not c.is_kimarite or c.name in set(variant_by_name)
                for c in new_pool)
