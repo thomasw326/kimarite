@@ -130,6 +130,8 @@ def commit_opening(
     The returned comparison is ready for later Tachiai-effect resolution.
     DO NOT start the Exchange from this function: effects and Push are pending.
     """
+    if state.v6_opening_committed:
+        raise ValueError("This bout has already resolved its opening commitment.")
     prepared_a = _validate_commitment(state.fighter_a, choice_a)
     prepared_b = _validate_commitment(state.fighter_b, choice_b)
 
@@ -169,6 +171,7 @@ def commit_opening(
     )
     result_a = apply(state.fighter_a, prepared_a)
     result_b = apply(state.fighter_b, prepared_b)
+    state.v6_opening_committed = True
     state.log(
         f"Tachiai commitment: {state.fighter_a.wrestler.name} committed "
         f"{len(result_a.committed)}; {state.fighter_b.wrestler.name} committed "
