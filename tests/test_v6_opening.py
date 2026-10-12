@@ -6,6 +6,7 @@ import pytest
 from kimarite.models import BoutState, Card, FighterState, Side, Wrestler
 from kimarite.opening_v6 import (
     OpeningCommitment, assign_starting_hand, commit_opening,
+    first_exchange_side_v6,
 )
 from kimarite.tachiai import compare_tachiai, technique_access
 
@@ -140,3 +141,16 @@ def test_old_comparison_and_technique_rules_remain_available():
     assert old.wrestler_a.power == 4
     assert old.wrestler_b.spirit == 5
     assert technique_access(4) == (6, 4)
+
+
+def test_v6_spirit_initiative_overrides_higher_opponent_technique():
+    state = ready()
+    opening = commit_opening(
+        state, OpeningCommitment((11, 12)), OpeningCommitment((21,)),
+    )
+    # A has Spirit 6 vs B's 5, but B has Technique 6 vs A's 1.
+    assert opening.comparison.spirit_advantage_a == 1
+    assert opening.comparison.technique_advantage_a < 0
+    assert first_exchange_side_v6(
+        opening, state.fighter_a.wrestler, state.fighter_b.wrestler,
+    ) is Side.A
