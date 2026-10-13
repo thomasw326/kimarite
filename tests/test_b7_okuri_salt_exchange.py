@@ -3,8 +3,14 @@ import pytest
 from kimarite.catalog import card_by_name
 from kimarite.effects import EffectContext, resolve_exchange_effect
 from kimarite.kimarite_effects import resolve_kimarite_play_effect
-from kimarite.models import Side
-from tests.helpers import make_bout
+from kimarite.models import Side, BoutState, Card, FighterState, Wrestler
+
+
+def make_bout():
+    blank = Card(9990, 'Blank')
+    a = Wrestler('A', 0, 0, 0, blank, blank, blank)
+    b = Wrestler('B', 0, 0, 0, blank, blank, blank)
+    return BoutState(FighterState(a), FighterState(b))
 
 
 def test_salt_throw_grants_one_exchange_play():
