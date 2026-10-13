@@ -33,3 +33,34 @@ def test_okuri_exchange_discards_after_effect(name, mode):
     assert [c.name for c in state.fighter_a.hand] == ["Oshi"]
     assert len(state.fighter_a.discard_pile) == before + 1
     assert state.fighter_a.discard_pile[-1].name == "Tsuki"
+
+
+@pytest.mark.parametrize("variant", ["R21-OKD-RS", "R21-OKT-RS"])
+def test_b7_okuri_empty_hand_discards_just_searched_reversal(variant):
+    from kimarite.r21_variant_rules import build_variant_card
+    from kimarite.playing import play_card
+    okuri = build_variant_card(variant, card_id=80001)
+    reversal = card_by_name("Pull")
+    other = card_by_name("Tsuki")
+    state = make_bout()
+    state.r20_active = True
+    state.fighter_a.hand = [okuri]
+    state.fighter_a.draw_pile = [other, reversal, card_by_name("Oshi")]
+    play_card(state, Side.A, okuri)
+    assert not state.fighter_a.hand
+    assert state.fighter_a.discard_pile[-1].name == "Pull"
+    assert [c.name for c in state.fighter_a.draw_pile] == ["Tsuki", "Oshi"]
+
+
+@pytest.mark.parametrize("variant", ["R21-OKD-RS", "R21-OKT-RS"])
+def test_b7_okuri_search_then_choose_discard(variant):
+    from kimarite.r21_variant_rules import build_variant_card
+    from kimarite.playing import play_card
+    okuri = build_variant_card(variant, card_id=80002)
+    state = make_bout()
+    state.r20_active = True
+    state.fighter_a.hand = [okuri, card_by_name("Oshi")]
+    state.fighter_a.draw_pile = [card_by_name("Henka"), card_by_name("Tsuki")]
+    play_card(state, Side.A, okuri, context=EffectContext(choices={"hand_index": 0}))
+    assert [c.name for c in state.fighter_a.hand] == ["Henka"]
+    assert state.fighter_a.discard_pile[-1].name == "Oshi"
