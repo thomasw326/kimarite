@@ -29,7 +29,7 @@ def main():
                 for field, value in row.items():
                     if field not in ("style", "opponent", "card"):
                         cards[key][field] += int(value)
-    assert ranges == {(i, i + 100) for i in range(0, 100, 20)}, ranges
+    assert ranges == {(i, i + 20) for i in range(0, 100, 20)}, ranges
     assert len(bouts) == 2000
     assert all(r["completed"] == "True" and not r["error"] for r in bouts)
     assert all(r["winner_style"] for r in bouts)
@@ -54,7 +54,7 @@ def main():
             mirrors[r["style_a"]]["seat_a_wins"] += int(r["seat_a_won"])
         methods[(*pair, r["win_method"])] += 1
     assert len(matchup) == 10 and all(v["bouts"] == 200 for v in matchup.values())
-    assert len(mirrors) == 4 and all(v["bouts"] == 1000 for v in mirrors.values())
+    assert len(mirrors) == 4 and all(v["bouts"] == 200 for v in mirrors.values())
     summary = {
         "total_bouts": 2000, "cross_bouts": 1200, "mirror_bouts": 800,
         "matchups": [{"styles": list(k), **dict(v)} for k, v in sorted(matchup.items())],
@@ -78,7 +78,7 @@ def main():
             w.writerow((*key, *(c[col] for col in columns),
                 round(100*c["deck_wins"]/c["deck_bouts"], 3) if c["deck_bouts"] else "",
                 round(100*c["played_wins"]/c["played_bouts"], 3) if c["played_bouts"] else ""))
-    print(json.dumps({"total_bouts": 10000, "matchup_count": 10, "mirror_count": 4,
+    print(json.dumps({"total_bouts": 2000, "matchup_count": 10, "mirror_count": 4,
                       "incomplete": 0}, indent=2), flush=True)
 
 
