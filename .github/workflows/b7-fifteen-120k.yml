@@ -1,0 +1,9 @@
+name: B7 Fifteen 120k
+on:
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo ready
