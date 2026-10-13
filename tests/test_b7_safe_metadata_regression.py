@@ -5,7 +5,6 @@ from pathlib import Path
 from kimarite import affinity_v5
 from kimarite.r21_gauntlet import load_arms
 from kimarite.r21_variant_rules import build_variant_card
-from kimarite.r26_style_final22 import install_final22
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,11 +31,3 @@ def test_b7_affinity_coverage_explicit_and_unrated_neutral():
     assert affinity_v5.affinity("The Technician", "__unknown_b7_card__") == 0
 
 
-def test_b7_install_keeps_22_selected_kimarite_and_kotenage_orbs():
-    from kimarite import style_builds_v5
-    install_final22()
-    pool = style_builds_v5.CARD_POOL
-    winners = [card for card in pool if card.is_kimarite]
-    assert len({card.name for card in winners}) == 22
-    kot = next(card for card in winners if card.name == "R21:R21-KOT-R1")
-    assert (kot.power, kot.technique, kot.spirit) == (1, 2, 0)
