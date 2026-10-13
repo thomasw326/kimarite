@@ -50,6 +50,7 @@ def install():
     catalog = {aliases.get(card.name, card.name):card
                for card in style_builds_v5.CARD_POOL}
     catalog["Driving Force"] = catalog["Driving Force — Power Payoff"]
+    aliases["Driving Force — Power Payoff"] = "Driving Force"
     tt = selected["The Technician"]
     assert set(tt) <= set(catalog), sorted(set(tt)-set(catalog))
     assert sum(v for n,v in tt.items() if catalog[n].is_kimarite) == 8
