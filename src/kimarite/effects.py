@@ -150,8 +150,6 @@ def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
     gain_push(state, side, 1)
     if chained and state.winner is None:
         draw_one(state, side)
-        if state.winner is None:
-            _discard_from_hand(state, side, card, context)
 
 
 def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
