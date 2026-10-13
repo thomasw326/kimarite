@@ -1,9 +1,9 @@
 {
-  "source": "Fast Grappler Pool!A53:C103 copy counts; zero omitted",
+  "source": "Fast Grappler Pool!A53:C103 user-edited live copy counts (zero omitted) - second frozen 40 batch",
   "source_url": "https://docs.google.com/spreadsheets/d/1tDtaDeT9fUMfEEzELqhM-_5iG2Y-r1KoxZOfKqMMUq0/edit?gid=213&range=A46:L114",
   "wrestler": "Fast Grappler",
   "selected_cards": 40,
-  "unique_names": 30,
+  "unique_names": 31,
   "copy_count": {
     "Yorikiri": 2,
     "Uwatedashinage": 1,
@@ -20,7 +20,6 @@
     "Gain Right Grip": 2,
     "Shitate": 2,
     "Uwate": 1,
-    "Attempt Two-Handed Grip": 2,
     "Attempt Deep Inside Grip": 1,
     "Attempt Deep Outside Grip": 1,
     "Oshi": 1,
@@ -32,10 +31,30 @@
     "Get Underneath": 1,
     "Headlong Charge": 1,
     "Tsuri": 1,
+    "Salt Throw": 1,
     "Give Ground": 1,
     "Hold Position": 1,
-    "Shiko Stomp": 1
+    "Shiko Stomp": 1,
+    "Immovable": 1
   },
   "rule_context": "B7/V5.2 approved R21 final22, Yorikiri C3, approved UWD/UWA thresholds",
-  "purpose": "Frozen user-edited deck for 2400-bout fixed-vs-fixed/random comparison"
+  "purpose": "Second 2400-bout matched FG fixed40 vs PF locked40 and Technician 27+13",
+  "comparison_baseline_run": "https://github.com/thomasw326/kimarite/actions/runs/38326873413",
+  "changes_since_baseline": [
+    {
+      "name": "Attempt Two-Handed Grip",
+      "prev": 2,
+      "next": 0
+    },
+    {
+      "name": "Salt Throw",
+      "prev": 0,
+      "next": 1
+    },
+    {
+      "name": "Immovable",
+      "prev": 0,
+      "next": 1
+    }
+  ]
 }
