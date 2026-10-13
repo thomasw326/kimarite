@@ -1,5 +1,5 @@
 {
-  "source": "Pressure Fighter Pool, rows 76-118, live Google Sheets copy count (0 omitted)",
+  "source": "Pressure Fighter Pool (current): Shove x3, Tsuppari x2, all other copies unchanged",
   "source_url": "https://docs.google.com/spreadsheets/d/1tDtaDeT9fUMfEEzELqhM-_5iG2Y-r1KoxZOfKqMMUq0/edit?gid=212&range=A75:J123",
   "wrestler": "Pressure Fighter",
   "sheet_retrieved": "2026-10-12",
@@ -16,8 +16,8 @@
     "Tottari": 1,
     "Oshi": 3,
     "Tsuki": 3,
-    "Shove": 2,
-    "Tsuppari": 3,
+    "Shove": 3,
+    "Tsuppari": 2,
     "Belt Slap": 2,
     "Driving Force — Power Payoff": 2,
     "Crushing Pressure — Power Crusher": 2,
