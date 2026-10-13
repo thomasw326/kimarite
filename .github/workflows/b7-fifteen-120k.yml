@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - experiment/b7-charger-four-fixed40-10k
-    paths:
-      - .github/workflows/b7-fifteen-120k.yml
   workflow_dispatch:
   pull_request:
     branches: [main]
