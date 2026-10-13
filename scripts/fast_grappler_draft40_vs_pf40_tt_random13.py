@@ -49,7 +49,7 @@ def fg_snapshot():
     data = json.loads(FG_FILE.read_text(encoding="utf-8"))
     counts = data["copy_count"]
     assert data["wrestler"] == "Fast Grappler"
-    assert len(counts) == 31 and sum(counts.values()) == 40
+    assert len(counts) == 30 and sum(counts.values()) == 40
     assert counts["Yorikiri"] == 2
     assert all(type(n) is int and n > 0 for n in counts.values())
     assert sum(counts[n] for n in (
