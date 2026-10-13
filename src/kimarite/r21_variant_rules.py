@@ -61,8 +61,6 @@ def variant_predicate(state: BoutState, side: Side, identifier: str) -> bool:
     # B7 approved balance pass; override the selected R21 roster predicates.
     if identifier == "R21-R22-ABI-1":
         return grip >= 2 and f.power >= 10 and mom >= 1
-    if identifier == "R21-KIR-P3-HA3":
-        return reversal and adv <= -3 and hand_adv >= 3
     if identifier == "R21-KOT-R1":
         return other_grip == 0 and mom >= 3 and len(f.hand) >= 6
     if identifier == "R21-TSU-C1":
