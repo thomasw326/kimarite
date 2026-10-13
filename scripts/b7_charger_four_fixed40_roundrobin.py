@@ -1,6 +1,6 @@
-"""B7 15-archetype experimental fixed40 round-robin, including mirrors.
+"""B7 four-style fixed40 round-robin, including mirrors.
 
-120 unordered matchups (105 cross-style, 15 mirrors), both seats per repetition.
+10 unordered matchups (6 cross-style, 4 mirrors), both seats per repetition.
 For each repetition run both orientations; mirrors use distinct seeds so each
 seat is an independent 40-card shuffle. Both participants count in card metrics.
 """
@@ -194,8 +194,8 @@ def run(start,stop,output):
             w.writerow(dict(zip(("style","opponent","card"),key)) |
                        {name:c[name] for name in COUNT_FIELDS})
     meta={"start":start,"stop":stop,"bouts":total,"completed":total-len(errors),
-          "incomplete":len(errors),"pairs":PAIRS,"mirror_bouts":(stop-start)*6,
-          "source":"B7 3 frozen plus 12 experimental style-informed fixed40; V5.2 AI"}
+          "incomplete":len(errors),"pairs":PAIRS,"mirror_bouts":(stop-start)*8,
+          "source":"B7 three locked decks plus updated Charger 40; V5.2 AI"}
     (output/"manifest.json").write_text(json.dumps(meta,indent=2))
     if errors:
         with (output/"incomplete.json").open("w") as f:
