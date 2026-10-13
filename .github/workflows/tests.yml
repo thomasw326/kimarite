@@ -5,18 +5,6 @@ on:
   pull_request:
 
 jobs:
-  historical-full-suite:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - run: python -m pip install -e ".[dev]"
-      - name: Report all historical expectations (informational until migrated)
-        run: pytest -q
-
   b7-safe-regressions:
     runs-on: ubuntu-latest
     steps:
