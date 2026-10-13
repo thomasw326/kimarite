@@ -371,14 +371,13 @@
       "Belt Slap": 1
     },
     "Mawashi Specialist": {
-      "Shitatenage": 1,
+      "Shitatenage": 2,
       "Uwatenage": 1,
       "Yorikiri": 1,
       "Uwatedashinage": 1,
       "Tsuridashi": 1,
       "Sukuinage": 1,
       "Yoritaoshi": 1,
-      "Hikiotoshi": 1,
       "Attempt Deep Inside Grip": 2,
       "Morozashi": 2,
       "Shitate": 2,
@@ -521,13 +520,12 @@
       "Shiko Stomp": 1
     },
     "Speed Demon": {
-      "Oshidashi": 1,
+      "Oshidashi": 2,
       "Tsukidashi": 1,
       "Tsukitaoshi": 1,
       "Oshitaoshi": 1,
       "Yorikiri": 1,
       "Okuritaoshi": 1,
-      "Hatakikomi": 1,
       "Yoritaoshi": 1,
       "Headlong Charge": 2,
       "Explosive Step — Fumikomi": 2,
@@ -550,5 +548,6 @@
       "Power Water": 1,
       "Tsuri": 1
     }
-  }
+  },
+  "notes": "2026-10-13: approved 2x Shitatenage on Mawashi Specialist (replaces Hikiotoshi); 2x Oshidashi on Speed Demon (replaces Hatakikomi); all other decks unchanged."
 }
