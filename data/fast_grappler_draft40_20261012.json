@@ -1,9 +1,9 @@
 {
-  "source": "Fast Grappler Pool!A53:C103 user-edited live copy counts (zero omitted) - second frozen 40 batch",
+  "source": "Fast Grappler Pool user-edited 40 physical cards, Hold Position replaces Immovable",
   "source_url": "https://docs.google.com/spreadsheets/d/1tDtaDeT9fUMfEEzELqhM-_5iG2Y-r1KoxZOfKqMMUq0/edit?gid=213&range=A46:L114",
   "wrestler": "Fast Grappler",
   "selected_cards": 40,
-  "unique_names": 31,
+  "unique_names": 30,
   "copy_count": {
     "Yorikiri": 2,
     "Uwatedashinage": 1,
@@ -33,28 +33,22 @@
     "Tsuri": 1,
     "Salt Throw": 1,
     "Give Ground": 1,
-    "Hold Position": 1,
-    "Shiko Stomp": 1,
-    "Immovable": 1
+    "Hold Position": 2,
+    "Shiko Stomp": 1
   },
   "rule_context": "B7/V5.2 approved R21 final22, Yorikiri C3, approved UWD/UWA thresholds",
-  "purpose": "Second 2400-bout matched FG fixed40 vs PF locked40 and Technician 27+13",
-  "comparison_baseline_run": "https://github.com/thomasw326/kimarite/actions/runs/38326873413",
+  "purpose": "R3 quick 600 bout A/B comparison; 300 vs Pressure Fighter 40 and 300 vs Technician 27+13",
+  "comparison_baseline_run": "https://github.com/thomasw326/kimarite/actions/runs/38328934534",
   "changes_since_baseline": [
     {
-      "name": "Attempt Two-Handed Grip",
-      "prev": 2,
+      "name": "Immovable",
+      "prev": 1,
       "next": 0
     },
     {
-      "name": "Salt Throw",
-      "prev": 0,
-      "next": 1
-    },
-    {
-      "name": "Immovable",
-      "prev": 0,
-      "next": 1
+      "name": "Hold Position",
+      "prev": 1,
+      "next": 2
     }
   ]
 }
