@@ -63,7 +63,7 @@ def test_tawara_search_takes_topmost_kimarite_not_first_card():
         card_by_name("Oshi"), card_by_name("Yorikiri"), card_by_name("Oshidashi")
     ]
     resolve_exchange_effect(state, Side.A, card_by_name("Use the Tawara"), EffectContext())
-    assert [c.name for c in state.fighter_a.kimarite_zone] == ["Yorikiri"]
+    assert [c.name for c in state.fighter_a.hand] == ["Yorikiri"]
     assert [c.name for c in state.fighter_a.draw_pile][:2] == ["Oshi", "Oshidashi"]
 
 
