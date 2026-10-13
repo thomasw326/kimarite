@@ -37,7 +37,14 @@ def play_card(
     state.log(f"{fighter.wrestler.name} plays {card.name}.")
 
     if card.is_kimarite:
+        duplicate_this_turn = any(
+            previous.is_kimarite and previous.name == card.name
+            for previous in fighter.played_this_turn[:-1]
+        )
         fighter.kimarite_zone.append(card)
+        if duplicate_this_turn and state.winner is None:
+            fighter.plays_remaining += 1
+            state.log(f"{fighter.wrestler.name} gains 1 Play for repeated {card.name}.")
         if getattr(state, "r20_active", False) and card.name.startswith("R21:"):
             from .r21_variant_rules import variant_exchange
             variant_exchange(state, side, card, context or EffectContext())
