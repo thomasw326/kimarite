@@ -263,6 +263,7 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
     fighter = state.fighter(side)
     improve_grip(state, side, "left")
+    add_temporary(state, side, card, phase="exchange")
     if state.winner is not None:
         return
 
@@ -935,6 +936,7 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Gaburi",
         "Gain Left Grip",
         "Gain Right Grip",
+        "Uwate",
         "Shitate",
         "Attempt Two-Handed Grip",
         "Attempt Deep Outside Grip",
