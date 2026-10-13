@@ -59,6 +59,8 @@ def variant_predicate(state: BoutState, side: Side, identifier: str) -> bool:
     reversal = bool(f.successful_reversal_this_turn)
 
     # B7 approved balance pass; override the selected R21 roster predicates.
+    if identifier == "R21-OKD-RS":
+        return reversal and pos >= 2 and mom >= 1
     if identifier == "R21-R22-ABI-1":
         return grip >= 2 and f.power >= 10 and mom >= 1
     if identifier == "R21-KOT-R1":
@@ -113,12 +115,7 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
     if identifier == "R21-R24-UWD-NE":
         return
     if identifier in {"R21-OKD-RS", "R21-OKT-RS"}:
-        # Search first, then pay the new mandatory one-card discard cost.
-        # With an otherwise empty hand the searched Reversal is discarded.
         search_for_reversal(state.fighter(side))
-        if state.winner is None:
-            from .kimarite_effects import _discard_one_from_hand
-            _discard_one_from_hand(state, side, card, context)
         return
     if identifier == "R21-KAT-H5-T2":
         if relative_momentum(state, side) >= 1:
@@ -160,6 +157,12 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
 def variant_progress(state: BoutState, side: Side, identifier: str) -> float:
     if variant_predicate(state, side, identifier):
         return 1.0
+    if identifier == "R21-OKD-RS":
+        f = state.fighter(side)
+        components = [1.0 if f.successful_reversal_this_turn else 0.0,
+                      min(1.0, max(0.0, (relative_position(state, side) + 3) / 5)),
+                      min(1.0, max(0.0, (relative_momentum(state, side) + 3) / 4))]
+        return min(0.99, sum(components) / len(components))
     # R20's advisory AI heuristic applies to the same named finish family;
     # cap below 1 for modified thresholds. Only predicate is authoritative.
     return min(0.99, _r20_progress(state, side, _references()[identifier]))
