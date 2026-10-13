@@ -820,12 +820,12 @@ def _sidestep(
 def _driving_force(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     mode = context.choice("mode")
     if mode not in ("power_payoff", "draw"):
-        raise ChoiceRequired(card.name, "mode", ["power_payoff", "draw"] if state.fighter(side).power >= 7 else ["draw"])
+        raise ChoiceRequired(card.name, "mode", ["power_payoff", "draw"] if state.fighter(side).power >= 5 else ["draw"])
     if mode == "power_payoff":
-        if state.fighter(side).power < 7:
-            raise IllegalPlay("Driving Force requires Power 7+ for its Push payoff.")
+        if state.fighter(side).power < 5:
+            raise IllegalPlay("Driving Force requires Power 5+ for its Push payoff.")
         gain_push(state, side, 1)
-        if state.winner is None:
+        if state.winner is None and state.fighter(side).power >= 7:
             gain_momentum(state, side, 1)
     else:
         draw_one(state, side)
@@ -850,6 +850,7 @@ def _crushing_pressure(state: BoutState, side: Side, card: Card, context: Effect
 
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Driving Force — Power Payoff": _driving_force,
+    "Driving Force": _driving_force,
     "Crushing Pressure — Power Crusher": _crushing_pressure,
     "Injury": lambda state, side, card, context: None,
     "Oshi": _oshi,
