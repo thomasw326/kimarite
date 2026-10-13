@@ -1,8 +1,8 @@
-name: B7 Pressure Fighter Shove Swap 10k
+name: B7 Uwate Top Deck 2k
 on:
   push:
     branches:
-      - experiment/b7-pressure-shove-swap-10k
+      - experiment/b7-uwate-topdeck-2k
   workflow_dispatch:
   pull_request:
     branches: [main]
@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
       max-parallel: 5
       matrix:
-        shard: [0, 1, 2, 3, 4]
+        shard: [0]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -67,9 +67,9 @@ jobs:
         with:
           pattern: b7-charger-four-shard-*
           path: combined/
-      - name: Verify and aggregate 10000 bouts
+      - name: Verify and aggregate 2000 bouts
         run: python scripts/b7_charger_four_fixed40_report.py --input combined --output final/
       - uses: actions/upload-artifact@v4
         with:
-          name: b7-pressure-shove-swap-10k-final
+          name: b7-uwate-topdeck-2k-final
           path: final/
