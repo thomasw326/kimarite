@@ -223,7 +223,6 @@ def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) 
         gain_push(state, side, 1)
     if state.winner is None:
         add_play(state, side, 1)
-        draw_one(state, side)
 
 
 
