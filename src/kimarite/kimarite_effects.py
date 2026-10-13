@@ -180,8 +180,6 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         else:
             lose_momentum(state, side, 1)
             gain_position(state, side, 2)
-        if state.winner is None:
-            _discard_one_from_hand(state, side, card, context)
 
     elif card.name == "Sukuinage":
         if no_grip(state, side):
