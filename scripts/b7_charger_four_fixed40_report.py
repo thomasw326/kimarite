@@ -13,7 +13,7 @@ def main():
     args = p.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     folders = sorted(m.parent for m in args.input.rglob("manifest.json"))
-    assert len(folders) == 1, folders
+    assert len(folders) == 5, folders
     ranges, bouts = set(), []
     cards = defaultdict(Counter)
     for folder in folders:
@@ -29,8 +29,8 @@ def main():
                 for field, value in row.items():
                     if field not in ("style", "opponent", "card"):
                         cards[key][field] += int(value)
-    assert ranges == {(0, 100)}, ranges
-    assert len(bouts) == 2000
+    assert ranges == {(i, i + 100) for i in range(0, 500, 100)}, ranges
+    assert len(bouts) == 10000
     assert all(r["completed"] == "True" and not r["error"] for r in bouts)
     assert all(r["winner_style"] for r in bouts)
     with (args.output / "all_bouts.csv").open("w", newline="", encoding="utf-8") as f:
@@ -53,10 +53,10 @@ def main():
             mirrors[r["style_a"]]["bouts"] += 1
             mirrors[r["style_a"]]["seat_a_wins"] += int(r["seat_a_won"])
         methods[(*pair, r["win_method"])] += 1
-    assert len(matchup) == 10 and all(v["bouts"] == 200 for v in matchup.values())
-    assert len(mirrors) == 4 and all(v["bouts"] == 200 for v in mirrors.values())
+    assert len(matchup) == 10 and all(v["bouts"] == 1000 for v in matchup.values())
+    assert len(mirrors) == 4 and all(v["bouts"] == 1000 for v in mirrors.values())
     summary = {
-        "total_bouts": 2000, "cross_bouts": 1200, "mirror_bouts": 800,
+        "total_bouts": 10000, "cross_bouts": 6000, "mirror_bouts": 4000,
         "matchups": [{"styles": list(k), **dict(v)} for k, v in sorted(matchup.items())],
         "torinaoshi_count": sum(torinaoshi.values()),
         "bouts_requiring_torinaoshi": sum(int(r["torinaoshi"]) > 0 for r in bouts),
@@ -78,7 +78,7 @@ def main():
             w.writerow((*key, *(c[col] for col in columns),
                 round(100*c["deck_wins"]/c["deck_bouts"], 3) if c["deck_bouts"] else "",
                 round(100*c["played_wins"]/c["played_bouts"], 3) if c["played_bouts"] else ""))
-    print(json.dumps({"total_bouts": 2000, "matchup_count": 10, "mirror_count": 4,
+    print(json.dumps({"total_bouts": 10000, "matchup_count": 10, "mirror_count": 4,
                       "incomplete": 0}, indent=2), flush=True)
 
 
