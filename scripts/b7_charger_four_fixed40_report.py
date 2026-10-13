@@ -19,7 +19,7 @@ def main():
     for folder in folders:
         m = json.loads((folder / "manifest.json").read_text())
         assert m["bouts"] == m["completed"] == 400 and m["incomplete"] == 0, m
-        assert m["stop"] - m["start"] == 100, m
+        assert m["stop"] - m["start"] == 20, m
         ranges.add((m["start"], m["stop"]))
         with (folder / "bouts.csv").open(newline="", encoding="utf-8") as f:
             bouts.extend(csv.DictReader(f))
@@ -56,7 +56,7 @@ def main():
     assert len(matchup) == 10 and all(v["bouts"] == 200 for v in matchup.values())
     assert len(mirrors) == 4 and all(v["bouts"] == 200 for v in mirrors.values())
     summary = {
-        "total_bouts": 2000, "cross_bouts": 6000, "mirror_bouts": 4000,
+        "total_bouts": 2000, "cross_bouts": 1200, "mirror_bouts": 800,
         "matchups": [{"styles": list(k), **dict(v)} for k, v in sorted(matchup.items())],
         "torinaoshi_count": sum(torinaoshi.values()),
         "bouts_requiring_torinaoshi": sum(int(r["torinaoshi"]) > 0 for r in bouts),
