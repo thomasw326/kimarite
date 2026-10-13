@@ -2,7 +2,7 @@ name: B7 Charger Four Fixed40 Round Robin 2k
 on:
   push:
     branches:
-      - experiment/b7-charger-four-fixed40-2k
+      - experiment/b7-charger-four-fixed40-10k
   workflow_dispatch:
   pull_request:
     branches: [main]
