@@ -27,9 +27,9 @@ def sample():
 
 def test_manifest_coverage_and_ids():
     arms = load_arms()
-    assert len(arms) == 50
-    assert len({a.arm_id for a in arms}) == 50
-    assert len({a.kimarite for a in arms}) == 18
+    assert len(arms) == 63
+    assert len({a.arm_id for a in arms}) == 63
+    assert len({a.kimarite for a in arms}) == 22
     assert all(a.arm_id.startswith("R21-") for a in arms)
     assert all(a.orbs and a.exchange_text and a.win_text for a in arms)
 
@@ -52,7 +52,7 @@ def test_50_arm_schedule():
     arms = load_arms()
     assert len(generic_roster()) == 108
     scheduled = list(schedule(arms))
-    assert len(scheduled) == 50 * 2 * 648
+    assert len(scheduled) == len(arms) * 2 * 648
     assert Counter((a.arm_id, a.placement) for a in scheduled)[
         ("R21-HIK-RS", "starting")
     ] == 648

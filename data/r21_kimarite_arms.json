@@ -550,8 +550,8 @@
       "family": "Kotenage",
       "role": "New candidate",
       "r20_reference": "KOT-1",
-      "orbs": "🟣🟢🟠",
-      "win": "Opponent has no Grip · Momentum ≥1 · Own hand ≥5",
+      "orbs": "🟣🟢🟢",
+      "win": "Opponent has no usable Grip · Momentum ≥3 · Own hand ≥6",
       "effect": "EXCHANGE (If opponent has Grip: reduce by 1 level; otherwise optional draw/discard): Reduce 1 opposing Grip by 1 level. If opponent has no Grip, you may draw 1 card, then discard 1 card.",
       "test_axis": "Replace one Technique with Spirit",
       "question": "Three total orbs; shift 🟣🟢🟢 → 🟣🟢🟠, keeping WIN/Exchange.",
@@ -562,7 +562,8 @@
       "r20_reference_wins_through_turn4": "80",
       "review_status": "Proposal — not approved",
       "source_link": "https://docs.google.com/spreadsheets/d/1JY-vPmU-yqcwYzrEugKP43JrnFGLi_UwZSFkOSqWtWI/edit?gid=1168699165&range=A42:R42",
-      "focus_metrics": "First 4 turns; hand 5+ timing; card availability"
+      "focus_metrics": "First 4 turns; hand 5+ timing; card availability",
+      "b7_metadata_note": "B7 final22 installation overrides original proposal's orbs and win gate; Exchange effect unchanged."
     },
     {
       "id": "R21-KOT-R2",
@@ -1066,11 +1067,12 @@
       "family": "Abisetaoshi",
       "r20_reference": "ABI-1",
       "orbs": "🟣🟣🟣",
-      "win": "Total Grip ≥2 · Power ≥9",
+      "win": "Total usable Grip ≥2 · Power ≥10 · Momentum ≥1",
       "effect": "At Power ≥6: if no usable Grip, gain 1 flexible Grip; otherwise gain 1 Power",
       "role": "R22 carried-forward R20 build",
       "review_status": "Designer bold approved / or open baseline",
-      "test_axis": "R22 consolidated 22-build roster"
+      "test_axis": "R22 consolidated 22-build roster",
+      "b7_metadata_note": "B7 selected-arm runtime predicate; historical R22 threshold was Power ≥9 without Momentum."
     },
     {
       "id": "R21-R22-TSO-2",
