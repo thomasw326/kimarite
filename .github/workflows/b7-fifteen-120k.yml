@@ -1,8 +1,8 @@
-name: B7 Charger Four Fixed40 Round Robin 10k
+name: B7 Charger Four Fixed40 Round Robin 2k
 on:
   push:
     branches:
-      - experiment/b7-charger-four-fixed40-10k
+      - experiment/b7-charger-four-fixed40-2k
   workflow_dispatch:
   pull_request:
     branches: [main]
@@ -41,10 +41,10 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -e .
-      - name: Run 2000 bouts per shard
+      - name: Run 400 bouts per shard
         run: |
-          START=$(( ${{ matrix.shard }} * 100 ))
-          STOP=$(( START + 100 ))
+          START=$(( ${{ matrix.shard }} * 20 ))
+          STOP=$(( START + 20 ))
           python scripts/b7_charger_four_fixed40_roundrobin.py --start "$START" --stop "$STOP" --output "artifacts/shard_${{ matrix.shard }}"
       - uses: actions/upload-artifact@v4
         if: always()
@@ -65,9 +65,9 @@ jobs:
         with:
           pattern: b7-charger-four-shard-*
           path: combined/
-      - name: Verify and aggregate 10000 bouts
+      - name: Verify and aggregate 2000 bouts
         run: python scripts/b7_charger_four_fixed40_report.py --input combined --output final/
       - uses: actions/upload-artifact@v4
         with:
-          name: b7-charger-four-10k-final
+          name: b7-charger-four-2k-final
           path: final/
