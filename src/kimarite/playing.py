@@ -59,8 +59,8 @@ def play_card(
         card,
         context or EffectContext(),
     )
-    if card.name in {"Power Water Cantrip", "Read the Move"}:
-        state.log(f"{card.name} is exhausted and removed from the bout.")
+    if card.name == "Power Water Cantrip":
+        state.log("Power Water Cantrip is exhausted and removed from the bout.")
     elif card.name not in TEMPORARY_CARD_NAMES and not (
         getattr(state, "r20_active", False) and card.name == "Henka"
     ):
