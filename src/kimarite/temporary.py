@@ -41,6 +41,7 @@ def remove_temporary(
     *,
     disrupted: bool,
     completed: bool = False,
+    exhausted: bool = False,
 ) -> Card:
     fighter = state.fighter(side)
     if instance not in fighter.temporary_zone:
@@ -66,7 +67,10 @@ def remove_temporary(
         elif card.name == "Get Underneath":
             gain_momentum(state, state.opponent_side(side), 2)
 
-    fighter.discard_pile.append(card)
+    if not exhausted:
+        fighter.discard_pile.append(card)
+    else:
+        state.log(f"{card.name} is exhausted and removed from the bout.")
     if (completed and not disrupted
             and card.name in {"Henka", "Pull", "Sidestep", "Immovable", "Kannuki"}):
         fighter.successful_reversal_this_turn = True
@@ -96,6 +100,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             if fighter.discard_pile:
                 fighter.draw_pile.append(fighter.discard_pile.pop())
                 state.log(f"{fighter.wrestler.name} recycles one card with Salt Throw.")
+            remove_temporary(state, side, instance, disrupted=False, completed=True, exhausted=True)
             continue
 
         if name == "Attempt Two-Handed Grip":
