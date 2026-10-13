@@ -236,7 +236,7 @@ def _contexts_for_card(
         return [base]
 
     if card.name in {"Driving Force — Power Payoff", "Driving Force", "Crushing Pressure — Power Crusher"}:
-        eligible = fighter.power >= 7
+        eligible = fighter.power >= (7 if card.name == "Crushing Pressure — Power Crusher" else 5)
         if card.name == "Crushing Pressure — Power Crusher":
             eligible = eligible and (fighter.power - opponent.power >= 3)
         effect_mode = "power_payoff" if card.name in {"Driving Force — Power Payoff", "Driving Force"} else "power_crusher"
