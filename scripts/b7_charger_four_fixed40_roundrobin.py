@@ -19,7 +19,7 @@ from kimarite.styles_v5 import STYLES
 NAMES = ('Pressure Fighter', 'Fast Grappler', 'The Technician', 'Charger')
 PAIRS = tuple((NAMES[i], NAMES[j]) for i in range(len(NAMES)) for j in range(i, len(NAMES)))
 BASE_SEED = 2026101309
-FIELDS = ("repetition", "pair_index", "style_a", "style_b", "seat_a_won",
+FIELDS = ("repetition", "pair_index", "style_a", "style_b", "torinaoshi", "seat_a_won",
           "winner_style", "win_method", "win_source", "completed", "turns", "error",
           "a_starting", "b_starting", "a_prepared", "b_prepared",
           "a_top", "b_top", "a_plays", "b_plays")
@@ -121,23 +121,35 @@ def run(start,stop,output):
                     a,b=((left,right) if orientation==0 else (right,left))
                     # Independent seed per orientation, including mirrors.
                     seed=BASE_SEED+rep*10000+index*2+orientation
-                    result=run_style_bout(a,b,seed=seed,max_turns=50,
-                                          difficulty=0,experimental_final22=True)
-                    state=result.state
-                    timed_out = (state.winner is None and result.turns >= 50
-                                 and result.unsupported_reason == "Turn limit 50 reached")
+                    # Torinaoshi: a stalemate at 50 turns is a complete
+                    # rematch with freshly seeded decks and game state.
+                    # Never treat an engine error as a rematch trigger.
+                    rematches = 0
+                    while True:
+                        result=run_style_bout(a,b,seed=seed,max_turns=50,
+                                              difficulty=0,experimental_final22=True)
+                        state=result.state
+                        if result.unsupported_reason != "Turn limit 50 reached":
+                            break
+                        if rematches >= 20:
+                            raise RuntimeError(
+                                f"Torinaoshi limit exceeded: repetition={rep}, "
+                                f"pair={a}/{b}, orientation={orientation}"
+                            )
+                        rematches += 1
+                        seed = BASE_SEED + rep*10000 + index*2 + orientation + rematches*1_000_000_007
                     win_side=state.winner
                     winner=(a if win_side is Side.A else b if win_side is Side.B else "")
                     played={side:Counter(aliases.get(name,name)
                             for owner,name in state.card_plays if owner is side)
                             for side in (Side.A,Side.B)}
-                    row=dict(repetition=rep,pair_index=index,style_a=a,style_b=b,
+                    row=dict(repetition=rep,pair_index=index,style_a=a,style_b=b,torinaoshi=rematches,
                              seat_a_won=int(win_side is Side.A) if winner else "",
                              winner_style=winner,
-                             win_method=("Turn-limit draw" if timed_out else aliases.get(state.win_method or "",state.win_method or "")),
-                             win_source=("turn_limit" if timed_out else state.win_source or ""),
-                             completed=(result.completed or timed_out),turns=result.turns,
-                             error=("" if timed_out else result.unsupported_reason or ""),
+                             win_method=aliases.get(state.win_method or "",state.win_method or ""),
+                             win_source=state.win_source or "",
+                             completed=result.completed,turns=result.turns,
+                             error=result.unsupported_reason or "",
                              a_starting=aliases.get(state.fighter_a.wrestler.starting_kimarite.name,
                                                     state.fighter_a.wrestler.starting_kimarite.name),
                              b_starting=aliases.get(state.fighter_b.wrestler.starting_kimarite.name,
@@ -153,7 +165,7 @@ def run(start,stop,output):
                              a_plays="; ".join(f"{n} x{v}" for n,v in sorted(played[Side.A].items())),
                              b_plays="; ".join(f"{n} x{v}" for n,v in sorted(played[Side.B].items())))
                     w.writerow(row);total+=1
-                    if not (result.completed or timed_out) or (not winner and not timed_out) or (result.unsupported_reason and not timed_out):
+                    if not result.completed or not winner or result.unsupported_reason:
                         errors.append(row)
                         continue
                     for side,style,opponent,seed_side in (
@@ -197,7 +209,7 @@ def run(start,stop,output):
                        {name:c[name] for name in COUNT_FIELDS})
     meta={"start":start,"stop":stop,"bouts":total,"completed":total-len(errors),
           "incomplete":len(errors),"pairs":PAIRS,"mirror_bouts":(stop-start)*8,
-          "source":"B7 three locked decks plus updated Charger 40; 50-turn draws; V5.2 AI"}
+          "source":"B7 three locked decks plus updated Charger 40; 50-turn Torinaoshi; V5.2 AI"}
     (output/"manifest.json").write_text(json.dumps(meta,indent=2))
     if errors:
         with (output/"incomplete.json").open("w") as f:
