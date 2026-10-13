@@ -32,6 +32,7 @@ def main():
     assert ranges == {(i, i + 100) for i in range(0, 500, 100)}, ranges
     assert len(bouts) == 10000
     assert all(r["completed"] == "True" and not r["error"] for r in bouts)
+    assert all(r["winner_style"] or r["win_source"] == "turn_limit" for r in bouts)
     with (args.output / "all_bouts.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=bouts[0])
         w.writeheader()
@@ -39,10 +40,14 @@ def main():
     matchup = defaultdict(Counter)
     methods = Counter()
     mirrors = defaultdict(Counter)
+    draws = Counter()
     for r in bouts:
         pair = tuple(sorted((r["style_a"], r["style_b"])))
         c = matchup[pair]
         c["bouts"] += 1
+        if r["win_source"] == "turn_limit":
+            c["draws"] += 1
+            draws[pair] += 1
         c[r["winner_style"]] += 1
         c["seat_a_wins"] += int(r["seat_a_won"])
         if r["style_a"] == r["style_b"]:
@@ -53,7 +58,10 @@ def main():
     assert len(mirrors) == 4 and all(v["bouts"] == 1000 for v in mirrors.values())
     summary = {
         "total_bouts": 10000, "cross_bouts": 6000, "mirror_bouts": 4000,
-        "matchups": [{"styles": list(k), **dict(v)} for k, v in sorted(matchup.items())],
+        "matchups": [{"styles": list(k), **dict(v),
+                     "decisive_bouts": v["bouts"] - v["draws"]}
+                     for k, v in sorted(matchup.items())],
+        "turn_limit_draws": sum(draws.values()),
         "mirror_seat_a_win_rates": {k: round(100 * v["seat_a_wins"] / v["bouts"], 3) for k, v in sorted(mirrors.items())},
     }
     (args.output / "summary.json").write_text(json.dumps(summary, indent=2))
