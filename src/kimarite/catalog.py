@@ -8,7 +8,7 @@ from .models import Card, Stat, Wrestler
 # V5 current print-pool orbs; stable historical IDs retained for reproducibility.
 CARD_POOL: tuple[Card, ...] = (
     Card(1, "Oshi", 0, 0, 1),
-    Card(11007, "Driving Force — Power Payoff", 2, 0, 1),
+    Card(11007, "Driving Force", 2, 0, 1),
     Card(11008, "Crushing Pressure — Power Crusher", 3, 0, 0),
     Card(3, "Tsuki", 1, 0, 0),
     Card(5, "Tsuppari", 2, 0, 1),
