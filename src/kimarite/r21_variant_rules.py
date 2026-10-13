@@ -113,7 +113,12 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
     if identifier == "R21-R24-UWD-NE":
         return
     if identifier in {"R21-OKD-RS", "R21-OKT-RS"}:
+        # Search first, then pay the new mandatory one-card discard cost.
+        # With an otherwise empty hand the searched Reversal is discarded.
         search_for_reversal(state.fighter(side))
+        if state.winner is None:
+            from .kimarite_effects import _discard_one_from_hand
+            _discard_one_from_hand(state, side, card, context)
         return
     if identifier == "R21-KAT-H5-T2":
         if relative_momentum(state, side) >= 1:
