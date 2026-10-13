@@ -80,6 +80,18 @@ def _context_for_card(
     opponent = state.opponent(side)
     fighter = state.fighter(side)
 
+    if card.name in {"R21:R21-OKD-RS", "R21:R21-OKT-RS"}:
+        from .r21_search import REVERSAL_CARD_NAMES
+        remaining = [c for c in fighter.hand if c.card_id != card.card_id]
+        searched = next((c for c in fighter.draw_pile
+                         if c.name in REVERSAL_CARD_NAMES), None)
+        eligible = remaining + ([searched] if searched is not None else [])
+        if len(eligible) > 1:
+            choices["hand_index"] = min(
+                range(len(eligible)),
+                key=lambda i: _card_priority(eligible[i], state, side),
+            )
+
     if card.name == "Oshi":
         choices["hand_index"] = _best_hand_index(state, side, prefer_discard=True) if fighter.hand else 0
 
