@@ -78,7 +78,7 @@ def main():
             w.writerow((*key, *(c[col] for col in columns),
                 round(100*c["deck_wins"]/c["deck_bouts"], 3) if c["deck_bouts"] else "",
                 round(100*c["played_wins"]/c["played_bouts"], 3) if c["played_bouts"] else ""))
-    print(json.dumps({"total_bouts": 2000, "matchup_count": 10, "mirror_count": 4,
+    print(json.dumps({"total_bouts": 10000, "matchup_count": 10, "mirror_count": 4,
                       "incomplete": 0}, indent=2), flush=True)
 
 
