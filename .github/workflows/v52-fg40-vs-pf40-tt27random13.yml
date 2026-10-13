@@ -1,8 +1,8 @@
-name: V5.2 FG fixed40 vs PF fixed40 and Technician random13 - 2400 bouts
+name: V5.2 FG40 revised r2 vs PF40 and Technician 27+13 - 2400 bouts
 
 on:
   push:
-    branches: [experiment/v52-fast-grappler-40-vs-pf40-tt27random13]
+    branches: [experiment/v52-fg40-r2-vs-pf40-tt27random13]
     paths:
       - ".github/workflows/v52-fg40-vs-pf40-tt27random13.yml"
       - "scripts/fast_grappler_draft40_vs_pf40_tt_random13.py"
@@ -148,7 +148,7 @@ jobs:
           x=json.loads(Path("artifacts/fg40_final/summary.json").read_text())
           assert x["completed"]==x["scheduled"]==2400 and x["incomplete"]==0,x
           assert all(r["completed"]==1200 for r in x["matchups"].values())
-          assert len(x["fast_grappler_deck"])==30
+          assert len(x["fast_grappler_deck"])==31
           assert sum(x["fast_grappler_deck"].values())==40
           assert sum(x["pressure_fighter_deck"].values())==40
           print("PASS: 2,400 bouts, 2 matchups, precise fixed deck inventories")
