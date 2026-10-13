@@ -1,4 +1,4 @@
-"""Fast Grappler user-edited fixed 40 vs PF fixed 40 and Technician 27+13.
+"""Fast Grappler round-2 fixed 40 vs PF fixed 40 and Technician 27+13.
 
 Mirrored difficulty-0 V5.2/B7 comparison: 2,400 scheduled bouts.
 Reuses the successful PF draft40 installer, shared V5.2 AI, corrected final22,
@@ -49,7 +49,7 @@ def fg_snapshot():
     data = json.loads(FG_FILE.read_text(encoding="utf-8"))
     counts = data["copy_count"]
     assert data["wrestler"] == "Fast Grappler"
-    assert len(counts) == 30 and sum(counts.values()) == 40
+    assert len(counts) == 31 and sum(counts.values()) == 40
     assert counts["Yorikiri"] == 2
     assert all(type(n) is int and n > 0 for n in counts.values())
     assert sum(counts[n] for n in (
@@ -498,7 +498,7 @@ def report(root, output):
         PF_FILE.read_text(encoding="utf-8"), encoding="utf-8"
     )
     md = [
-        "# Fast Grappler fixed 40 versus PF fixed 40 and Technician 27+13",
+        "# Fast Grappler updated fixed 40 (round 2) versus PF fixed 40 and Technician 27+13",
         "",
         f"- **Completed: {len(good):,}/{SCHEDULED:,}; "
         f"incomplete: {len(bad)}.**",
