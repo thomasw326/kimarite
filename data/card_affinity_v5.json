@@ -752,5 +752,5 @@
       ]
     }
   ],
-  "b7_coverage_note": "B7 active printed pool comprises 61 cards (22 Kimarite, 39 non-Kimarite). This six-axis affinity snapshot rates 59; unrated active names deliberately remain neutral under affinity_v5.affinity (score 0). No new ratings are inferred."
+  "b7_coverage_note": "B7 active printed pool comprises 61 cards (22 Kimarite, 39 non-Kimarite); all 61 card names have six-axis ratings in this snapshot. Unknown names still use the existing neutral affinity fallback (score 0). No ratings were changed."
 }
