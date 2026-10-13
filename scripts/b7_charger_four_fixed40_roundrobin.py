@@ -46,6 +46,8 @@ def install():
     from kimarite.models import Card, FighterState, Stat, Wrestler
     from kimarite.styles_v5 import STYLES as profiles
     aliases, old_builder = previous.install()
+    # Avoid changing the frozen decks' legacy alias map.
+    aliases = dict(aliases)
     selected = snapshot()
     catalog = {aliases.get(card.name, card.name):card
                for card in style_builds_v5.CARD_POOL}
