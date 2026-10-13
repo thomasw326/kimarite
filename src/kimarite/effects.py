@@ -935,7 +935,6 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Gaburi",
         "Gain Left Grip",
         "Gain Right Grip",
-        "Uwate",
         "Shitate",
         "Attempt Two-Handed Grip",
         "Attempt Deep Outside Grip",
