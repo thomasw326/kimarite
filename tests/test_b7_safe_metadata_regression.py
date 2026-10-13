@@ -24,10 +24,10 @@ def test_selected_b7_metadata_matches_runtime_overrides():
 def test_b7_affinity_coverage_explicit_and_unrated_neutral():
     data = json.loads((ROOT / "data/card_affinity_v5.json").read_text(encoding="utf-8"))
     names = [row["name"] for row in data["cards"]]
-    assert len(names) == 59
-    assert len(set(names)) == 59
+    assert len(names) == 61
+    assert len(set(names)) == 61
     assert "61 cards" in data["b7_coverage_note"]
-    assert "neutral" in data["b7_coverage_note"]
+    assert "61" in data["b7_coverage_note"]
     assert all(len(row["ratings"]) == 6 for row in data["cards"])
     assert affinity_v5.affinity("The Technician", "__unknown_b7_card__") == 0
 
