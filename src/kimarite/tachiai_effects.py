@@ -170,6 +170,10 @@ def resolve_prepared_tachiai(
             if comparison.advantage_for(side, Stat.TECHNIQUE) > 0:
                 establish_grip(state, side, "right")
 
+        elif name in {"Uwate", "Shitate"}:
+            if comparison.advantage_for(side, Stat.TECHNIQUE) > 0:
+                momentum_delta[side] += 1
+
         elif name == "Salt Throw":
             resolve_exchange_effect(state, side, card, EffectContext(comparison=comparison))
 
