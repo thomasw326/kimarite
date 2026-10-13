@@ -256,60 +256,25 @@ def _gain_right_grip(
 
 
 def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    """Improve Left Grip, look at total Grip cards, and play one free at Deep Left Grip."""
-    from .selection import ai_choose_from_look, keep_and_bottom, look_from_top
+    """Improve Left Grip and play the top card for free with Deep Left Grip."""
     from .legality import can_play_card
     from .playing import play_card
 
     fighter = state.fighter(side)
     improve_grip(state, side, "left")
     add_temporary(state, side, card, phase="exchange")
-    if state.winner is not None:
+    if state.winner is not None or fighter.left_grip is not GripState.DEEP or not fighter.draw_pile:
         return
 
-    looked = look_from_top(fighter, fighter.total_grip)
-    if not looked:
+    top = fighter.draw_pile[0]
+    fighter.hand.append(top)
+    fighter.plays_remaining += 1
+    if not can_play_card(state, side, top):
+        fighter.plays_remaining -= 1
+        fighter.hand.remove(top)
         return
-
-    deep = fighter.left_grip is GripState.DEEP
-    if deep:
-        # Temporarily allow one Play to make the selected follow-up free.
-        fighter.plays_remaining += 1
-        eligible = []
-        for candidate in looked:
-            fighter.hand.append(candidate)
-            is_legal = can_play_card(state, side, candidate)
-            fighter.hand.pop()
-            if is_legal:
-                eligible.append(candidate)
-        if not eligible:
-            fighter.plays_remaining -= 1
-            keep_and_bottom(fighter, looked, [])
-            return
-    else:
-        eligible = looked
-
-    chosen_index = context.choice("uwate_card_index")
-    if chosen_index is None:
-        if context.choice("__human__") and len(eligible) > 1:
-            raise ChoiceRequired(
-                card.name, "uwate_card_index",
-                [i for i, candidate in enumerate(looked) if candidate in eligible],
-            )
-        chosen = ai_choose_from_look(eligible, fighter.wrestler, 1)[0]
-    else:
-        if not isinstance(chosen_index, int) or not 0 <= chosen_index < len(looked):
-            raise ChoiceRequired(card.name, "uwate_card_index", list(range(len(looked))))
-        chosen = looked[chosen_index]
-        if chosen not in eligible:
-            raise IllegalPlay("Uwate's selected card cannot currently be played.")
-
-    keep_and_bottom(fighter, looked, [chosen])
-    state.log(f"{fighter.wrestler.name} looks at {len(looked)} card(s) with Uwate and adds {chosen.name} to hand.")
-    if deep:
-        state.log(f"{fighter.wrestler.name} plays {chosen.name} for free with Deep Left Grip.")
-        play_card(state, side, chosen, context=context)
-
+    fighter.draw_pile.pop(0)
+    play_card(state, side, top, context=context)
 
 
 def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
