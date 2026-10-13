@@ -1,11 +1,14 @@
-name: B7 Fifteen Fixed40 Round Robin 120k
+name: B7 Charger Four Fixed40 Round Robin 10k
 on:
   push:
     branches:
-      - experiment/b7-fifteen-fixed40-roundrobin
+      - experiment/b7-charger-four-fixed40-10k
     paths:
       - .github/workflows/b7-fifteen-120k.yml
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+
 
 jobs:
   smoke:
@@ -17,12 +20,12 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -e ".[dev]"
-      - name: Smoke the 15-style grid
-        run: pytest -q tests/test_b7_fifteen_fixed40_smoke.py
+      - name: Smoke the 4-style grid
+        run: python scripts/b7_charger_four_fixed40_roundrobin.py --start 0 --stop 1 --output artifacts/smoke
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b7-fifteen-smoke
+          name: b7-charger-four-smoke
           path: artifacts/smoke/
 
   shards:
@@ -40,15 +43,15 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -e .
-      - name: Run 24000 bouts per shard
+      - name: Run 2000 bouts per shard
         run: |
           START=$(( ${{ matrix.shard }} * 100 ))
           STOP=$(( START + 100 ))
-          python scripts/b7_fifteen_fixed40_roundrobin.py --start "$START" --stop "$STOP" --output "artifacts/shard_${{ matrix.shard }}"
+          python scripts/b7_charger_four_fixed40_roundrobin.py --start "$START" --stop "$STOP" --output "artifacts/shard_${{ matrix.shard }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b7-fifteen-shard-${{ matrix.shard }}
+          name: b7-charger-four-shard-${{ matrix.shard }}
           path: artifacts/shard_${{ matrix.shard }}/
 
   report:
@@ -62,11 +65,11 @@ jobs:
           python-version: "3.11"
       - uses: actions/download-artifact@v4
         with:
-          pattern: b7-fifteen-shard-*
+          pattern: b7-charger-four-shard-*
           path: combined/
-      - name: Verify and aggregate 120000 bouts
-        run: python scripts/b7_fifteen_fixed40_report.py --input combined --output final/
+      - name: Verify and aggregate 10000 bouts
+        run: python scripts/b7_charger_four_fixed40_report.py --input combined --output final/
       - uses: actions/upload-artifact@v4
         with:
-          name: b7-fifteen-120k-final
+          name: b7-charger-four-10k-final
           path: final/
