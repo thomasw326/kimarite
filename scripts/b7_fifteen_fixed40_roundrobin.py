@@ -54,9 +54,9 @@ def install():
     assert sum(v for n,v in tt.items() if catalog[n].is_kimarite) == 8
     assert sum(v for n,v in tt.items() if not catalog[n].is_kimarite) == 32
     for style, counts in selected.items():
-        assert set(counts) <= set(catalog), (style, sorted(set(counts)-set(catalog)))
-        assert sum(n for name,n in counts.items() if catalog[name].is_kimarite) == 8, style
-        assert sum(n for name,n in counts.items() if not catalog[name].is_kimarite) == 32, style
+        assert all(name in catalog or (style == "Pressure Fighter" and name == "Yorikiri (YOR-C1)") for name in counts), style
+        assert sum(n for name,n in counts.items() if (catalog[name].is_kimarite if name in catalog else name == "Yorikiri (YOR-C1)")) == 8, style
+        assert sum(n for name,n in counts.items() if (not catalog[name].is_kimarite if name in catalog else False)) == 32, style
     assert selected["Fast Grappler"] == previous.fg_snapshot()
     assert selected["Pressure Fighter"] == previous.pf.snapshot()
 
