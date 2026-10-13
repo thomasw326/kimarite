@@ -66,7 +66,7 @@ def remove_temporary(
         elif card.name == "Get Underneath":
             gain_momentum(state, state.opponent_side(side), 2)
 
-    if card.name in {"Salt Throw", "Shiko Stomp"}:
+    if card.name == "Salt Throw":
         state.log(f"{card.name} is exhausted instead of entering the Discard Pile.")
     else:
         fighter.discard_pile.append(card)
