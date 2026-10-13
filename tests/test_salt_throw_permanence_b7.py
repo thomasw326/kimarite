@@ -41,3 +41,15 @@ def test_salt_throw_is_exhausted_if_disrupted_or_removed():
         assert not fighter.temporary_zone
         assert salt not in fighter.discard_pile
         assert salt not in fighter.draw_pile
+
+
+def test_shiko_stomp_exhausts_when_disrupted_instead_of_being_recycled():
+    state, fighter, _, recycled = _state()
+    shiko = SimpleNamespace(name="Shiko Stomp", card_id=3)
+    instance = add_temporary(state, Side.A, shiko, phase="exchange")
+    resolve_start_of_turn_temporaries(state, Side.A)
+    assert fighter.temporary_zone == [instance]
+    remove_temporary(state, Side.A, instance, disrupted=True)
+    assert shiko not in fighter.discard_pile
+    assert shiko not in fighter.draw_pile
+    assert recycled in fighter.discard_pile
