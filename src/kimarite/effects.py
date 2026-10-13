@@ -256,14 +256,13 @@ def _gain_right_grip(
 
 
 def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    """Look based on total Grip; Deep Left Grip plays a selected card for free."""
+    """Improve Left Grip, look at total Grip cards, and play one free at Deep Left Grip."""
     from .selection import ai_choose_from_look, keep_and_bottom, look_from_top
     from .legality import can_play_card
     from .playing import play_card
 
     fighter = state.fighter(side)
     improve_grip(state, side, "left")
-    add_temporary(state, side, card, phase="exchange")
     if state.winner is not None:
         return
 
