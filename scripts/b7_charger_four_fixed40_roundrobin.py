@@ -121,16 +121,8 @@ def run(start,stop,output):
                     a,b=((left,right) if orientation==0 else (right,left))
                     # Independent seed per orientation, including mirrors.
                     seed=BASE_SEED+rep*10000+index*2+orientation
-                    # Some mirror shuffles can indefinitely replay utility cards.
-                    # Deterministically resample only unresolved seeds; do not
-                    # silently count a timed-out bout as a win or a draw.
-                    for retry in range(5):
-                        trial_seed = seed + retry * 1_000_000_007
-                        result=run_style_bout(a,b,seed=trial_seed,max_turns=100,
-                                              difficulty=0,experimental_final22=True)
-                        if result.completed and result.state.winner is not None and not result.unsupported_reason:
-                            seed = trial_seed
-                            break
+                    result=run_style_bout(a,b,seed=seed,max_turns=100,
+                                          difficulty=0,experimental_final22=True)
                     state=result.state
                     win_side=state.winner
                     winner=(a if win_side is Side.A else b if win_side is Side.B else "")
