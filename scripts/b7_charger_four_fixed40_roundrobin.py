@@ -48,6 +48,7 @@ def install():
     aliases, old_builder = previous.install()
     # Avoid changing the frozen decks' legacy alias map.
     aliases = dict(aliases)
+    legacy_aliases = dict(aliases)
     selected = snapshot()
     catalog = {aliases.get(card.name, card.name):card
                for card in style_builds_v5.CARD_POOL}
@@ -106,13 +107,13 @@ def install():
 
     style_builds_v5.build_style = builder
     style_simulate_v5.build_style = builder
-    return aliases,builder
+    return aliases,builder,legacy_aliases
 
 
 def run(start,stop,output):
     from kimarite.models import Side
     from kimarite.style_simulate_v5 import run_style_bout
-    aliases,builder=install()
+    aliases,builder,legacy_aliases=install()
     output.mkdir(parents=True,exist_ok=True)
     stats=defaultdict(Counter)
     errors=[]
@@ -180,7 +181,8 @@ def run(start,stop,output):
                                    initial.wrestler.prepared_tachiai_card,
                                    *initial.draw_pile]
                         assert len(inventory)==40 and len({c.card_id for c in inventory})==40
-                        counts=Counter(aliases.get(c.name,c.name) for c in inventory)
+                        inventory_aliases = aliases if style == "Charger" else legacy_aliases
+                        counts=Counter(inventory_aliases.get(c.name,c.name) for c in inventory)
                         assert counts==Counter(snapshot()[style])
                         won=int(win_side is side)
                         starter=aliases.get(initial.wrestler.starting_kimarite.name,
