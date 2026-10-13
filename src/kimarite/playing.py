@@ -37,12 +37,11 @@ def play_card(
     state.log(f"{fighter.wrestler.name} plays {card.name}.")
 
     if card.is_kimarite:
-        duplicate_this_turn = any(
-            previous.is_kimarite and previous.name == card.name
-            for previous in fighter.played_this_turn[:-1]
+        duplicate_in_zone = any(
+            previous.name == card.name for previous in fighter.kimarite_zone
         )
         fighter.kimarite_zone.append(card)
-        if duplicate_this_turn and state.winner is None:
+        if duplicate_in_zone and state.winner is None:
             fighter.plays_remaining += 1
             state.log(f"{fighter.wrestler.name} gains 1 Play for repeated {card.name}.")
         if getattr(state, "r20_active", False) and card.name.startswith("R21:"):
