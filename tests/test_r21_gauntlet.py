@@ -45,7 +45,7 @@ def test_every_arm_has_executable_predicate_and_effect():
         )
         state = sample()
         assert isinstance(variant_predicate(state, Side.A, arm.arm_id), bool)
-        variant_exchange(state, Side.A, card, EffectContext())
+        # A mandatory post-search hand discard needs an explicit choice.\n        variant_exchange(state, Side.A, card, EffectContext(choices={"hand_index": 0}))
 
 
 def test_50_arm_schedule():
