@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -e ".[dev]"
-      - name: Canary test: duplicate Kimarite grants a Play
+      - name: 'Canary test: duplicate Kimarite grants a Play'
         run: python -m pytest -q tests/test_duplicate_kimarite_canary.py
       - name: Smoke the 4-style grid
         run: python scripts/b7_charger_four_fixed40_roundrobin.py --start 0 --stop 1 --output artifacts/smoke
