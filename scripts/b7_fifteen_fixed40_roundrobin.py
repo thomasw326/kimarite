@@ -8,6 +8,7 @@ import argparse
 import csv
 import json
 import random
+import time
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -116,6 +117,9 @@ def run(start,stop,output):
     stats=defaultdict(Counter)
     errors=[]
     total=0
+    started_at=time.monotonic()
+    expected=(stop-start)*len(PAIRS)*2
+    print(f'[PROGRESS] shard repetitions {start}-{stop}: 0/{expected} bouts (0.0%)',flush=True)
     with (output/"bouts.csv").open("w",newline="",encoding="utf-8") as f:
         w=csv.DictWriter(f,fieldnames=FIELDS);w.writeheader()
         for rep in range(start,stop):
@@ -154,6 +158,11 @@ def run(start,stop,output):
                              a_plays="; ".join(f"{n} x{v}" for n,v in sorted(played[Side.A].items())),
                              b_plays="; ".join(f"{n} x{v}" for n,v in sorted(played[Side.B].items())))
                     w.writerow(row);total+=1
+                    if total % 1000 == 0 or total == expected:
+                        elapsed=time.monotonic()-started_at
+                        rate=total/elapsed if elapsed else 0
+                        eta=(expected-total)/rate if rate else 0
+                        print(f'[PROGRESS] shard {start}-{stop}: {total:,}/{expected:,} bouts ({100*total/expected:.1f}%) | elapsed {elapsed/60:.1f}m | ETA {eta/60:.1f}m | {rate:.2f} bouts/s',flush=True)
                     if not result.completed or not winner or result.unsupported_reason:
                         errors.append(row)
                         continue
@@ -197,8 +206,8 @@ def run(start,stop,output):
             w.writerow(dict(zip(("style","opponent","card"),key)) |
                        {name:c[name] for name in COUNT_FIELDS})
     meta={"start":start,"stop":stop,"bouts":total,"completed":total-len(errors),
-          "incomplete":len(errors),"pairs":PAIRS,"mirror_bouts":(stop-start)*6,
-          "source":"B7 3 frozen plus 12 experimental style-informed fixed40; V5.2 AI"}
+          "incomplete":len(errors),"pairs":PAIRS,"mirror_bouts":(stop-start)*26,
+          "source":"B7 13 reviewed fixed40; approved B7 rules and style AI"}
     (output/"manifest.json").write_text(json.dumps(meta,indent=2))
     if errors:
         with (output/"incomplete.json").open("w") as f:
