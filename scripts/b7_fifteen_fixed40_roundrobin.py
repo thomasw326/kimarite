@@ -1,6 +1,6 @@
-"""B7 15-archetype experimental fixed40 round-robin, including mirrors.
+"""B7 13-archetype reviewed fixed40 round-robin, including mirrors.
 
-120 unordered matchups (105 cross-style, 15 mirrors), both seats per repetition.
+91 unordered matchups (78 cross-style, 13 mirrors), both seats per repetition.
 For each repetition run both orientations; mirrors use distinct seeds so each
 seat is an independent 40-card shuffle. Both participants count in card metrics.
 """
@@ -16,7 +16,7 @@ import fast_grappler_draft40_vs_pf40_tt_random13 as previous
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "data/b7_fifteen_fixed40_draft.json"
 from kimarite.styles_v5 import STYLES
-NAMES = tuple(STYLES)
+NAMES = tuple(n for n in STYLES if n not in ('The Arsenal', 'The Specialist'))
 PAIRS = tuple((NAMES[i], NAMES[j]) for i in range(len(NAMES)) for j in range(i, len(NAMES)))
 BASE_SEED = 2026101309
 FIELDS = ("repetition", "pair_index", "style_a", "style_b", "seat_a_won",
@@ -46,9 +46,12 @@ def install():
     from kimarite.models import Card, FighterState, Stat, Wrestler
     from kimarite.styles_v5 import STYLES as profiles
     aliases, old_builder = previous.install()
+    aliases = dict(aliases)
     selected = snapshot()
     catalog = {aliases.get(card.name, card.name):card
                for card in style_builds_v5.CARD_POOL}
+    catalog["Driving Force"] = catalog["Driving Force — Power Payoff"]
+    aliases["Driving Force — Power Payoff"] = "Driving Force"
     tt = selected["The Technician"]
     assert set(tt) <= set(catalog), sorted(set(tt)-set(catalog))
     assert sum(v for n,v in tt.items() if catalog[n].is_kimarite) == 8
@@ -121,7 +124,7 @@ def run(start,stop,output):
                     a,b=((left,right) if orientation==0 else (right,left))
                     # Independent seed per orientation, including mirrors.
                     seed=BASE_SEED+rep*10000+index*2+orientation
-                    result=run_style_bout(a,b,seed=seed,max_turns=100,
+                    result=run_style_bout(a,b,seed=seed,max_turns=50,
                                           difficulty=0,experimental_final22=True)
                     state=result.state
                     win_side=state.winner
