@@ -214,8 +214,8 @@ def run(start,stop,output):
             w.writerow(dict(zip(("style","opponent","card"),key)) |
                        {name:c[name] for name in COUNT_FIELDS})
     meta={"start":start,"stop":stop,"bouts":total,"completed":total-len(errors),
-          "incomplete":len(errors),"pairs":PAIRS,"mirror_bouts":(stop-start)*8,
-          "source":"B7 three locked decks plus updated Charger 40; 50-turn Torinaoshi; V5.2 AI"}
+          "incomplete":len(errors),"pairs":PAIRS,"mirror_bouts":(stop-start)*10,
+          "source":"B7 four approved decks plus revised Mountain; 50-turn Torinaoshi; style AI v5"}
     (output/"manifest.json").write_text(json.dumps(meta,indent=2))
     if errors:
         with (output/"incomplete.json").open("w") as f:
