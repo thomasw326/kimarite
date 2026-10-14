@@ -166,7 +166,7 @@ def run(start,stop,output):
                                    *initial.draw_pile]
                         assert len(inventory)==40 and len({c.card_id for c in inventory})==40
                         counts=Counter(aliases.get(c.name,c.name) for c in inventory)
-                        assert counts==Counter(snapshot()[style])
+                        assert counts==Counter(aliases.get(name,name) for name,qty in snapshot()[style].items() for _ in range(qty))
                         won=int(win_side is side)
                         starter=aliases.get(initial.wrestler.starting_kimarite.name,
                                             initial.wrestler.starting_kimarite.name)
