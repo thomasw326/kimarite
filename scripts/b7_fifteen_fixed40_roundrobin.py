@@ -124,7 +124,7 @@ def run(start,stop,output):
                     a,b=((left,right) if orientation==0 else (right,left))
                     # Independent seed per orientation, including mirrors.
                     seed=BASE_SEED+rep*10000+index*2+orientation
-                    result=run_style_bout(a,b,seed=seed,max_turns=50,
+                    result=run_style_bout(a,b,seed=seed,max_turns=100,
                                           difficulty=0,experimental_final22=True)
                     state=result.state
                     win_side=state.winner
