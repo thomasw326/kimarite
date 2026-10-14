@@ -1,5 +1,7 @@
 # Kimarite
 
+> **B7 APPROVED STANDARD (13 October 2026):** See [B7_STANDARD.md](B7_STANDARD.md) for the canonical current 61-card pool, four fixed 40-card decks, tested 10K reference, Uwate top-deck/Temporary behavior, Tsuppari draw, and **duplicate-Kimarite +1 Play** rule. Historical V5.0/V5.2 and prior B7 experiments below are not the current balanced build.
+
 Kimarite is a sumo-inspired tactical card game with a deterministic rules engine, AI-vs-AI simulator, and an early **V5.0 human-vs-AI terminal prototype**.
 
 ## Play a bout (V5.0 development branch)
