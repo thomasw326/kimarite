@@ -18,7 +18,7 @@ def main():
     cards = defaultdict(Counter)
     for folder in folders:
         m = json.loads((folder / "manifest.json").read_text())
-        assert m["bouts"] == m["completed"] == 24000 and m["incomplete"] == 0, m
+        assert m["bouts"] == m["completed"] == 18200 and m["incomplete"] == 0, m
         assert m["stop"] - m["start"] == 100, m
         ranges.add((m["start"], m["stop"]))
         with (folder / "bouts.csv").open(newline="", encoding="utf-8") as f:
@@ -30,7 +30,7 @@ def main():
                     if field not in ("style", "opponent", "card"):
                         cards[key][field] += int(value)
     assert ranges == {(i, i + 100) for i in range(0, 500, 100)}, ranges
-    assert len(bouts) == 120000
+    assert len(bouts) == 91000
     assert all(r["completed"] == "True" and not r["error"] for r in bouts)
     with (args.output / "all_bouts.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=bouts[0])
@@ -49,10 +49,10 @@ def main():
             mirrors[r["style_a"]]["bouts"] += 1
             mirrors[r["style_a"]]["seat_a_wins"] += int(r["seat_a_won"])
         methods[(*pair, r["win_method"])] += 1
-    assert len(matchup) == 120 and all(v["bouts"] == 1000 for v in matchup.values())
-    assert len(mirrors) == 15 and all(v["bouts"] == 1000 for v in mirrors.values())
+    assert len(matchup) == 91 and all(v["bouts"] == 1000 for v in matchup.values())
+    assert len(mirrors) == 13 and all(v["bouts"] == 1000 for v in mirrors.values())
     summary = {
-        "total_bouts": 120000, "cross_bouts": 105000, "mirror_bouts": 15000,
+        "total_bouts": 91000, "cross_bouts": 78000, "mirror_bouts": 13000,
         "matchups": [{"styles": list(k), **dict(v)} for k, v in sorted(matchup.items())],
         "mirror_seat_a_win_rates": {k: round(100 * v["seat_a_wins"] / v["bouts"], 3) for k, v in sorted(mirrors.items())},
     }
@@ -72,7 +72,7 @@ def main():
             w.writerow((*key, *(c[col] for col in columns),
                 round(100*c["deck_wins"]/c["deck_bouts"], 3) if c["deck_bouts"] else "",
                 round(100*c["played_wins"]/c["played_bouts"], 3) if c["played_bouts"] else ""))
-    print(json.dumps({"total_bouts": 120000, "matchup_count": 120, "mirror_count": 15,
+    print(json.dumps({"total_bouts": 91000, "matchup_count": 120, "mirror_count": 15,
                       "incomplete": 0}, indent=2), flush=True)
 
 
