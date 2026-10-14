@@ -100,7 +100,7 @@ def install():
         fighter.random_selected_names = ()
         inventory = [starter,prepared,*fighter.draw_pile]
         assert len(inventory)==40 and len({c.card_id for c in inventory})==40
-        assert Counter(aliases.get(c.name,c.name) for c in inventory)==Counter(current)
+        assert Counter(aliases.get(c.name,c.name) for c in inventory)==Counter(aliases.get(name,name) for name,qty in current.items() for _ in range(qty))
         return style_builds_v5.StyleBuild(fighter,frozenset())
 
     style_builds_v5.build_style = builder
