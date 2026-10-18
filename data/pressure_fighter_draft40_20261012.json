@@ -1,5 +1,5 @@
 {
-  "source": "Pressure Fighter Pool (current): Shove x3, Tsuppari x2, all other copies unchanged",
+  "source": "B8 Morotsuki approved +2; -1 Shove, -1 Immovable",
   "source_url": "https://docs.google.com/spreadsheets/d/1tDtaDeT9fUMfEEzELqhM-_5iG2Y-r1KoxZOfKqMMUq0/edit?gid=212&range=A75:J123",
   "wrestler": "Pressure Fighter",
   "sheet_retrieved": "2026-10-12",
@@ -16,7 +16,7 @@
     "Tottari": 1,
     "Oshi": 3,
     "Tsuki": 3,
-    "Shove": 3,
+    "Shove": 2,
     "Tsuppari": 2,
     "Belt Slap": 2,
     "Driving Force — Power Payoff": 2,
@@ -24,7 +24,6 @@
     "Nodowa": 2,
     "Regain Balance": 2,
     "Hold Position": 1,
-    "Immovable": 1,
     "Power Water": 1,
     "Read the Move": 1,
     "Ottsuke": 1,
@@ -33,6 +32,7 @@
     "Stare Down": 1,
     "Harite": 1,
     "Shiko Stomp": 1,
-    "Kannuki": 1
+    "Kannuki": 1,
+    "Morotsuki": 2
   }
 }
