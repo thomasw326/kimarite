@@ -1,7 +1,7 @@
-name: B8 Morotsuki Four Wrestler 1000
+name: B8 Morotsuki First AI 1000
 on:
   push:
-    branches: [experiment/b8-morotsuki-four-ring5-1000]
+    branches: [experiment/b8-morotsuki-first-ai-1000]
     paths:
       - .github/workflows/b8-morotsuki-four-1000.yml
       - src/kimarite/**
