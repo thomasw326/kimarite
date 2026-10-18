@@ -191,10 +191,16 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
 def gain_position(state: BoutState, side: Side, amount: int) -> None:
     if amount < 0:
         raise ValueError("amount must be non-negative")
-    state.position = max(
-        POSITION_MIN,
-        min(POSITION_MAX, state.position + state.sign(side) * amount),
-    )
+    if state.winner is not None:
+        return
+    target = state.position + state.sign(side) * amount
+    if state.sign(side) * target >= 5:
+        state.position = state.sign(side) * POSITION_MAX
+        state.log(f"{state.fighter(side).wrestler.name} reaches Position 5.")
+        state.win_source = "ringout"
+        state.declare_winner(side, "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi")
+        return
+    state.position = max(POSITION_MIN, min(POSITION_MAX, target))
     state.log(f"{state.fighter(side).wrestler.name} gains {amount} Position.")
 
 
