@@ -192,7 +192,7 @@ def gain_position(state: BoutState, side: Side, amount: int) -> None:
     if amount < 0:
         raise ValueError("amount must be non-negative")
     state.position = max(
-        TRACK_MIN,
+        POSITION_MIN,
         min(POSITION_MAX, state.position + state.sign(side) * amount),
     )
     state.log(f"{state.fighter(side).wrestler.name} gains {amount} Position.")
