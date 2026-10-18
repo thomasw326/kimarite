@@ -6,6 +6,8 @@ from .prevention import has_negative_effect_prevention, prevent_negative_effect
 
 TRACK_MIN = -3
 TRACK_MAX = 3
+POSITION_MIN = -4
+POSITION_MAX = 4
 
 
 def _cap_for(side: Side) -> int:
@@ -43,8 +45,19 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
     sign = state.sign(side)
     current = state.momentum if kind == "momentum" else state.position
     target = current + sign * amount
-    excess = _distance_past_cap(target)
-    clamped = max(TRACK_MIN, min(TRACK_MAX, target))
+    if kind == "push" and abs(target) >= 5 and sign * target >= 5:
+        state.position = sign * POSITION_MAX
+        state.fighter(side).gained_push_this_turn = True
+        state.log(f"{state.fighter(side).wrestler.name} gains {amount} Push (ring edge crossed).")
+        state.win_source = "ringout"
+        state.declare_winner(side, "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi")
+        return
+    if kind == "push":
+        excess = 0
+        clamped = max(POSITION_MIN, min(POSITION_MAX, target))
+    else:
+        excess = _distance_past_cap(target)
+        clamped = max(TRACK_MIN, min(TRACK_MAX, target))
 
     if kind == "momentum":
         state.momentum = clamped
@@ -180,7 +193,7 @@ def gain_position(state: BoutState, side: Side, amount: int) -> None:
         raise ValueError("amount must be non-negative")
     state.position = max(
         TRACK_MIN,
-        min(TRACK_MAX, state.position + state.sign(side) * amount),
+        min(POSITION_MAX, state.position + state.sign(side) * amount),
     )
     state.log(f"{state.fighter(side).wrestler.name} gains {amount} Position.")
 
