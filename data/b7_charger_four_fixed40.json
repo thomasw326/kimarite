@@ -11,7 +11,7 @@
       "Tottari": 1,
       "Oshi": 3,
       "Tsuki": 3,
-      "Shove": 3,
+      "Shove": 2,
       "Tsuppari": 2,
       "Belt Slap": 2,
       "Driving Force — Power Payoff": 2,
@@ -19,7 +19,6 @@
       "Nodowa": 2,
       "Regain Balance": 2,
       "Hold Position": 1,
-      "Immovable": 1,
       "Power Water": 1,
       "Read the Move": 1,
       "Ottsuke": 1,
@@ -28,7 +27,8 @@
       "Stare Down": 1,
       "Harite": 1,
       "Shiko Stomp": 1,
-      "Kannuki": 1
+      "Kannuki": 1,
+      "Morotsuki": 2
     },
     "Fast Grappler": {
       "Yorikiri": 2,
@@ -103,7 +103,7 @@
       "Harite": 1,
       "Explosive Step — Fumikomi": 2,
       "Headlong Charge": 2,
-      "Shove": 2,
+      "Shove": 1,
       "Belt Slap": 2,
       "Yoritaoshi": 1,
       "Hatakikomi": 1,
@@ -120,8 +120,9 @@
       "Tsuri": 1,
       "Ottsuke": 1,
       "Get Underneath": 2,
-      "Driving Force": 1
+      "Driving Force": 1,
+      "Morotsuki": 1
     }
   },
-  "source": "B7 Pressure Fighter Pool: Tsuppari x2, Shove x3; three other decks unchanged; duplicate Kimarite rule retained."
+  "source": "B8 Morotsuki: PF +2, Charger +1, approved swaps; ring ±4, ring-out ±5"
 }
