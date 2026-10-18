@@ -12,6 +12,7 @@ CARD_POOL: tuple[Card, ...] = (
     Card(11008, "Crushing Pressure — Power Crusher", 3, 0, 0),
     Card(3, "Tsuki", 1, 0, 0),
     Card(5, "Tsuppari", 2, 0, 1),
+    Card(11009, "Morotsuki", 3, 0, 0),
     Card(7, "Headlong Charge", 0, 0, 3),
     Card(8, "Nodowa", 3, 0, 0),
     Card(9, "Harite", 2, 0, 1),
