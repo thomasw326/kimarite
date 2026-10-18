@@ -56,6 +56,20 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
     if not plays:
         return None
 
+    fighter = state.fighter(side)
+    # Morotsuki only pays off on later cards in the same turn. Hold it if
+    # drawn mid-turn; lead with it only with a plausible immediate follow-up.
+    if fighter.cards_played_this_turn > 0:
+        plays = [p for p in plays if p.card.name != "Morotsuki"]
+    morotsuki_lead = (
+        fighter.cards_played_this_turn == 0
+        and fighter.plays_remaining >= 2
+        and any(p.card.name == "Morotsuki" for p in plays)
+        and any(p.card.name != "Morotsuki" for p in plays)
+    )
+    if not plays:
+        return None
+
     before_position = relative_position(state, side)
     before_momentum = relative_momentum(state, side)
     current = score_state(state, side)
@@ -91,6 +105,8 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
         # Scaled like the former rank bonus while preserving tactical scoring.
         affinity = card_affinity(style, candidate.card.name) * 4 if style is not None else 0
         setup_hold = _four_card_setup_hold_value(state, side, candidate.card.name)
+        if morotsuki_lead and candidate.card.name == "Morotsuki" and tier == 1:
+            tier = 2
         scored.append((
             tier, candidate.score + danger_score + affinity - setup_hold,
             (card_affinity(style, candidate.card.name) if style is not None else 0), -candidate.card.card_id,
