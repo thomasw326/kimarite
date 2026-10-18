@@ -1,0 +1,64 @@
+name: B7 Four Wrestlers Ring Five 1000
+on:
+  push:
+    branches: [experiment/b7-four-ring5-1000]
+    paths:
+      - .github/workflows/b7-four-ring5-1000.yml
+      - src/kimarite/rules.py
+      - scripts/b7_charger_four_fixed40_roundrobin.py
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Check ring-five boundaries
+        run: |
+          python - <<'PY'
+          from kimarite import rules
+          assert (rules.POSITION_MIN,rules.POSITION_MAX)==(-4,4)
+          assert (rules.TRACK_MIN,rules.TRACK_MAX)==(-3,3)
+          print("Position ±4; automatic finish on push to ±5; Momentum ±3")
+          PY
+      - name: Four-style round robin (1000 bouts including mirrors)
+        run: python scripts/b7_charger_four_fixed40_roundrobin.py --start 0 --stop 50 --output artifacts/ring5
+      - name: Validate results and summarize
+        run: |
+          python - <<'PY'
+          import csv,json
+          from collections import Counter
+          from pathlib import Path
+          p=Path("artifacts/ring5")
+          manifest=json.loads((p/"manifest.json").read_text())
+          rows=list(csv.DictReader((p/"bouts.csv").open()))
+          assert manifest["bouts"]==manifest["completed"]==len(rows)==1000,manifest
+          assert manifest["incomplete"]==0 and len({tuple(sorted((r["style_a"],r["style_b"]))) for r in rows})==10
+          assert all(r["completed"]=="True" and r["winner_style"] and not r["error"] for r in rows)
+          wins=Counter(r["winner_style"] for r in rows)
+          methods=Counter(r["win_method"] for r in rows)
+          matchups={}
+          for r in rows:
+              k=" vs ".join(sorted((r["style_a"],r["style_b"])))
+              matchups.setdefault(k,Counter())[r["winner_style"]]+=1
+          summary={"bouts":len(rows),"wins":wins,"methods":methods,"matchups":matchups,
+                   "torinaoshi":sum(int(r["torinaoshi"]) for r in rows),
+                   "rule":"Position ±4; reaching ±5 by Push is immediate ring-out; Momentum ±3"}
+          (p/"summary.json").write_text(json.dumps(summary,indent=2))
+          print(json.dumps(summary,indent=2))
+          with open(__import__("os").environ["GITHUB_STEP_SUMMARY"],"a") as f:
+              f.write("## Four-way 1,000-bout ring-five test\n\n")
+              f.write("Position ±4, Push to ±5 ends the bout; Momentum stays ±3.\n\n")
+              f.write("| Style | Wins | Win rate |\n|---|---:|---:|\n")
+              for name,n in sorted(wins.items()):f.write(f"| {name} | {n} | {n/500:.1%} |\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b7-four-ring5-1000-results
+          path: artifacts/ring5/
