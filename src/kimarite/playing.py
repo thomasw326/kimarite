@@ -40,6 +40,7 @@ def play_card(
     )
     if previous_morotsuki:
         from .rules import gain_push
+        state.log(f"Morotsuki bonus for {fighter.wrestler.name}: {previous_morotsuki} Push")
         gain_push(state, side, previous_morotsuki)
         if state.winner is not None:
             return
