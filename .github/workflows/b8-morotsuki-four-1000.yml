@@ -1,0 +1,72 @@
+name: B8 Morotsuki Four Wrestler 1000
+on:
+  push:
+    branches: [experiment/b8-morotsuki-four-ring5-1000]
+    paths:
+      - .github/workflows/b8-morotsuki-four-1000.yml
+      - src/kimarite/**
+      - data/b7_charger_four_fixed40.json
+      - data/pressure_fighter_draft40_20261012.json
+  workflow_dispatch:
+jobs:
+  smoke-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Validate card, fixed decks and ring rules
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,"scripts")
+          from kimarite.catalog import CARD_POOL
+          from kimarite.rules import POSITION_MAX, POSITION_MIN
+          from b7_charger_four_fixed40_roundrobin import snapshot,install
+          assert (POSITION_MIN,POSITION_MAX)==(-4,4)
+          c=next(c for c in CARD_POOL if c.name=="Morotsuki")
+          assert (c.power,c.technique,c.spirit)==(3,0,0)
+          s=snapshot()
+          assert s["Pressure Fighter"]["Morotsuki"]==2 and s["Charger"]["Morotsuki"]==1
+          install()
+          print("PASS fixed decks and Morotsuki")
+          PY
+      - name: Run 1000 four-style bouts including mirrors
+        run: python scripts/b7_charger_four_fixed40_roundrobin.py --start 0 --stop 50 --output artifacts/morotsuki
+      - name: Report win and card use statistics
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from collections import Counter,defaultdict
+          import csv,json,os
+          root=Path("artifacts/morotsuki")
+          rows=list(csv.DictReader((root/"bouts.csv").open()))
+          cards=list(csv.DictReader((root/"cards.csv").open()))
+          assert len(rows)==1000 and all(r["completed"]=="True" and r["winner_style"] and not r["error"] for r in rows)
+          totals=Counter()
+          for r in rows:
+              totals[r["style_a"]]+=1
+              totals[r["style_b"]]+=1
+          wins=Counter(r["winner_style"] for r in rows)
+          card_report={}
+          for r in cards:
+              if r["card"]=="Morotsuki" and r["opponent"]=="ALL":
+                  played=int(r["played_bouts"]);pw=int(r["played_wins"])
+                  card_report[r["style"]]={"played_bouts":played,"played_uses":int(r["played_uses"]),"played_wins":pw,"played_win_pct":round(100*pw/played,2) if played else None,"total_appearances":int(r["deck_copies"])}
+          summary={"bouts":len(rows),"wrestlers":{name:{"wins":wins[name],"bouts":totals[name],"win_pct":round(100*wins[name]/totals[name],2)} for name in totals},"morotsuki":card_report,"win_methods":dict(Counter(r["win_method"] for r in rows)),"rule":"Position ±4; +5 or -5 ring-out"}
+          (root/"summary.json").write_text(json.dumps(summary,indent=2))
+          print(json.dumps(summary,indent=2))
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a") as f:
+              f.write("## Morotsuki — 1000 bouts\n\n")
+              for name,d in summary["wrestlers"].items():f.write(f"- {name}: {d['wins']}/{d['bouts']} ({d['win_pct']}%)\n")
+              f.write("\nMorotsuki when played:\n")
+              for name,d in card_report.items():f.write(f"- {name}: {d['played_wins']}/{d['played_bouts']} wins ({d['played_win_pct']}%), {d['played_uses']} uses\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: morotsuki-four-1000
+          path: artifacts/morotsuki/
