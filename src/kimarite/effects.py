@@ -821,6 +821,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Explosive Step — Fumikomi": _explosive_step,
     "Tsuki": _tsuki,
     "Tsuppari": _tsuppari,
+    "Morotsuki": lambda state, side, card, context: None,
     "Harite": _harite,
     "Nodowa": _nodowa,
     "Headlong Charge": _headlong_charge,
