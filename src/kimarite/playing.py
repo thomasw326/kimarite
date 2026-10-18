@@ -35,6 +35,14 @@ def play_card(
     state.card_plays.append((side, card.name))
     state.card_play_ids.append((side, card.card_id))
     state.log(f"{fighter.wrestler.name} plays {card.name}.")
+    previous_morotsuki = sum(
+        previous.name == "Morotsuki" for previous in fighter.played_this_turn[:-1]
+    )
+    if previous_morotsuki:
+        from .rules import gain_push
+        gain_push(state, side, previous_morotsuki)
+        if state.winner is not None:
+            return
 
     if card.is_kimarite:
         duplicate_in_zone = any(
