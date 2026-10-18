@@ -59,7 +59,7 @@ def test_overflow_loop_with_grip_is_yorikiri():
 
 def test_shared_tracks_are_symmetric_for_side_b():
     bout = state()
-    bout.position = -2
+    bout.position = -1
 
     gain_push(bout, Side.B, 3)
 
