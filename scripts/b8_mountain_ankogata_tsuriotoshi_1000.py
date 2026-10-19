@@ -66,6 +66,8 @@ def install():
         assert sum(n for name,n in counts.items() if (catalog[name].is_kimarite if name in catalog else name == "Yorikiri (YOR-C1)")) == 8, style
         assert sum(n for name,n in counts.items() if (not catalog[name].is_kimarite if name in catalog else False)) == 32, style
     assert selected["Mountain"]["Ankogata"] == 2 and selected["Mountain"]["Tsuriotoshi"] == 1
+    assert selected["Mountain"]["Ottsuke"] == selected["Mountain"]["Kannuki"] == 2
+    assert selected["Mountain"]["Shove"] == 1 and "Belt Slap" not in selected["Mountain"]
     assert "Tottari" not in selected["Mountain"]
     assert selected["Fast Grappler"] == previous.fg_snapshot()
     assert selected["Pressure Fighter"] == previous.pf.snapshot()
