@@ -53,15 +53,15 @@ def main():
     resolve_exchange_effect(s,Side.A,ank,EffectContext())
     assert s.fighter_b.total_grip==4
 
-    # Count Grip LEVELS (normal=1, deep=2); check both seats and exact 12/13 edge.
-    s = BoutState(fighter("Mountain",7,2,2), fighter("Grappler",10))
+    # Count Grip LEVELS (normal=1, deep=2); check both seats and exact 14/15 edge.
+    s = BoutState(fighter("Mountain",9,2,2), fighter("Grappler",10))
     s.momentum=1
-    assert not kimarite_is_satisfied(s,Side.A,tsu)  # 4 + 7 + 1 = 12
+    assert not kimarite_is_satisfied(s,Side.A,tsu)  # 4 + 9 + 1 = 14
     s.momentum=2
-    assert kimarite_is_satisfied(s,Side.A,tsu)      # 4 + 7 + 2 = 13
-    s = BoutState(fighter("Grappler",10), fighter("Mountain",10))
+    assert kimarite_is_satisfied(s,Side.A,tsu)      # 4 + 9 + 2 = 15
+    s = BoutState(fighter("Grappler",10), fighter("Mountain",12))
     s.momentum=-3
-    assert kimarite_is_satisfied(s,Side.B,tsu)      # 0 + 10 + 3 = 13
+    assert kimarite_is_satisfied(s,Side.B,tsu)      # 0 + 12 + 3 = 15
     s.momentum=-2
     assert not kimarite_is_satisfied(s,Side.B,tsu)
 
@@ -78,7 +78,7 @@ def main():
         assert (s.momentum==1) == (mode=="momentum")
         assert (s.fighter_a.total_grip==1) == (mode=="grip")
 
-    print("PASS: Mountain trial 40, threshold 5/6/9, Stable, both Grip hands, protection, Tsuriotoshi total 12/13, 3 AI choices")
+    print("PASS: Mountain trial 40, threshold 5/6/9, Stable, both Grip hands, protection, Tsuriotoshi total 14/15, 3 AI choices")
 
 if __name__ == "__main__":
     main()
