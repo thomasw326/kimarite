@@ -6,7 +6,7 @@ instead. One Shiko Stomp protects against the entire hostile effect.
 Morozashi's existing grip-reduction immunity remains effective.
 
 Tsuriotoshi: PP T kimarite, threshold = usable Grip level (0..4)
-+ absolute Power + relative Momentum >=13. Exchange choose one +1
++ absolute Power + relative Momentum >=15. Exchange choose one +1
 Power, +1 Momentum, or +1 Flexible Grip.
 
 B8 Stability vs Unstable has not been implemented in the tested engine:
@@ -53,7 +53,7 @@ def _ankogata(state, side, card, context):
 def _tsuriotoshi_predicate(state, side):
     return (effective_total_grip(state, side)
             + state.fighter(side).power
-            + state.momentum * state.sign(side)) >= 13
+            + state.momentum * state.sign(side)) >= 15
 
 
 def _tsuriotoshi_exchange(state, side, card, context):
@@ -113,7 +113,7 @@ def install_b8_mountain_cards():
             total = (effective_total_grip(state, side)
                      + state.fighter(side).power
                      + state.momentum * state.sign(side))
-            return max(0.0, min(1.0, total / 13.0))
+            return max(0.0, min(1.0, total / 15.0))
         return old_progress(state, side, card)
     ai.kimarite_progress = progress
 
