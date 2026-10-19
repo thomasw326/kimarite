@@ -63,19 +63,23 @@ def main():
         "mirror_seat_a_win_rates": {k: round(100 * v["seat_a_wins"] / v["bouts"], 3) for k, v in sorted(mirrors.items())},
     }
     summary["baseline"] = {"overall": 46.3, "per_opponent": {"Pressure Fighter": 58.4, "Fast Grappler": 40.0, "The Technician": 29.2, "Charger": 57.6}}
+    summary["threshold_13"] = {"overall": 59.2, "per_opponent": {"Pressure Fighter": 71.6, "Fast Grappler": 52.4, "The Technician": 41.6, "Charger": 71.2}, "tsuriotoshi_finisher_wins": 323, "oshitaoshi_finisher_wins": 130}
     summary["mountain_wins"] = sum(v["Mountain"] for v in matchup.values())
     summary["mountain_win_pct"] = round(100 * summary["mountain_wins"] / 1000, 2)
     summary["per_opponent"] = {next(n for n in pair if n != "Mountain"): {"mountain_wins": v["Mountain"], "opponent_wins": 250-v["Mountain"], "mountain_win_pct": round(100*v["Mountain"]/250,2)} for pair,v in matchup.items()}
     summary["change_vs_baseline_pp"] = {name: round(v["mountain_win_pct"]-summary["baseline"]["per_opponent"][name],2) for name,v in summary["per_opponent"].items()}
     summary["overall_change_pp"] = round(summary["mountain_win_pct"]-summary["baseline"]["overall"],2)
+    summary["change_vs_threshold_13_pp"] = {name: round(v["mountain_win_pct"]-summary["threshold_13"]["per_opponent"][name],2) for name,v in summary["per_opponent"].items()}
+    summary["overall_change_vs_threshold_13_pp"] = round(summary["mountain_win_pct"]-summary["threshold_13"]["overall"],2)
+    summary["tsuriotoshi_threshold"] = 15
     (args.output / "summary.json").write_text(json.dumps(summary, indent=2))
     import os
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
-            f.write(f"## Mountain with Ankogata / Tsuriotoshi — 1000 bouts\n\nMountain: {summary['mountain_wins']}/1000 ({summary['mountain_win_pct']}%)\n\n")
+            f.write(f"## Mountain with Tsuriotoshi threshold 15 — 1000 bouts\n\nMountain: {summary['mountain_wins']}/1000 ({summary['mountain_win_pct']}%)\n\n")
             for opponent, d in sorted(summary["per_opponent"].items()):
                 f.write(f"- {opponent}: {d['mountain_wins']}/250 ({d['mountain_win_pct']}%)\n")
-            f.write(f"\nOverall delta: {summary['overall_change_pp']:+.1f} pp vs baseline. Torinaoshi: {summary['torinaoshi_count']}\n")
+            f.write(f"\nVs threshold 13: {summary['overall_change_vs_threshold_13_pp']:+.1f} pp. Vs original baseline: {summary['overall_change_pp']:+.1f} pp. Torinaoshi: {summary['torinaoshi_count']}\n")
     with (args.output / "win_methods.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(("style_1", "style_2", "method", "wins"))
