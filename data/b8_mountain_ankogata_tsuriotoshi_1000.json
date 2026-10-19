@@ -157,7 +157,7 @@
   },
   "notes": {
     "Ankogata": "PPP; Exchange gain 1 Power, become Stable; at post-gain Power 6+ reduce both opponent Grips one level, at 9+ instead remove all opponent Grips. Existing Shiko Stomp and Morozashi prevent negative Grip effects. Experimental Stable status logged but B8 Unstable rules not yet implemented.",
-    "Tsuriotoshi": "PPT; Kimarite total usable Grip level (0-4) + absolute Power + relative Momentum >=13; Exchange choose gain 1 Power or 1 Momentum or 1 Flexible Grip.",
+    "Tsuriotoshi": "PPT; Kimarite total usable Grip level (0-4) + absolute Power + relative Momentum >=15; Exchange choose gain 1 Power or 1 Momentum or 1 Flexible Grip.",
     "removed": {
       "Tottari": 1,
       "Ottsuke": 1,
@@ -167,6 +167,7 @@
       "Tsuriotoshi": 1,
       "Ankogata": 2
     },
-    "baseline": "Mountain 463/1000: vs PF 146/250, FG 100/250, Technician 73/250, Charger 144/250"
+    "baseline": "Mountain 463/1000: vs PF 146/250, FG 100/250, Technician 73/250, Charger 144/250",
+    "test_variant": "Threshold-only A/B: Tsuriotoshi 15 vs 13. Other card mechanics, decks, AI, seeds and B8 game rules unchanged."
   }
 }
