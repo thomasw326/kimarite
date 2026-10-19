@@ -72,14 +72,17 @@ def main():
     summary["change_vs_threshold_13_pp"] = {name: round(v["mountain_win_pct"]-summary["threshold_13"]["per_opponent"][name],2) for name,v in summary["per_opponent"].items()}
     summary["overall_change_vs_threshold_13_pp"] = round(summary["mountain_win_pct"]-summary["threshold_13"]["overall"],2)
     summary["tsuriotoshi_threshold"] = 15
+    summary["baseline_15_griptrim"] = {"overall": 51.7, "per_opponent": {"Pressure Fighter": 62.0, "Fast Grappler": 46.0, "The Technician": 32.8, "Charger": 66.0}}
+    summary["change_vs_baseline_15_griptrim_pp"] = {name: round(v["mountain_win_pct"]-summary["baseline_15_griptrim"]["per_opponent"][name], 2) for name,v in summary["per_opponent"].items()}
+    summary["overall_change_vs_baseline_15_griptrim_pp"] = round(summary["mountain_win_pct"]-51.7,2)
     (args.output / "summary.json").write_text(json.dumps(summary, indent=2))
     import os
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
-            f.write(f"## Mountain with Tsuriotoshi threshold 15 — 1000 bouts\n\nMountain: {summary['mountain_wins']}/1000 ({summary['mountain_win_pct']}%)\n\n")
+            f.write(f"## Mountain with Ottsuke/Kannuki restored, Tsuriotoshi 15 — 1000 bouts\n\nMountain: {summary['mountain_wins']}/1000 ({summary['mountain_win_pct']}%)\n\n")
             for opponent, d in sorted(summary["per_opponent"].items()):
                 f.write(f"- {opponent}: {d['mountain_wins']}/250 ({d['mountain_win_pct']}%)\n")
-            f.write(f"\nVs threshold 13: {summary['overall_change_vs_threshold_13_pp']:+.1f} pp. Vs original baseline: {summary['overall_change_pp']:+.1f} pp. Torinaoshi: {summary['torinaoshi_count']}\n")
+            f.write(f"\nVs prior 15-point deck: {summary['overall_change_vs_baseline_15_griptrim_pp']:+.1f} pp. Vs threshold 13: {summary['overall_change_vs_threshold_13_pp']:+.1f} pp. Vs original baseline: {summary['overall_change_pp']:+.1f} pp. Torinaoshi: {summary['torinaoshi_count']}\n")
     with (args.output / "win_methods.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(("style_1", "style_2", "method", "wins"))
