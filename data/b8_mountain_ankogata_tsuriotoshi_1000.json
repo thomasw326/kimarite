@@ -1,6 +1,6 @@
 {
-  "schema": "B8_mountain_ankogata_tsuriotoshi_vs_locked_four_1000",
-  "source": "Trial only: B8 locked four unchanged; Mountain replaces Tottari x1 with Tsuriotoshi x1, trims Ottsuke and Kannuki 2->1 and adds Ankogata x2. Based on 18 October Mountain baseline.",
+  "schema": "B8_mountain_grip_defense_ott_kannuki_restored_vs_locked_four_1000",
+  "source": "Same B8 15-point Tsuriotoshi trial, with 2 Grip-defense restorations: Ottsuke 1→2 and Kannuki 1→2; Belt Slap 1→0 and Shove 2→1. Opponents, seeds, effects, AI and 40-card total unchanged.",
   "rules": "Position ±4; ring-out at ±5; V5 style AI",
   "decks": {
     "Pressure Fighter": {
@@ -138,17 +138,16 @@
       "Hold Position": 3,
       "Harite": 2,
       "Nodowa": 2,
-      "Kannuki": 1,
+      "Kannuki": 2,
       "Shiko Stomp": 2,
       "Regain Balance": 2,
       "Crushing Pressure — Power Crusher": 2,
-      "Shove": 2,
+      "Shove": 1,
       "Oshi": 2,
       "Tsuki": 2,
       "Tsuppari": 1,
       "Gain Right Grip": 1,
-      "Ottsuke": 1,
-      "Belt Slap": 1,
+      "Ottsuke": 2,
       "Shitate": 1,
       "Driving Force": 2,
       "Tsuriotoshi": 1,
@@ -168,6 +167,15 @@
       "Ankogata": 2
     },
     "baseline": "Mountain 463/1000: vs PF 146/250, FG 100/250, Technician 73/250, Charger 144/250",
-    "test_variant": "Threshold-only A/B: Tsuriotoshi 15 vs 13. Other card mechanics, decks, AI, seeds and B8 game rules unchanged."
+    "test_variant": "Threshold-only A/B: Tsuriotoshi 15 vs 13. Other card mechanics, decks, AI, seeds and B8 game rules unchanged.",
+    "deck_replacement_test": "Restore Ottsuke ×2 and Kannuki ×2; remove Belt Slap ×1 and trim Shove ×2→×1. This is a deck-only A/B with Tsuriotoshi ≥15; no card-rule changes.",
+    "baseline_15": {
+      "overall_pct": 51.7,
+      "Pressure Fighter": 62,
+      "Charger": 66,
+      "Fast Grappler": 46,
+      "The Technician": 32.8,
+      "tsuriotoshi_finisher_wins": 216
+    }
   }
 }
