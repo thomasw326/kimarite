@@ -19,7 +19,8 @@ def main():
     assert len(config)==5 and all(sum(x.values())==40 for x in config.values())
     mountain = config["Mountain"]
     assert mountain["Tsuriotoshi"]==1 and mountain["Ankogata"]==2
-    assert "Tottari" not in mountain and mountain["Ottsuke"]==mountain["Kannuki"]==1
+    assert "Tottari" not in mountain and mountain["Ottsuke"]==mountain["Kannuki"]==2
+    assert "Belt Slap" not in mountain and mountain["Shove"]==1
     ank = Card(9991, "Ankogata", 3)
     tsu = Card(9992, "Tsuriotoshi", 2, 1, 0, True)
 
