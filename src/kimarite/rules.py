@@ -194,6 +194,12 @@ def lose_position(state: BoutState, side: Side, amount: int, *, source: str = "u
     gain_position(state, state.opponent_side(side), amount)
 
 
+def make_unstable(state: BoutState, side: Side) -> None:
+    """Apply the B9 Unstable condition until this fighter finishes its next turn."""
+    state.fighter(side).unstable = True
+    state.log(f"{state.fighter(side).wrestler.name} becomes Unstable.")
+
+
 def gain_power(state: BoutState, side: Side, amount: int) -> None:
     fighter = state.fighter(side)
     fighter.power += amount
