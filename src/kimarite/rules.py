@@ -194,7 +194,12 @@ def lose_position(state: BoutState, side: Side, amount: int, *, source: str = "u
 
 def make_unstable(state: BoutState, side: Side) -> None:
     """Apply the B9 Unstable condition until this fighter finishes its next turn."""
-    state.fighter(side).unstable = True
+    fighter = state.fighter(side)
+    fighter.unstable = True
+    # Recovery follows the target's NEXT completed turn. If inflicted during
+    # their own turn, do not recover at that turn's imminent end.
+    recovery = fighter.turns_started + (1 if state.active_side is side else 0) + 1
+    fighter.unstable_recovery_turn = max(fighter.unstable_recovery_turn, recovery)
     state.log(f"{state.fighter(side).wrestler.name} becomes Unstable.")
 
 
