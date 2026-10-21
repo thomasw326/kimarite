@@ -556,8 +556,12 @@ def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) ->
     make_unstable(state, state.opponent_side(side))
     opponent = state.opponent(side)
     if opponent.hand:
-        import random
-        discarded = opponent.hand.pop(random.randrange(len(opponent.hand)))
+        # Deterministic pseudo-random discard preserves reproducible batch seeds.
+        import hashlib
+        signature = repr((state.turn_number, side.value, tuple(x.card_id for x in opponent.hand),
+                          tuple((s.value, i) for s, i in state.card_play_ids)))
+        roll = int.from_bytes(hashlib.sha256(signature.encode()).digest()[:8], "big")
+        discarded = opponent.hand.pop(roll % len(opponent.hand))
         opponent.discard_pile.append(discarded)
     mill_cards(state, state.opponent_side(side), 1)
 
