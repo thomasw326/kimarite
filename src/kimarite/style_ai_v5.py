@@ -91,8 +91,16 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
         # Scaled like the former rank bonus while preserving tactical scoring.
         affinity = card_affinity(style, candidate.card.name) * 4 if style is not None else 0
         setup_hold = _four_card_setup_hold_value(state, side, candidate.card.name)
+        # Morotezuki is an opener: each later play is +1 Push. Reward only
+        # when another play remains; otherwise retain it for a future turn.
+        opener_bonus = 0
+        if candidate.card.name == "Morotezuki":
+            if state.fighter(side).cards_played_this_turn == 0 and state.fighter(side).plays_remaining >= 2:
+                opener_bonus = 34
+            else:
+                setup_hold += 35
         scored.append((
-            tier, candidate.score + danger_score + affinity - setup_hold,
+            tier, candidate.score + danger_score + affinity + opener_bonus - setup_hold,
             (card_affinity(style, candidate.card.name) if style is not None else 0), -candidate.card.card_id,
             candidate,
         ))
