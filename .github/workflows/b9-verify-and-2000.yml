@@ -31,7 +31,8 @@ jobs:
       - name: B9 smoke across all 15 styles (70 bouts)
         run: |
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 2000-bout batch - only reached after green tests and smoke
+      - name: B9 2000-bout batch - only on manually requested reruns after green tests and smoke
+        if: github.event_name == 'workflow_dispatch'
         run: |
           python scripts/b9_round_robin.py --bouts 2000 --output-dir b9_artifacts/batch_2000
       - name: Upload smoke and batch results
