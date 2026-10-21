@@ -66,6 +66,8 @@ def remove_temporary(
                 state.position = state.sign(state.opponent_side(side)) * abs(state.position)
         elif card.name == "Nekodamashi":
             lose_momentum(state, side, 1)
+        elif card.name == "Henka":
+            make_unstable(state, side)
         if card.name in {
             "Attempt Two-Handed Grip",
             "Attempt Deep Outside Grip",
@@ -157,7 +159,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             ):
                 reduce_grip(state, opponent_side, hand="left")
                 reduce_grip(state, opponent_side, hand="right")
-                make_unstable(state, opponent_side)
+            make_unstable(state, opponent_side)
         elif name == "Morozashi":
             gain_push(state, side, 1)
         elif name in {"Get Underneath", "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
