@@ -203,6 +203,7 @@ def start_exchange_turn(
     """
     state.active_side = side
     state.turn_number += 1
+    state.fighter(side).turns_started += 1
     # Preserve the opponent's prevented/reduced Grip attempt until Tottari's
     # start-of-turn check; ordinary turn counters still reset immediately.
     grip_event_for_tottari = state.fighter(side).opponent_grip_reduced_this_turn
@@ -267,7 +268,10 @@ def end_exchange_turn(
 
     fighter = state.fighter(side)
     # B9 Unstable lasts through the affected fighter's turn, then clears.
-    fighter.unstable = False
+    if fighter.unstable and fighter.turns_started >= fighter.unstable_recovery_turn:
+        fighter.unstable = False
+        fighter.unstable_recovery_turn = 0
+        state.log(f"{fighter.wrestler.name} regains Stability after their turn.")
     if fighter.bonus_turns_queued > 0:
         fighter.bonus_turns_queued -= 1
         next_side = side
