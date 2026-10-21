@@ -17,6 +17,7 @@ from .rules import (
     lose_momentum,
     lose_position,
     lose_power,
+    make_unstable,
     reduce_grip,
 )
 from .selection import ai_look_keep
@@ -390,11 +391,7 @@ def _gaburi(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 
 
 def _henka(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    if getattr(state, "r20_active", False):
-        # Approved R20 design: defensive Temporary, delayed draw on completion.
-        add_temporary(state, side, card, phase="exchange")
-    else:
-        draw_one(state, side)
+    add_temporary(state, side, card, phase="exchange")
 
 
 def _reset_to_neutral(
@@ -556,6 +553,16 @@ def _choose_opponent_temporary(
 
 
 def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    make_unstable(state, state.opponent_side(side))
+    opponent = state.opponent(side)
+    if opponent.hand:
+        import random
+        discarded = opponent.hand.pop(random.randrange(len(opponent.hand)))
+        opponent.discard_pile.append(discarded)
+    mill_cards(state, state.opponent_side(side), 1)
+
+
+def _kachiage(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_power(state, side, 2)
     target = _choose_opponent_temporary(state, side, card, context)
     if target is None:
@@ -600,30 +607,13 @@ def _read_the_move(
 
 
 def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    """Current Pull choice: setup a reversal or filter one card."""
-    if context.choice("__human__") and context.choice("mode") not in {"reversal", "filter"}:
-        raise ChoiceRequired(card.name, "mode", ["reversal", "filter"])
-    if context.choice("mode") in {"filter", "draw_discard"}:
+    """B9: yield one Position to gain Momentum, disrupt Stability and draw."""
+    lose_position(state, side, 1, source="Pull")
+    if state.winner is None:
+        gain_momentum(state, side, 1)
+    if state.winner is None:
+        make_unstable(state, state.opponent_side(side))
         draw_one(state, side)
-        if state.winner is None:
-            _discard_from_hand(state, side, card, context)
-        # Pull is ordinarily a Temporary, but filter mode never enters it.
-        state.fighter(side).discard_pile.append(card)
-        return
-
-    fighter = state.fighter(side)
-    lose_momentum(state, side, 1)
-    if state.winner is None:
-        lose_position(state, side, 1, source="Pull")
-    if fighter.discard_pile and state.winner is None:
-        index = context.choice("discard_index")
-        if not isinstance(index, int) or not 0 <= index < len(fighter.discard_pile):
-            index = len(fighter.discard_pile) - 1
-        recovered = fighter.discard_pile.pop(index)
-        fighter.draw_pile.insert(0, recovered)
-        state.log(f"{fighter.wrestler.name} puts {recovered.name} on top of the Draw Pile.")
-    if state.winner is None:
-        add_temporary(state, side, card, phase="exchange")
 
 
 def _power_water(
@@ -848,7 +838,85 @@ def _crushing_pressure(state: BoutState, side: Side, card: Card, context: Effect
         draw_one(state, side)
 
 
+
+def _morotezuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    # Subsequent plays supply its Push from playing.play_card.
+    state.log("Morotezuki primes subsequent card plays for +1 Push each.")
+
+
+def _nekodamashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    make_unstable(state, state.opponent_side(side))
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _maesabaki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    opponent_side = state.opponent_side(side)
+    opponent = state.opponent(side)
+    if opponent.total_grip:
+        if not prevent_negative_effect(state, opponent_side, source=card.name, description="reduce Grip"):
+            reduce_grip(state, opponent_side)
+    if opponent.temporary_zone:
+        target = _choose_opponent_temporary(state, side, card, context)
+        if target is not None and not prevent_negative_effect(state, opponent_side, source=card.name, description="remove Temporary"):
+            remove_temporary(state, opponent_side, target, disrupted=True)
+
+
+def _deashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    # Power uses the current Exchange value. Spirit is the prepared-Tachiai duel.
+    push = int(state.fighter(side).power > state.opponent(side).power)
+    if context.comparison is not None:
+        push += int(tachiai_advantage(context, side, Stat.SPIRIT) > 0)
+    else:
+        push += int(state.fighter(side).wrestler.base_spirit >
+                    state.opponent(side).wrestler.base_spirit)
+    if push:
+        gain_push(state, side, push)
+
+
+def _butsukari(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    if state.fighter(side).power > state.opponent(side).power:
+        if not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose Power"):
+            lose_power(state, state.opponent_side(side), 1)
+    if state.momentum * state.sign(side) >= 1:
+        make_unstable(state, state.opponent_side(side))
+    mill_cards(state, side, 1)
+
+
+def _denshamichi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_push(state, side, 1)
+    if state.winner is None:
+        gain_momentum(state, side, 1)
+        add_temporary(state, side, card, phase="exchange")
+
+
+def _spin_away(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_momentum(state, side, 1)
+    if state.winner is None:
+        _sidestep(state, side, card, context)
+
+
+def _ankogata(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_power(state, side, 1)
+    state.fighter(side).unstable = False
+    if state.fighter(side).power >= 6:
+        opponent_side = state.opponent_side(side)
+        opponent = state.opponent(side)
+        for hand in ("left", "right"):
+            if state.fighter(side).power >= 9:
+                reduce_grip(state, opponent_side, amount=2, hand=hand)
+            else:
+                reduce_grip(state, opponent_side, hand=hand)
+
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
+    "Morotezuki": _morotezuki,
+    "Nekodamashi": _nekodamashi,
+    "Maesabaki": _maesabaki,
+    "Deashi": _deashi,
+    "Butsukari": _butsukari,
+    "Denshamichi": _denshamichi,
+    "Spin Away": _spin_away,
+    "Ankogata": _ankogata,
+    "Kachiage": _kachiage,
     "Driving Force — Power Payoff": _driving_force,
     "Crushing Pressure — Power Crusher": _crushing_pressure,
     "Injury": lambda state, side, card, context: None,
@@ -948,6 +1016,9 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Sidestep",
         "Use the Tawara",
         "Kannuki",
+        "Nekodamashi",
+        "Denshamichi",
+        "Spin Away",
         "Morozashi",
     }
 )
