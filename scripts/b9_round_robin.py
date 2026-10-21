@@ -67,7 +67,21 @@ def make_fighter(name, entry, seed, ranking):
     return fighter
 
 
-def run_one(name_a, name_b, decks, seed, max_turns):
+def randomized_deck(entry, rng):
+    """40-card unoptimized control: 5 distinct finishers and 35 Basics (max two copies)."""
+    kimarite = [n for n in sorted(CARD_NAMES)
+                if card_by_name(n).is_kimarite and n not in {"Okuridashi", "Okuritaoshi", "Utchari"}]
+    basics = [n for n in sorted(CARD_NAMES) if not card_by_name(n).is_kimarite]
+    cards = rng.sample(kimarite, 5) + rng.sample(basics * 2, 35)
+    rng.shuffle(cards)
+    return {"stats": entry["stats"], "cards": cards}
+
+
+def run_one(name_a, name_b, decks, seed, max_turns, random_decks=False):
+    if random_decks:
+        randomized = random.Random(seed * 104729 + 19)
+        decks = {name_a: randomized_deck(decks[name_a], randomized),
+                 name_b: randomized_deck(decks[name_b], randomized)}
     a = make_fighter(name_a, decks[name_a], seed * 2, 1)
     b = make_fighter(name_b, decks[name_b], seed * 2 + 1, 2)
     state = BoutState(a, b)
@@ -93,7 +107,7 @@ def run_one(name_a, name_b, decks, seed, max_turns):
     except (ValueError, KeyError, RuntimeError, NotImplementedError) as exc:
         error = f"{type(exc).__name__}: {exc}"
     winner = name_a if state.winner is Side.A else name_b if state.winner is Side.B else ""
-    return winner, state.win_method or "", turn, error, state
+    return winner, state.win_method or "", turn, error, state, decks
 
 
 def main():
@@ -103,11 +117,14 @@ def main():
     parser.add_argument("--seed", type=int, default=20261021)
     parser.add_argument("--output-dir", default="b9_artifacts")
     parser.add_argument("--fail-on-errors", action="store_true")
+    parser.add_argument("--random-decks", action="store_true", help="Independently redraw 40 unoptimized cards for each wrestler-bout")
     args = parser.parse_args()
     decks = load_decks()
     if args.bouts < 1:
         parser.error("--bouts must be positive")
     names = list(decks)
+    global CARD_NAMES
+    CARD_NAMES = {card for entry in decks.values() for card in entry['cards']}
     pairs = list(combinations(names, 2))
     output = Path(args.output_dir)
     output.mkdir(parents=True, exist_ok=True)
@@ -127,8 +144,8 @@ def main():
             i = (idx // 2) % len(pairs)
             x, y = pairs[i]
             a, b = (x, y) if idx % 2 == 0 else (y, x)
-            winner, method, turns, error, state = run_one(
-                a, b, decks, args.seed + idx, args.max_turns
+            winner, method, turns, error, state, bout_decks = run_one(
+                a, b, decks, args.seed + idx, args.max_turns, random_decks=args.random_decks
             )
             opportunities[a] += 1
             opportunities[b] += 1
@@ -157,7 +174,7 @@ def main():
                     # All other cards in the wrestler's drafted 40-card pool are
                     # "unplayed"; duplicates count once per wrestler-bout.
                     played_names = {n for owner, n in state.card_plays if owner is side}
-                    basic_names = {n for n in decks[wrestler_name]["cards"]
+                    basic_names = {n for n in bout_decks[wrestler_name]["cards"]
                                    if n not in KIMARITE_PREDICATES}
                     for card_name in basic_names:
                         won = int(state.winner is side)
@@ -197,6 +214,8 @@ def main():
         "head_to_head_wins": {name: dict(matchup[name]) for name in names},
         "scheduled_bouts_by_wrestler": dict(opportunities),
         "seed": args.seed,
+        "random_decks": args.random_decks,
+        "random_deck_design": "Five unique Kimarite plus 35 randomly sampled Basic cards (maximum two copies); all 40 newly selected per wrestler-bout",
     }
     (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"completed": summary["completed_bouts"],
