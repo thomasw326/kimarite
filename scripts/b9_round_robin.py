@@ -12,6 +12,7 @@ from itertools import combinations
 from pathlib import Path
 
 from kimarite.catalog import card_by_name
+from kimarite.kimarite import KIMARITE_PREDICATES
 from kimarite.models import BoutState, FighterState, Side, Stat, Wrestler
 from kimarite.styles_v5 import STYLES
 from kimarite.style_ai_v5 import play_style_turn
@@ -114,6 +115,8 @@ def main():
     methods_by_wrestler = {name: Counter() for name in names}
     matchup = {name: Counter() for name in names}
     opportunities = Counter()
+    kimarite_available_bouts = Counter()
+    kimarite_wins = Counter()
     with (output / "bouts.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["bout","wrestler_a","wrestler_b","winner","method","turns","error"])
@@ -126,6 +129,13 @@ def main():
             )
             opportunities[a] += 1
             opportunities[b] += 1
+            for side in (Side.A, Side.B):
+                fighter = state.fighter(side)
+                available = {fighter.wrestler.starting_kimarite.name}
+                available.update(c.name for c in fighter.kimarite_zone)
+                available.update(n for play_side, n in state.card_plays if play_side is side and n in KIMARITE_PREDICATES)
+                for name in available:
+                    kimarite_available_bouts[name] += 1
             if error:
                 errors[error] += 1
             else:
@@ -133,6 +143,8 @@ def main():
                 loser = b if winner == a else a
                 losses[loser] += 1
                 methods[method] += 1
+                if method in KIMARITE_PREDICATES:
+                    kimarite_wins[method] += 1
                 methods_by_wrestler[winner][method] += 1
                 matchup[winner][loser] += 1
             played.update(name for _, name in state.card_plays)
@@ -147,6 +159,7 @@ def main():
             "win_rate": wins[name] / (wins[name] + losses[name])
             if wins[name] + losses[name] else 0} for name in names},
         "win_methods": dict(methods),
+        "kimarite_win_rates": {name: {"wins": kimarite_wins[name], "available_wrestler_bouts": count, "win_rate_percent": round(100 * kimarite_wins[name] / count, 2)} for name, count in sorted(kimarite_available_bouts.items())},
         "cards_played": dict(played),
         "winning_methods_by_wrestler": {name: dict(methods_by_wrestler[name]) for name in names},
         "head_to_head_wins": {name: dict(matchup[name]) for name in names},
