@@ -60,8 +60,7 @@ def _tsukidashi(state: BoutState, side: Side) -> bool:
 
 def _oshitaoshi(state: BoutState, side: Side) -> bool:
     return (
-        relative_momentum(state, side) >= 1
-        and relative_position(state, side) >= 1
+        relative_momentum(state, side) >= 2
         and state.fighter(side).power >= 8
     )
 
@@ -136,8 +135,8 @@ def _abisetaoshi(state: BoutState, side: Side) -> bool:
 
 def _kirikaeshi(state: BoutState, side: Side) -> bool:
     f = state.fighter(side)
-    return (power_advantage(state, side) <= -3 and len(f.hand) > len(state.opponent(side).hand)
-            and f.successful_reversal_this_turn)
+    return (power_advantage(state, side) <= -3 and not f.unstable
+            and state.opponent(side).unstable)
 
 
 def _okuridashi(state: BoutState, side: Side) -> bool:
@@ -148,6 +147,11 @@ def _okuridashi(state: BoutState, side: Side) -> bool:
 def _okuritaoshi(state: BoutState, side: Side) -> bool:
     # B9 generated-only finisher: mirrors Oshitaoshi with one less Momentum.
     return state.fighter(side).power >= 8 and relative_momentum(state, side) >= 1
+
+
+def _tsuriotoshi(state: BoutState, side: Side) -> bool:
+    fighter = state.fighter(side)
+    return fighter.power + relative_momentum(state, side) + effective_total_grip(state, side) >= 15
 
 
 def _sukuinage(state: BoutState, side: Side) -> bool:
@@ -170,6 +174,7 @@ KIMARITE_PREDICATES: dict[str, Predicate] = {
     "Uwatedashinage": _uwatedashinage,
     "Utchari": _utchari,
     "Sukuinage": _sukuinage,
+    "Tsuriotoshi": _tsuriotoshi,
     "Okuritaoshi": _okuritaoshi,
     "Okuridashi": _okuridashi,
     "Kirikaeshi": _kirikaeshi,
