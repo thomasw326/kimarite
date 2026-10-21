@@ -28,6 +28,8 @@ def play_card(
     if not can_play_card(state, side, card):
         raise IllegalPlay(f"{card.name} is not currently a legal play.")
 
+    # B9: each subsequent card played after Morotezuki generates one Push.
+    primed = any(c.name == "Morotezuki" for c in fighter.played_this_turn)
     fighter.hand.remove(card)
     fighter.plays_remaining -= 1
     fighter.cards_played_this_turn += 1
@@ -35,6 +37,11 @@ def play_card(
     state.card_plays.append((side, card.name))
     state.card_play_ids.append((side, card.card_id))
     state.log(f"{fighter.wrestler.name} plays {card.name}.")
+    if primed and card.name != "Morotezuki":
+        from .rules import gain_push
+        gain_push(state, side, 1)
+        if state.winner is not None:
+            return
 
     if card.is_kimarite:
         fighter.kimarite_zone.append(card)
