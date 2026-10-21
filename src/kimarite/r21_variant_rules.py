@@ -58,6 +58,12 @@ def variant_predicate(state: BoutState, side: Side, identifier: str) -> bool:
     other_grip = effective_total_grip(state, state.opponent_side(side))
     reversal = bool(f.successful_reversal_this_turn)
 
+    # B9 generated-only Okuri finishers are no longer tied to Reversal.
+    if identifier == "R21-OKD-RS":
+        return pos >= 2 and mom >= 1
+    if identifier == "R21-OKT-RS":
+        return f.power >= 8 and mom >= 1
+
     # B7 approved balance pass; override the selected R21 roster predicates.
     if identifier == "R21-R22-ABI-1":
         return grip >= 2 and f.power >= 10 and mom >= 1
@@ -115,7 +121,7 @@ def variant_exchange(state: BoutState, side: Side, card: Card, context: EffectCo
     if identifier == "R21-R24-UWD-NE":
         return
     if identifier in {"R21-OKD-RS", "R21-OKT-RS"}:
-        search_for_reversal(state.fighter(side))
+        # B9: generated-only Kimarite have no Exchange effect.
         return
     if identifier == "R21-KAT-H5-T2":
         if relative_momentum(state, side) >= 1:

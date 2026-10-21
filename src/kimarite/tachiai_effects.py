@@ -3,12 +3,12 @@ from __future__ import annotations
 from .effects import draw_one, give_opponent_kimarite, resolve_exchange_effect, EffectContext
 from .models import BoutState, Side, Stat, Card
 from .prevention import prevent_negative_effect
-from .rules import establish_grip, gain_momentum, gain_power, lose_power
+from .rules import establish_grip, gain_momentum, gain_power, lose_power, make_unstable
 from .tachiai import TachiaiComparison, TachiaiStats, apply_tachiai_power_push, apply_tachiai_push
 from .temporary import add_temporary
 
 
-PREPARED_TEMPORARY_TACHIAI = frozenset({"Shiko Stomp", "Salt Throw"})
+PREPARED_TEMPORARY_TACHIAI = frozenset({"Shiko Stomp", "Salt Throw", "Nekodamashi"})
 REVEAL_FAMILY = frozenset({"Oshi", "Tsuki"})
 
 
@@ -151,6 +151,9 @@ def resolve_prepared_tachiai(
 
         elif name == "Shiko Stomp":
             pass
+        elif name == "Nekodamashi":
+            make_unstable(state, opponent_side)
+            add_temporary(state, side, card, phase="pre-bout")
 
         elif name == "Nodowa":
             if not prevent_negative_effect(
