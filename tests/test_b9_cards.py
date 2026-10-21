@@ -228,3 +228,25 @@ def test_sukuinage_requires_five_card_hand_advantage():
     assert not kimarite_is_satisfied(bout, Side.A, card_by_name("Sukuinage"))
     bout.fighter_b.hand = []
     assert kimarite_is_satisfied(bout, Side.A, card_by_name("Sukuinage"))
+
+
+def test_tottari_requires_opponent_seven_discarded_cards():
+    bout = state()
+    card = card_by_name("Tottari")
+    bout.fighter_a.opponent_grip_reduced_this_turn = True
+    bout.fighter_b.discard_pile = [card_by_name("Oshi")] * 6
+    assert not kimarite_is_satisfied(bout, Side.A, card)
+    bout.fighter_b.discard_pile.append(card_by_name("Tsuki"))
+    assert kimarite_is_satisfied(bout, Side.A, card)
+
+
+def test_kirikaeshi_requires_two_momentum_and_stability():
+    bout = state(power_a=4, power_b=8)
+    card = card_by_name("Kirikaeshi")
+    bout.fighter_b.unstable = True
+    bout.momentum = 1
+    assert not kimarite_is_satisfied(bout, Side.A, card)
+    bout.momentum = 2
+    assert kimarite_is_satisfied(bout, Side.A, card)
+    bout.fighter_a.unstable = True
+    assert not kimarite_is_satisfied(bout, Side.A, card)
