@@ -7,7 +7,7 @@ import argparse
 import csv
 import json
 import random
-from collections import Counter
+from collections import Counter, defaultdict
 from itertools import combinations
 from pathlib import Path
 
