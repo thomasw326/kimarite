@@ -177,3 +177,44 @@ def test_pull_no_longer_enters_temporary():
     assert bout.fighter_b.unstable
     assert bout.fighter_a.hand[0].name == "Tsuki"
     assert not bout.fighter_a.temporary_zone
+
+
+def test_stability_recovers_after_next_affected_turn():
+    from kimarite.turns import end_exchange_turn
+    bout = state()
+    bout.active_side = Side.A
+    make_unstable(bout, Side.B)
+    assert bout.fighter_b.unstable
+    bout.active_side = Side.B
+    bout.fighter_b.turns_started = 1
+    end_exchange_turn(bout, Side.B)
+    assert not bout.fighter_b.unstable
+
+
+def test_stability_does_not_recover_when_inflicted_during_own_turn():
+    from kimarite.turns import end_exchange_turn
+    bout = state()
+    bout.active_side = Side.A
+    bout.fighter_a.turns_started = 1
+    make_unstable(bout, Side.A)
+    end_exchange_turn(bout, Side.A)
+    assert bout.fighter_a.unstable
+    bout.active_side = Side.A
+    bout.fighter_a.turns_started = 2
+    end_exchange_turn(bout, Side.A)
+    assert not bout.fighter_a.unstable
+
+
+def test_repeated_unstable_extends_to_next_affected_turn():
+    from kimarite.turns import end_exchange_turn
+    bout = state()
+    bout.active_side = Side.A
+    bout.fighter_a.turns_started = 1
+    make_unstable(bout, Side.A)
+    bout.fighter_a.turns_started = 2
+    make_unstable(bout, Side.A)
+    end_exchange_turn(bout, Side.A)
+    assert bout.fighter_a.unstable
+    bout.fighter_a.turns_started = 3
+    end_exchange_turn(bout, Side.A)
+    assert not bout.fighter_a.unstable
