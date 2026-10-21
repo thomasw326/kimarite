@@ -198,7 +198,7 @@ def make_unstable(state: BoutState, side: Side) -> None:
     fighter.unstable = True
     # Recovery follows the target's NEXT completed turn. If inflicted during
     # their own turn, do not recover at that turn's imminent end.
-    recovery = fighter.turns_started + (1 if state.active_side is side else 0) + 1
+    recovery = fighter.turns_started + 1
     fighter.unstable_recovery_turn = max(fighter.unstable_recovery_turn, recovery)
     state.log(f"{state.fighter(side).wrestler.name} becomes Unstable.")
 
