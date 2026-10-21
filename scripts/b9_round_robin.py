@@ -117,6 +117,9 @@ def main():
     opportunities = Counter()
     kimarite_available_bouts = Counter()
     kimarite_wins = Counter()
+    # Restores per-card played/unplayed wrestler-bout win tracking from big_test.py.
+    basic_card_outcomes = defaultdict(lambda: {"played_bouts": 0, "played_wins": 0,
+                                                "unplayed_bouts": 0, "unplayed_wins": 0})
     with (output / "bouts.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["bout","wrestler_a","wrestler_b","winner","method","turns","error"])
@@ -148,9 +151,37 @@ def main():
                 methods_by_wrestler[winner][method] += 1
                 matchup[winner][loser] += 1
             played.update(name for _, name in state.card_plays)
+            if not error:
+                for side, wrestler_name in ((Side.A, a), (Side.B, b)):
+                    # Only cards actually played during Exchange count as "played".
+                    # All other cards in the wrestler's drafted 40-card pool are
+                    # "unplayed"; duplicates count once per wrestler-bout.
+                    played_names = {n for owner, n in state.card_plays if owner is side}
+                    basic_names = {n for n in decks[wrestler_name]["cards"]
+                                   if n not in KIMARITE_PREDICATES}
+                    for card_name in basic_names:
+                        won = int(state.winner is side)
+                        group = "played" if card_name in played_names else "unplayed"
+                        for key in (("ALL", card_name), (wrestler_name, card_name)):
+                            tally = basic_card_outcomes[key]
+                            tally[group + "_bouts"] += 1
+                            tally[group + "_wins"] += won
             writer.writerow([idx + 1, a, b, winner, method, turns, error])
             if (idx + 1) % 100 == 0:
                 print(f"B9 completed {idx+1}/{args.bouts} bouts", flush=True)
+    with (output / "basic_card_win_rates.csv").open("w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(["wrestler", "card", "played_bouts", "played_wins",
+                         "played_win_rate_percent", "unplayed_bouts", "unplayed_wins",
+                         "unplayed_win_rate_percent", "difference_pp"])
+        for (wrestler_name, card_name), tally in sorted(basic_card_outcomes.items()):
+            pn, pw = tally["played_bouts"], tally["played_wins"]
+            un, uw = tally["unplayed_bouts"], tally["unplayed_wins"]
+            pr = round(100 * pw / pn, 2) if pn else None
+            ur = round(100 * uw / un, 2) if un else None
+            writer.writerow([wrestler_name, card_name, pn, pw, pr if pr is not None else "",
+                             un, uw, ur if ur is not None else "",
+                             round(pr - ur, 2) if pr is not None and ur is not None else ""])
     summary = {
         "requested_bouts": args.bouts,
         "completed_bouts": sum(wins.values()),
@@ -161,6 +192,7 @@ def main():
         "win_methods": dict(methods),
         "kimarite_win_rates": {name: {"wins": kimarite_wins[name], "available_wrestler_bouts": count, "win_rate_percent": round(100 * kimarite_wins[name] / count, 2)} for name, count in sorted(kimarite_available_bouts.items())},
         "cards_played": dict(played),
+        "basic_card_win_rate_report": "basic_card_win_rates.csv",
         "winning_methods_by_wrestler": {name: dict(methods_by_wrestler[name]) for name in names},
         "head_to_head_wins": {name: dict(matchup[name]) for name in names},
         "scheduled_bouts_by_wrestler": dict(opportunities),
