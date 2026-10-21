@@ -37,7 +37,7 @@ def play_card(
     state.card_plays.append((side, card.name))
     state.card_play_ids.append((side, card.card_id))
     state.log(f"{fighter.wrestler.name} plays {card.name}.")
-    if primed and card.name != "Morotezuki":
+    if primed:
         from .rules import gain_push
         gain_push(state, side, 1)
         if state.winner is not None:
