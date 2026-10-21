@@ -141,13 +141,13 @@ def _kirikaeshi(state: BoutState, side: Side) -> bool:
 
 
 def _okuridashi(state: BoutState, side: Side) -> bool:
-    return (state.fighter(side).successful_reversal_this_turn
-            and relative_position(state, side) >= 1 and relative_momentum(state, side) >= 1)
+    # B9 generated-only finisher: mirrors Oshidashi with one less Momentum.
+    return relative_position(state, side) >= 2 and relative_momentum(state, side) >= 1
 
 
 def _okuritaoshi(state: BoutState, side: Side) -> bool:
-    return (state.fighter(side).successful_reversal_this_turn
-            and relative_position(state, side) >= 0 and relative_momentum(state, side) >= 2)
+    # B9 generated-only finisher: mirrors Oshitaoshi with one less Momentum.
+    return state.fighter(side).power >= 8 and relative_momentum(state, side) >= 1
 
 
 def _sukuinage(state: BoutState, side: Side) -> bool:
