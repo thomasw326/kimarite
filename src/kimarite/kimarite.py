@@ -81,6 +81,7 @@ def _tottari(state: BoutState, side: Side) -> bool:
     return (
         no_grip(state, side)
         and state.fighter(side).opponent_grip_reduced_this_turn
+        and len(state.opponent(side).discard_pile) >= 7
     )
 
 
@@ -136,7 +137,7 @@ def _abisetaoshi(state: BoutState, side: Side) -> bool:
 def _kirikaeshi(state: BoutState, side: Side) -> bool:
     f = state.fighter(side)
     return (power_advantage(state, side) <= -3 and not f.unstable
-            and state.opponent(side).unstable)
+            and state.opponent(side).unstable and relative_momentum(state, side) >= 2)
 
 
 def _okuridashi(state: BoutState, side: Side) -> bool:
