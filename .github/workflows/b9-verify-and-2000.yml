@@ -2,7 +2,7 @@ name: b9-verify-and-2000
 on:
   pull_request:
     branches:
-      - main
+      - experiment/v52-fg40-r3-holdposition-600
     paths:
       - ".github/workflows/b9-verify-and-2000.yml"
       - "src/kimarite/**"
