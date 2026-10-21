@@ -218,3 +218,13 @@ def test_repeated_unstable_extends_to_next_affected_turn():
     bout.fighter_a.turns_started = 3
     end_exchange_turn(bout, Side.A)
     assert not bout.fighter_a.unstable
+
+
+def test_sukuinage_requires_five_card_hand_advantage():
+    bout = state()
+    bout.momentum = 2
+    bout.fighter_a.hand = [card_by_name("Oshi")] * 5
+    bout.fighter_b.hand = [card_by_name("Tsuki")]
+    assert not kimarite_is_satisfied(bout, Side.A, card_by_name("Sukuinage"))
+    bout.fighter_b.hand = []
+    assert kimarite_is_satisfied(bout, Side.A, card_by_name("Sukuinage"))
