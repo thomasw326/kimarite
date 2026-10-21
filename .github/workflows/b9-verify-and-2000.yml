@@ -11,7 +11,7 @@ on:
       - "tests/test_b9_cards.py"
   push:
     branches:
-      - experiment/b9-no-momentum-overflow
+      - experiment/b9-random-decks-10k
   workflow_dispatch:
 
 jobs:
@@ -34,9 +34,9 @@ jobs:
       - name: B9 smoke across all 15 styles (70 bouts)
         run: |
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 2000-bout batch - no Momentum overflow experiment
+      - name: B9 10000-bout batch - randomized decks
         run: |
-          python scripts/b9_round_robin.py --bouts 2000 --fail-on-errors --output-dir b9_artifacts/batch_2000_no_momentum_overflow
+          python scripts/b9_round_robin.py --bouts 10000 --random-decks --fail-on-errors --output-dir b9_artifacts/batch_10000_random_decks
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
