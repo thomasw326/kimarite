@@ -111,6 +111,9 @@ def main():
     output = Path(args.output_dir)
     output.mkdir(parents=True, exist_ok=True)
     wins, losses, errors, methods, played = Counter(), Counter(), Counter(), Counter(), Counter()
+    methods_by_wrestler = {name: Counter() for name in names}
+    matchup = {name: Counter() for name in names}
+    opportunities = Counter()
     with (output / "bouts.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["bout","wrestler_a","wrestler_b","winner","method","turns","error"])
