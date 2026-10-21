@@ -542,7 +542,7 @@ def _choose_opponent_temporary(
     instances = state.opponent(side).temporary_zone
     if not instances:
         return None
-    if len(instances) == 1:
+    if len(instances) == 1 or not context.choice("__human__"):
         return instances[0]
 
     choice = context.choice("temporary_index")
@@ -1012,7 +1012,7 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Attempt Deep Inside Grip",
         "Hold Position",
         "Immovable",
-        "Pull",
+        "Henka",
         "Sidestep",
         "Use the Tawara",
         "Kannuki",
