@@ -156,7 +156,7 @@ def _tsuriotoshi(state: BoutState, side: Side) -> bool:
 
 def _sukuinage(state: BoutState, side: Side) -> bool:
     return (no_grip(state, side) and relative_momentum(state, side) >= 2
-            and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 3)
+            and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 5)
 
 
 def _utchari(state: BoutState, side: Side) -> bool:
