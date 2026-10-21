@@ -31,9 +31,9 @@ jobs:
       - name: B9 smoke across all 15 styles (70 bouts)
         run: |
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 2000-bout batch - Stability recovery retest after green gates
+      - name: B9 2000-bout batch - Tottari Kirikaeshi Sukuinage balance
         run: |
-          python scripts/b9_round_robin.py --bouts 2000 --fail-on-errors --output-dir b9_artifacts/batch_2000_stability_recovery
+          python scripts/b9_round_robin.py --bouts 2000 --fail-on-errors --output-dir b9_artifacts/batch_2000_balance_nerfs
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
