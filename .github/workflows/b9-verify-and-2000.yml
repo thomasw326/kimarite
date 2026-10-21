@@ -9,6 +9,9 @@ on:
       - "data/b9_*.json"
       - "scripts/b9_round_robin.py"
       - "tests/test_b9_cards.py"
+  push:
+    branches:
+      - experiment/b9-no-momentum-overflow
   workflow_dispatch:
 
 jobs:
@@ -31,9 +34,9 @@ jobs:
       - name: B9 smoke across all 15 styles (70 bouts)
         run: |
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 2000-bout batch - Tsukiotoshi Katasukashi changes
+      - name: B9 2000-bout batch - no Momentum overflow experiment
         run: |
-          python scripts/b9_round_robin.py --bouts 2000 --fail-on-errors --output-dir b9_artifacts/batch_2000_stability_hand_winrates
+          python scripts/b9_round_robin.py --bouts 2000 --fail-on-errors --output-dir b9_artifacts/batch_2000_no_momentum_overflow
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
