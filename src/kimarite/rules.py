@@ -57,7 +57,7 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Push.")
         next_kind = "momentum"
 
-    if excess == 0:
+    if excess == 0 or kind == "momentum":
         return
 
     # Overflow converts 1:1. If the destination track is already capped for
