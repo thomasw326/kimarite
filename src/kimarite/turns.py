@@ -266,6 +266,8 @@ def end_exchange_turn(
         return None
 
     fighter = state.fighter(side)
+    # B9 Unstable lasts through the affected fighter's turn, then clears.
+    fighter.unstable = False
     if fighter.bonus_turns_queued > 0:
         fighter.bonus_turns_queued -= 1
         next_side = side
