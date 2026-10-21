@@ -70,11 +70,11 @@ def _yoritaoshi(state: BoutState, side: Side) -> bool:
 
 
 def _katasukashi(state: BoutState, side: Side) -> bool:
-    return (no_grip(state, state.opponent_side(side)) and relative_momentum(state, side) >= 1 and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 5)
+    return (no_grip(state, state.opponent_side(side)) and relative_momentum(state, side) >= 2 and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 5)
 
 
 def _tsukiotoshi(state: BoutState, side: Side) -> bool:
-    return (no_grip(state, side) and relative_momentum(state, side) >= 1 and power_advantage(state, side) <= -3)
+    return (no_grip(state, side) and relative_momentum(state, side) >= 1 and power_advantage(state, side) <= -3\n            and state.opponent(side).unstable)
 
 
 def _tottari(state: BoutState, side: Side) -> bool:
