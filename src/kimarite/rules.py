@@ -148,16 +148,14 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0:
         return
 
-    # R20 Henka: prevent only the FIRST point of incoming Push during the
-    # opponent's next turn, retaining Henka until its normal delayed draw.
-    if getattr(state, "r20_active", False):
-        for temporary in defender.temporary_zone:
-            if amount <= 0:
-                break
-            if temporary.card.name == "Henka" and not getattr(temporary, "henka_prevention_used", False):
-                temporary.henka_prevention_used = True
-                amount -= 1
-                state.log("Henka prevents the first 1 incoming Push.")
+    # B9 Henka: protect exactly one incoming Push while active.
+    for temporary in defender.temporary_zone:
+        if amount <= 0:
+            break
+        if temporary.card.name == "Henka" and not getattr(temporary, "henka_prevention_used", False):
+            temporary.henka_prevention_used = True
+            amount -= 1
+            state.log("Henka prevents the first 1 incoming Push.")
     if amount <= 0:
         return
 
