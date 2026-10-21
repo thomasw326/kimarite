@@ -121,12 +121,17 @@ def main():
             winner, method, turns, error, state = run_one(
                 a, b, decks, args.seed + idx, args.max_turns
             )
+            opportunities[a] += 1
+            opportunities[b] += 1
             if error:
                 errors[error] += 1
             else:
                 wins[winner] += 1
-                losses[b if winner == a else a] += 1
+                loser = b if winner == a else a
+                losses[loser] += 1
                 methods[method] += 1
+                methods_by_wrestler[winner][method] += 1
+                matchup[winner][loser] += 1
             played.update(name for _, name in state.card_plays)
             writer.writerow([idx + 1, a, b, winner, method, turns, error])
             if (idx + 1) % 100 == 0:
@@ -140,11 +145,15 @@ def main():
             if wins[name] + losses[name] else 0} for name in names},
         "win_methods": dict(methods),
         "cards_played": dict(played),
+        "winning_methods_by_wrestler": {name: dict(methods_by_wrestler[name]) for name in names},
+        "head_to_head_wins": {name: dict(matchup[name]) for name in names},
+        "scheduled_bouts_by_wrestler": dict(opportunities),
+        "seed": args.seed,
     }
     (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"completed": summary["completed_bouts"],
                       "errors": summary["errors"]}, indent=2))
-    if args.fail_on_errors and errors:
+    if args.fail_on_errors and (errors or sum(wins.values()) != args.bouts):
         raise SystemExit(1)
 
 
