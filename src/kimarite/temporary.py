@@ -3,7 +3,7 @@ from __future__ import annotations
 from .models import BoutState, Card, GripState, Side, TemporaryInstance
 from .catalog import card_by_name
 from .prevention import prevent_negative_effect
-from .rules import establish_grip, gain_momentum, gain_power, gain_push, reduce_grip
+from .rules import establish_grip, gain_momentum, gain_power, gain_push, make_unstable, lose_momentum, reduce_grip
 
 
 def add_temporary(
@@ -51,12 +51,21 @@ def remove_temporary(
 
     # A disrupted Sidestep must release the shared Side-by-Side lock.
     # Without this, Push remains suppressed indefinitely after its card leaves.
-    if card.name == "Sidestep" and state.side_by_side_owner is side:
+    if card.name in {"Sidestep", "Spin Away"} and state.side_by_side_owner is side:
         state.side_by_side_owner = None
         state.side_by_side_distance = 0
         state.log("Side-by-Side ends when Sidestep leaves the Temporary Zone.")
 
     if disrupted:
+        if card.name in {"Denshamichi", "Spin Away"}:
+            opponent_side = state.opponent_side(side)
+            finisher = "Okuritaoshi" if card.name == "Denshamichi" else "Okuridashi"
+            state.opponent(side).kimarite_zone.append(card_by_name(finisher))
+            state.log(f"{finisher} is granted to the opponent Kimarite Zone.")
+            if card.name == "Denshamichi":
+                state.position = state.sign(state.opponent_side(side)) * abs(state.position)
+        elif card.name == "Nekodamashi":
+            lose_momentum(state, side, 1)
         if card.name in {
             "Attempt Two-Handed Grip",
             "Attempt Deep Outside Grip",
@@ -68,7 +77,7 @@ def remove_temporary(
 
     fighter.discard_pile.append(card)
     if (completed and not disrupted
-            and card.name in {"Henka", "Pull", "Sidestep", "Immovable", "Kannuki"}):
+            and card.name in {"Immovable"}):
         fighter.successful_reversal_this_turn = True
         state.reversal_completions.append((side, card.name, state.turn_number))
         state.log(f"{card.name} successfully completes its Reversal.")
@@ -129,12 +138,13 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name == "Immovable":
             if not instance.opponent_gained_push_while_active:
                 gain_momentum(state, side, 2)
-        elif name == "Henka" and getattr(state, "r20_active", False):
-            from .effects import draw_one
-            draw_one(state, side)
-        elif name == "Pull":
-            state.momentum = -state.momentum
-            state.log(f"{fighter.wrestler.name} reverses Momentum with surviving Pull.")
+        elif name == "Henka":
+            gain_momentum(state, side, 1)
+            make_unstable(state, state.opponent_side(side))
+        elif name == "Nekodamashi":
+            make_unstable(state, state.opponent_side(side))
+        elif name == "Denshamichi":
+            gain_push(state, side, 1)
         elif name in {"Use the Tawara", "Give Ground"}:
             pass
         elif name == "Kannuki":
@@ -147,11 +157,12 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             ):
                 reduce_grip(state, opponent_side, hand="left")
                 reduce_grip(state, opponent_side, hand="right")
+                make_unstable(state, opponent_side)
         elif name == "Morozashi":
             gain_push(state, side, 1)
         elif name in {"Get Underneath", "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
             pass
-        elif name == "Sidestep":
+        elif name in {"Sidestep", "Spin Away"}:
             distance = state.side_by_side_distance
             if state.side_by_side_owner is side:
                 if state.momentum * state.sign(side) >= 0:
@@ -162,9 +173,11 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
                 state.side_by_side_owner = None
                 state.side_by_side_distance = 0
                 state.log(
-                    f"Sidestep survives; {state.fighter(favorable).wrestler.name} "
+                    f"{name} survives; {state.fighter(favorable).wrestler.name} "
                     "takes the favorable orientation."
                 )
+                if name == "Sidestep":
+                    make_unstable(state, state.opponent_side(side))
         else:
             raise KeyError(f"No start-of-turn Temporary resolution for {name!r}.")
 
