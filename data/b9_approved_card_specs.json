@@ -1,0 +1,224 @@
+{
+  "version": "B9",
+  "status": "approved-designs-pending-runtime-integration",
+  "source": "B9 Working Card Pool",
+  "momentum_convention": "zero-sum: active wrestler gains/loses",
+  "generated_only_kimarite": {
+    "Okuridashi": {
+      "win": {
+        "position_min": 2,
+        "momentum_min": 1
+      },
+      "exchange": null,
+      "generated_by": "Spin Away removal",
+      "normal_play": false
+    },
+    "Okuritaoshi": {
+      "win": {
+        "power_min": 8,
+        "momentum_min": 1
+      },
+      "exchange": null,
+      "generated_by": "Denshamichi removal",
+      "normal_play": false
+    }
+  },
+  "cards": {
+    "Pull": {
+      "orbs": [
+        0,
+        1,
+        2
+      ],
+      "exchange": [
+        "lose_position:1",
+        "gain_momentum:1",
+        "opponent_unstable",
+        "draw:1"
+      ]
+    },
+    "Kannuki": {
+      "orbs": [
+        2,
+        1,
+        0
+      ],
+      "temporary": true,
+      "while_active": "suppress_opponent_grip_establishment_improvement_benefits",
+      "survive": [
+        "reduce_both_opponent_grips:1",
+        "opponent_unstable"
+      ]
+    },
+    "Henka": {
+      "orbs": [
+        0,
+        4,
+        0
+      ],
+      "temporary": true,
+      "while_active": "prevent_first_incoming_push:1",
+      "survive": [
+        "gain_momentum:1",
+        "opponent_unstable"
+      ],
+      "disrupted": [
+        "self_unstable"
+      ]
+    },
+    "Sidestep": {
+      "orbs": [
+        0,
+        3,
+        0
+      ],
+      "temporary": true,
+      "side_by_side": true,
+      "survive": [
+        "favorable_position_by_momentum",
+        "opponent_unstable"
+      ]
+    },
+    "Kirikaeshi": {
+      "orbs": [
+        0,
+        2,
+        1
+      ],
+      "win": {
+        "own_stable": true,
+        "opponent_unstable": true,
+        "power_disadvantage_min": 3
+      },
+      "exchange": {
+        "optional_cost": "lose_power:1",
+        "reward": [
+          "gain_momentum:1",
+          "draw:1"
+        ]
+      }
+    },
+    "Spin Away": {
+      "orbs": [
+        0,
+        1,
+        2
+      ],
+      "exchange": [
+        "gain_momentum:1",
+        "start_sidesteplike_side_by_side"
+      ],
+      "disrupted": [
+        "grant_opponent_okuridashi_to_zone"
+      ]
+    },
+    "Denshamichi": {
+      "orbs": [
+        1,
+        0,
+        2
+      ],
+      "exchange": [
+        "gain_push:1",
+        "gain_momentum:1",
+        "enter_temporary"
+      ],
+      "survive": [
+        "gain_push:1"
+      ],
+      "disrupted": [
+        "grant_opponent_okuritaoshi_to_zone",
+        "position=-abs(position)"
+      ]
+    },
+    "Morotezuki": {
+      "orbs": [
+        3,
+        0,
+        0
+      ],
+      "exchange": "gain_push:1_for_each_later_card_played_this_turn"
+    },
+    "Kachiage": {
+      "orbs": [
+        3,
+        0,
+        0
+      ],
+      "exchange": [
+        "gain_power:2",
+        "remove_opponent_temporary:1_if_present"
+      ]
+    },
+    "Nodowa": {
+      "orbs": [
+        3,
+        0,
+        0
+      ],
+      "exchange": [
+        "opponent_unstable",
+        "opponent_random_hand_discard:1",
+        "opponent_mill:1"
+      ],
+      "prepared_tachiai": "retain_B7"
+    },
+    "Nekodamashi": {
+      "orbs": [
+        1,
+        1,
+        2
+      ],
+      "on_play": [
+        "opponent_unstable",
+        "enter_temporary"
+      ],
+      "survive": [
+        "opponent_unstable"
+      ],
+      "disrupted": [
+        "lose_momentum:1"
+      ]
+    },
+    "Maesabaki": {
+      "orbs": [
+        0,
+        2,
+        1
+      ],
+      "exchange": [
+        "reduce_opponent_grip:1",
+        "remove_opponent_temporary:1"
+      ]
+    },
+    "Deashi": {
+      "orbs": [
+        2,
+        0,
+        2
+      ],
+      "exchange": [
+        "gain_push:1_if_power_duel_won",
+        "gain_push:1_if_spirit_duel_won"
+      ],
+      "prepared_tachiai": null
+    },
+    "Butsukari": {
+      "orbs": [
+        2,
+        0,
+        1
+      ],
+      "exchange": [
+        "opponent_lose_power:1_if_own_power_higher",
+        "opponent_unstable_if_momentum_positive",
+        "self_mill:1"
+      ]
+    }
+  },
+  "notes": [
+    "Experimental Ankogata and Tsuriotoshi retain tested status until balance approval.",
+    "B9 15-wrestler deck list lives in Google Sheets; 9 generated-only Okuri slots replaced.",
+    "Source branch preserved unchanged; this manifest is a machine-readable contract for subsequent implementation."
+  ]
+}
