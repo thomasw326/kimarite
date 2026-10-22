@@ -71,6 +71,21 @@ CARD_POOL: tuple[Card, ...] = (
     Card(11006, "Uwatedashinage", 0, 2, 1, True),
 )
 
+# B9-specific cards live outside the historical 61-card V5 print pool.
+B9_CARD_POOL: tuple[Card, ...] = (
+    # B9 additions; generated-only Okuri cards are not used in starting decks.
+    Card(12001, "Morotezuki", 3, 0, 0),
+    Card(12002, "Kachiage", 3, 0, 0),
+    Card(12003, "Nekodamashi", 1, 1, 2),
+    Card(12004, "Maesabaki", 0, 2, 1),
+    Card(12005, "Deashi", 2, 0, 2),
+    Card(12006, "Butsukari", 2, 0, 1),
+    Card(12007, "Denshamichi", 1, 0, 2),
+    Card(12008, "Spin Away", 0, 1, 2),
+    Card(12009, "Ankogata", 3, 0, 0),
+    Card(12010, "Tsuriotoshi", 2, 1, 0, True),
+)
+
 
 # Starting Kimarite are game definitions, not necessarily present in the
 # current 45-card shuffled pool snapshot. Synthetic IDs are engine-only.
@@ -101,7 +116,7 @@ STARTING_KIMARITE: tuple[Card, ...] = (
 
 
 def card_by_id(card_id: int) -> Card:
-    for card in (*CARD_POOL, *STARTING_KIMARITE):
+    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL):
         if card.card_id == card_id:
             return card
     raise KeyError(card_id)
@@ -112,7 +127,7 @@ def card_by_name(name: str, *, prefer_starting_kimarite: bool = False) -> Card:
         (STARTING_KIMARITE, CARD_POOL)
         if prefer_starting_kimarite
         else (CARD_POOL, STARTING_KIMARITE)
-    )
+    ) + (B9_CARD_POOL,)
     for group in groups:
         for card in group:
             if card.name == name:
