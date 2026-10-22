@@ -11,7 +11,7 @@ on:
       - "tests/test_b9_cards.py"
   push:
     branches:
-      - experiment/b9-reset-first-ai
+      - experiment/b9-pressure-plus-seven-4k
   workflow_dispatch:
 
 jobs:
@@ -34,9 +34,9 @@ jobs:
       - name: B9 smoke across all 15 styles (70 bouts)
         run: |
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 200-bout batch - Reset first AI
+      - name: B9 4000-bout batch - Pressure Fighter plus previous seven
         run: |
-          python scripts/b9_round_robin.py --bouts 200 --fail-on-errors --output-dir b9_artifacts/batch_200_reset_first_ai
+          python scripts/b9_round_robin.py --bouts 4000 --roster-names 'Pressure Fighter' 'Power Grappler' 'Bulldozer' 'Opportunist' 'Unorthodox Powerhouse' 'Charger' 'Speed Demon' 'Mawashi Specialist' --fail-on-errors --output-dir b9_artifacts/batch_4000_pressure_plus_seven
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
