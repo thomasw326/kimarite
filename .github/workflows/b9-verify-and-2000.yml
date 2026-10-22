@@ -1,4 +1,4 @@
-name: b9-roster-5-11-4k
+name: b9-roster-6-11-4k
 on:
   pull_request:
     branches:
@@ -11,7 +11,7 @@ on:
       - "tests/test_b9_cards.py"
   push:
     branches:
-      - experiment/b9-mid-roster-5-11-4k
+      - experiment/b9-ranks-6-11-4k
   workflow_dispatch:
 
 jobs:
@@ -34,9 +34,9 @@ jobs:
       - name: B9 smoke across all 15 styles (70 bouts)
         run: |
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 4000-bout round robin - roster 5 through 11
+      - name: B9 4000-bout round robin - roster 6 through 11
         run: |
-          python scripts/b9_round_robin.py --bouts 4000 --roster-names 'Power Grappler' 'Bulldozer' 'Opportunist' 'Unorthodox Powerhouse' 'Charger' 'Speed Demon' 'Mawashi Specialist' --fail-on-errors --output-dir b9_artifacts/batch_4000_roster_5_11
+          python scripts/b9_round_robin.py --bouts 4000 --roster-names 'Bulldozer' 'Opportunist' 'Unorthodox Powerhouse' 'Charger' 'Speed Demon' 'Mawashi Specialist' --fail-on-errors --output-dir b9_artifacts/batch_4000_roster_6_11
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
