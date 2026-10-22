@@ -11,7 +11,7 @@ on:
       - "tests/test_b9_cards.py"
   push:
     branches:
-      - experiment/b9-36912-technique-10k-lock
+      - experiment/b9-mid-roster-5-11-4k
   workflow_dispatch:
 
 jobs:
@@ -34,9 +34,9 @@ jobs:
       - name: B9 smoke across all 15 styles (70 bouts)
         run: |
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 10000-bout confirmation - Technique draw 3-6-9-12
+      - name: B9 4000-bout round robin - roster 5 through 11
         run: |
-          python scripts/b9_round_robin.py --bouts 10000 --fail-on-errors --output-dir b9_artifacts/batch_10000_technique_draw_36912
+          python scripts/b9_round_robin.py --bouts 4000 --roster-start 5 --roster-end 11 --fail-on-errors --output-dir b9_artifacts/batch_4000_roster_5_11
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
