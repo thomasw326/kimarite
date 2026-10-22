@@ -36,7 +36,7 @@ jobs:
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
       - name: B9 4000-bout round robin - roster 5 through 11
         run: |
-          python scripts/b9_round_robin.py --bouts 4000 --roster-start 5 --roster-end 11 --fail-on-errors --output-dir b9_artifacts/batch_4000_roster_5_11
+          python scripts/b9_round_robin.py --bouts 4000 --roster-names 'Power Grappler' 'Bulldozer' 'Opportunist' 'Unorthodox Powerhouse' 'Charger' 'Speed Demon' 'Mawashi Specialist' --fail-on-errors --output-dir b9_artifacts/batch_4000_roster_5_11
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
