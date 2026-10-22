@@ -11,7 +11,7 @@ on:
       - "tests/test_b9_cards.py"
   push:
     branches:
-      - experiment/b9-random-decks-10k
+      - experiment/b9-technique-selection-only
   workflow_dispatch:
 
 jobs:
@@ -34,9 +34,9 @@ jobs:
       - name: B9 smoke across all 15 styles (70 bouts)
         run: |
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 10000-bout batch - randomized decks
+      - name: B9 10000-bout batch - Technique selection only
         run: |
-          python scripts/b9_round_robin.py --bouts 10000 --random-decks --fail-on-errors --output-dir b9_artifacts/batch_10000_random_decks
+          python scripts/b9_round_robin.py --bouts 10000 --random-decks --fail-on-errors --output-dir b9_artifacts/batch_10000_technique_selection_only
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
