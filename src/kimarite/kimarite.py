@@ -55,7 +55,7 @@ def _oshidashi(state: BoutState, side: Side) -> bool:
 
 
 def _tsukidashi(state: BoutState, side: Side) -> bool:
-    return relative_position(state, side) >= 2 and state.fighter(side).cards_played_this_turn >= 3
+    return relative_position(state, side) >= 3 and state.fighter(side).cards_played_this_turn >= 3
 
 
 def _oshitaoshi(state: BoutState, side: Side) -> bool:
@@ -116,7 +116,7 @@ def _hikiotoshi(state: BoutState, side: Side) -> bool:
 
 
 def _tsukitaoshi(state: BoutState, side: Side) -> bool:
-    return relative_momentum(state, side) >= 2 and state.fighter(side).cards_played_this_turn >= 3
+    return relative_momentum(state, side) >= 1 and state.fighter(side).cards_played_this_turn >= 4
 
 
 def _tsuridashi(state: BoutState, side: Side) -> bool:
