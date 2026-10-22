@@ -87,13 +87,6 @@ def _context_for_card(
         if opponent.left_grip is not GripState.NONE and opponent.right_grip is not GripState.NONE:
             choices["grip"] = _best_grip_to_reduce(state, side)
 
-    if card.name == "Pull":
-        choices["mode"] = "reversal" if fighter.discard_pile and relative_momentum(state, side) <= -1 else "filter"
-        if choices["mode"] == "filter" and fighter.hand:
-            choices["hand_index"] = _best_hand_index(state, side, prefer_discard=True)
-        if fighter.discard_pile:
-            choices["discard_index"] = _best_discard_index(state, side)
-
     if card.name == "Power Water" and fighter.discard_pile:
         ranked = sorted(
             range(len(fighter.discard_pile)),
@@ -107,7 +100,7 @@ def _context_for_card(
     if card.name == "Read the Move":
         choices["mode"] = "remove" if opponent.temporary_zone else "draw"
 
-    if card.name in {"Nodowa", "Read the Move"} and opponent.temporary_zone:
+    if card.name in {"Kachiage", "Maesabaki", "Read the Move"} and opponent.temporary_zone:
         priority = {
             "Morozashi": 90,
             "Kannuki": 85,
@@ -154,7 +147,7 @@ def _context_for_card(
             if opponent.left_grip is not GripState.NONE and opponent.right_grip is not GripState.NONE:
                 choices["grip"] = _best_grip_to_reduce(state, side)
 
-    if card.name in {"Katasukashi", "Hatakikomi"}:
+    if card.name in {"Katasukashi", "Hatakikomi", "Kirikaeshi"}:
         # AI accepts optional tactical conversion when the cost will not create
         # an immediate severe Momentum deficit.
         choices["use_optional"] = relative_momentum(state, side) >= -1
@@ -279,13 +272,9 @@ def _contexts_for_card(
         ]
 
     if card.name == "Pull":
-        variants = [_context_variant(base, mode="filter")]
-        if fighter.discard_pile:
-            variants.append(_context_variant(base, mode="reversal",
-                                             discard_index=_best_discard_index(state, side)))
-        return variants
+        return [base]
 
-    if card.name in {"Nodowa", "Read the Move"} and opponent.temporary_zone:
+    if card.name in {"Kachiage", "Maesabaki", "Read the Move"} and opponent.temporary_zone:
         variants = [_context_variant(base, temporary_index=index, mode="remove")
                     for index in range(len(opponent.temporary_zone))]
         if card.name == "Read the Move":
@@ -403,11 +392,13 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
         parts = [_at_least(grip, 1), _at_least(position, 2), _at_least(power_adv, 2)]
     elif card.name == "Katasukashi":
         parts = [1.0 if effective_total_grip(state, state.opponent_side(side)) == 0 else 0.0,
-                 _at_least(momentum, 1), _at_least(hand_adv, 5)]
+                 _at_least(momentum, 2), _at_least(hand_adv, 5)]
     elif card.name == "Tsukiotoshi":
-        parts = [1.0 if grip == 0 else 0.0, _at_least(momentum, 1), _at_most(power_adv, -3)]
+        parts = [1.0 if grip == 0 else 0.0, _at_least(momentum, 1), _at_most(power_adv, -3),
+                 1.0 if opponent.unstable else 0.0]
     elif card.name == "Tottari":
-        parts = [1.0 if grip == 0 else 0.0, 1.0 if fighter.opponent_grip_reduced_this_turn else 0.0]
+        parts = [1.0 if grip == 0 else 0.0, 1.0 if fighter.opponent_grip_reduced_this_turn else 0.0,
+                 _at_least(len(opponent.discard_pile), 7)]
     elif card.name == "Uwatenage":
         parts = [1.0 if fighter.left_grip is GripState.DEEP and grip > 0 else 0.0,
                  _at_least(momentum, 1), _nonnegative(position)]
@@ -428,13 +419,14 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     elif card.name == "Abisetaoshi":
         parts = [_at_least(grip, 2), _at_least(fighter.power, 10)]
     elif card.name == "Kirikaeshi":
-        parts = [_at_most(power_adv, -3), _at_least(hand_adv, 1), reversal]
+        parts = [_at_most(power_adv, -3), 1.0 if not fighter.unstable else 0.0,
+                 1.0 if opponent.unstable else 0.0, _at_least(momentum, 2)]
     elif card.name == "Okuridashi":
         parts = [reversal, _at_least(position, 1), _at_least(momentum, 1)]
     elif card.name == "Okuritaoshi":
         parts = [reversal, _nonnegative(position), _at_least(momentum, 2)]
     elif card.name == "Sukuinage":
-        parts = [1.0 if grip == 0 else 0.0, _at_least(momentum, 2), _at_least(hand_adv, 3)]
+        parts = [1.0 if grip == 0 else 0.0, _at_least(momentum, 2), _at_least(hand_adv, 5)]
     elif card.name == "Utchari":
         parts = [1.0 if fighter.gained_momentum_this_turn else 0.0, _at_most(position, -3)]
     elif card.name == "Uwatedashinage":
@@ -489,6 +481,9 @@ def score_state(state: BoutState, side: Side) -> float:
     score += len(fighter.hand) * 1.5
     score -= len(opponent.hand) * 0.5
     score += fighter.plays_remaining * 0.5
+    score += 22 if opponent.unstable else 0
+    score -= 24 if fighter.unstable else 0
+    score += 8 * sum(x.card.name in {"Denshamichi", "Spin Away", "Nekodamashi", "Henka", "Kannuki"} for x in fighter.temporary_zone)
 
     # Shiko Stomp prevents a future opposing negative effect and persists
     # until consumed. Without a state value, one-step AI treats this delayed
