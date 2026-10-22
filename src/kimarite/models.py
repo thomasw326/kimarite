@@ -86,6 +86,9 @@ class FighterState:
     gained_push_this_turn: bool = False
     gained_momentum_this_turn: bool = False
     successful_reversal_this_turn: bool = False
+    unstable: bool = False
+    turns_started: int = 0
+    unstable_recovery_turn: int = 0
 
     @property
     def total_grip(self) -> int:
