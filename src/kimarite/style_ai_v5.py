@@ -53,6 +53,10 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
     if state.fighter(side).kimarite_zone:
         plays = [p for p in plays if p.card.name != "Headlong Charge"
                  or p.context.choice("sacrifice_kimarite") is not None]
+    # Reset to Neutral clears both Temporary zones. Never play it after
+    # another card has been played this turn, to preserve our own setups.
+    if state.fighter(side).cards_played_this_turn > 0:
+        plays = [p for p in plays if p.card.name != "Reset to Neutral"]
     if not plays:
         return None
 
@@ -70,6 +74,9 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
             continue
         if trial.winner is side:
             tier = 3
+        elif candidate.card.name == "Reset to Neutral" and state.fighter(side).cards_played_this_turn == 0 and trial.winner is None:
+            # If we are using Reset, do it before generating new Temporaries.
+            tier = 2
         elif trial.winner is not None or candidate.score <= -1_000_000:
             tier = -1
         else:
