@@ -86,10 +86,11 @@ def technique_thresholds(advantage: int) -> int:
 
 
 def technique_access(advantage: int) -> tuple[int, int]:
-    """Look improves per advantage; extra kept cards unlock at 1, 4, 7, 10, 13..."""
+    """Draw-only experiment: extra kept cards at +3, +6, +9, +12..."""
     if advantage <= 0:
         return (2, 2)
-    return (2 + advantage, 2 + technique_thresholds(advantage))
+    keep = 2 + advantage // 3
+    return (keep, keep)
 
 
 def spirit_rewards(advantage: int) -> tuple[int, int]:
