@@ -117,12 +117,16 @@ def main():
     parser.add_argument("--seed", type=int, default=20261021)
     parser.add_argument("--output-dir", default="b9_artifacts")
     parser.add_argument("--fail-on-errors", action="store_true")
+    parser.add_argument("--roster-start", type=int, default=1)
+    parser.add_argument("--roster-end", type=int, default=15)
     parser.add_argument("--random-decks", action="store_true", help="Independently redraw 40 unoptimized cards for each wrestler-bout")
     args = parser.parse_args()
     decks = load_decks()
     if args.bouts < 1:
         parser.error("--bouts must be positive")
-    names = list(decks)
+    names = list(decks)[args.roster_start - 1:args.roster_end]
+    if len(names) < 2:
+        parser.error("Roster range must contain at least two wrestlers")
     global CARD_NAMES
     CARD_NAMES = {card for entry in decks.values() for card in entry['cards']}
     pairs = list(combinations(names, 2))
