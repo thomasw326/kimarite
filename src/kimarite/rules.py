@@ -57,7 +57,7 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Push.")
         next_kind = "momentum"
 
-    if excess == 0:
+    if excess == 0 or kind == "momentum":
         return
 
     # Overflow converts 1:1. If the destination track is already capped for
@@ -148,16 +148,14 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0:
         return
 
-    # R20 Henka: prevent only the FIRST point of incoming Push during the
-    # opponent's next turn, retaining Henka until its normal delayed draw.
-    if getattr(state, "r20_active", False):
-        for temporary in defender.temporary_zone:
-            if amount <= 0:
-                break
-            if temporary.card.name == "Henka" and not getattr(temporary, "henka_prevention_used", False):
-                temporary.henka_prevention_used = True
-                amount -= 1
-                state.log("Henka prevents the first 1 incoming Push.")
+    # B9 Henka: protect exactly one incoming Push while active.
+    for temporary in defender.temporary_zone:
+        if amount <= 0:
+            break
+        if temporary.card.name == "Henka" and not getattr(temporary, "henka_prevention_used", False):
+            temporary.henka_prevention_used = True
+            amount -= 1
+            state.log("Henka prevents the first 1 incoming Push.")
     if amount <= 0:
         return
 
@@ -192,6 +190,17 @@ def lose_position(state: BoutState, side: Side, amount: int, *, source: str = "u
         state.fighter(side).lost_position_this_turn = True
         state.position_loss_events.append((side, state.turn_number, source, amount))
     gain_position(state, state.opponent_side(side), amount)
+
+
+def make_unstable(state: BoutState, side: Side) -> None:
+    """Apply the B9 Unstable condition until this fighter finishes its next turn."""
+    fighter = state.fighter(side)
+    fighter.unstable = True
+    # Recovery follows the target's NEXT completed turn. If inflicted during
+    # their own turn, do not recover at that turn's imminent end.
+    recovery = fighter.turns_started + 1
+    fighter.unstable_recovery_turn = max(fighter.unstable_recovery_turn, recovery)
+    state.log(f"{state.fighter(side).wrestler.name} becomes Unstable.")
 
 
 def gain_power(state: BoutState, side: Side, amount: int) -> None:

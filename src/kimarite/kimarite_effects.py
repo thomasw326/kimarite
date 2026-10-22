@@ -168,18 +168,27 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 fighter.discard_pile.append(discarded)
 
     elif card.name == "Kirikaeshi":
-        draw_one(state, side)
+        # B9: optional conversion of Power into Momentum and a card.
+        if context.choice("use_optional") is True:
+            from .rules import lose_power
+            lose_power(state, side, 1)
+            gain_momentum(state, side, 1)
+            if state.winner is None:
+                draw_one(state, side)
 
     elif card.name in {"Okuridashi", "Okuritaoshi"}:
-        mode = context.choice("mode")
-        if mode not in {"position_to_momentum", "momentum_to_position"}:
-            raise ChoiceRequired(card.name, "mode", ["position_to_momentum", "momentum_to_position"])
-        if mode == "position_to_momentum":
-            lose_position(state, side, 1, source=card.name)
-            gain_momentum(state, side, 2)
+        return  # B9 generated-only: no Exchange effect.
+
+    elif card.name == "Tsuriotoshi":
+        mode = context.choice("mode") or "power"
+        if mode == "power":
+            gain_power(state, side, 1)
+        elif mode == "momentum":
+            gain_momentum(state, side, 1)
+        elif mode == "grip":
+            gain_flexible_grip(state, side)
         else:
-            lose_momentum(state, side, 1)
-            gain_position(state, side, 2)
+            raise ChoiceRequired(card.name, "mode", ["power", "momentum", "grip"])
 
     elif card.name == "Sukuinage":
         if no_grip(state, side):

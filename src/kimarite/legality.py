@@ -9,6 +9,8 @@ def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
         return False
 
     fighter = state.fighter(side)
+    if card.name in {"Okuridashi", "Okuritaoshi"}:
+        return False  # B9 generated-only finishers
     if card not in fighter.hand or fighter.plays_remaining <= 0:
         return False
 
@@ -32,7 +34,7 @@ def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
             (fighter.right_grip is not GripState.NONE and fighter.left_grip is GripState.NONE)
         )
 
-    if card.name == "Sidestep":
+    if card.name in {"Sidestep", "Spin Away"}:
         return state.side_by_side_owner is None
 
     return True
