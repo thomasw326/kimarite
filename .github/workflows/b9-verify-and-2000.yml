@@ -1,0 +1,46 @@
+name: b9-verify-and-2000
+on:
+  pull_request:
+    branches:
+      - experiment/v52-fg40-r3-holdposition-600
+    paths:
+      - ".github/workflows/b9-verify-and-2000.yml"
+      - "src/kimarite/**"
+      - "data/b9_*.json"
+      - "scripts/b9_round_robin.py"
+      - "tests/test_b9_cards.py"
+  push:
+    branches:
+      - experiment/b9-technique-selection-designed-10k
+  workflow_dispatch:
+
+jobs:
+  b9-smoke-then-2000:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install runtime and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+      - name: Compile source
+        run: python -m compileall -q src/kimarite scripts/b9_round_robin.py
+      - name: B9 mechanical regression tests
+        run: python -m pytest -q tests/test_b9_cards.py
+      - name: B9 smoke across all 15 styles (70 bouts)
+        run: |
+          python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
+      - name: B9 10000-bout batch - Technique selection only, designed decks
+        run: |
+          python scripts/b9_round_robin.py --bouts 10000 --fail-on-errors --output-dir b9_artifacts/batch_10000_technique_selection_designed
+      - name: Upload smoke and batch results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: b9-smoke-and-batch-2000
+          path: b9_artifacts/
+          if-no-files-found: warn
