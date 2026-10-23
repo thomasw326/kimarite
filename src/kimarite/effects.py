@@ -137,6 +137,9 @@ def _discard_from_hand(state: BoutState, side: Side, card: Card, context: Effect
     if not fighter.hand:
         return
     index = 0 if len(fighter.hand) == 1 else context.choice("hand_index")
+    if index is None and not context.choice("__human__"):
+        from .ai import _best_hand_index
+        index = _best_hand_index(state, side, prefer_discard=True)
     options = list(range(len(fighter.hand)))
     if index not in options:
         raise ChoiceRequired(card.name, "hand_index", options)
@@ -620,9 +623,7 @@ def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> N
         make_unstable(state, state.opponent_side(side))
         draw_one(state, side)
         if state.winner is None:
-            if context.choice("hand_index") is None and not context.choice("__human__"):
-                # AI fallback: discard the newly drawn card rather than fail a choice.
-                context = EffectContext(context.comparison, {**(context.choices or {}), "hand_index": len(state.fighter(side).hand) - 1})
+            # Rank the complete hand after drawing, rather than always losing the new card.
             _discard_from_hand(state, side, card, context)
 
 
