@@ -1,10 +1,5 @@
-name: B9 balanced cards 13050 retest
+name: B9 balance full tournament (manual only)
 on:
-  push:
-    branches:
-      - experiment/b9-pull-read-move-balance
-    paths:
-      - .github/workflows/b9-neutral-13050.yml
   workflow_dispatch:
 
 jobs:
