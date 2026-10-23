@@ -610,13 +610,15 @@ def _read_the_move(
 
 
 def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    """B9: yield one Position to gain Momentum, disrupt Stability and draw."""
+    """B9: yield Position, gain Momentum, unsettle opponent, draw then discard."""
     lose_position(state, side, 1, source="Pull")
     if state.winner is None:
         gain_momentum(state, side, 1)
     if state.winner is None:
         make_unstable(state, state.opponent_side(side))
         draw_one(state, side)
+        if state.winner is None:
+            _discard_from_hand(state, side, card, context)
 
 
 def _power_water(
