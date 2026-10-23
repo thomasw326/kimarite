@@ -220,13 +220,13 @@ def test_repeated_unstable_extends_to_next_affected_turn():
     assert not bout.fighter_a.unstable
 
 
-def test_sukuinage_requires_five_card_hand_advantage():
+def test_sukuinage_requires_four_card_hand_advantage():
     bout = state()
     bout.momentum = 2
     bout.fighter_a.hand = [card_by_name("Oshi")] * 5
-    bout.fighter_b.hand = [card_by_name("Tsuki")]
+    bout.fighter_b.hand = [card_by_name("Tsuki")] * 2
     assert not kimarite_is_satisfied(bout, Side.A, card_by_name("Sukuinage"))
-    bout.fighter_b.hand = []
+    bout.fighter_b.hand = [card_by_name("Tsuki")]
     assert kimarite_is_satisfied(bout, Side.A, card_by_name("Sukuinage"))
 
 
@@ -259,6 +259,25 @@ def test_tsukiotoshi_requires_unstable_opponent():
     assert not kimarite_is_satisfied(bout, Side.A, card)
     bout.fighter_b.unstable = True
     assert kimarite_is_satisfied(bout, Side.A, card)
+
+
+def test_katasukashi_requires_four_card_hand_advantage():
+    bout = state()
+    bout.momentum = 2
+    bout.fighter_a.hand = [card_by_name("Oshi")] * 5
+    bout.fighter_b.hand = [card_by_name("Tsuki")] * 2
+    assert not kimarite_is_satisfied(bout, Side.A, card_by_name("Katasukashi"))
+    bout.fighter_b.hand = [card_by_name("Tsuki")]
+    assert kimarite_is_satisfied(bout, Side.A, card_by_name("Katasukashi"))
+
+
+def test_tsukitaoshi_requires_four_plays_but_no_momentum():
+    bout = state()
+    bout.momentum = 0
+    bout.fighter_a.cards_played_this_turn = 3
+    assert not kimarite_is_satisfied(bout, Side.A, card_by_name("Tsukitaoshi"))
+    bout.fighter_a.cards_played_this_turn = 4
+    assert kimarite_is_satisfied(bout, Side.A, card_by_name("Tsukitaoshi"))
 
 
 def test_katasukashi_requires_two_momentum():
