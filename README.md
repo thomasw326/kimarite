@@ -1,3 +1,7 @@
+# Kimirate — B10 main build
+
+**Current build: B10.** This mainline includes the State 3 neutral AI scoring prototype, card-level telemetry, and the approved ring boundary rules (Position ±4 playable; ring-out at ±5). The full 13,050-bout neutral-AI round robin passed on the precursor branch; the later integration preserved newer mainline ring rules and was not independently validated by that entire tournament. The general legacy test suite still requires cleanup. See [B10 promotion PR #42](https://github.com/thomasw326/kimarite/pull/42) for the integration history.
+
 # Kimarite
 
 Kimarite is a sumo management roguelike and tactical card game. The next milestone is **playable human-vs-AI sumo**, supported by a single deterministic rules engine that can also run AI-vs-AI simulations for balance testing.
