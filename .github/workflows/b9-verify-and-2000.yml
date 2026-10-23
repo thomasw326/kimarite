@@ -1,17 +1,17 @@
-name: b9-verify-and-2000
+name: b9-30-style-13050
 on:
   pull_request:
     branches:
       - experiment/v52-fg40-r3-holdposition-600
     paths:
-      - ".github/workflows/b9-verify-and-2000.yml"
+      - ".github/workflows/b9-30-style-13050.yml"
       - "src/kimarite/**"
       - "data/b9_*.json"
       - "scripts/b9_round_robin.py"
       - "tests/test_b9_cards.py"
   push:
     branches:
-      - experiment/b9-tsuppari-no-momentum
+      - experiment/b9-thirty-style-roundrobin
   workflow_dispatch:
 
 jobs:
@@ -31,16 +31,16 @@ jobs:
         run: python -m compileall -q src/kimarite scripts/b9_round_robin.py
       - name: B9 mechanical regression tests
         run: python -m pytest -q tests/test_b9_cards.py
-      - name: B9 smoke across all 15 styles (70 bouts)
+      - name: B9 smoke across all 30 styles (180 bouts)
         run: |
-          python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 4000-bout batch - Tsuppari without Momentum
+          python scripts/b9_round_robin.py --bouts 180 --fail-on-errors --output-dir b9_artifacts/smoke
+      - name: B9 13050-bout batch across all 435 pairings
         run: |
-          python scripts/b9_round_robin.py --bouts 4000 --roster-names 'Pressure Fighter' 'Power Grappler' 'Bulldozer' 'Opportunist' 'Unorthodox Powerhouse' 'Charger' 'Speed Demon' 'Mawashi Specialist' --fail-on-errors --output-dir b9_artifacts/batch_4000_tsuppari_no_momentum
+          python scripts/b9_round_robin.py --bouts 13050 --fail-on-errors --output-dir b9_artifacts/batch_13050_thirty_styles
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: b9-smoke-and-batch-2000
+          name: b9-30-style-smoke-and-13050
           path: b9_artifacts/
           if-no-files-found: warn
