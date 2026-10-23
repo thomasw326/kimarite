@@ -1,0 +1,41 @@
+name: B9 Katasukashi +3 clean 3000
+on:
+  push:
+    branches:
+      - experiment/b9-katasukashi-hand3-clean-3000
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e . pytest
+      - run: python -m compileall -q src/kimarite scripts/b9_round_robin.py
+      - run: python -m pytest -q tests/test_b9_cards.py
+      - run: python scripts/b9_round_robin.py --bouts 100 --fail-on-errors --output-dir artifacts/smoke
+  batch:
+    needs: smoke
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run 600 distinct bouts
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: python scripts/b9_round_robin.py --bouts 600 --start-index $((SHARD * 600)) --fail-on-errors --output-dir artifacts/shard_${SHARD}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: katasukashi-3000-shard-${{ matrix.shard }}
+          path: artifacts/shard_${{ matrix.shard }}/
