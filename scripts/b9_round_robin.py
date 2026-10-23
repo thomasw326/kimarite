@@ -159,6 +159,9 @@ def main():
     opportunities = Counter()
     kimarite_available_bouts = Counter()
     kimarite_wins = Counter()
+    card_plays_by_wrestler = Counter()
+    card_bouts_by_wrestler = Counter()
+    card_winning_bouts = Counter()
     # Restores per-card played/unplayed wrestler-bout win tracking from big_test.py.
     basic_card_outcomes = defaultdict(lambda: {"played_bouts": 0, "played_wins": 0,
                                                 "unplayed_bouts": 0, "unplayed_wins": 0})
@@ -193,6 +196,14 @@ def main():
                     kimarite_wins[method] += 1
                 methods_by_wrestler[winner][method] += 1
                 matchup[winner][loser] += 1
+            for fighter_side, wrestler_name in ((Side.A, a), (Side.B, b)):
+                counts = Counter(name for owner, name in state.card_plays if owner is fighter_side)
+                for card_name, count in counts.items():
+                    key = (wrestler_name, card_name)
+                    card_plays_by_wrestler[key] += count
+                    card_bouts_by_wrestler[key] += 1
+                    if state.winner is fighter_side:
+                        card_winning_bouts[key] += 1
             played.update(name for _, name in state.card_plays)
             if not error:
                 for side, wrestler_name in ((Side.A, a), (Side.B, b)):
@@ -225,6 +236,18 @@ def main():
             writer.writerow([wrestler_name, card_name, pn, pw, pr if pr is not None else "",
                              un, uw, ur if ur is not None else "",
                              round(pr - ur, 2) if pr is not None and ur is not None else ""])
+    with (output / "card_usage_by_wrestler.csv").open("w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(["wrestler", "card", "plays", "bouts_played",
+                         "wins_when_played", "wrestler_bouts",
+                         "plays_per_100_bouts", "pct_bouts_played"])
+        for (wrestler_name, card_name), count in sorted(card_plays_by_wrestler.items()):
+            total = opportunities[wrestler_name]
+            writer.writerow([wrestler_name, card_name, count,
+                             card_bouts_by_wrestler[(wrestler_name, card_name)],
+                             card_winning_bouts[(wrestler_name, card_name)], total,
+                             round(100 * count / total, 2) if total else 0,
+                             round(100 * card_bouts_by_wrestler[(wrestler_name, card_name)] / total, 2) if total else 0])
     summary = {
         "requested_bouts": args.bouts,
         "start_index": args.start_index,
@@ -237,6 +260,7 @@ def main():
         "win_methods": dict(methods),
         "kimarite_win_rates": {name: {"wins": kimarite_wins[name], "available_wrestler_bouts": count, "win_rate_percent": round(100 * kimarite_wins[name] / count, 2)} for name, count in sorted(kimarite_available_bouts.items())},
         "cards_played": dict(played),
+        "card_usage_report": "card_usage_by_wrestler.csv",
         "basic_card_win_rate_report": "basic_card_win_rates.csv",
         "winning_methods_by_wrestler": {name: dict(methods_by_wrestler[name]) for name in names},
         "head_to_head_wins": {name: dict(matchup[name]) for name in names},
