@@ -1,0 +1,21 @@
+name: B9 current discard smoke
+on:
+  push:
+    branches: [experiment/b9-pull-read-move-balance]
+    paths:
+      - .github/workflows/b9-discard-smoke.yml
+      - src/kimarite/**
+      - tests/test_b9_cards.py
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e . pytest
+      - run: python -m pytest -q tests/test_b9_cards.py
+      - run: python scripts/b9_round_robin.py --bouts 100 --fail-on-errors --output-dir b9_artifacts/discard_smoke
