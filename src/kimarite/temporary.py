@@ -74,8 +74,6 @@ def remove_temporary(
             "Attempt Deep Inside Grip",
         }:
             gain_momentum(state, state.opponent_side(side), 1)
-        elif card.name == "Get Underneath":
-            gain_momentum(state, state.opponent_side(side), 2)
 
     fighter.discard_pile.append(card)
     if (completed and not disrupted
@@ -163,7 +161,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             make_unstable(state, opponent_side)
         elif name == "Morozashi":
             gain_push(state, side, 1)
-        elif name in {"Get Underneath", "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
+        elif name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
             pass
         elif name in {"Sidestep", "Spin Away"}:
             distance = state.side_by_side_distance
