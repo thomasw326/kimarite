@@ -6,6 +6,8 @@ from .prevention import has_negative_effect_prevention, prevent_negative_effect
 
 TRACK_MIN = -3
 TRACK_MAX = 3
+POSITION_MIN = -4
+POSITION_MAX = 4
 
 
 def _cap_for(side: Side) -> int:
@@ -43,8 +45,19 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
     sign = state.sign(side)
     current = state.momentum if kind == "momentum" else state.position
     target = current + sign * amount
-    excess = _distance_past_cap(target)
-    clamped = max(TRACK_MIN, min(TRACK_MAX, target))
+    if kind == "push" and sign * target >= 5:
+        state.position = sign * POSITION_MAX
+        state.fighter(side).gained_push_this_turn = True
+        state.log(f"{state.fighter(side).wrestler.name} crosses the ring boundary.")
+        state.win_source = "ringout"
+        state.declare_winner(side, "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi")
+        return
+    if kind == "push":
+        excess = 0
+        clamped = max(POSITION_MIN, min(POSITION_MAX, target))
+    else:
+        excess = _distance_past_cap(target)
+        clamped = max(TRACK_MIN, min(TRACK_MAX, target))
 
     if kind == "momentum":
         state.momentum = clamped
@@ -57,14 +70,14 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Push.")
         next_kind = "momentum"
 
-    if excess == 0 or kind == "momentum":
+    if excess == 0:
         return
 
     # Overflow converts 1:1. If the destination track is already capped for
     # the same wrestler, conversion would loop forever; that is an immediate win.
     if _track_at_favorable_cap(state, side, next_kind):
         losing_side = state.opponent_side(side)
-        if kind == "push" and any(_has_temporary(state, losing_side, n) for n in ("Use the Tawara", "Give Ground")):
+        if kind == "push" and _has_temporary(state, losing_side, "Use the Tawara"):
             state.log(
                 f"Use the Tawara prevents {state.fighter(losing_side).wrestler.name} "
                 "from losing to Push."
@@ -72,7 +85,6 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
             return
 
         method = "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi"
-        state.win_source = "ringout"
         state.declare_winner(side, method)
         return
 
@@ -114,11 +126,6 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0 or state.winner is not None:
         return
 
-    # Sidestep suppresses ALL Push, including its owner's.
-    if state.side_by_side_owner is not None:
-        state.log("Sidestep reduces all Push to 0.")
-        return
-
     defending_side = state.opponent_side(side)
     if _has_temporary(state, defending_side, "Hold Position"):
         if not prevent_negative_effect(
@@ -132,38 +139,6 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
             )
             return
 
-    # The four basic Grip cards each protect against one point of incoming Push.
-    # The protection is a real Temporary, discarded when consumed or at its
-    # owner's next turn, and multiple shields can each absorb one Push.
-    defender = state.fighter(defending_side)
-    for instance in list(defender.temporary_zone):
-        if amount <= 0:
-            break
-        if instance.card.name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
-            defender.temporary_zone.remove(instance)
-            defender.discard_pile.append(instance.card)
-            state.temporary_outcomes.append((defending_side, instance.card.name, "protected"))
-            state.log(f"{instance.card.name} prevents 1 incoming Push.")
-            amount -= 1
-    if amount <= 0:
-        return
-
-    # B9 Henka: protect exactly one incoming Push while active.
-    for temporary in defender.temporary_zone:
-        if amount <= 0:
-            break
-        if temporary.card.name == "Henka" and not getattr(temporary, "henka_prevention_used", False):
-            temporary.henka_prevention_used = True
-            amount -= 1
-            state.log("Henka prevents the first 1 incoming Push.")
-    if amount <= 0:
-        return
-
-    # Use the Tawara prevents incoming Push from moving its owner.
-    if any(_has_temporary(state, defending_side, n) for n in ("Use the Tawara", "Give Ground")):
-        state.log(f"No Push Temporary prevents {amount} incoming Push.")
-        return
-
     # Sidestep only breaks after Push has survived prevention/suppression.
     _break_sidestep_from_push(state, side)
 
@@ -172,35 +147,30 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
 
     _resolve_shared_track_gain(state, side, amount, "push")
 
+    if _has_temporary(state, defending_side, "Use the Tawara"):
+        gain_momentum(state, defending_side, 1)
+
 
 def gain_position(state: BoutState, side: Side, amount: int) -> None:
     if amount < 0:
         raise ValueError("amount must be non-negative")
-    state.position = max(
-        TRACK_MIN,
-        min(TRACK_MAX, state.position + state.sign(side) * amount),
-    )
+    if state.winner is not None:
+        return
+    target = state.position + state.sign(side) * amount
+    if state.sign(side) * target >= 5:
+        state.position = state.sign(side) * POSITION_MAX
+        state.win_source = "ringout"
+        state.declare_winner(side, "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi")
+        return
+    state.position = max(POSITION_MIN, min(POSITION_MAX, target))
     state.log(f"{state.fighter(side).wrestler.name} gains {amount} Position.")
 
 
-def lose_position(state: BoutState, side: Side, amount: int, *, source: str = "unspecified") -> None:
+def lose_position(state: BoutState, side: Side, amount: int) -> None:
     if amount < 0:
         raise ValueError("amount must be non-negative")
-    if amount > 0:
-        state.fighter(side).lost_position_this_turn = True
-        state.position_loss_events.append((side, state.turn_number, source, amount))
+    state.fighter(side).lost_position_this_turn = amount > 0
     gain_position(state, state.opponent_side(side), amount)
-
-
-def make_unstable(state: BoutState, side: Side) -> None:
-    """Apply the B9 Unstable condition until this fighter finishes its next turn."""
-    fighter = state.fighter(side)
-    fighter.unstable = True
-    # Recovery follows the target's NEXT completed turn. If inflicted during
-    # their own turn, do not recover at that turn's imminent end.
-    recovery = fighter.turns_started + 1
-    fighter.unstable_recovery_turn = max(fighter.unstable_recovery_turn, recovery)
-    state.log(f"{state.fighter(side).wrestler.name} becomes Unstable.")
 
 
 def gain_power(state: BoutState, side: Side, amount: int) -> None:
@@ -247,13 +217,6 @@ def effective_total_grip(
     return state.fighter(side).total_grip
 
 
-def gain_flexible_grip(state: BoutState, side: Side) -> None:
-    """Improve whichever Grip is shallower, left on ties, up to Deep."""
-    fighter = state.fighter(side)
-    hand = "left" if fighter.left_grip <= fighter.right_grip else "right"
-    improve_grip(state, side, hand)
-
-
 def establish_grip(state: BoutState, side: Side, hand: str) -> None:
     fighter = state.fighter(side)
     if grip_benefits_suppressed(state, side):
@@ -263,7 +226,6 @@ def establish_grip(state: BoutState, side: Side, hand: str) -> None:
             source="Kannuki",
             description="prevent establishing Grip",
         ):
-            state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
             state.log(f"Kannuki prevents {fighter.wrestler.name} from establishing Grip.")
             return
     attr = _grip_attr(hand)
@@ -282,7 +244,6 @@ def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> No
             source="Kannuki",
             description="prevent improving Grip",
         ):
-            state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
             state.log(f"Kannuki prevents {fighter.wrestler.name} from improving Grip.")
             return
     attr = _grip_attr(hand)

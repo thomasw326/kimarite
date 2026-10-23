@@ -1,49 +1,23 @@
 # Kimarite
 
-Kimarite is a sumo-inspired tactical card game with a deterministic rules engine, AI-vs-AI simulator, and an early **V5.0 human-vs-AI terminal prototype**.
+Kimarite is a sumo management roguelike and tactical card game. The next milestone is **playable human-vs-AI sumo**, supported by a single deterministic rules engine that can also run AI-vs-AI simulations for balance testing.
 
-## Play a bout (V5.0 development branch)
+## Current goal: playable engine and 15-style AI
 
-From the repository root:
+- Support both human and AI controllers using the same legal actions, state transitions, and win conditions.
+- Separate the **game engine** (rules, card resolution, hidden information, state) from **decision controllers** (human input or AI choices).
+- Allow the engine to pause for player decisions, including card selection, targets, and optional effects, then resume consistently.
+- Preserve reproducible bout seeds, event logs, and sufficient state for saved/resumed player matches.
+- Build 15 recognizable AI opponents, one for each Sumo Style. Give each weighted preferences for its top three Kimarite and top seven other cards from the Google Sheets affinity library.
+- At difficulty 0, exclude seven eligible cards from the AI draw pile, using low affinity and strategic mismatch rather than the old wrestler-name-specific rules; preserve protected starting cards and key setup cards.
+- In combat, choose an immediate win first, prevent an immediate loss, and treat Position or Momentum of -2 or worse as danger. Pursue negative-Momentum win conditions only with a credible near-term finish; otherwise use current state and legal options before style affinity.
+- Keep Technique's first-turn card-access rewards unchanged pending validation. Verify intended Grip-based defensive/Power-exhaustion protection and measure early losses before considering additional Technique bonuses.
+- Retain deck exhaustion as a loss condition, but do not optimize the AI around this historically rare outcome.
 
-```powershell
-python -m pip install -e ".[dev]"
-python -m kimarite.play_human --human Fujinokawa --opponent Fujinokawa
-```
+## Development approach
 
-Choose cards to keep when the Technique or Grip card-access prompt appears. During your Exchange turn, enter the numbered card you want to play, `pass` to end the turn, or `quit` to leave. Some card effects prompt for extra choices. You can also choose a different opponent and AI mode:
+1. **Shared game engine** — deterministic rules, legal actions, hidden information, interactive decision points, save/resume state.
+2. **Human and AI controllers** — same interface for human choices, existing tactical AI, and the new 15-style AI.
+3. **Playtesting and analysis** — scripted human-vs-AI tests and seeded AI-vs-AI comparisons, followed by larger balance runs.
 
-```powershell
-python -m kimarite.play_human --human Fujinokawa --opponent Tochinoshin --ai-mode personality --seed 42
-```
-
-**Prototype limits:** This is terminal-only, not a graphical game; it uses the existing predefined wrestler templates rather than the upcoming 15 weighted style archetypes. The engine's AI operates on full game state internally; the public observation API only exposes the player's own hand and public opponent information. There is no persistent save/load interface yet.
-
-## Developer tests
-
-```powershell
-python -m pytest -q
-```
-
-The rules engine remains shared across tactical AI, personality AI, automated simulation, and human actions. Human card and keep/bottom choices use transactional execution so invalid input does not corrupt the bout state.
-
-## Experimental 15-style AI\n\nThe V5 branch also contains all 15 Sumo Styles from the live card-library sheet. The new builder selects favored starting cards with weighted randomness, excludes seven eligible low-affinity cards at base difficulty, and preserves required Grip setup. The style AI prioritizes wins and recovery from dangerous Position/Momentum before its favorite cards. These modules are **opt-in** and do not replace the existing 30-wrestler balance fixtures.\n\nPlay **as one Sumo Style against another** in the terminal prototype:
-
-```powershell
-python -m kimarite.play_human --human-style "Mountain" --opponent-style "The Technician"
-```
-
-The existing named-wrestler mode remains supported. This new AI is still experimental, and an initial winning opening can end a bout before interactive card selection.
-
-Run a mirrored 15-style test locally (210 bouts per repetition):\n\n```powershell\npython -m kimarite.style_round_robin_v5 --repetitions 1\n```\n\n## Current development roadmap
-
-1. Complete and validate the human-vs-AI bout lifecycle.
-2. Validate the new 15 style-aware AI opponents and improve their decision priorities.
-3. Add survival-first AI priorities for dangerous Position and Momentum.
-4. Compare deterministic AI-vs-AI runs for balance without changing approved card rules unnecessarily.
-
-The tabletop rules and card library remain the design source of truth; gameplay changes are validated separately from controller and UI development.
-
-## CI and validation policy
-
-The repository is public. The earlier GitHub Actions monthly-minutes constraint is retired: run Actions workflows and regression tests whenever useful for development. Continue to keep V5 changes in draft PR #16 until validated; no balance, card-stat, or rules-tuning decisions are approved merely by a green build.
+The active Google Doc and Google Sheets card library / Sumo Styles affinity worksheets are the design sources of truth. This README describes the next development direction; it does not assert that the new AI or human-facing interface has been implemented. Existing experimental pull requests and rules require reconciliation before declaring the playable milestone complete.
