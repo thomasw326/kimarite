@@ -1,4 +1,4 @@
-name: b9-three-kimarite-balance-3000
+name: b9-neutral-ai-smoke-and-600
 on:
   pull_request:
     branches:
@@ -11,7 +11,7 @@ on:
       - "tests/test_b9_cards.py"
   push:
     branches:
-      - experiment/b9-three-kimarite-balance-3000
+      - experiment/b9-neutral-ai-v1
   workflow_dispatch:
 
 jobs:
@@ -40,15 +40,10 @@ jobs:
           path: b9_artifacts/smoke/
           if-no-files-found: warn
 
-  five-parallel-batches:
+  focused-600:
     needs: smoke
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      max-parallel: 5
-      matrix:
-        shard: [0, 1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -59,13 +54,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .
       - name: Run 600 bouts
-        env:
-          SHARD: ${{ matrix.shard }}
         run: |
-          python scripts/b9_round_robin.py --bouts 600 --start-index $((SHARD * 600)) --fail-on-errors --output-dir b9_artifacts/shard_${SHARD}
+          python scripts/b9_round_robin.py --bouts 600 --start-index 0 --fail-on-errors --output-dir b9_artifacts/neutral_600
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b9-three-kimarite-shard-${{ matrix.shard }}
+          name: b9-neutral-ai-600
           path: b9_artifacts/shard_${{ matrix.shard }}/
           if-no-files-found: warn
