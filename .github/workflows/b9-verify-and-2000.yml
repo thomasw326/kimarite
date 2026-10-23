@@ -11,7 +11,7 @@ on:
       - "tests/test_b9_cards.py"
   push:
     branches:
-      - experiment/b9-pressure-plus-seven-4k
+      - experiment/b9-tsuppari-no-momentum
   workflow_dispatch:
 
 jobs:
@@ -34,9 +34,9 @@ jobs:
       - name: B9 smoke across all 15 styles (70 bouts)
         run: |
           python scripts/b9_round_robin.py --bouts 70 --fail-on-errors --output-dir b9_artifacts/smoke
-      - name: B9 4000-bout batch - Pressure Fighter plus previous seven
+      - name: B9 4000-bout batch - Tsuppari without Momentum
         run: |
-          python scripts/b9_round_robin.py --bouts 4000 --roster-names 'Pressure Fighter' 'Power Grappler' 'Bulldozer' 'Opportunist' 'Unorthodox Powerhouse' 'Charger' 'Speed Demon' 'Mawashi Specialist' --fail-on-errors --output-dir b9_artifacts/batch_4000_pressure_plus_seven
+          python scripts/b9_round_robin.py --bouts 4000 --roster-names 'Pressure Fighter' 'Power Grappler' 'Bulldozer' 'Opportunist' 'Unorthodox Powerhouse' 'Charger' 'Speed Demon' 'Mawashi Specialist' --fail-on-errors --output-dir b9_artifacts/batch_4000_tsuppari_no_momentum
       - name: Upload smoke and batch results
         if: always()
         uses: actions/upload-artifact@v4
