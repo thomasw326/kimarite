@@ -1,4 +1,4 @@
-name: b9-30-style-five-parallel-batches
+name: b9-katasukashi-hand3-five-parallel-batches
 on:
   pull_request:
     branches:
@@ -11,7 +11,7 @@ on:
       - "tests/test_b9_cards.py"
   push:
     branches:
-      - experiment/b9-thirty-style-roundrobin
+      - experiment/b9-katasukashi-hand3-13050
   workflow_dispatch:
 
 jobs:
