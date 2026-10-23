@@ -70,7 +70,7 @@ def _yoritaoshi(state: BoutState, side: Side) -> bool:
 
 
 def _katasukashi(state: BoutState, side: Side) -> bool:
-    return (no_grip(state, state.opponent_side(side)) and relative_momentum(state, side) >= 2 and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 5)
+    return (no_grip(state, state.opponent_side(side)) and relative_momentum(state, side) >= 2 and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 4)
 
 
 def _tsukiotoshi(state: BoutState, side: Side) -> bool:
@@ -116,7 +116,7 @@ def _hikiotoshi(state: BoutState, side: Side) -> bool:
 
 
 def _tsukitaoshi(state: BoutState, side: Side) -> bool:
-    return relative_momentum(state, side) >= 1 and state.fighter(side).cards_played_this_turn >= 4
+    return state.fighter(side).cards_played_this_turn >= 4
 
 
 def _tsuridashi(state: BoutState, side: Side) -> bool:
@@ -158,7 +158,7 @@ def _tsuriotoshi(state: BoutState, side: Side) -> bool:
 
 def _sukuinage(state: BoutState, side: Side) -> bool:
     return (no_grip(state, side) and relative_momentum(state, side) >= 2
-            and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 5)
+            and len(state.fighter(side).hand) - len(state.opponent(side).hand) >= 4)
 
 
 def _utchari(state: BoutState, side: Side) -> bool:
