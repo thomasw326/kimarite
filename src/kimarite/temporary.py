@@ -148,7 +148,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name == "Denshamichi":
             gain_momentum(state, side, 1)
             gain_push(state, side, 1)
-        elif name in {"Use the Tawara", "Give Ground"}:
+        elif name == "Give Ground":
             pass
         elif name == "Kannuki":
             opponent_side = state.opponent_side(side)
