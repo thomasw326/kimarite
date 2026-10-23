@@ -1,8 +1,8 @@
-name: B9 neutral AI 13050 card review
+name: B9 balance 13050 matched round robin
 on:
   push:
     branches:
-      - experiment/b9-neutral-ai-v1
+      - experiment/b9-pull-read-move-balance
     paths:
       - .github/workflows/b9-neutral-13050.yml
   workflow_dispatch:
