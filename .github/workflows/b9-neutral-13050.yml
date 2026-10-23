@@ -1,4 +1,4 @@
-name: B9 balance 13050 matched round robin
+name: B9 balanced cards 13050 retest
 on:
   push:
     branches:
