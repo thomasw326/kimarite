@@ -62,3 +62,27 @@ jobs:
           name: b9-neutral-ai-600
           path: b9_artifacts/neutral_600/
           if-no-files-found: warn
+
+  baseline-600:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: experiment/b9-three-kimarite-balance-3000
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install baseline runtime
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+      - name: Run matched 600 bouts using previous AI
+        run: python scripts/b9_round_robin.py --bouts 600 --start-index 0 --fail-on-errors --output-dir b9_artifacts/baseline_600
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b9-baseline-ai-600
+          path: b9_artifacts/baseline_600/
+          if-no-files-found: warn
