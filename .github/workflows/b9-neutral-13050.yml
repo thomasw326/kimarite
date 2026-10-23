@@ -1,6 +1,11 @@
-name: B9 balance full tournament (manual only)
+name: B9 13050 discard AI retest
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - experiment/b9-pull-read-move-balance
+    paths:
+      - .github/b9-discard-retest.trigger
 
 jobs:
   verify:
