@@ -336,3 +336,12 @@ def test_use_the_tawara_does_not_enter_temporary():
     assert bout.position == -1
     assert bout.fighter_a.hand[-1].name == "Yorikiri"
     assert not bout.fighter_a.temporary_zone
+
+
+def test_get_underneath_is_immediate_not_temporary():
+    bout = state()
+    effect(bout, "Get Underneath")
+    assert bout.momentum == 1
+    assert bout.position == 1
+    assert not bout.fighter_a.temporary_zone
+
