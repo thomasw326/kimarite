@@ -1,5 +1,8 @@
 name: B10 main 13050 large smoke
 on:
+  pull_request:
+    paths:
+      - .github/workflows/b10-main-13050-smoke.yml
   push:
     branches:
       - test/b10-main-13050-smoke
