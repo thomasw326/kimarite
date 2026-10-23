@@ -76,7 +76,7 @@ def test_okuri_finishers_are_generated_only():
 def test_denshamichi_interruption_creates_okuritaoshi_and_flips_position():
     bout = state()
     card = effect(bout, "Denshamichi")
-    assert bout.momentum == 1 and bout.position == 1
+    assert bout.momentum == 0 and bout.position == 1
     instance = bout.fighter_a.temporary_zone[0]
     assert instance.card == card
     remove_temporary(bout, Side.A, instance, disrupted=True)
@@ -313,3 +313,16 @@ def test_regain_balance_reduced_momentum_bonus():
     assert bout.momentum == 0
     assert bout.fighter_a.power == before_power + 2
     assert bout.fighter_a.hand[-1].name == "Tsuki"
+
+
+def test_denshamichi_grants_momentum_only_on_temporary_resolution():
+    bout = state()
+    effect(bout, "Denshamichi")
+    assert bout.position == 1 and bout.momentum == 0
+    bout.active_side = Side.A
+    bout.fighter_a.turns_started = 1
+    from kimarite.temporary import resolve_start_of_turn_temporaries
+    resolve_start_of_turn_temporaries(bout, Side.A)
+    assert bout.momentum == 1
+    assert bout.position == 2
+
