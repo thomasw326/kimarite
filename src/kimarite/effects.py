@@ -618,6 +618,9 @@ def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> N
         make_unstable(state, state.opponent_side(side))
         draw_one(state, side)
         if state.winner is None:
+            if context.choice("hand_index") is None and not context.choice("__human__"):
+                # AI fallback: discard the newly drawn card rather than fail a choice.
+                context = EffectContext(context.comparison, {**(context.choices or {}), "hand_index": len(state.fighter(side).hand) - 1})
             _discard_from_hand(state, side, card, context)
 
 
