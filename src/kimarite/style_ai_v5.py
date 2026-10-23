@@ -45,6 +45,51 @@ def _four_card_setup_hold_value(state: BoutState, side: Side, card_name: str) ->
     return 35.0 if position >= 2 or momentum >= 2 else 22.0
 
 
+
+def neutral_development_value(before: BoutState, after: BoutState, side: Side, card_name: str) -> float:
+    """State-3 resource development, independent of archetype preferences.
+
+    Score real state changes, not printed effects that fail to resolve.
+    Later strategic modes still use the original tactical evaluator.
+    """
+    from .rules import effective_total_grip
+    a, b = before.fighter(side), after.fighter(side)
+    foe_a, foe_b = before.opponent(side), after.opponent(side)
+    old_grip = effective_total_grip(before, side)
+    new_grip = effective_total_grip(after, side)
+    push = relative_position(after, side) - relative_position(before, side)
+    momentum = relative_momentum(after, side) - relative_momentum(before, side)
+    power = b.power - a.power
+    grip_gain = max(0, new_grip - old_grip)
+    value = 10 * max(0, push) + 7 * max(0, momentum) + 5 * max(0, power)
+    if grip_gain:
+        value += (12 if old_grip == 0 else 4) + 4 * max(0, grip_gain - 1)
+    value += 3 * max(0, effective_total_grip(before, before.opponent_side(side)) -
+                     effective_total_grip(after, after.opponent_side(side)))
+    new_stomps = sum(x.card.name == "Shiko Stomp" for x in b.temporary_zone)
+    old_stomps = sum(x.card.name == "Shiko Stomp" for x in a.temporary_zone)
+    if new_stomps > old_stomps:
+        value += 12 if old_stomps == 0 else 3
+    removed = [x.card.name for x in foe_a.temporary_zone
+               if x.card.name not in [y.card.name for y in foe_b.temporary_zone]]
+    if removed:
+        value += 12 * len(removed)
+        value += 6 * len(removed)  # Opportunity to disrupt may expire.
+    # Favor early card discovery only when Plays remain to exploit it.
+    draw_delta = len(b.hand) - len(a.hand) + 1  # played card leaves hand
+    if draw_delta > 0:
+        value += draw_delta * (2 + (6 if a.plays_remaining >= 3 else 4 if a.plays_remaining == 2 else 0))
+    gained_play = b.plays_remaining - (a.plays_remaining - 1)
+    if gained_play > 0:
+        remaining_useful = any(c.name not in {"Injury"} for c in b.hand)
+        value += 7 * gained_play if remaining_useful else 0
+    # Give delayed useful Temporaries a modest value without counting Shiko twice.
+    temporary_added = len(b.temporary_zone) - len(a.temporary_zone)
+    if temporary_added > 0 and card_name != "Shiko Stomp":
+        value += min(temporary_added, 2) * 2
+    return value
+
+
 def choose_style_play(state: BoutState, side: Side, comparison: TachiaiComparison, style: str | None) -> AIPlay | None:
     if style is not None and style not in STYLES:
         raise ValueError(f"Unknown V5 style: {style}")
@@ -106,8 +151,14 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
                 opener_bonus = 34
             else:
                 setup_hold += 35
+        # Only use neutral development weights when neither wrestler is under
+        # material pressure and there is no immediate finishing opportunity.
+        neutral = (abs(before_position) < 2 and abs(before_momentum) < 2
+                   and abs(state.fighter(side).power - state.opponent(side).power) < 3
+                   and trial.winner is None)
+        neutral_bonus = neutral_development_value(state, trial, side, candidate.card.name) if neutral else 0
         scored.append((
-            tier, candidate.score + danger_score + affinity + opener_bonus - setup_hold,
+            tier, candidate.score + danger_score + affinity + opener_bonus - setup_hold + neutral_bonus,
             (card_affinity(style, candidate.card.name) if style is not None else 0), -candidate.card.card_id,
             candidate,
         ))
