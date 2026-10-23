@@ -896,7 +896,6 @@ def _butsukari(state: BoutState, side: Side, card: Card, context: EffectContext)
 def _denshamichi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_push(state, side, 1)
     if state.winner is None:
-        gain_momentum(state, side, 1)
         add_temporary(state, side, card, phase="exchange")
 
 
