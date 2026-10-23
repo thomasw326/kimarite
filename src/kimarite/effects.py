@@ -245,6 +245,7 @@ def _gain_left_grip(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
+    deep_before_play = fighter.left_grip is GripState.DEEP
     improve_grip(state, side, "left")
     add_temporary(state, side, card, phase="exchange")
 
@@ -273,7 +274,7 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
     if not looked:
         return
 
-    deep = fighter.left_grip is GripState.DEEP
+    deep = deep_before_play
     if deep:
         # Temporarily allow one Play to make the selected follow-up free.
         fighter.plays_remaining += 1
