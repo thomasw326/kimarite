@@ -20,20 +20,39 @@ from kimarite.tachiai import compare_tachiai, first_exchange_side
 from kimarite.tachiai_effects import resolve_prepared_tachiai
 from kimarite.turns import apply_initial_power, end_exchange_turn, start_exchange_turn
 
-DATA = Path(__file__).resolve().parent.parent / "data" / "b9_wrestler_decks.json"
+DATA = Path(__file__).resolve().parent.parent / "data" / "b9_30_wrestler_decks.json"
 
 
 def load_decks():
     decks = json.loads(DATA.read_text(encoding="utf-8"))["decks"]
-    if len(decks) != 15:
-        raise ValueError(f"Expected 15 wrestlers, got {len(decks)}")
+    if len(decks) != 30:
+        raise ValueError(f"Expected 30 wrestlers, got {len(decks)}")
     for name, record in decks.items():
         if len(record["cards"]) != 40:
             raise ValueError(f"{name} has {len(record['cards'])} rather than 40 cards")
         if any(card in {"Okuridashi", "Okuritaoshi"} for card in record["cards"]):
             raise ValueError(f"{name} includes generated-only Okuri cards")
+        from collections import Counter as DeckCounter
+        counts = DeckCounter(record["cards"])
+        if max(counts.values()) > 2 or len(counts) < 30:
+            raise ValueError(f"{name}: invalid draft copies or unique-card count")
         for card in record["cards"]:
             card_by_name(card)
+    # Draft-only style profiles reuse a close original style AI preference model.
+    # This is a proxy for playtest purposes, not a trained personality for new styles.
+    from dataclasses import replace
+    analogues = {
+        "Dancer":"The Specialist", "Momentum Twister":"The Technician",
+        "Attrition Fighter":"Disruptor", "Gripless Fighter":"Opportunist",
+        "Hand-Size Specialist":"The Specialist", "Inside Fighter":"Mawashi Specialist",
+        "Outside Fighter":"The Technician", "Double-Grip Wrestler":"Power Grappler",
+        "Lifting Specialist":"Power Grappler", "Stability Master":"Unorthodox Powerhouse",
+        "Arm Controller":"Disruptor", "Pull-Down Specialist":"Opportunist",
+        "Counter Wrestler":"The Specialist", "Ring-Edge Defender":"Mountain",
+        "Power Finisher":"Heavy Hitter",
+    }
+    for new_name, model_name in analogues.items():
+        STYLES[new_name] = replace(STYLES[model_name], name=new_name)
     return decks
 
 
