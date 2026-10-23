@@ -527,7 +527,6 @@ def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectCon
     if state.winner is None:
         gain_momentum(state, side, 1)
     _search_kimarite(state, side, card.name, to_hand=True)
-    add_temporary(state, side, card, phase="exchange")
 
 
 
@@ -1024,7 +1023,6 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Immovable",
         "Henka",
         "Sidestep",
-        "Use the Tawara",
         "Kannuki",
         "Nekodamashi",
         "Denshamichi",
