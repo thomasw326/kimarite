@@ -286,3 +286,19 @@ def _grip_attr(hand: str) -> str:
     if normalized == "right":
         return "right_grip"
     raise ValueError("hand must be 'left' or 'right'")
+
+
+def make_unstable(state: BoutState, side: Side) -> None:
+    """Apply Unstable to a wrestler (idempotent)."""
+    if state.winner is not None:
+        return
+    fighter = state.fighter(side)
+    fighter.unstable = True
+    state.log(f"{fighter.wrestler.name} becomes Unstable.")
+
+
+def gain_flexible_grip(state: BoutState, side: Side) -> None:
+    """Improve the weaker Grip, deterministically preferring Left on ties."""
+    fighter = state.fighter(side)
+    hand = "left" if int(fighter.left_grip) <= int(fighter.right_grip) else "right"
+    improve_grip(state, side, hand)
