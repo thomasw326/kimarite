@@ -98,6 +98,37 @@ def neutral_development_value(before: BoutState, after: BoutState, side: Side, c
     return value
 
 
+def neutral_foregone_benefit(before: BoutState, side: Side, card_name: str) -> float:
+    """Penalty for spending a conditional Grip card before using its better payoff.
+
+    Applies only when another card currently in hand can first establish Grip
+    and there are enough Plays for both actions. This is deliberately a local
+    sequencing estimate, not a second penalty after multi-play lookahead.
+    """
+    from .rules import effective_total_grip
+    if effective_total_grip(before, side) > 0:
+        return 0.0
+    payoff = {"Yori": 10, "Gaburi": 7, "Tsuri": 5}.get(card_name)
+    if payoff is None or before.fighter(side).plays_remaining < 2:
+        return 0.0
+    # Other flexible Grip cards can establish Grip as the first play.
+    setup_names = {"Yori", "Gaburi", "Tsuri", "Gain Left Grip",
+                   "Gain Right Grip", "Uwate", "Shitate"}
+    setup_available = any(c.name in setup_names and c.name != card_name
+                          for c in before.fighter(side).hand)
+    if not setup_available:
+        return 0.0
+    # Opening with this card forfeits the higher conditional payoff.
+    # Relative to Tsuri's post-Grip Power (5), Yori sacrifices 5 points,
+    # while Gaburi sacrifices 2. Other setup cards do not require a penalty.
+    alternative_payoffs = [v for name, v in {"Yori": 10, "Gaburi": 7, "Tsuri": 5}.items()
+                           if name != card_name and
+                           any(c.name == name for c in before.fighter(side).hand)]
+    if alternative_payoffs:
+        return max(0.0, payoff - min(alternative_payoffs))
+    return 0.0
+
+
 def choose_style_play(state: BoutState, side: Side, comparison: TachiaiComparison, style: str | None) -> AIPlay | None:
     if style is not None and style not in STYLES:
         raise ValueError(f"Unknown V5 style: {style}")
@@ -169,7 +200,7 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
         # whose unrelated grip/progress/unstable weights would dominate them.
         # Style affinity is deliberately excluded here until calibrated to
         # the agreed neutral decisions and actual deck win conditions.
-        evaluation = (neutral_bonus + opener_bonus if neutral
+        evaluation = (neutral_bonus + opener_bonus - neutral_foregone_benefit(state, side, candidate.card.name) if neutral
                       else candidate.score + danger_score + affinity + opener_bonus - setup_hold)
         scored.append((
             tier, evaluation,
