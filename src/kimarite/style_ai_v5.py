@@ -126,7 +126,9 @@ def neutral_foregone_benefit(before: BoutState, side: Side, card_name: str) -> f
                            any(c.name == name for c in before.fighter(side).hand)]
     if alternative_payoffs:
         return max(0.0, payoff - min(alternative_payoffs))
-    return 0.0
+    # A dedicated Grip setup card can be spent first without consuming
+    # the flexible card's conditional payoff.
+    return float(payoff)
 
 
 def choose_style_play(state: BoutState, side: Side, comparison: TachiaiComparison, style: str | None) -> AIPlay | None:
