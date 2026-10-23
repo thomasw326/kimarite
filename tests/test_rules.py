@@ -1,5 +1,5 @@
 from kimarite.models import BoutState, Card, FighterState, GripState, Side, Wrestler
-from kimarite.rules import gain_momentum, gain_push
+from kimarite.rules import gain_momentum, gain_push, gain_position, lose_position, POSITION_MIN, POSITION_MAX
 
 
 def wrestler(name: str) -> Wrestler:
@@ -30,14 +30,13 @@ def test_push_overflow_converts_to_momentum():
 
     gain_push(bout, Side.A, 3)
 
-    assert bout.position == 3
-    assert bout.momentum == 2
-    assert bout.winner is None
+    assert bout.position == 4
+    assert bout.winner is Side.A
 
 
 def test_overflow_loop_without_grip_is_oshidashi():
     bout = state()
-    bout.position = 3
+    bout.position = 4
     bout.momentum = 3
 
     gain_push(bout, Side.A, 1)
@@ -48,11 +47,11 @@ def test_overflow_loop_without_grip_is_oshidashi():
 
 def test_overflow_loop_with_grip_is_yorikiri():
     bout = state()
-    bout.position = 3
+    bout.position = 4
     bout.momentum = 3
     bout.fighter_a.left_grip = GripState.GRIP
 
-    gain_momentum(bout, Side.A, 1)
+    gain_push(bout, Side.A, 1)
 
     assert bout.winner is Side.A
     assert bout.win_method == "Yorikiri"
@@ -60,9 +59,31 @@ def test_overflow_loop_with_grip_is_yorikiri():
 
 def test_shared_tracks_are_symmetric_for_side_b():
     bout = state()
-    bout.position = -2
+    bout.position = -1
 
     gain_push(bout, Side.B, 3)
 
-    assert bout.position == -3
-    assert bout.momentum == -2
+    assert bout.position == -4
+    assert bout.momentum == 0
+
+
+def test_four_is_safe_five_is_ringout():
+    bout = state()
+    gain_push(bout, Side.A, 4)
+    assert bout.position == 4 and bout.winner is None
+    gain_push(bout, Side.A, 1)
+    assert bout.winner is Side.A and bout.win_source == "ringout"
+
+
+def test_direct_position_ringout_both_sides():
+    bout = state()
+    gain_position(bout, Side.B, 4)
+    assert bout.position == -4 and bout.winner is None
+    lose_position(bout, Side.A, 1)
+    assert bout.winner is Side.B
+
+
+def test_momentum_overflow_still_pushes():
+    bout = state()
+    gain_momentum(bout, Side.A, 4)
+    assert bout.momentum == 3 and bout.position == 1
