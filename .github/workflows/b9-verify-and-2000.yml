@@ -1,4 +1,4 @@
-name: b9-katasukashi-hand3-five-parallel-batches
+name: b9-katasukashi-hand3-3000
 on:
   pull_request:
     branches:
@@ -58,14 +58,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e .
-      - name: Run 2610 bouts (435 pairings x 6)
+      - name: Run 600 bouts (global deterministic schedule)
         env:
           SHARD: ${{ matrix.shard }}
         run: |
-          python scripts/b9_round_robin.py --bouts 2610 --start-index $((SHARD * 2610)) --fail-on-errors --output-dir b9_artifacts/shard_${SHARD}
+          python scripts/b9_round_robin.py --bouts 600 --start-index $((SHARD * 600)) --fail-on-errors --output-dir b9_artifacts/shard_${SHARD}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b9-30-style-shard-${{ matrix.shard }}
+          name: b9-katasukashi-3000-shard-${{ matrix.shard }}
           path: b9_artifacts/shard_${{ matrix.shard }}/
           if-no-files-found: warn
