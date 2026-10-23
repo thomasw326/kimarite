@@ -302,3 +302,14 @@ def test_uwate_free_play_requires_deep_left_grip_before_play():
         assert (len(bout.fighter_a.hand) == 0) == free_play
         assert bout.fighter_a.plays_remaining == initial_plays
 
+
+
+def test_regain_balance_reduced_momentum_bonus():
+    bout = state()
+    bout.momentum = -1
+    bout.fighter_a.draw_pile = [card_by_name("Tsuki")]
+    before_power = bout.fighter_a.power
+    effect(bout, "Regain Balance")
+    assert bout.momentum == 0
+    assert bout.fighter_a.power == before_power + 2
+    assert bout.fighter_a.hand[-1].name == "Tsuki"
