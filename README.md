@@ -1,6 +1,14 @@
-# Kimirate — B10 main build
+# Kimarite — B10 main build
 
-**Current build: B10.** This mainline includes the State 3 neutral AI scoring prototype, card-level telemetry, and the approved ring boundary rules (Position ±4 playable; ring-out at ±5). The full 13,050-bout neutral-AI round robin passed on the precursor branch; the later integration preserved newer mainline ring rules and was not independently validated by that entire tournament. The general legacy test suite still requires cleanup. See [B10 promotion PR #42](https://github.com/thomasw326/kimarite/pull/42) for the integration history.
+**Active release baseline: B10**, on [GitHub main](https://github.com/thomasw326/kimarite/tree/main). B10 includes State 3 neutral AI tactical scoring, card-use telemetry, and the approved Position boundary (±4 remains in the ring; crossing to ±5 is ring-out). See [promotion PR #42](https://github.com/thomasw326/kimarite/pull/42).
+
+## B10 validation and source-of-truth
+
+- The **13,050-bout** neutral-AI precursor tournament completed with no simulation errors. The subsequent integrated mainline and final small card adjustments **have not** received an independent full 13,050-bout replay; do not claim they have.
+- The general legacy test suite has outstanding failures requiring triage; a passing tournament is not equivalent to a clean full regression suite.
+- For **implemented** card mechanics consult the code on `main`. The [B10 Card Pool — Reconciliation](https://docs.google.com/spreadsheets/d/1tDtaDeT9fUMfEEzELqhM-_5iG2Y-r1KoxZOfKqMMUq0/edit) tab is a preserved B9 design register, **not yet a verified export of every B10 runtime card**. Older B7 columns and design proposals must not be treated as live mechanics without reconciliation.
+- The [Card Library Intro](https://docs.google.com/spreadsheets/d/1JY-vPmU-yqcwYzrEugKP43JrnFGLi_UwZSFkOSqWtWI/edit) identifies B10 as current. Historical B7/B8/B9 and V5.x artifacts remain for comparison.
+- No new card rebalancing is implied by this release documentation.
 
 # Kimarite
 
