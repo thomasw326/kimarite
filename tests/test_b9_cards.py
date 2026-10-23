@@ -10,7 +10,7 @@ from kimarite.catalog import card_by_name
 from kimarite.effects import EffectContext, resolve_exchange_effect
 from kimarite.kimarite import kimarite_is_satisfied
 from kimarite.legality import can_play_card
-from kimarite.models import BoutState, FighterState, Side, Wrestler
+from kimarite.models import BoutState, FighterState, GripState, Side, Wrestler
 from kimarite.playing import play_card
 from kimarite.rules import gain_push, make_unstable
 from kimarite.temporary import add_temporary, remove_temporary, resolve_start_of_turn_temporaries
@@ -289,3 +289,16 @@ def test_katasukashi_requires_two_momentum():
     assert not kimarite_is_satisfied(bout, Side.A, card)
     bout.momentum = 2
     assert kimarite_is_satisfied(bout, Side.A, card)
+
+
+def test_uwate_free_play_requires_deep_left_grip_before_play():
+    for initial_grip, free_play in ((GripState.GRIP, False), (GripState.DEEP, True)):
+        bout = state()
+        bout.fighter_a.left_grip = initial_grip
+        bout.fighter_a.draw_pile = [card_by_name("Pull")]
+        initial_plays = bout.fighter_a.plays_remaining
+        effect(bout, "Uwate")
+        assert bout.fighter_a.left_grip is GripState.DEEP
+        assert (len(bout.fighter_a.hand) == 0) == free_play
+        assert bout.fighter_a.plays_remaining == initial_plays
+
