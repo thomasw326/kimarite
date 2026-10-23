@@ -326,3 +326,13 @@ def test_denshamichi_grants_momentum_only_on_temporary_resolution():
     assert bout.momentum == 1
     assert bout.position == 2
 
+
+
+def test_use_the_tawara_does_not_enter_temporary():
+    bout = state()
+    bout.fighter_a.draw_pile = [card_by_name("Tsuki"), card_by_name("Yorikiri")]
+    effect(bout, "Use the Tawara")
+    assert bout.momentum == 1
+    assert bout.position == -1
+    assert bout.fighter_a.hand[-1].name == "Yorikiri"
+    assert not bout.fighter_a.temporary_zone
