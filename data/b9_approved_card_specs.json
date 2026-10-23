@@ -34,7 +34,8 @@
         "lose_position:1",
         "gain_momentum:1",
         "opponent_unstable",
-        "draw:1"
+        "draw:1",
+        "discard:1"
       ]
     },
     "Kannuki": {
@@ -213,6 +214,13 @@
         "opponent_lose_power:1_if_own_power_higher",
         "opponent_unstable_if_momentum_positive",
         "self_mill:1"
+      ]
+    },
+    "Read the Move": {
+      "orbs": [
+        0,
+        1,
+        1
       ]
     }
   },
