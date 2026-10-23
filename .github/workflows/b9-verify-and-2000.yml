@@ -1,0 +1,71 @@
+name: b9-30-style-five-parallel-batches
+on:
+  pull_request:
+    branches:
+      - experiment/v52-fg40-r3-holdposition-600
+    paths:
+      - ".github/workflows/b9-verify-and-2000.yml"
+      - "src/kimarite/**"
+      - "data/b9_*.json"
+      - "scripts/b9_round_robin.py"
+      - "tests/test_b9_cards.py"
+  push:
+    branches:
+      - experiment/b9-thirty-style-roundrobin
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install runtime and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+      - name: Compile source
+        run: python -m compileall -q src/kimarite scripts/b9_round_robin.py
+      - name: B9 mechanical regression tests
+        run: python -m pytest -q tests/test_b9_cards.py
+      - name: Smoke 180 bouts
+        run: python scripts/b9_round_robin.py --bouts 180 --fail-on-errors --output-dir b9_artifacts/smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b9-30-style-smoke
+          path: b9_artifacts/smoke/
+          if-no-files-found: warn
+
+  five-parallel-batches:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install runtime dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+      - name: Run 2610 bouts (435 pairings x 6)
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          python scripts/b9_round_robin.py --bouts 2610 --start-index $((SHARD * 2610)) --fail-on-errors --output-dir b9_artifacts/shard_${SHARD}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b9-30-style-shard-${{ matrix.shard }}
+          path: b9_artifacts/shard_${{ matrix.shard }}/
+          if-no-files-found: warn
