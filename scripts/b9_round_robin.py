@@ -132,6 +132,7 @@ def run_one(name_a, name_b, decks, seed, max_turns, random_decks=False):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--bouts", type=int, default=2000)
+    parser.add_argument("--start-index", type=int, default=0, help="Zero-based global bout offset for parallel shards")
     parser.add_argument("--max-turns", type=int, default=100)
     parser.add_argument("--seed", type=int, default=20261021)
     parser.add_argument("--output-dir", default="b9_artifacts")
@@ -142,6 +143,8 @@ def main():
     decks = load_decks()
     if args.bouts < 1:
         parser.error("--bouts must be positive")
+    if args.start_index < 0:
+        parser.error("--start-index must be nonnegative")
     names = args.roster_names if args.roster_names else list(decks)
     if len(names) < 2 or len(set(names)) != len(names) or any(n not in decks for n in names):
         parser.error("Provide at least two distinct valid wrestler names")
@@ -162,7 +165,8 @@ def main():
     with (output / "bouts.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["bout","wrestler_a","wrestler_b","winner","method","turns","error"])
-        for idx in range(args.bouts):
+        for local_idx in range(args.bouts):
+            idx = args.start_index + local_idx
             i = (idx // 2) % len(pairs)
             x, y = pairs[i]
             a, b = (x, y) if idx % 2 == 0 else (y, x)
@@ -206,8 +210,8 @@ def main():
                             tally[group + "_bouts"] += 1
                             tally[group + "_wins"] += won
             writer.writerow([idx + 1, a, b, winner, method, turns, error])
-            if (idx + 1) % 100 == 0:
-                print(f"B9 completed {idx+1}/{args.bouts} bouts", flush=True)
+            if (local_idx + 1) % 100 == 0:
+                print(f"B9 shard completed {local_idx+1}/{args.bouts} bouts (global {idx+1})", flush=True)
     with (output / "basic_card_win_rates.csv").open("w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["wrestler", "card", "played_bouts", "played_wins",
@@ -223,6 +227,8 @@ def main():
                              round(pr - ur, 2) if pr is not None and ur is not None else ""])
     summary = {
         "requested_bouts": args.bouts,
+        "start_index": args.start_index,
+        "end_index_exclusive": args.start_index + args.bouts,
         "completed_bouts": sum(wins.values()),
         "errors": dict(errors),
         "wrestlers": {name: {"wins": wins[name], "losses": losses[name],
