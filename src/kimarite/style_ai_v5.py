@@ -91,9 +91,10 @@ def neutral_development_value(before: BoutState, after: BoutState, side: Side, c
     temporary_added = len(b.temporary_zone) - len(a.temporary_zone)
     if temporary_added > 0 and card_name != "Shiko Stomp":
         value += min(temporary_added, 2) * 2
-    # Oshi's discard / other hand costs must not look like free cycling.
-    consumed_extra = max(0, len(a.hand) - 1 + draw_delta - len(b.hand))
-    value -= 6 * consumed_extra
+    # Oshi's required extra discard is a real opportunity cost.
+    # Its Draw offsets the hand count but does not restore the chosen card.
+    if card_name == "Oshi" and len(a.hand) > 1:
+        value -= 10
     return value
 
 
