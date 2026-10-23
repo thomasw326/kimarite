@@ -60,5 +60,5 @@ jobs:
         if: always()
         with:
           name: b9-neutral-ai-600
-          path: b9_artifacts/shard_${{ matrix.shard }}/
+          path: b9_artifacts/neutral_600/
           if-no-files-found: warn
