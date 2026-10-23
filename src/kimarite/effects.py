@@ -265,6 +265,7 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
     from .playing import play_card
 
     fighter = state.fighter(side)
+    deep_before_play = fighter.left_grip is GripState.DEEP
     improve_grip(state, side, "left")
     add_temporary(state, side, card, phase="exchange")
     if state.winner is not None:
