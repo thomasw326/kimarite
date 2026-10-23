@@ -69,8 +69,10 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: experiment/b9-three-kimarite-balance-3000
+      - name: Restore baseline AI while keeping identical telemetry
+        run: |
+          git fetch --depth=1 origin experiment/b9-three-kimarite-balance-3000
+          git show FETCH_HEAD:src/kimarite/style_ai_v5.py > src/kimarite/style_ai_v5.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
