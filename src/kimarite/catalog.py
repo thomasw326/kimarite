@@ -36,7 +36,7 @@ CARD_POOL: tuple[Card, ...] = (
     Card(28, "Henka", 0, 4, 0),
     Card(29, "Pull", 0, 1, 2),
     Card(30, "Get Underneath", 1, 1, 0),
-    Card(31, "Read the Move", 0, 2, 1),
+    Card(31, "Read the Move", 0, 1, 1),
     Card(32, "Reset to Neutral", 0, 2, 1),
     Card(33, "Regain Balance", 2, 0, 2),
     Card(34, "Sidestep", 0, 3, 0),
