@@ -166,10 +166,12 @@ def gain_position(state: BoutState, side: Side, amount: int) -> None:
     state.log(f"{state.fighter(side).wrestler.name} gains {amount} Position.")
 
 
-def lose_position(state: BoutState, side: Side, amount: int) -> None:
+def lose_position(state: BoutState, side: Side, amount: int, *, source: str = "effect") -> None:
     if amount < 0:
         raise ValueError("amount must be non-negative")
     state.fighter(side).lost_position_this_turn = amount > 0
+    if amount > 0:
+        state.position_loss_events.append((side, amount, source, state.turn_number))
     gain_position(state, state.opponent_side(side), amount)
 
 
