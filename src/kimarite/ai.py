@@ -81,7 +81,10 @@ def _context_for_card(
     fighter = state.fighter(side)
 
     if card.name == "Oshi":
-        choices["hand_index"] = _best_hand_index(state, side, prefer_discard=True) if fighter.hand else 0
+        # Oshi itself leaves hand before its discard is resolved.
+        remainder = [c for c in fighter.hand if c is not card]
+        if remainder:
+            choices["hand_index"] = min(range(len(remainder)), key=lambda i: _card_priority(remainder[i], state, side))
 
     if card.name in {"Tsuki", "Kotenage"}:
         if opponent.left_grip is not GripState.NONE and opponent.right_grip is not GripState.NONE:
