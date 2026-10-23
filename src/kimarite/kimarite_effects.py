@@ -23,6 +23,9 @@ def _bottom_one_from_hand(state: BoutState, side: Side, card: Card, context: Eff
         index = 0
     else:
         index = context.choice("hand_index")
+        if index is None and not context.choice("__human__"):
+            from .ai import _best_hand_index
+            index = _best_hand_index(state, side, prefer_discard=True)
         options = list(range(len(fighter.hand)))
         if index not in options:
             raise ChoiceRequired(card.name, "hand_index", options)
@@ -37,6 +40,9 @@ def _discard_one_from_hand(state: BoutState, side: Side, card: Card, context: Ef
         return
     options = list(range(len(fighter.hand)))
     index = 0 if len(options) == 1 else context.choice("hand_index")
+    if index is None and not context.choice("__human__"):
+        from .ai import _best_hand_index
+        index = _best_hand_index(state, side, prefer_discard=True)
     if index not in options:
         raise ChoiceRequired(card.name, "hand_index", options)
     discarded = fighter.hand.pop(index)
@@ -161,6 +167,9 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
             draw_one(state, side)
             if fighter.hand:
                 index = 0 if len(fighter.hand) == 1 else context.choice("hand_index")
+                if index is None and not context.choice("__human__"):
+                    from .ai import _best_hand_index
+                    index = _best_hand_index(state, side, prefer_discard=True)
                 options = list(range(len(fighter.hand)))
                 if index not in options:
                     raise ChoiceRequired(card.name, "hand_index", options)
