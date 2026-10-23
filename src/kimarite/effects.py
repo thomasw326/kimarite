@@ -419,7 +419,7 @@ def _regain_balance(
 ) -> None:
     draw_one(state, side)
     if state.winner is None and state.momentum * state.sign(side) < 0:
-        gain_momentum(state, side, 2)
+        gain_momentum(state, side, 1)
         gain_power(state, side, 2)
 
 
@@ -522,7 +522,6 @@ def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectCon
     if state.winner is None:
         gain_momentum(state, side, 1)
     _search_kimarite(state, side, card.name, to_hand=True)
-    add_temporary(state, side, card, phase="exchange")
 
 
 
@@ -888,7 +887,6 @@ def _butsukari(state: BoutState, side: Side, card: Card, context: EffectContext)
 def _denshamichi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_push(state, side, 1)
     if state.winner is None:
-        gain_momentum(state, side, 1)
         add_temporary(state, side, card, phase="exchange")
 
 

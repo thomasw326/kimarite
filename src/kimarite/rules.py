@@ -166,10 +166,12 @@ def gain_position(state: BoutState, side: Side, amount: int) -> None:
     state.log(f"{state.fighter(side).wrestler.name} gains {amount} Position.")
 
 
-def lose_position(state: BoutState, side: Side, amount: int) -> None:
+def lose_position(state: BoutState, side: Side, amount: int, *, source: str = "effect") -> None:
     if amount < 0:
         raise ValueError("amount must be non-negative")
     state.fighter(side).lost_position_this_turn = amount > 0
+    if amount > 0:
+        state.position_loss_events.append((side, amount, source, state.turn_number))
     gain_position(state, state.opponent_side(side), amount)
 
 
@@ -286,3 +288,19 @@ def _grip_attr(hand: str) -> str:
     if normalized == "right":
         return "right_grip"
     raise ValueError("hand must be 'left' or 'right'")
+
+
+def make_unstable(state: BoutState, side: Side) -> None:
+    """Apply Unstable to a wrestler (idempotent)."""
+    if state.winner is not None:
+        return
+    fighter = state.fighter(side)
+    fighter.unstable = True
+    state.log(f"{fighter.wrestler.name} becomes Unstable.")
+
+
+def gain_flexible_grip(state: BoutState, side: Side) -> None:
+    """Improve the weaker Grip, deterministically preferring Left on ties."""
+    fighter = state.fighter(side)
+    hand = "left" if int(fighter.left_grip) <= int(fighter.right_grip) else "right"
+    improve_grip(state, side, hand)

@@ -1,0 +1,16 @@
+name: B10 focused card smoke
+on:
+  pull_request:
+  push:
+    branches:
+      - fix/b10-reconcile-approved-cards
+jobs:
+  b10-card-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest tests/test_b10_reconciliation.py tests/test_v5_style_simulation.py -q
