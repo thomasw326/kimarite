@@ -1,0 +1,136 @@
+name: R22 complete 22-build V5.2 neutral tactical gauntlet
+on:
+  push:
+    branches: [experiment/v52-seven-candidate-retest]
+    paths: [".github/workflows/r22-complete-gauntlet.yml"]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Validate exact R22 roster, tactical AI, and no preference bonuses
+        run: |
+          python - <<'PY'
+          import json,inspect
+          from kimarite.r21_gauntlet import load_arms, generic_roster
+          from kimarite.r21_gauntlet_bouts import run_fixture
+          from kimarite.style_ai_v5 import choose_style_play
+          from kimarite.r21_variant_rules import build_variant_card
+          from kimarite.r21_search import search_draw_pile_first,search_for_reversal
+          from kimarite.models import Card,FighterState,Wrestler
+          roster=json.load(open("data/r22_kimarite_roster.json"))
+          ids=roster["arms"]
+          assert len(ids)==22 and len(set(ids))==22
+          assert len(roster["approved"])==13 and len(roster["open"])==9
+          assert set(ids)==set(roster["approved"]+roster["open"])
+          arms={a.arm_id:a for a in load_arms()}
+          assert all(i in arms for i in ids)
+          assert len({arms[i].kimarite for i in ids})==22
+          assert len(generic_roster())==108
+          source=inspect.getsource(run_fixture)
+          assert "play_style_turn(state, side, cmp, style=None)" in source
+          assert "if style is not None else 0" in inspect.getsource(choose_style_play)
+          assert "danger_score" in inspect.getsource(choose_style_play)
+          assert arms["R21-UTC-F2-MN2"].orbs=="🟢🟢"
+          assert arms["R21-KAT-H5-T2"].orbs=="🟢🟢"
+          assert build_variant_card("R21-OKD-RS",card_id=57001).technique==1
+          assert "fighter.draw_pile.pop(index)" in inspect.getsource(search_draw_pile_first)
+          print("R22 roster/AI/no-affinity/search implementation guards PASS")
+          PY
+          python -m pytest -q tests/test_r21_search.py tests/test_r20_variant_runtime.py
+          python -m kimarite.r21_gauntlet_bouts --arm R21-OKD-RS --count 10 --max-turns 60 --output artifacts/r22_smoke/okd.csv
+          python -m kimarite.r21_gauntlet_bouts --arm R21-OKT-RS --count 10 --max-turns 60 --output artifacts/r22_smoke/okt.csv
+          python -m kimarite.r21_gauntlet_bouts --arm R21-KAT-H5-T2 --count 10 --max-turns 60 --output artifacts/r22_smoke/kat.csv
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r22-smoke
+          path: artifacts/r22_smoke/
+  full:
+    needs: smoke
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run two R22 cards per shard, 1296 bouts each
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          python - <<'PY'
+          import json,os,pathlib,subprocess,sys,csv
+          roster=json.load(open("data/r22_kimarite_roster.json"))
+          shard=int(os.environ["SHARD"])
+          ids=roster["arms"][shard*2:(shard+1)*2]
+          assert len(ids)==2
+          out=pathlib.Path("artifacts/r22")
+          out.mkdir(parents=True,exist_ok=True)
+          for card in ids:
+              path=out/(card+".csv")
+              subprocess.run([sys.executable,"-m","kimarite.r21_gauntlet_bouts",
+                  "--arm",card,"--count","1296","--max-turns","60",
+                  "--seed","20261010","--output",str(path)],check=True)
+              with path.open(newline="",encoding="utf-8") as f:
+                  rows=list(csv.DictReader(f))
+              assert len(rows)==1296,(card,len(rows))
+              assert all(r["completed"]=="True" and r["error"]=="" for r in rows),(card,"error/incomplete")
+              print(card,len(rows),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r22-shard-${{ matrix.shard }}
+          path: artifacts/r22/
+          retention-days: 30
+  report:
+    needs: [smoke,full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: r22-shard-*
+          path: artifacts/r22_collected
+          merge-multiple: true
+      - name: Verify full R22 22-build roster and create report
+        run: |
+          python - <<'PY'
+          import csv,json,glob,os
+          roster=json.load(open("data/r22_kimarite_roster.json"))
+          files=glob.glob("artifacts/r22_collected/*.csv")
+          assert len(files)==22,len(files)
+          assert {os.path.basename(p).removesuffix(".csv") for p in files}==set(roster["arms"])
+          for file in files:
+              with open(file,newline="",encoding="utf-8") as stream:
+                  rows=list(csv.DictReader(stream))
+              assert len(rows)==1296,(file,len(rows))
+              assert sum(r["placement"]=="starting" for r in rows)==648
+              assert sum(r["placement"]=="shuffled" for r in rows)==648
+          print("R22 28512 bouts / 22 builds verified")
+          PY
+          python -m kimarite.r21_gauntlet_report artifacts/r22_collected/*.csv --output-dir artifacts/r22_report
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r22-22-build-final-report
+          path: artifacts/r22_report/

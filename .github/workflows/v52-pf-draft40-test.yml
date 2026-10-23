@@ -1,0 +1,128 @@
+name: V5.2 PF draft40 vs FG+Technician randomized opponents
+
+on:
+  push:
+    branches: [experiment/v52-pressure-draft40-vs-random13]
+    paths:
+      - ".github/workflows/v52-pf-draft40-test.yml"
+      - "scripts/pressure_fighter_draft40_vs_random13.py"
+      - "data/pressure_fighter_draft40_20261012.json"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Regression tests for B7 style AI and Shiko Stomp
+        run: python -m pytest -q tests/test_v5_shiko_playability.py tests/test_v5_style_ai.py
+      - name: Run 12 paired smoke bouts
+        run: python scripts/pressure_fighter_draft40_vs_random13.py run --start 0 --stop 3 --output artifacts/smoke
+      - name: Check exact 40-copy deck, C1, and fresh random opponents
+        run: |
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+          from kimarite.models import BoutState, Side
+          from kimarite.rules import effective_total_grip
+          from kimarite.r21_variant_rules import variant_exchange, variant_predicate, build_variant_card
+          from kimarite.effects import EffectContext
+          from sys import path
+          path.insert(0, "scripts")
+          from pressure_fighter_draft40_vs_random13 import install
+          aliases, builder = install()
+          card = build_variant_card("R21-YOR-C1", card_id=100099)
+          state = BoutState(builder("Pressure Fighter", seed=6).fighter,
+                            builder("Fast Grappler", seed=8).fighter,
+                            r20_active=True)
+          state.position=0
+          state.momentum=1
+          variant_exchange(state, Side.A, card, EffectContext())
+          assert effective_total_grip(state, Side.A) >= 1
+          state.position=2
+          assert variant_predicate(state, Side.A, "R21-YOR-C1")
+          with Path("artifacts/smoke/bouts.csv").open() as fh:
+            bouts=list(csv.DictReader(fh))
+          assert len(bouts)==12
+          assert all(r["completed"]=="True" for r in bouts),bouts
+          seen={"Fast Grappler":set(), "The Technician":set()}
+          for row in bouts:
+            for side in ("a","b"):
+              name=row["seat_"+side]
+              sample=tuple(row[side+"_random13"].split("; ")) if row[side+"_random13"] else ()
+              if name=="Pressure Fighter":
+                assert sample == ()
+              else:
+                assert len(sample)==len(set(sample))==13
+                seen[name].add(sample)
+          assert all(len(samples)>1 for samples in seen.values()),seen
+          print("PASS: Pressure fixed 40; C1 gains Grip and satisfies win; FG and TT reroll 13 each bout")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pf-draft40-smoke
+          path: artifacts/smoke
+          retention-days: 30
+
+  simulate:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run 600 bouts (300 vs each opponent)
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          START=$((SHARD * 150))
+          STOP=$(((SHARD + 1) * 150))
+          python scripts/pressure_fighter_draft40_vs_random13.py run \
+            --start "$START" --stop "$STOP" --output "artifacts/shard-$SHARD"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pf-draft40-shard-${{ matrix.shard }}
+          path: artifacts/shard-${{ matrix.shard }}/
+          retention-days: 60
+
+  report:
+    needs: simulate
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pf-draft40-shard-*
+          path: artifacts/shards
+          merge-multiple: false
+      - name: Aggregate matchups, finishers, Shiko plays and all bout logs
+        run: |
+          python scripts/pressure_fighter_draft40_vs_random13.py report \
+            --root artifacts/shards --output artifacts/final
+          cat artifacts/final/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pf-draft40-vs-random13-2400-report
+          path: artifacts/final/
+          retention-days: 90

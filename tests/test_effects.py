@@ -19,24 +19,26 @@ def bout_with_hand(cards):
     )
 
 
-def test_oshi_gains_push_play_and_draw():
+def test_oshi_gains_push_and_play_and_draws():
     oshi = card_by_name("Oshi")
     bout = bout_with_hand([oshi])
+    bout.momentum = 1
 
     play_card(bout, Side.A, oshi)
 
     assert bout.position == 1
     assert bout.fighter_a.plays_remaining == 2
     assert bout.fighter_a.cards_played_this_turn == 1
-    assert bout.fighter_a.hand[0].name == "Draw A"
-    assert bout.fighter_a.discard_pile[-1].name == "Oshi"
+    assert [c.name for c in bout.fighter_a.hand] == ["Draw A"]
+    assert [c.name for c in bout.fighter_a.discard_pile] == ["Draw B", "Oshi"]
+    assert bout.fighter_a.draw_pile == []  # Oshi mills after drawing
 
 
 def test_tsuppari_chains_after_oshi():
     oshi = card_by_name("Oshi")
     tsuppari = card_by_name("Tsuppari")
     bout = bout_with_hand([oshi, tsuppari])
-    bout.fighter_a.draw_pile = [Card(8101, "Draw A"), Card(8102, "Draw B")]
+    bout.fighter_a.draw_pile = [Card(8101, "Draw A"), Card(8102, "Draw B"), Card(8103, "Draw C"), Card(8104, "Draw D")]
 
     play_card(bout, Side.A, oshi)
     play_card(bout, Side.A, tsuppari)
@@ -45,11 +47,13 @@ def test_tsuppari_chains_after_oshi():
     assert bout.position == 2
     assert [c.name for c in bout.fighter_a.played_this_turn] == ["Oshi", "Tsuppari"]
     assert bout.fighter_a.plays_remaining == 2
+    assert bout.winner is None
 
 
 def test_tsuki_requires_choice_only_when_both_opposing_grips_exist():
     tsuki = card_by_name("Tsuki")
     bout = bout_with_hand([tsuki])
+    bout.momentum = 1
     bout.fighter_b.left_grip = GripState.GRIP
     bout.fighter_b.right_grip = GripState.DEEP
 
@@ -62,15 +66,16 @@ def test_tsuki_requires_choice_only_when_both_opposing_grips_exist():
         raise AssertionError("Tsuki should require a Grip choice when both are present")
 
 
-def test_gain_right_grip_converts_to_push_if_already_established():
+def test_gain_right_grip_deepens_existing_grip_and_grants_temporary_shield():
     card = card_by_name("Gain Right Grip")
     bout = bout_with_hand([card])
     bout.fighter_a.right_grip = GripState.GRIP
 
     play_card(bout, Side.A, card)
 
-    assert bout.fighter_a.right_grip is GripState.GRIP
-    assert bout.position == 1
+    assert bout.fighter_a.right_grip is GripState.DEEP
+    assert bout.position == 0
+    assert [t.card.name for t in bout.fighter_a.temporary_zone] == ["Gain Right Grip"]
 
 
 def test_regain_balance_recovers_negative_momentum():
@@ -81,6 +86,7 @@ def test_regain_balance_recovers_negative_momentum():
     play_card(bout, Side.A, card)
 
     assert bout.momentum == 0
+    assert bout.fighter_a.power == 2
 
 
 def test_belt_slap_uses_recorded_spirit_advantage():
@@ -96,7 +102,7 @@ def test_belt_slap_uses_recorded_spirit_advantage():
     assert bout.momentum == 1
 
 
-def test_ottsuke_removes_grip_temporary_and_rewards_momentum_push():
+def test_ottsuke_removes_grip_temporary_and_rewards_momentum_only():
     from kimarite.temporary import add_temporary
 
     ottsuke = card_by_name("Ottsuke")
@@ -119,7 +125,7 @@ def test_ottsuke_removes_grip_temporary_and_rewards_momentum_push():
 
     assert not bout.fighter_b.temporary_zone
     assert bout.momentum == 1
-    assert bout.position == 1
+    assert bout.position == 0
 
 
 def test_draw_effect_with_empty_draw_pile_is_immediate_exhaustion_loss():

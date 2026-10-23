@@ -1,0 +1,347 @@
+{
+  "schema_version": 1,
+  "axes": [
+    "power",
+    "spirit",
+    "technique",
+    "grip",
+    "momentum",
+    "push",
+    "tachiai"
+  ],
+  "scale": "Power/Spirit/Technique/Grip/Momentum/Push: provisional 0–5 fit; Tachiai: 1 = long game, 5 = opening.",
+  "source_sheet": "https://docs.google.com/spreadsheets/d/1JY-vPmU-yqcwYzrEugKP43JrnFGLi_UwZSFkOSqWtWI/edit?gid=993340856",
+  "cards": [
+    {
+      "name": "Abisetaoshi",
+      "variant": "ABI-2",
+      "scores": {
+        "power": 5,
+        "spirit": 0,
+        "technique": 1,
+        "grip": 4,
+        "momentum": 1,
+        "push": 1,
+        "tachiai": 3
+      },
+      "status": "R20 preferred — confirm",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Hatakikomi",
+      "variant": "R21-HAT-C3",
+      "scores": {
+        "power": 3,
+        "spirit": 3,
+        "technique": 2,
+        "grip": 0,
+        "momentum": 4,
+        "push": 1,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Hikiotoshi",
+      "variant": "R21-HIK-C2",
+      "scores": {
+        "power": 1,
+        "spirit": 2,
+        "technique": 4,
+        "grip": 3,
+        "momentum": 4,
+        "push": 1,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Katasukashi",
+      "variant": "R21-KAT-H5",
+      "scores": {
+        "power": 0,
+        "spirit": 1,
+        "technique": 5,
+        "grip": 0,
+        "momentum": 3,
+        "push": 0,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Kirikaeshi",
+      "variant": "R21-KIR-P3",
+      "scores": {
+        "power": 0,
+        "spirit": 1,
+        "technique": 5,
+        "grip": 1,
+        "momentum": 2,
+        "push": 0,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "provisional"
+    },
+    {
+      "name": "Kotenage",
+      "variant": "KOT-1",
+      "scores": {
+        "power": 2,
+        "spirit": 1,
+        "technique": 4,
+        "grip": 4,
+        "momentum": 2,
+        "push": 0,
+        "tachiai": 5
+      },
+      "status": "R20 baseline — unresolved",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Okuridashi",
+      "variant": "OKD-2",
+      "scores": {
+        "power": 1,
+        "spirit": 3,
+        "technique": 4,
+        "grip": 0,
+        "momentum": 4,
+        "push": 5,
+        "tachiai": 2
+      },
+      "status": "R20 chosen reference — confirm",
+      "tachiai_source": "provisional"
+    },
+    {
+      "name": "Okuritaoshi",
+      "variant": "OKT-2",
+      "scores": {
+        "power": 2,
+        "spirit": 4,
+        "technique": 3,
+        "grip": 0,
+        "momentum": 5,
+        "push": 4,
+        "tachiai": 2
+      },
+      "status": "R20 chosen reference — confirm",
+      "tachiai_source": "provisional"
+    },
+    {
+      "name": "Oshidashi",
+      "variant": "OSH-3",
+      "scores": {
+        "power": 4,
+        "spirit": 5,
+        "technique": 0,
+        "grip": 0,
+        "momentum": 5,
+        "push": 5,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Oshitaoshi",
+      "variant": "R21-OTA-C1",
+      "scores": {
+        "power": 5,
+        "spirit": 3,
+        "technique": 0,
+        "grip": 0,
+        "momentum": 3,
+        "push": 5,
+        "tachiai": 3
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Shitatenage",
+      "variant": "R21-SHI-C3",
+      "scores": {
+        "power": 2,
+        "spirit": 1,
+        "technique": 4,
+        "grip": 5,
+        "momentum": 3,
+        "push": 1,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Sukuinage",
+      "variant": "R21-SUK-P3",
+      "scores": {
+        "power": 1,
+        "spirit": 2,
+        "technique": 4,
+        "grip": 0,
+        "momentum": 4,
+        "push": 0,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "provisional"
+    },
+    {
+      "name": "Tottari",
+      "variant": "R21-TOT-NS",
+      "scores": {
+        "power": 1,
+        "spirit": 1,
+        "technique": 5,
+        "grip": 5,
+        "momentum": 1,
+        "push": 0,
+        "tachiai": 3
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Tsukidashi",
+      "variant": "R21-TSU-C1",
+      "scores": {
+        "power": 3,
+        "spirit": 5,
+        "technique": 2,
+        "grip": 0,
+        "momentum": 3,
+        "push": 5,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Tsukiotoshi",
+      "variant": "R21-TSO-C3",
+      "scores": {
+        "power": 1,
+        "spirit": 2,
+        "technique": 3,
+        "grip": 0,
+        "momentum": 3,
+        "push": 2,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Tsukitaoshi",
+      "variant": "R21-TKT-C1",
+      "scores": {
+        "power": 3,
+        "spirit": 5,
+        "technique": 2,
+        "grip": 0,
+        "momentum": 4,
+        "push": 4,
+        "tachiai": 3
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Tsuridashi",
+      "variant": "R21-TSR-P6",
+      "scores": {
+        "power": 5,
+        "spirit": 1,
+        "technique": 2,
+        "grip": 5,
+        "momentum": 3,
+        "push": 2,
+        "tachiai": 3
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Utchari",
+      "variant": "R21-UTC-F2",
+      "scores": {
+        "power": 0,
+        "spirit": 4,
+        "technique": 5,
+        "grip": 0,
+        "momentum": 5,
+        "push": 0,
+        "tachiai": 4
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "provisional"
+    },
+    {
+      "name": "Uwatedashinage",
+      "variant": "R21-UWD-C5",
+      "scores": {
+        "power": 1,
+        "spirit": 2,
+        "technique": 5,
+        "grip": 5,
+        "momentum": 3,
+        "push": 0,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "provisional"
+    },
+    {
+      "name": "Uwatenage",
+      "variant": "R21-UWA-C1",
+      "scores": {
+        "power": 1,
+        "spirit": 1,
+        "technique": 5,
+        "grip": 5,
+        "momentum": 3,
+        "push": 0,
+        "tachiai": 1
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Yorikiri",
+      "variant": "R21-YOR-C3",
+      "scores": {
+        "power": 3,
+        "spirit": 2,
+        "technique": 3,
+        "grip": 5,
+        "momentum": 3,
+        "push": 5,
+        "tachiai": 2
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    },
+    {
+      "name": "Yoritaoshi",
+      "variant": "R21-YTA-C3",
+      "scores": {
+        "power": 5,
+        "spirit": 2,
+        "technique": 2,
+        "grip": 4,
+        "momentum": 3,
+        "push": 4,
+        "tachiai": 1
+      },
+      "status": "Selected — designer",
+      "tachiai_source": "historical_V4.3"
+    }
+  ],
+  "tachiai_source": "16 from historical V4.3 Card Affinity ratings, 6 explicitly provisional estimates; review scores prior to final automated assignment."
+}

@@ -1,5 +1,6 @@
 from kimarite.catalog import card_by_name
-from kimarite.effects import EffectContext
+import pytest
+from kimarite.effects import EffectContext, ChoiceRequired, IllegalPlay
 from kimarite.models import BoutState, Card, FighterState, GripState, Side, Wrestler
 from kimarite.playing import play_card
 from kimarite.rules import gain_push
@@ -18,31 +19,39 @@ def bout_with_hand(cards):
     )
 
 
-def test_headlong_charge_stays_only_in_temporary_zone_after_play():
+def test_headlong_charge_sacrifices_kimarite_for_momentum_and_push():
     card = card_by_name("Headlong Charge")
+    kimarite = card_by_name("Yorikiri")
     bout = bout_with_hand([card])
+    bout.fighter_a.kimarite_zone.append(kimarite)
 
-    play_card(bout, Side.A, card)
-
-    assert [x.card.name for x in bout.fighter_a.temporary_zone] == ["Headlong Charge"]
-    assert card not in bout.fighter_a.discard_pile
-
-
-def test_headlong_disruption_loses_three_momentum():
-    card = card_by_name("Headlong Charge")
-    bout = bout_with_hand([card])
-    play_card(bout, Side.A, card)
-    instance = bout.fighter_a.temporary_zone[0]
-
-    remove_temporary(bout, Side.A, instance, disrupted=True)
-
-    assert bout.momentum == -2  # +1 on play, then -3 for disruption
-    assert card in bout.fighter_a.discard_pile
-    assert bout.temporary_outcomes[-1] == (
-        Side.A,
-        "Headlong Charge",
-        "disrupted",
+    play_card(
+        bout, Side.A, card,
+        context=EffectContext(choices={"sacrifice_kimarite": 0}),
     )
+
+    assert bout.momentum == 1
+    assert bout.position == 1
+    assert bout.fighter_a.kimarite_zone == []
+    assert kimarite in bout.fighter_a.discard_pile
+    assert card in bout.fighter_a.discard_pile
+    assert not bout.fighter_a.temporary_zone
+
+
+def test_headlong_charge_cannot_decline_sacrifice():
+    card = card_by_name("Headlong Charge")
+    bout = bout_with_hand([card])
+    bout.fighter_a.kimarite_zone.append(card_by_name("Yorikiri"))
+    with pytest.raises(ChoiceRequired):
+        play_card(bout, Side.A, card, context=EffectContext(choices={"sacrifice_kimarite": None}))
+
+
+def test_headlong_charge_without_kimarite_is_not_playable():
+    card = card_by_name("Headlong Charge")
+    bout = bout_with_hand([card])
+    with pytest.raises(IllegalPlay):
+        play_card(bout, Side.A, card)
+    assert card in bout.fighter_a.hand
 
 
 def test_attempt_two_handed_grip_resolves_at_next_turn_start():
@@ -83,7 +92,7 @@ def test_hold_position_prevents_opponent_push_while_active():
     assert bout.position == 0
 
 
-def test_use_tawara_converts_opponent_push_to_momentum():
+def test_use_tawara_prevents_push_and_gains_momentum():
     card = card_by_name("Use the Tawara")
     bout = bout_with_hand([card])
     play_card(
@@ -117,7 +126,7 @@ def test_sidestep_survives_and_takes_favorable_orientation_on_momentum_tie():
     assert not bout.fighter_a.temporary_zone
 
 
-def test_opponent_push_breaks_sidestep_before_push_resolves():
+def test_opponent_push_is_zero_while_sidestep_remains():
     card = card_by_name("Sidestep")
     bout = bout_with_hand([card])
     bout.position = 2
@@ -125,11 +134,9 @@ def test_opponent_push_breaks_sidestep_before_push_resolves():
     play_card(bout, Side.A, card)
     gain_push(bout, Side.B, 1)
 
-    assert bout.side_by_side_owner is None
-    assert not bout.fighter_a.temporary_zone
-    assert card in bout.fighter_a.discard_pile
-    # Retained distance 2 becomes favorable to B, then B's Push moves to -3.
-    assert bout.position == -3
+    assert bout.side_by_side_owner is Side.A
+    assert any(x.card.name == "Sidestep" for x in bout.fighter_a.temporary_zone)
+    assert bout.position == 0  # No Push while Side-by-Side is active.
 
 
 def test_prevented_push_does_not_break_sidestep():

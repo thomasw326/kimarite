@@ -1,0 +1,23 @@
+name: R21 ordered Search smoke
+
+on:
+  push:
+    branches:
+      - experiment/r21-kimarite-retest
+    paths:
+      - src/kimarite/r21_search.py
+      - tests/test_r21_search.py
+      - .github/workflows/r21-search-check.yml
+  workflow_dispatch:
+
+jobs:
+  search-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest -q tests/test_r21_search.py

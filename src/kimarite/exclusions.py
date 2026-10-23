@@ -6,7 +6,7 @@ from .catalog import CARD_POOL, ORIGINAL_WRESTLERS
 from .models import Card
 
 
-UNIVERSALLY_PROTECTED_IDS = frozenset({1, 2, 3, 4})
+UNIVERSALLY_PROTECTED_IDS = frozenset({1, 3})
 
 
 POWER_COMPARISON = frozenset({

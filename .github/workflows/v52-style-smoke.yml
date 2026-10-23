@@ -1,0 +1,45 @@
+name: V5.2 style-aware 630-bout smoke test
+
+on:
+  push:
+    branches: [release/v5.1]
+    paths:
+      - ".github/workflows/v52-style-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Verify six-axis affinity and current new cards
+        run: |
+          python - <<'PY'
+          from kimarite.catalog import CARD_POOL
+          from kimarite.affinity_v5 import affinity
+          from kimarite.styles_v5 import STYLES
+          from kimarite.style_ai_v5 import choose_style_play
+          assert len(STYLES) == 15
+          for name in ("Driving Force — Power Payoff", "Crushing Pressure — Power Crusher"):
+              assert any(c.name == name for c in CARD_POOL), name
+              assert any(affinity(style, name) != 0 for style in STYLES), name
+          import inspect
+          source = inspect.getsource(choose_style_play)
+          assert "card_affinity(style, candidate.card.name)" in source
+          assert "candidate.score + danger_score + affinity" in source
+          print("V5.2 card catalog, affinity, AI guard: PASS")
+          PY
+      - name: Run 630 fully mirrored bouts (15 styles, 3 cycles, difficulty -7)
+        run: |
+          python scripts/styles_test.py --difficulty -7 --repetitions 3 --seed 20261011 --max-turns 100 --output-dir artifacts/v52_style_smoke
+      - name: Upload smoke-test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v52-style-aware-630-bouts
+          path: artifacts/v52_style_smoke/

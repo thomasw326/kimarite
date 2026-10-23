@@ -78,12 +78,17 @@ class FighterState:
     first_exchange_turn: bool = True
     technique_reward_pending: bool = True
     technique_look_adjustment: int = 0
+    technique_keep_adjustment: int = 0
     spirit_reward_pending: bool = True
     bonus_turns_queued: int = 0
     lost_position_this_turn: bool = False
     opponent_grip_reduced_this_turn: bool = False
     gained_push_this_turn: bool = False
     gained_momentum_this_turn: bool = False
+    successful_reversal_this_turn: bool = False
+    unstable: bool = False
+    turns_started: int = 0
+    unstable_recovery_turn: int = 0
 
     @property
     def total_grip(self) -> int:
@@ -100,11 +105,22 @@ class BoutState:
     side_by_side_distance: int = 0
     active_side: Side | None = None
     turn_number: int = 0
+    disable_kimarite_exchange_effects: bool = False
+    r20_active: bool = False  # Experimental gauntlet only; never enabled for normal V5 bouts.
     winner: Side | None = None
     win_method: str | None = None
+    win_source: str | None = None
+    tachiai_spirit_advantage_a: int = 0
+    winning_kimarite_card_id: int | None = None
+    card_play_ids: list[tuple[Side, int]] = field(default_factory=list)
     card_plays: list[tuple[Side, str]] = field(default_factory=list)
+    first_exchange_hands: dict[Side, tuple[str, ...]] = field(default_factory=dict)
     kimarite_removals: list[tuple[Side, str]] = field(default_factory=list)
     temporary_outcomes: list[tuple[Side, str, str]] = field(default_factory=list)
+    reversal_completions: list[tuple[Side, str, int]] = field(default_factory=list)
+    headlong_decisions: list[tuple[Side, str, str, str | None]] = field(default_factory=list)
+    position_loss_events: list[tuple[Side, int, str, int]] = field(default_factory=list)
+    katasukashi_win_sources: list[str] = field(default_factory=list)
     event_log: list[str] = field(default_factory=list)
 
     def fighter(self, side: Side) -> FighterState:

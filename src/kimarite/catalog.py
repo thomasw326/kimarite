@@ -5,17 +5,16 @@ from dataclasses import dataclass
 from .models import Card, Stat, Wrestler
 
 
-# Current shuffled AI-vs-AI pool snapshot. IDs match Goldfish Data.
+# V5 current print-pool orbs; stable historical IDs retained for reproducibility.
 CARD_POOL: tuple[Card, ...] = (
-    Card(1, "Oshi", 1, 0, 0),
-    Card(2, "Oshi", 1, 0, 0),
+    Card(1, "Oshi", 0, 0, 1),
+    Card(11007, "Driving Force — Power Payoff", 2, 0, 1),
+    Card(11008, "Crushing Pressure — Power Crusher", 3, 0, 0),
     Card(3, "Tsuki", 1, 0, 0),
-    Card(4, "Tsuki", 1, 0, 0),
     Card(5, "Tsuppari", 2, 0, 1),
-    Card(6, "Tsuppari", 2, 0, 1),
-    Card(7, "Headlong Charge", 3, 0, 0),
-    Card(8, "Nodowa", 2, 0, 0),
-    Card(9, "Harite", 2, 0, 1),
+    Card(7, "Headlong Charge", 0, 0, 3),
+    Card(8, "Nodowa", 3, 0, 0),
+    Card(9, "Harite", 3, 0, 1),
     Card(10, "Gain Left Grip", 0, 3, 0),
     Card(11, "Gain Right Grip", 0, 3, 0),
     Card(12, "Uwate", 0, 3, 0),
@@ -23,35 +22,68 @@ CARD_POOL: tuple[Card, ...] = (
     Card(14, "Attempt Two-Handed Grip", 0, 3, 1),
     Card(15, "Attempt Deep Outside Grip", 0, 3, 1),
     Card(16, "Attempt Deep Inside Grip", 0, 3, 1),
-    Card(17, "Shiko Stomp", 2, 0, 3),
-    Card(18, "Salt Throw", 1, 0, 4),
-    Card(19, "Stare Down", 2, 1, 2),
+    Card(17, "Shiko Stomp", 1, 1, 1),
+    Card(18, "Salt Throw", 1, 1, 3),
+    Card(19, "Stare Down", 1, 1, 1),
     Card(20, "Power Water", 1, 2, 2),
-    Card(21, "Belt Slap", 3, 0, 2),
-    Card(22, "Tsuri", 1, 3, 0),
+    Card(21, "Belt Slap", 2, 0, 3),
+    Card(22, "Tsuri", 2, 2, 0),
     Card(23, "Yori", 1, 2, 1),
     Card(24, "Gaburi", 1, 2, 1),
     Card(25, "Ottsuke", 1, 2, 1),
-    Card(26, "Hold Position", 2, 0, 1),
-    Card(27, "Immovable", 2, 0, 1),
-    Card(28, "Henka", 0, 0, 4),
+    Card(26, "Hold Position", 3, 0, 0),
+    Card(27, "Immovable", 3, 0, 0),
+    Card(28, "Henka", 0, 4, 0),
     Card(29, "Pull", 0, 1, 2),
-    Card(30, "Get Underneath", 1, 2, 1),
-    Card(31, "Read the Move", 0, 1, 2),
+    Card(30, "Get Underneath", 1, 1, 0),
+    Card(31, "Read the Move", 0, 2, 1),
     Card(32, "Reset to Neutral", 0, 2, 1),
-    Card(33, "Regain Balance", 1, 1, 2),
-    Card(34, "Sidestep", 0, 1, 2),
-    Card(35, "Use the Tawara", 0, 1, 2),
+    Card(33, "Regain Balance", 2, 0, 2),
+    Card(34, "Sidestep", 0, 3, 0),
+    Card(35, "Use the Tawara", 0, 3, 0),
     Card(36, "Kannuki", 2, 1, 0),
     Card(37, "Morozashi", 0, 3, 0),
     Card(38, "Yorikiri", 1, 1, 1, True),
-    Card(39, "Oshidashi", 3, 0, 0, True),
+    Card(39, "Oshidashi", 2, 0, 1, True),
     Card(40, "Tsukidashi", 1, 0, 2, True),
     Card(41, "Oshitaoshi", 3, 0, 0, True),
     Card(42, "Yoritaoshi", 2, 1, 0, True),
-    Card(43, "Give Ground", 1, 0, 2),
+    Card(43, "Give Ground", 0, 2, 1),
     Card(44, "Uwatenage", 0, 2, 1, True),
     Card(45, "Hatakikomi", 1, 0, 2, True),
+    # Big Test 2: include the eight starting-only Kimarite in every deck role.
+    Card(46, "Katasukashi", 0, 3, 0, True),
+    Card(47, "Hikiotoshi", 0, 1, 2, True),
+    Card(48, "Tottari", 1, 1, 0, True),
+    Card(49, "Tsukiotoshi", 1, 1, 1, True),
+    Card(50, "Tsukitaoshi", 1, 0, 2, True),
+    Card(51, "Tsuridashi", 2, 1, 0, True),
+    Card(52, "Kotenage", 1, 1, 0, True),
+    Card(53, "Abisetaoshi", 3, 0, 0, True),
+    Card(54, "Shove", 2, 0, 0),
+    Card(55, "Explosive Step — Fumikomi", 0, 0, 3),
+    Card(58, "Shitatenage", 0, 2, 1, True),
+    Card(11001, "Kirikaeshi", 0, 2, 1, True),
+    Card(11002, "Okuridashi", 0, 1, 2, True),
+    Card(11003, "Okuritaoshi", 1, 0, 2, True),
+    Card(11004, "Sukuinage", 1, 1, 1, True),
+    Card(11005, "Utchari", 0, 2, 0, True),
+    Card(11006, "Uwatedashinage", 0, 2, 1, True),
+)
+
+# B9-specific cards live outside the historical 61-card V5 print pool.
+B9_CARD_POOL: tuple[Card, ...] = (
+    # B9 additions; generated-only Okuri cards are not used in starting decks.
+    Card(12001, "Morotezuki", 3, 0, 0),
+    Card(12002, "Kachiage", 3, 0, 0),
+    Card(12003, "Nekodamashi", 1, 1, 2),
+    Card(12004, "Maesabaki", 0, 2, 1),
+    Card(12005, "Deashi", 2, 0, 2),
+    Card(12006, "Butsukari", 2, 0, 1),
+    Card(12007, "Denshamichi", 1, 0, 2),
+    Card(12008, "Spin Away", 0, 1, 2),
+    Card(12009, "Ankogata", 3, 0, 0),
+    Card(12010, "Tsuriotoshi", 2, 1, 0, True),
 )
 
 
@@ -60,24 +92,31 @@ CARD_POOL: tuple[Card, ...] = (
 STARTING_KIMARITE: tuple[Card, ...] = (
     Card(1001, "Katasukashi", 0, 3, 0, True),
     Card(1002, "Hikiotoshi", 0, 1, 2, True),
-    Card(1003, "Tottari", 0, 1, 2, True),
+    Card(1003, "Tottari", 1, 1, 0, True),
     Card(1004, "Yorikiri", 1, 1, 1, True),
     Card(1005, "Uwatenage", 0, 2, 1, True),
     Card(1006, "Hatakikomi", 1, 0, 2, True),
-    Card(1007, "Tsukiotoshi", 0, 0, 3, True),
+    Card(1007, "Tsukiotoshi", 1, 1, 1, True),
     Card(1008, "Tsukitaoshi", 1, 0, 2, True),
-    Card(1009, "Oshidashi", 3, 0, 0, True),
+    Card(1009, "Oshidashi", 2, 0, 1, True),
     Card(1010, "Oshitaoshi", 3, 0, 0, True),
     Card(1011, "Tsuridashi", 2, 1, 0, True),
-    Card(1012, "Kotenage", 1, 2, 0, True),
+    Card(1012, "Kotenage", 1, 1, 0, True),
     Card(1013, "Abisetaoshi", 3, 0, 0, True),
     Card(1014, "Yoritaoshi", 2, 1, 0, True),
     Card(1015, "Tsukidashi", 1, 0, 2, True),
+    Card(1016, "Shitatenage", 0, 2, 1, True),
+    Card(1017, "Kirikaeshi", 0, 2, 1, True),
+    Card(1018, "Okuridashi", 0, 1, 2, True),
+    Card(1019, "Okuritaoshi", 1, 0, 2, True),
+    Card(1020, "Sukuinage", 1, 1, 1, True),
+    Card(1021, "Utchari", 0, 2, 0, True),
+    Card(1022, "Uwatedashinage", 0, 2, 1, True),
 )
 
 
 def card_by_id(card_id: int) -> Card:
-    for card in (*CARD_POOL, *STARTING_KIMARITE):
+    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL):
         if card.card_id == card_id:
             return card
     raise KeyError(card_id)
@@ -88,7 +127,7 @@ def card_by_name(name: str, *, prefer_starting_kimarite: bool = False) -> Card:
         (STARTING_KIMARITE, CARD_POOL)
         if prefer_starting_kimarite
         else (CARD_POOL, STARTING_KIMARITE)
-    )
+    ) + (B9_CARD_POOL,)
     for group in groups:
         for card in group:
             if card.name == name:

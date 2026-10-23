@@ -1,0 +1,249 @@
+{
+  "title": "Selected Kimarite design specifications",
+  "source_sheet": "https://docs.google.com/spreadsheets/d/1zT4W_jhKioyLJ7yOqSnePc7XdBL7oiXw68ytbrR59gE/edit?gid=755090412",
+  "notes": "Designer selections; not a claim that every new rule has been wired into simulator. Katasukashi discard reclaim and Utchari 2 green orbs were revised after R21 testing. Scoring lives in Kimarite Card Library / Kimarite 7-Axis Scores.",
+  "cards": [
+    {
+      "name": "Abisetaoshi",
+      "variant": "ABI-2",
+      "orbs": "🟣🟣🟣",
+      "text": "WIN: Total Grip ≥ 2; Power ≥ 10.\nEXCHANGE: If Power ≥ 6, gain 1 flexible Grip if you have no usable Grip; otherwise gain 1 Power.",
+      "status": "R20 preferred — confirm",
+      "source_round": "R20",
+      "tested_start_win_percent": "51.9",
+      "tested_shuffled_win_percent": "51.5",
+      "test_note": "R20 tested ABI-2: 336/648 Starting, 334/648 Shuffled; approval bookkeeping pending."
+    },
+    {
+      "name": "Hatakikomi",
+      "variant": "R21-HAT-C3",
+      "orbs": "🟣🟠🟠",
+      "text": "WIN: Momentum ≤ −2; Power ≥ 6.\nEXCHANGE: You may lose 1 Momentum. If you do, your opponent discards 1 card from their hand. If their hand is empty, draw 1 card instead.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "48.9",
+      "tested_shuffled_win_percent": "50.6",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Hikiotoshi",
+      "variant": "R21-HIK-C2",
+      "orbs": "🟢🟠🟠",
+      "text": "WIN: Grip ≥ 1; Momentum ≤ −2; Position ≥ 0.\nEXCHANGE: Look at the top 3 cards of your Draw Pile. Put 1 into your hand and the others on the bottom of your Draw Pile.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "49.1",
+      "tested_shuffled_win_percent": "50.5",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Katasukashi",
+      "variant": "R21-KAT-H5",
+      "orbs": "🟢🟢🟢",
+      "text": "WIN: Your opponent has no Grip; Momentum ≥ 1; hand advantage ≥ 5.\nEXCHANGE: If Momentum ≥ 1, choose 1 card from your Discard Pile and put it into your hand.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "50.2",
+      "tested_shuffled_win_percent": "48",
+      "test_note": "Exchange modified after R21 — untested"
+    },
+    {
+      "name": "Kirikaeshi",
+      "variant": "R21-KIR-P3",
+      "orbs": "🟢🟢🟠",
+      "text": "WIN: Your Power is at least 3 below your opponent's; you have more cards in hand than your opponent; you made a successful Reversal this turn.\nEXCHANGE: Draw 1 card.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "51.7",
+      "tested_shuffled_win_percent": "49.2",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Kotenage",
+      "variant": "KOT-1",
+      "orbs": "🟣🟢",
+      "text": "WIN: Your opponent has no Grip; Momentum ≥ 1; you have ≥ 5 cards in hand.\nEXCHANGE: Reduce an opponent's Grip by 1 level. If they have no Grip, you may draw 1 card, then discard 1 card.",
+      "status": "R20 baseline — unresolved",
+      "source_round": "R20",
+      "tested_start_win_percent": "54.5",
+      "tested_shuffled_win_percent": "50.0",
+      "test_note": "R20 tested KOT-1: 353/648 Starting, 324/648 Shuffled; balance approval pending."
+    },
+    {
+      "name": "Okuridashi",
+      "variant": "OKD-2",
+      "orbs": "🟢🟠🟠",
+      "text": "WIN: You made a successful Reversal this turn; Position ≥ 1; Momentum ≥ 1.\nEXCHANGE: Choose one: lose 1 Position to gain 2 Momentum, or lose 1 Momentum to gain 2 Position.",
+      "status": "R20 chosen reference — confirm",
+      "source_round": "R20",
+      "tested_start_win_percent": "47.4",
+      "tested_shuffled_win_percent": "50.9",
+      "test_note": "R20 tested OKD-2: 307/648 Starting, 330/648 Shuffled; approval pending."
+    },
+    {
+      "name": "Okuritaoshi",
+      "variant": "OKT-2",
+      "orbs": "🟣🟠🟠",
+      "text": "WIN: You made a successful Reversal this turn; Position ≥ 0; Momentum ≥ 2.\nEXCHANGE: Choose one: lose 1 Position to gain 2 Momentum, or lose 1 Momentum to gain 2 Position.",
+      "status": "R20 chosen reference — confirm",
+      "source_round": "R20",
+      "tested_start_win_percent": "47.8",
+      "tested_shuffled_win_percent": "50.8",
+      "test_note": "R20 tested OKT-2: 310/648 Starting, 329/648 Shuffled; approval pending."
+    },
+    {
+      "name": "Oshidashi",
+      "variant": "OSH-3",
+      "orbs": "🟣🟣🟠",
+      "text": "WIN: Position ≥ 2; Momentum ≥ 2.\nEXCHANGE: If Position ≥ 1, gain 1 Momentum.",
+      "status": "Selected — designer",
+      "source_round": "R20",
+      "tested_start_win_percent": "47.8",
+      "tested_shuffled_win_percent": "49.4",
+      "test_note": "R20 tested OSH-3: 310/648 Starting, 320/648 Shuffled; designer selected."
+    },
+    {
+      "name": "Oshitaoshi",
+      "variant": "R21-OTA-C1",
+      "orbs": "🟣🟣🟣",
+      "text": "WIN: Momentum ≥ 1; Position ≥ 1; Power ≥ 8.\nEXCHANGE: If Momentum ≥ 1, gain 1 Power. Then, if your Power exceeds your opponent's, gain 1 Momentum.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "50.5",
+      "tested_shuffled_win_percent": "50.5",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Shitatenage",
+      "variant": "R21-SHI-C3",
+      "orbs": "🟢🟢🟠",
+      "text": "WIN: Deep Right Grip; Momentum ≥ 1; Position ≥ 0.\nEXCHANGE: If you have Right Grip, gain 1 Momentum.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "50",
+      "tested_shuffled_win_percent": "50.3",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Sukuinage",
+      "variant": "R21-SUK-P3",
+      "orbs": "🟣🟢🟠",
+      "text": "WIN: You have no Grip; Momentum ≥ 2; hand advantage ≥ 3.\nEXCHANGE: If you have no Grip, draw 1 card.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "48.9",
+      "tested_shuffled_win_percent": "50.6",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Tottari",
+      "variant": "R21-TOT-NS",
+      "orbs": "🟣🟢",
+      "text": "WIN: You have no active Grip; you prevented or reduced an opponent's Grip attempt during the specified turn window.\nEXCHANGE: Look at the top 3 cards of your opponent's Draw Pile and discard 1 of them.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "50.9",
+      "tested_shuffled_win_percent": "51.4",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Tsukidashi",
+      "variant": "R21-TSU-C1",
+      "orbs": "🟣🟠🟠",
+      "text": "WIN: Position ≥ 2; you played ≥ 3 cards this turn.\nEXCHANGE: If Position ≥ 1, gain 1 Play and draw 1 card.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "46.6",
+      "tested_shuffled_win_percent": "51.7",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Tsukiotoshi",
+      "variant": "R21-TSO-C3",
+      "orbs": "🟣🟢🟠",
+      "text": "WIN: You have no Grip; Momentum ≥ 1; your Power is at least 3 below your opponent's.\nEXCHANGE: Gain 1 Play.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "48.5",
+      "tested_shuffled_win_percent": "51.7",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Tsukitaoshi",
+      "variant": "R21-TKT-C1",
+      "orbs": "🟣🟠🟠",
+      "text": "WIN: Momentum ≥ 2; you played ≥ 3 cards this turn.\nEXCHANGE: Gain 1 Play, draw 1 card, then discard 1 card from your hand.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "50.5",
+      "tested_shuffled_win_percent": "54.3",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Tsuridashi",
+      "variant": "R21-TSR-P6",
+      "orbs": "🟣🟣🟢",
+      "text": "WIN: Total Grip ≥ 3; Position ≥ 0; Power ≥ 6.\nEXCHANGE: Gain 1 Power. If Momentum ≥ 2, gain 1 additional Power.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "48.1",
+      "tested_shuffled_win_percent": "52",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Utchari",
+      "variant": "R21-UTC-F2",
+      "orbs": "🟢🟢",
+      "text": "WIN: You gained Momentum this turn; Position = −3.\nEXCHANGE: If Position < 0, look at the top 2 cards of your Draw Pile. Put 1 into your hand and the other on the bottom of your Draw Pile.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "55.1",
+      "tested_shuffled_win_percent": "48.3",
+      "test_note": "Two green orbs after R21 — untested"
+    },
+    {
+      "name": "Uwatedashinage",
+      "variant": "R21-UWD-C5",
+      "orbs": "🟢🟢🟠",
+      "text": "WIN: Left Grip ≥ 1; Momentum ≥ 1; your Power is at least 5 below your opponent's.\nEXCHANGE: Draw 1 card. You may discard 1 card from your hand to establish Left Grip.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "49.5",
+      "tested_shuffled_win_percent": "50.8",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Uwatenage",
+      "variant": "R21-UWA-C1",
+      "orbs": "🟢🟢🟠",
+      "text": "WIN: Deep Left Grip; Momentum ≥ 1; Position ≥ 0.\nEXCHANGE: If Momentum ≥ 0, establish Left Grip.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "49.7",
+      "tested_shuffled_win_percent": "48.5",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Yorikiri",
+      "variant": "R21-YOR-C3",
+      "orbs": "🟣🟢🟠",
+      "text": "WIN: Grip ≥ 1; Momentum ≥ 1; Position ≥ 2.\nEXCHANGE: If Total Grip ≥ 2, gain 1 Push.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "51.9",
+      "tested_shuffled_win_percent": "51.2",
+      "test_note": "R21 tested version"
+    },
+    {
+      "name": "Yoritaoshi",
+      "variant": "R21-YTA-C3",
+      "orbs": "🟣🟣🟢",
+      "text": "WIN: Grip ≥ 1; Position ≥ 2; your Power exceeds your opponent's by ≥ 2.\nEXCHANGE: If Total Grip ≥ 1, gain 1 Power.",
+      "status": "Selected — designer",
+      "source_round": "R21",
+      "tested_start_win_percent": "48.9",
+      "tested_shuffled_win_percent": "49.2",
+      "test_note": "R21 tested version"
+    }
+  ]
+}

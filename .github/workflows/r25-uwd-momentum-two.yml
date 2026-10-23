@@ -1,0 +1,85 @@
+name: R25 Uwatedashinage Momentum 2 restored Exchange
+on:
+  push:
+    branches: [experiment/r25-uwd-momentum-two]
+    paths: [".github/workflows/r25-uwd-momentum-two.yml"]
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Verify restored Exchange, two orbs and V5.2 neutral AI
+        run: |
+          python -m pytest -q tests/test_r21_search.py tests/test_r20_variant_runtime.py
+          python - <<'PY'
+          import inspect
+          from kimarite.r21_gauntlet import load_arms
+          from kimarite.r21_gauntlet_bouts import run_fixture
+          from kimarite.r21_variant_rules import variant_predicate,variant_exchange
+          from kimarite.style_ai_v5 import choose_style_play
+          d={a.arm_id:a for a in load_arms()}
+          a=d["R21-R25-UWD-M2-EX"]
+          prior=d["R21-R22-UWD-3"]
+          assert a.orbs==prior.orbs=="🟢🟢"
+          assert a.exchange_text==prior.exchange_text
+          assert "Momentum ≥2" in a.win_text
+          assert 'identifier == "R21-R25-UWD-M2-EX"' in inspect.getsource(variant_predicate)
+          assert "play_style_turn(state, side, cmp, style=None)" in inspect.getsource(run_fixture)
+          assert "if style is not None else 0" in inspect.getsource(choose_style_play)
+          assert 'identifier == "R21-R24-UWD-NE"' in inspect.getsource(variant_exchange)
+          print("R25 checks pass")
+          PY
+          python -m kimarite.r21_gauntlet_bouts --arm R21-R25-UWD-M2-EX --count 10 --max-turns 60 --output artifacts/r25_smoke.csv
+  full:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run matched 1296 V5.2 generic fixtures
+        run: |
+          mkdir -p artifacts/r25
+          python -m kimarite.r21_gauntlet_bouts --arm R21-R25-UWD-M2-EX --count 1296 --max-turns 60 --seed 20261010 --output artifacts/r25/UWD-M2-EX.csv
+          python - <<'PY'
+          import csv
+          rows=list(csv.DictReader(open("artifacts/r25/UWD-M2-EX.csv",newline="")))
+          assert len(rows)==1296
+          for placement in ("starting","shuffled"):
+              subset=[r for r in rows if r["placement"]==placement]
+              assert len(subset)==648
+              assert all(r["completed"]=="True" and not r["error"] for r in subset)
+              print(placement,sum(r["subject_won"]=="True" for r in subset),"/648")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r25-uwd-momentum-two-raw
+          path: artifacts/r25/
+  report:
+    needs: [smoke,full]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - uses: actions/download-artifact@v4
+        with:
+          name: r25-uwd-momentum-two-raw
+          path: artifacts/r25
+      - run: python -m kimarite.r21_gauntlet_report artifacts/r25/*.csv --output-dir artifacts/r25_report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r25-uwd-momentum-two-report
+          path: artifacts/r25_report/

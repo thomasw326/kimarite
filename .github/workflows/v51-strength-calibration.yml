@@ -1,0 +1,28 @@
+name: V5.1 225-build single round robin
+
+on:
+  push:
+    branches: [release/v5.1]
+    paths:
+      - ".github/workflows/v51-strength-calibration.yml"
+      - "scripts/v51_strength_calibration.py"
+  workflow_dispatch:
+
+jobs:
+  round-robin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run 225 entrants, one bout per unordered pair
+        run: python scripts/v51_strength_calibration.py --output-dir artifacts/v51_225_round_robin
+      - name: Upload 25,200 bouts and 225 win rates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v51-225-single-round-robin
+          path: artifacts/v51_225_round_robin/

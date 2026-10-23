@@ -1,0 +1,27 @@
+name: V5.1 difficulty -7 baseline
+
+on:
+  push:
+    branches: [release/v5.1]
+    paths:
+      - ".github/workflows/v51-minus7-baseline.yml"
+  workflow_dispatch:
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Baseline 15 styles at difficulty -7, 100 mirrored round robins
+        run: python scripts/styles_test.py --difficulty -7 --repetitions 100 --max-turns 100 --seed 20261011 --output-dir artifacts/v51_minus7_baseline
+      - name: Upload baseline data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v51-minus7-baseline-21000-bouts
+          path: artifacts/v51_minus7_baseline/

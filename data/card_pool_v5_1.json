@@ -1,0 +1,599 @@
+{
+  "version": "5.1 + Power Additions (candidate)",
+  "status": "61-card comparison candidate: two approved Power additions; baseline 59-card V5.1 preserved in Git history",
+  "source": {
+    "non_kimarite": "Playtest Pool 5.0 (PR17+) (37 active non-Kimarite)",
+    "kimarite": "Selected Kimarite V5 (22 selected versions)",
+    "affinity": "Card Affinity — Current V5 (six axes)"
+  },
+  "counts": {
+    "non_kimarite": 39,
+    "kimarite": 22,
+    "printed_pool": 61
+  },
+  "cards": [
+    {
+      "name": "Oshi",
+      "id": 1,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 0,
+        "spirit": 1
+      },
+      "text": "Tachiai: Reveal top cards, adding each card's printed orbs; continue through Oshi/Tsuki until first other card. Discard revealed cards. Exchange: Gain 1 Push and 1 Play. Draw 1. Then Mill 1."
+    },
+    {
+      "name": "Tsuki",
+      "id": 3,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 1,
+        "technique": 0,
+        "spirit": 0
+      },
+      "text": "Tachiai: Same reveal-orb chain as Oshi. Exchange: Reduce one opponent Grip by one level if they have one. Gain 1 Play. Draw 1. Then Mill 1."
+    },
+    {
+      "name": "Tsuppari",
+      "id": 5,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 2,
+        "technique": 0,
+        "spirit": 1
+      },
+      "text": "Tachiai: Shuffle 3 Oshi, 3 Tsuki and 3 Shove into your Draw Pile (9 generated cards). Exchange: Gain 1 Momentum; if another Oshi/Tsuki/Tsuppari/Shove was played this turn, gain 1 Push. Gain 1 Play, draw 1, then Mill 1."
+    },
+    {
+      "name": "Headlong Charge",
+      "id": 7,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 0,
+        "spirit": 3
+      },
+      "text": "Tachiai / Exchange: Sacrifice 1 Kimarite in play; gain 1 Momentum and 1 Push. Mill 2. Cannot play in Exchange without a Kimarite to sacrifice. Prepared copy is discarded after Tachiai."
+    },
+    {
+      "name": "Nodowa",
+      "id": 8,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 3,
+        "technique": 0,
+        "spirit": 0
+      },
+      "text": "Tachiai: Gain 2 Power. Opponent looks at 2 fewer cards when resolving Technique, minimum 2. Exchange: Gain 2 Power. Remove 1 opposing Temporary."
+    },
+    {
+      "name": "Harite",
+      "id": 9,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 3,
+        "technique": 0,
+        "spirit": 1
+      },
+      "text": "Gain 1 Power. Opponent loses 1 Power."
+    },
+    {
+      "name": "Gain Left Grip",
+      "id": 10,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 0
+      },
+      "text": "Tachiai: If you win Technique, establish your Left Grip. Exchange: Increase Left Grip by 1 level (max Level 2). Temporary: Prevent the next 1 Push you receive while this protection remains active."
+    },
+    {
+      "name": "Gain Right Grip",
+      "id": 11,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 0
+      },
+      "text": "Tachiai: If you win Technique, establish your Right Grip. Exchange: Increase Right Grip by 1 level (max Level 2). Temporary: Prevent the next 1 Push you receive while this protection remains active."
+    },
+    {
+      "name": "Uwate",
+      "id": 12,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 0
+      },
+      "text": "Exchange: Improve Left Grip by 1. Look at the top X cards of your Draw Pile, where X is your Total Grip. If Left Grip is Deep, play 1 without spending a Play; otherwise, draw 1. Put the rest on the bottom of your Draw Pile. Temporary: Prevent the next 1 Push you receive while this protection remains active."
+    },
+    {
+      "name": "Shitate",
+      "id": 13,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 0
+      },
+      "text": "Improve Right Grip by 1. If Right Grip is already Deep, gain 2 Push instead. Temporary: Prevent the next 1 Push you receive while this protection remains active."
+    },
+    {
+      "name": "Attempt Two-Handed Grip",
+      "id": 14,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 1
+      },
+      "text": "Exchange: Establish 1 chosen Grip at Level 1 (without reducing an existing higher Grip). Temporary: Remains until the beginning of your next turn. If it survives, establish both Left and Right Grip at Level 1 (without reducing existing higher Grips). If removed or prevented before then, lose 1 Momentum."
+    },
+    {
+      "name": "Attempt Deep Outside Grip",
+      "id": 15,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 1
+      },
+      "text": "Exchange: Establish Left Grip at Level 1 (without reducing an existing higher Grip). Temporary: Remains until the beginning of your next turn. If it survives, set your Left Grip to Deep (2). If removed or prevented before then, lose 1 Momentum."
+    },
+    {
+      "name": "Attempt Deep Inside Grip",
+      "id": 16,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 1
+      },
+      "text": "Exchange: Establish Right Grip at Level 1 (without reducing an existing higher Grip). Temporary: Remains until the beginning of your next turn. If it survives, set your Right Grip to Deep (2). If removed or prevented before then, lose 1 Momentum."
+    },
+    {
+      "name": "Shiko Stomp",
+      "id": 17,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 1,
+        "technique": 1,
+        "spirit": 1
+      },
+      "text": "Tachiai / Exchange: Enter a persistent Temporary. When an opponent effect would negatively affect you or something you control, prevent that effect and discard Shiko Stomp. It does not expire at the beginning of your turn."
+    },
+    {
+      "name": "Salt Throw",
+      "id": 18,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 1,
+        "technique": 1,
+        "spirit": 3
+      },
+      "text": "Tachiai / Exchange: If your Discard Pile has 7+ cards, return the entire Discard Pile to the bottom of the Draw Pile. Enter a persistent Temporary; at the start of each of your turns, recycle one discarded card to the bottom of your Draw Pile."
+    },
+    {
+      "name": "Stare Down",
+      "id": 19,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 1,
+        "technique": 1,
+        "spirit": 1
+      },
+      "text": "Tachiai: If you win Power, gain 1 Push. If you win Technique, improve opening card access by 1 kept card. If you win Spirit, gain 1 Momentum. Exchange: Look at top 1 plus the number of Tachiai comparisons won cards; keep 1, bottom the rest."
+    },
+    {
+      "name": "Power Water",
+      "id": 20,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 1,
+        "technique": 2,
+        "spirit": 2
+      },
+      "text": "Exchange: Shuffle 6 Power Water Cantrip cards into your Draw Pile."
+    },
+    {
+      "name": "Belt Slap",
+      "id": 21,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 2,
+        "technique": 0,
+        "spirit": 3
+      },
+      "text": "Exchange: Gain 1 Push. If you won Spirit in the Tachiai by 3 or more, gain 1 Momentum."
+    },
+    {
+      "name": "Tsuri",
+      "id": 22,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 2,
+        "technique": 2,
+        "spirit": 0
+      },
+      "text": "Exchange: If you have no usable Grip, gain 1 Grip instead; otherwise, gain 1 Power. Temporary: Remains until the beginning of your next turn. If it survives, gain 3 Push if your Power is 5+ and your Total Grip is 2+; otherwise, gain 1 Push."
+    },
+    {
+      "name": "Yori",
+      "id": 23,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 1,
+        "technique": 2,
+        "spirit": 1
+      },
+      "text": "Exchange: If you have no usable Grip, gain 1 Grip instead; otherwise, gain 1 Push. Temporary: Remains until the beginning of your next turn. If it survives, gain 3 Momentum if your Total Grip is greater than your opponent's Total Grip; otherwise, gain 1 Momentum."
+    },
+    {
+      "name": "Gaburi",
+      "id": 24,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 1,
+        "technique": 2,
+        "spirit": 1
+      },
+      "text": "Exchange: If you have no usable Grip, gain 1 Grip instead; otherwise, gain 1 Momentum. Temporary: Remains until the beginning of your next turn. If it survives and your Power is greater than your opponent's Power, create a Yorikiri in your Kimarite Zone."
+    },
+    {
+      "name": "Ottsuke",
+      "id": 25,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 1,
+        "technique": 2,
+        "spirit": 1
+      },
+      "text": "Exchange — Choose: reduce 1 opposing Grip by 1 level, OR remove an opposing Grip-referencing Temporary or Kimarite and gain 1 Momentum, OR draw 1 card."
+    },
+    {
+      "name": "Hold Position",
+      "id": 26,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 3,
+        "technique": 0,
+        "spirit": 0
+      },
+      "text": "Exchange — Temporary: Your opponent cannot gain Push while Hold Position remains. Remains until the beginning of your next turn. If it survives, gain 1 Momentum and 1 Power."
+    },
+    {
+      "name": "Immovable",
+      "id": 27,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 3,
+        "technique": 0,
+        "spirit": 0
+      },
+      "text": "Exchange — Temporary: Gain 1 Power. Remains until the beginning of your next turn. If it survives and your opponent gained no Push while it remained, gain 2 Momentum."
+    },
+    {
+      "name": "Henka",
+      "id": 28,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 4,
+        "spirit": 0
+      },
+      "text": "Tachiai: If your Technique is greater than your opponent's Spirit, the bout begins at Position 0, regardless of Tachiai Push. Exchange: Draw 1 card."
+    },
+    {
+      "name": "Pull",
+      "id": 29,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 1,
+        "spirit": 2
+      },
+      "text": "Exchange — Choose: (1) Lose 1 Momentum and 1 Position; put 1 card from your discard pile on top of your Draw Pile. Temporary: At the start of your next turn, if Pull remains, reverse your Momentum. (2) Draw 1 card, then discard 1 card."
+    },
+    {
+      "name": "Get Underneath",
+      "id": 30,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 1,
+        "technique": 1,
+        "spirit": 0
+      },
+      "text": "Tachiai / Exchange: Gain 1 Momentum and 1 Push. Opponent searches their deck for a Kimarite and puts it in their Kimarite Zone."
+    },
+    {
+      "name": "Read the Move",
+      "id": 31,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 2,
+        "spirit": 1
+      },
+      "text": "Exchange: Choose one — Remove 1 card from your opponent's Temporary Zone. If you do, gain 1 Momentum and draw 1 card; OR draw 1 card."
+    },
+    {
+      "name": "Reset to Neutral",
+      "id": 32,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 2,
+        "spirit": 1
+      },
+      "text": "Exchange: Remove all cards from both players' Temporary Zones. Remove all your Grip. If your Momentum is negative, set it to 0. If you removed at least 1 Grip this way, gain 1 Position."
+    },
+    {
+      "name": "Regain Balance",
+      "id": 33,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 2,
+        "technique": 0,
+        "spirit": 2
+      },
+      "text": "Exchange: Draw 1 card. If your Momentum is negative, gain 2 Momentum and 2 Power."
+    },
+    {
+      "name": "Sidestep",
+      "id": 34,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 0
+      },
+      "text": "Tachiai unchanged. Exchange Temporary: Enter Side-by-Side at current distance. While active, ALL Push from both wrestlers is 0. At start of your next turn resolve favorable Position by Momentum, then discard."
+    },
+    {
+      "name": "Use the Tawara",
+      "id": 35,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 0
+      },
+      "text": "Exchange — Temporary: Lose 1 Position. Gain 1 Momentum. Search for a Kimarite. While this remains, Push cannot move you. At the start of your next turn, discard this."
+    },
+    {
+      "name": "Kannuki",
+      "id": 36,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 2,
+        "technique": 1,
+        "spirit": 0
+      },
+      "text": "While Kannuki remains, your opponent cannot establish or improve Grip, gain benefits from existing Grip, or play Grip-building cards (including delayed Grip attempts) into play or the Temporary Zone. At the start of your next turn, reduce both their Left Grip and Right Grip by 1 level, then discard Kannuki."
+    },
+    {
+      "name": "Morozashi",
+      "id": 37,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 3,
+        "spirit": 0
+      },
+      "text": "Exchange: If exactly one hand has a Grip (Level 1 or Deep Level 2), establish Level 1 Grip with the other hand without changing the existing Grip. While Morozashi remains in your Temporary Zone, your Grips cannot be reduced. At the start of your next turn, gain 1 Push, then discard Morozashi."
+    },
+    {
+      "name": "Give Ground",
+      "id": 43,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 2,
+        "spirit": 1
+      },
+      "text": "Tachiai: If you lose Spirit, reduce the Push you receive by 1. Exchange: Lose 1 Position. Gain 1 Momentum and 1 Power. Draw 1 card."
+    },
+    {
+      "name": "Shove",
+      "id": 54,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 2,
+        "technique": 0,
+        "spirit": 0
+      },
+      "text": "Tachiai: Gain 1 Push; if your Position is +3 after the opening Push, immediately win by Shove. Exchange: Gain 1 Push. If you played Oshi/Tsuki/Tsuppari earlier this turn, draw 1 then discard 1 from hand. Mill 1."
+    },
+    {
+      "name": "Explosive Step — Fumikomi",
+      "id": 55,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 0,
+        "technique": 0,
+        "spirit": 3
+      },
+      "text": "Tachiai: If you win Spirit, gain 1 Push. Exchange: Gain 1 Momentum; if your Momentum was 0 or less before play, gain 1 Push. Mill 2 in both phases."
+    },
+    {
+      "name": "Abisetaoshi",
+      "type": "Kimarite",
+      "orbs": "🟣🟣🟣",
+      "text": "WIN: Total Grip ≥ 2; Power ≥ 10.\nEXCHANGE: If Power ≥ 6, gain 1 flexible Grip if you have no usable Grip; otherwise gain 1 Power.",
+      "variant": "ABI-2"
+    },
+    {
+      "name": "Hatakikomi",
+      "type": "Kimarite",
+      "orbs": "🟣🟠🟠",
+      "text": "WIN: Momentum ≤ −2; Power ≥ 6.\nEXCHANGE: You may lose 1 Momentum. If you do, your opponent discards 1 card from their hand. If their hand is empty, draw 1 card instead.",
+      "variant": "R21-HAT-C3"
+    },
+    {
+      "name": "Hikiotoshi",
+      "type": "Kimarite",
+      "orbs": "🟢🟠🟠",
+      "text": "WIN: Grip ≥ 1; Momentum ≤ −2; Position ≥ 0.\nEXCHANGE: Look at the top 3 cards of your Draw Pile. Put 1 into your hand and the others on the bottom of your Draw Pile.",
+      "variant": "R21-HIK-C2"
+    },
+    {
+      "name": "Katasukashi",
+      "type": "Kimarite",
+      "orbs": "🟢🟢🟢",
+      "text": "WIN: Your opponent has no Grip; Momentum ≥ 1; hand advantage ≥ 5.\nEXCHANGE: If Momentum ≥ 1, choose 1 card from your Discard Pile and put it into your hand.",
+      "variant": "R21-KAT-H5"
+    },
+    {
+      "name": "Kirikaeshi",
+      "type": "Kimarite",
+      "orbs": "🟢🟢🟠",
+      "text": "WIN: Your Power is at least 3 below your opponent's; you have more cards in hand than your opponent; you made a successful Reversal this turn.\nEXCHANGE: Draw 1 card.",
+      "variant": "R21-KIR-P3"
+    },
+    {
+      "name": "Kotenage",
+      "type": "Kimarite",
+      "orbs": "🟣🟢",
+      "text": "WIN: Your opponent has no Grip; Momentum ≥ 1; you have ≥ 5 cards in hand.\nEXCHANGE: Reduce an opponent's Grip by 1 level. If they have no Grip, you may draw 1 card, then discard 1 card.",
+      "variant": "KOT-1"
+    },
+    {
+      "name": "Okuridashi",
+      "type": "Kimarite",
+      "orbs": "🟢🟠🟠",
+      "text": "WIN: You made a successful Reversal this turn; Position ≥ 1; Momentum ≥ 1.\nEXCHANGE: Choose one: lose 1 Position to gain 2 Momentum, or lose 1 Momentum to gain 2 Position.",
+      "variant": "OKD-2"
+    },
+    {
+      "name": "Okuritaoshi",
+      "type": "Kimarite",
+      "orbs": "🟣🟠🟠",
+      "text": "WIN: You made a successful Reversal this turn; Position ≥ 0; Momentum ≥ 2.\nEXCHANGE: Choose one: lose 1 Position to gain 2 Momentum, or lose 1 Momentum to gain 2 Position.",
+      "variant": "OKT-2"
+    },
+    {
+      "name": "Oshidashi",
+      "type": "Kimarite",
+      "orbs": "🟣🟣🟠",
+      "text": "WIN: Position ≥ 2; Momentum ≥ 2.\nEXCHANGE: If Position ≥ 1, gain 1 Momentum.",
+      "variant": "OSH-3"
+    },
+    {
+      "name": "Oshitaoshi",
+      "type": "Kimarite",
+      "orbs": "🟣🟣🟣",
+      "text": "WIN: Momentum ≥ 1; Position ≥ 1; Power ≥ 8.\nEXCHANGE: If Momentum ≥ 1, gain 1 Power. Then, if your Power exceeds your opponent's, gain 1 Momentum.",
+      "variant": "R21-OTA-C1"
+    },
+    {
+      "name": "Shitatenage",
+      "type": "Kimarite",
+      "orbs": "🟢🟢🟠",
+      "text": "WIN: Deep Right Grip; Momentum ≥ 1; Position ≥ 0.\nEXCHANGE: If you have Right Grip, gain 1 Momentum.",
+      "variant": "R21-SHI-C3"
+    },
+    {
+      "name": "Sukuinage",
+      "type": "Kimarite",
+      "orbs": "🟣🟢🟠",
+      "text": "WIN: You have no Grip; Momentum ≥ 2; hand advantage ≥ 3.\nEXCHANGE: If you have no Grip, draw 1 card.",
+      "variant": "R21-SUK-P3"
+    },
+    {
+      "name": "Tottari",
+      "type": "Kimarite",
+      "orbs": "🟣🟢",
+      "text": "WIN: You have no active Grip; you prevented or reduced an opponent's Grip attempt during the specified turn window.\nEXCHANGE: Look at the top 3 cards of your opponent's Draw Pile and discard 1 of them.",
+      "variant": "R21-TOT-NS"
+    },
+    {
+      "name": "Tsukidashi",
+      "type": "Kimarite",
+      "orbs": "🟣🟠🟠",
+      "text": "WIN: Position ≥ 2; you played ≥ 3 cards this turn.\nEXCHANGE: If Position ≥ 1, gain 1 Play and draw 1 card.",
+      "variant": "R21-TSU-C1"
+    },
+    {
+      "name": "Tsukiotoshi",
+      "type": "Kimarite",
+      "orbs": "🟣🟢🟠",
+      "text": "WIN: You have no Grip; Momentum ≥ 1; your Power is at least 3 below your opponent's.\nEXCHANGE: Gain 1 Play.",
+      "variant": "R21-TSO-C3"
+    },
+    {
+      "name": "Tsukitaoshi",
+      "type": "Kimarite",
+      "orbs": "🟣🟠🟠",
+      "text": "WIN: Momentum ≥ 2; you played ≥ 3 cards this turn.\nEXCHANGE: Gain 1 Play, draw 1 card, then discard 1 card from your hand.",
+      "variant": "R21-TKT-C1"
+    },
+    {
+      "name": "Tsuridashi",
+      "type": "Kimarite",
+      "orbs": "🟣🟣🟢",
+      "text": "WIN: Total Grip ≥ 3; Position ≥ 0; Power ≥ 6.\nEXCHANGE: Gain 1 Power. If Momentum ≥ 2, gain 1 additional Power.",
+      "variant": "R21-TSR-P6"
+    },
+    {
+      "name": "Utchari",
+      "type": "Kimarite",
+      "orbs": "🟢🟢",
+      "text": "WIN: You gained Momentum this turn; Position = −3.\nEXCHANGE: If Position < 0, look at the top 2 cards of your Draw Pile. Put 1 into your hand and the other on the bottom of your Draw Pile.",
+      "variant": "R21-UTC-F2"
+    },
+    {
+      "name": "Uwatedashinage",
+      "type": "Kimarite",
+      "orbs": "🟢🟢🟠",
+      "text": "WIN: Left Grip ≥ 1; Momentum ≥ 1; your Power is at least 5 below your opponent's.\nEXCHANGE: Draw 1 card. You may discard 1 card from your hand to establish Left Grip.",
+      "variant": "R21-UWD-C5"
+    },
+    {
+      "name": "Uwatenage",
+      "type": "Kimarite",
+      "orbs": "🟢🟢🟠",
+      "text": "WIN: Deep Left Grip; Momentum ≥ 1; Position ≥ 0.\nEXCHANGE: If Momentum ≥ 0, establish Left Grip.",
+      "variant": "R21-UWA-C1"
+    },
+    {
+      "name": "Yorikiri",
+      "type": "Kimarite",
+      "orbs": "🟣🟢🟠",
+      "text": "WIN: Grip ≥ 1; Momentum ≥ 1; Position ≥ 2.\nEXCHANGE: If Total Grip ≥ 2, gain 1 Push.",
+      "variant": "R21-YOR-C3"
+    },
+    {
+      "name": "Yoritaoshi",
+      "type": "Kimarite",
+      "orbs": "🟣🟣🟢",
+      "text": "WIN: Grip ≥ 1; Position ≥ 2; your Power exceeds your opponent's by ≥ 2.\nEXCHANGE: If Total Grip ≥ 1, gain 1 Power.",
+      "variant": "R21-YTA-C3"
+    },
+    {
+      "name": "Driving Force — Power Payoff",
+      "id": 11007,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 2,
+        "technique": 0,
+        "spirit": 1
+      },
+      "text": "Choose: If your Power is 7+, gain 2 Push and 1 Momentum; OR draw 1 card."
+    },
+    {
+      "name": "Crushing Pressure — Power Crusher",
+      "id": 11008,
+      "type": "Non-Kimarite",
+      "orbs": {
+        "power": 3,
+        "technique": 0,
+        "spirit": 0
+      },
+      "text": "Choose: If your Power is 7+ and your Power Advantage is 3+, gain 1 Momentum and your opponent loses 2 Power; OR draw 1 card."
+    }
+  ]
+}

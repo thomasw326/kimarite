@@ -1,0 +1,60 @@
+{
+  "experiment": "R22 — 22 selected family builds, 13 approved plus 9 open",
+  "ai": "V5.2 danger-aware neutral tactical AI, style=None",
+  "profiles": "108 generic stat/priority profiles",
+  "placements": [
+    "starting",
+    "shuffled"
+  ],
+  "bouts_per_arm": 1296,
+  "arms": [
+    "R21-R22-ABI-1",
+    "R21-HAT-C3",
+    "R21-OTA-C2",
+    "R21-SHI-C3",
+    "R21-SUK-P3",
+    "R21-TOT-NS",
+    "R21-TSU-C1",
+    "R21-R22-TSO-2",
+    "R21-TKT-C1",
+    "R21-TSR-C7",
+    "R21-R22-UWD-3",
+    "R21-YOR-C3",
+    "R21-YTA-C3",
+    "R21-HIK-C2-MN3",
+    "R21-KAT-H5-T2",
+    "R21-KIR-P3-HA3",
+    "R21-KOT-R1",
+    "R21-R22-OSH-3",
+    "R21-OKD-RS",
+    "R21-OKT-RS",
+    "R21-UTC-F2-MN2",
+    "R21-UWA-C1-M2"
+  ],
+  "approved": [
+    "R21-R22-ABI-1",
+    "R21-HAT-C3",
+    "R21-OTA-C2",
+    "R21-SHI-C3",
+    "R21-SUK-P3",
+    "R21-TOT-NS",
+    "R21-TSU-C1",
+    "R21-R22-TSO-2",
+    "R21-TKT-C1",
+    "R21-TSR-C7",
+    "R21-R22-UWD-3",
+    "R21-YOR-C3",
+    "R21-YTA-C3"
+  ],
+  "open": [
+    "R21-HIK-C2-MN3",
+    "R21-KAT-H5-T2",
+    "R21-KIR-P3-HA3",
+    "R21-KOT-R1",
+    "R21-R22-OSH-3",
+    "R21-OKD-RS",
+    "R21-OKT-RS",
+    "R21-UTC-F2-MN2",
+    "R21-UWA-C1-M2"
+  ]
+}

@@ -76,7 +76,7 @@ def test_losing_technique_first_turn_draws_two_then_next_turn_uses_normal_access
     assert [c.card_id for c in second] == [3, 4]
 
 
-def test_spirit_advantage_six_gives_momentum_and_queues_bonus_turn():
+def test_spirit_advantage_does_not_grant_old_turn_reward():
     a = make_wrestler("A", 0, 6, Stat.SPIRIT, Stat.POWER)
     b = make_wrestler("B", 0, 0, Stat.SPIRIT, Stat.POWER)
     bout = BoutState(FighterState(a), FighterState(b))
@@ -84,12 +84,12 @@ def test_spirit_advantage_six_gives_momentum_and_queues_bonus_turn():
 
     reward = resolve_first_turn_spirit_reward(bout, Side.A, comparison)
 
-    assert reward == (1, 1)
-    assert bout.momentum == 1
-    assert bout.fighter_a.bonus_turns_queued == 1
+    assert reward == (0, 0)
+    assert bout.momentum == 0
+    assert bout.fighter_a.bonus_turns_queued == 0
 
 
-def test_spirit_momentum_resolves_before_start_kimarite_check():
+def test_spirit_no_longer_grants_momentum_before_kimarite_check():
     kimarite = Card(5000, "Yorikiri", power=1, technique=1, spirit=1, is_kimarite=True)
     prepared_a = Card(5001, "Prepared A", spirit=3)
     prepared_b = Card(5002, "Prepared B")
@@ -111,13 +111,12 @@ def test_spirit_momentum_resolves_before_start_kimarite_check():
     from kimarite.turns import start_exchange_turn
     start_exchange_turn(bout, Side.A, comparison)
 
-    assert bout.momentum == 1
-    assert bout.winner is Side.A
-    assert bout.win_method == "Yorikiri"
-    assert bout.fighter_a.hand == []
+    assert bout.momentum == 0
+    assert bout.winner is None
+    assert len(bout.fighter_a.hand) == 2
 
 
-def test_spirit_bonus_turn_is_taken_before_opponent_turn():
+def test_spirit_no_longer_grants_bonus_turn():
     a = make_wrestler("A", 0, 6, Stat.SPIRIT, Stat.POWER)
     b = make_wrestler("B", 0, 0, Stat.SPIRIT, Stat.POWER)
     bout = BoutState(
@@ -130,7 +129,7 @@ def test_spirit_bonus_turn_is_taken_before_opponent_turn():
     start_exchange_turn(bout, Side.A, comparison)
     next_side = end_exchange_turn(bout, Side.A)
 
-    assert next_side is Side.A
+    assert next_side is Side.B
     assert bout.fighter_a.bonus_turns_queued == 0
 
 
@@ -149,7 +148,7 @@ def test_multiple_satisfied_kimarite_default_to_earliest_played():
     )
     bout.fighter_a.left_grip = GripState.GRIP
     bout.fighter_a.right_grip = GripState.GRIP
-    bout.momentum = 1
+    bout.momentum = 2
     bout.position = 2
 
     chosen = check_kimarite_zone(bout, Side.A)
@@ -173,7 +172,7 @@ def test_kimarite_chooser_can_override_earliest_for_reward_choice():
     )
     bout.fighter_a.left_grip = GripState.GRIP
     bout.fighter_a.right_grip = GripState.GRIP
-    bout.momentum = 1
+    bout.momentum = 2
     bout.position = 2
 
     chosen = check_kimarite_zone(
