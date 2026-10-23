@@ -61,9 +61,11 @@ def neutral_development_value(before: BoutState, after: BoutState, side: Side, c
     momentum = relative_momentum(after, side) - relative_momentum(before, side)
     power = b.power - a.power
     grip_gain = max(0, new_grip - old_grip)
-    value = 10 * max(0, push) + 7 * max(0, momentum) + 5 * max(0, power)
+    value = 10 * push + 7 * momentum + 5 * power
     if grip_gain:
         value += (12 if old_grip == 0 else 4) + 4 * max(0, grip_gain - 1)
+    elif new_grip < old_grip:
+        value -= 8 * (old_grip - new_grip)
     value += 3 * max(0, effective_total_grip(before, before.opponent_side(side)) -
                      effective_total_grip(after, after.opponent_side(side)))
     new_stomps = sum(x.card.name == "Shiko Stomp" for x in b.temporary_zone)
@@ -73,20 +75,25 @@ def neutral_development_value(before: BoutState, after: BoutState, side: Side, c
     removed = [x.card.name for x in foe_a.temporary_zone
                if x.card.name not in [y.card.name for y in foe_b.temporary_zone]]
     if removed:
-        value += 12 * len(removed)
-        value += 6 * len(removed)  # Opportunity to disrupt may expire.
+        # Count remaining useful effects, not merely Temporary names.
+        value += 18 * len(removed)  # Opportunity to disrupt may expire.
     # Favor early card discovery only when Plays remain to exploit it.
     draw_delta = len(b.hand) - len(a.hand) + 1  # played card leaves hand
     if draw_delta > 0:
-        value += draw_delta * (2 + (6 if a.plays_remaining >= 3 else 4 if a.plays_remaining == 2 else 0))
+        # Only reward information if there are Plays to use it.
+        extra = 6 if a.plays_remaining >= 3 else 4 if a.plays_remaining == 2 else 0
+        value += draw_delta * (2 + extra)
     gained_play = b.plays_remaining - (a.plays_remaining - 1)
     if gained_play > 0:
         remaining_useful = any(c.name not in {"Injury"} for c in b.hand)
         value += 7 * gained_play if remaining_useful else 0
-    # Give delayed useful Temporaries a modest value without counting Shiko twice.
+    # An ordinary Temporary only earns a setup credit if its effect remains.
     temporary_added = len(b.temporary_zone) - len(a.temporary_zone)
     if temporary_added > 0 and card_name != "Shiko Stomp":
         value += min(temporary_added, 2) * 2
+    # Oshi's discard / other hand costs must not look like free cycling.
+    consumed_extra = max(0, len(a.hand) - 1 + draw_delta - len(b.hand))
+    value -= 6 * consumed_extra
     return value
 
 
@@ -157,8 +164,14 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
                    and abs(state.fighter(side).power - state.opponent(side).power) < 3
                    and trial.winner is None)
         neutral_bonus = neutral_development_value(state, trial, side, candidate.card.name) if neutral else 0
+        # State 3 uses its OWN scale. Do not add these values to score_state,
+        # whose unrelated grip/progress/unstable weights would dominate them.
+        # Style affinity is deliberately excluded here until calibrated to
+        # the agreed neutral decisions and actual deck win conditions.
+        evaluation = (neutral_bonus + opener_bonus if neutral
+                      else candidate.score + danger_score + affinity + opener_bonus - setup_hold)
         scored.append((
-            tier, candidate.score + danger_score + affinity + opener_bonus - setup_hold + neutral_bonus,
+            tier, evaluation,
             (card_affinity(style, candidate.card.name) if style is not None else 0), -candidate.card.card_id,
             candidate,
         ))
@@ -166,7 +179,7 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
     if not scored:
         return None
     selected = max(scored, key=lambda item: item[:4])
-    if selected[0] < 0 or (selected[0] < 3 and selected[1] < current - 100):
+    if selected[0] < 0 or (selected[0] < 3 and selected[1] < -100):
         return None
     return selected[-1]
 
