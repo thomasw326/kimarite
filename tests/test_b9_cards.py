@@ -175,7 +175,8 @@ def test_pull_no_longer_enters_temporary():
     assert bout.momentum == 1
     assert bout.position == 0
     assert bout.fighter_b.unstable
-    assert bout.fighter_a.hand[0].name == "Tsuki"
+    assert not bout.fighter_a.hand  # Drawn Tsuki is discarded with no other choice.
+    assert bout.fighter_a.discard_pile[-1].name == "Tsuki"
     assert not bout.fighter_a.temporary_zone
 
 
