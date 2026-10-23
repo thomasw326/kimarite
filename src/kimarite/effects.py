@@ -221,7 +221,6 @@ def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) 
         played.name in {"Oshi", "Tsuki", "Tsuppari", "Shove"}
         for played in fighter.played_this_turn[:-1]
     )
-    gain_momentum(state, side, 1)
     if chained and state.winner is None:
         gain_push(state, side, 1)
     if state.winner is None:
