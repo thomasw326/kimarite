@@ -43,6 +43,14 @@ The B10 engine gives **Gain Left Grip, Gain Right Grip, Uwate, and Shitate** a o
 
 **Use the Tawara** no longer creates a Temporary. Some other cards produce delayed payoffs (e.g. **Yori**, **Gaburi**, **Denshamichi**, **Morozashi**) or disruption penalties; read their current UI descriptions rather than historical spreadsheet text. The UI text is in `src/kimarite/b10_card_info.py`; the engine rules remain the authority.
 
+## Three-bout management (development)
+
+The browser now offers a **Three-bout management** panel alongside single-bout practice. Select one approved B10 wrestler deck and deal nine physical card copies reproducibly from that 40-card deck. To ensure each bout has a legal opening, the current prototype deals **three Kimarite and six ordinary cards**. Allocate all nine, without reuse, into three groups of three: one starting Kimarite, one prepared Tachiai and one first draw for each bout.
+
+Start the series to play three Human vs AI bouts in order against **three distinct randomly chosen opponents**. Each bout uses the approved B10 rules and State 3 AI, with its own deterministic seed; match results are summarized as you progress. The allocation and series results are stored in browser session storage to help recover after a refresh.
+
+**Interpretation to validate against the earliest spreadsheet rules:** The nine cards currently allocate *opening slots*, not permanently remove cards from the wrestler's deck for later bouts. This uses existing B10 opening validation; it is a first playable management implementation, not a claim that the historical spreadsheet specified the same drafting constraints.
+
 ## Developer tests
 
 ```powershell
