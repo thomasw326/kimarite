@@ -43,9 +43,11 @@ def labelled_choices(session, exc, command=None):
         "discard_for_grip": "Discard a card to establish Left Grip?",
     }
     title = titles.get(key, "Choose an option")
+    from .b10_card_info import card_info
     options = []
     for option in exc.options:
         label = str(option)
+        selected_card = None
         if isinstance(option, bool):
             label = "Yes" if option else "No"
         elif isinstance(option, int) and not isinstance(option, bool):
@@ -70,7 +72,8 @@ def labelled_choices(session, exc, command=None):
                 cards = [t.card for t in foe.temporary_zone if t.card.name in GRIP_REFERENCING_TEMPORARIES]
                 cards += [c for c in foe.kimarite_zone if c.name in GRIP_REFERENCING_KIMARITE]
             if cards is not None and 0 <= option < len(cards):
-                label = f"{option + 1}. {cards[option].name}"
+                selected_card = cards[option]
+                label = f"{option + 1}. {selected_card.name}"
             elif key == "opponent_hand_index":
                 label = f"Opponent hand position {option + 1} (hidden card)"
             else:
@@ -87,7 +90,10 @@ def labelled_choices(session, exc, command=None):
                 "power": "Gain 1 Power", "momentum": "Gain 1 Momentum",
             }
             label = modes.get(str(option), str(option).replace("_", " ").title())
-        options.append({"value": option, "label": label})
+        item = {"value": option, "label": label}
+        if selected_card is not None:
+            item["card"] = card_info(selected_card)
+        options.append(item)
     return {"choice_required": True, "message": str(exc), "card": card_name,
             "choice_name": key, "choice_title": title, "options": options}
 
