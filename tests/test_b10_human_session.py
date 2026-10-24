@@ -74,6 +74,7 @@ def test_morozashi_with_both_grips_is_playable_and_has_delayed_push():
     session.awaiting_human = True
     session.pending_selection = None
     own.plays_remaining = 2
+    session.state.fighter(Side.B).temporary_zone.clear()
     own.left_grip = GripState.GRIP
     own.right_grip = GripState.GRIP
     own.hand.append(card_by_name("Morozashi"))
