@@ -83,3 +83,25 @@ def test_morozashi_with_both_grips_is_playable_and_has_delayed_push():
     assert public_snapshot(session)["human"]["hand"][idx]["unavailable_reason"] is None
     session.play(idx)
     assert any(t.card.name == "Morozashi" for t in own.temporary_zone) or any(t.card.name == "Morozashi" for t in session.state.fighter(Side.A).temporary_zone)
+
+
+def test_every_approved_opponent_maps_to_registered_v5_style():
+    from kimarite.b10_human_session import STYLE_PROXIES
+    from kimarite.styles_v5 import STYLES
+    assert all(STYLE_PROXIES.get(name, name) in STYLES for name in roster())
+
+
+def test_outside_fighter_can_complete_opponent_turn_after_human_plays():
+    from kimarite.models import Side
+    session = new_b10_session(
+        "Hand-Size Specialist", "Outside Fighter", seed=20261021,
+        opening={"kimarite": "Katasukashi",
+                 "prepared": "Attempt Two-Handed Grip",
+                 "top": "Attempt Deep Outside Grip"},
+    )
+    if session.pending_selection:
+        session.choose_cards(list(range(session.pending_selection.keep)))
+    assert session.awaiting_human
+    session.end_turn()
+    assert session.stopped_reason is None or "Unknown V5 style" not in session.stopped_reason
+    assert any(side is Side.B for side, name in session.state.card_plays) or session.finished or session.awaiting_human
