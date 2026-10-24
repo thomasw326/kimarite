@@ -44,6 +44,16 @@ STYLE_PROXIES = {
 }
 
 
+def opening_options(name: str) -> dict:
+    if name not in roster():
+        raise ValueError("Unknown wrestler")
+    cards = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"][name]["cards"]
+    return {
+        "kimarite": [card_info(card_by_name(n)) for n in dict.fromkeys(cards) if card_by_name(n).is_kimarite],
+        "ordinary": [card_info(card_by_name(n)) for n in dict.fromkeys(cards) if not card_by_name(n).is_kimarite],
+    }
+
+
 def roster() -> tuple[str, ...]:
     records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
     names = tuple(n for n in records if n not in EXCLUDED)
@@ -52,16 +62,34 @@ def roster() -> tuple[str, ...]:
     return names
 
 
-def _fighter(name: str, record: dict, *, seed: int, ranking: int) -> FighterState:
+def _fighter(name: str, record: dict, *, seed: int, ranking: int, opening: dict | None = None) -> FighterState:
     rng = random.Random(seed)
     cards = [card_by_name(n) for n in record["cards"]]
     kimarite = [c for c in cards if c.is_kimarite]
     ordinary = [c for c in cards if not c.is_kimarite]
     if len(cards) != 40 or not kimarite or len(ordinary) < 2:
         raise ValueError(f"Invalid B10 deck for {name}")
-    starting_kimarite = kimarite.pop(rng.randrange(len(kimarite)))
-    prepared = ordinary.pop(rng.randrange(len(ordinary)))
-    top = ordinary.pop(rng.randrange(len(ordinary)))
+    if opening is None:
+        starting_kimarite = kimarite.pop(rng.randrange(len(kimarite)))
+        prepared = ordinary.pop(rng.randrange(len(ordinary)))
+        top = ordinary.pop(rng.randrange(len(ordinary)))
+    else:
+        from collections import Counter
+        keys = ("kimarite", "prepared", "top")
+        if any(key not in opening or not isinstance(opening[key], str) for key in keys):
+            raise ValueError("Choose three valid opening cards")
+        requested = [opening[key] for key in keys]
+        counts = Counter(record["cards"])
+        if any(n > counts[name] for name, n in Counter(requested).items()):
+            raise ValueError("Selected opening cards exceed available copies")
+        def take(pool, name):
+            for i, card in enumerate(pool):
+                if card.name == name:
+                    return pool.pop(i)
+            raise ValueError("Opening card has the wrong role")
+        starting_kimarite = take(kimarite, requested[0])
+        prepared = take(ordinary, requested[1])
+        top = take(ordinary, requested[2])
     remaining = kimarite + ordinary
     rng.shuffle(remaining)
     model = STYLES[STYLE_PROXIES.get(name, name)]
@@ -78,14 +106,14 @@ def _fighter(name: str, record: dict, *, seed: int, ranking: int) -> FighterStat
 
 
 def new_b10_session(human: str, opponent: str, *, seed: int = 20261021,
-                    max_turns: int = 100) -> HumanBout:
+                    max_turns: int = 100, opening: dict | None = None) -> HumanBout:
     """Build the same 40-card wrestler fixtures and neutral State-3 AI as B10 testing."""
     if human not in roster() or opponent not in roster():
         raise ValueError("Both wrestlers must belong to the approved 26-wrestler roster")
     if max_turns < 1:
         raise ValueError("max_turns must be positive")
     records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
-    a = _fighter(human, records[human], seed=seed * 2, ranking=1)
+    a = _fighter(human, records[human], seed=seed * 2, ranking=1, opening=opening)
     b = _fighter(opponent, records[opponent], seed=seed * 2 + 1, ranking=2)
     state = BoutState(a, b)
     comparison = compare_tachiai(a.wrestler, b.wrestler)
