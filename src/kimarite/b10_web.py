@@ -12,7 +12,7 @@ import secrets
 from threading import RLock
 from urllib.parse import urlsplit
 
-from .b10_human_session import dispatch, new_b10_session, public_snapshot, roster, opening_options
+from .b10_human_session import dispatch, new_b10_session, public_snapshot, roster, opening_options, management_deal
 from .effects import ChoiceRequired, IllegalPlay
 
 STATIC = Path(__file__).resolve().parents[2] / "web"
@@ -120,6 +120,14 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = urlsplit(self.path).path
+        if path.startswith("/api/management/deal/"):
+            from urllib.parse import unquote, parse_qs
+            try:
+                name = unquote(path.removeprefix("/api/management/deal/"))
+                seed = int(parse_qs(urlsplit(self.path).query).get("seed", ["20261021"])[0])
+                return self.reply(200, management_deal(name, seed))
+            except (ValueError, TypeError) as exc:
+                return self.reply(400, {"error": str(exc)})
         if path == "/api/roster":
             return self.reply(200, {"roster": roster()})
         if path.startswith("/api/opening/"):
