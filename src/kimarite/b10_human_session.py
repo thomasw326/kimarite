@@ -95,6 +95,13 @@ def new_b10_session(human: str, opponent: str, *, seed: int = 20261021,
         state.active_side = first_exchange_side(comparison, a.wrestler, b.wrestler)
     def opponent_turn(state, side, comparison):
         return play_style_turn(state, side, comparison, opponent)
+    # Opening setup is public to the player: cards and base/printed-orb totals.
+    # Preserve the frozen tournament's randomized starting selections.
+    state.log(f"Tachiai setup — {human}: base Power {a.wrestler.base_power}, Technique {a.wrestler.base_technique}, Spirit {a.wrestler.base_spirit}.")
+    state.log(f"Tachiai setup — {human}: starting Kimarite {a.wrestler.starting_kimarite.name}, prepared {a.wrestler.prepared_tachiai_card.name}, top deck card {a.wrestler.top_of_deck_card.name}.")
+    state.log(f"Tachiai orbs — {human}: Power {comparison.wrestler_a.power}, Technique {comparison.wrestler_a.technique}, Spirit {comparison.wrestler_a.spirit}.")
+    state.log(f"Tachiai orbs — {opponent}: Power {comparison.wrestler_b.power}, Technique {comparison.wrestler_b.technique}, Spirit {comparison.wrestler_b.spirit}.")
+    state.log(f"Opening Position {state.position:+d}, Momentum {state.momentum:+d} from {human}'s perspective after Tachiai.")
     session = HumanBout(state, comparison, Side.A, opponent_turn, max_turns)
     session.advance()
     return session
@@ -114,6 +121,7 @@ def public_snapshot(session: HumanBout) -> dict:
         return {"player":"You" if side == session.human_side else "Opponent", "card":name}
     return {
         "glossary": GLOSSARY,
+        "opening": {"human": {"starting_kimarite":card_info(own.wrestler.starting_kimarite), "prepared_tachiai":card_info(own.wrestler.prepared_tachiai_card), "top_of_deck":card_info(own.wrestler.top_of_deck_card), "base_stats":[own.wrestler.base_power,own.wrestler.base_technique,own.wrestler.base_spirit], "tachiai_orbs":[session.comparison.wrestler_a.power,session.comparison.wrestler_a.technique,session.comparison.wrestler_a.spirit]}, "opponent": {"starting_kimarite":card_info(other.wrestler.starting_kimarite), "prepared_tachiai":card_info(other.wrestler.prepared_tachiai_card), "tachiai_orbs":[session.comparison.wrestler_b.power,session.comparison.wrestler_b.technique,session.comparison.wrestler_b.spirit]}},
         "recent_plays":[recorded_play(side,name) for side,name in session.state.card_plays[-30:]],
         "events":session.state.event_log[-30:],
         "phase": "finished" if session.finished else
