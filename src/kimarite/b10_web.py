@@ -1,0 +1,181 @@
+"""Minimal single-user localhost HTTP service for the B10 graphical bout UI.
+
+Sessions exist only in this process. Bind to loopback, not a public interface.
+"""
+from __future__ import annotations
+
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+import os
+import json
+import secrets
+from threading import RLock
+from urllib.parse import urlsplit
+
+from .b10_human_session import dispatch, new_b10_session, public_snapshot, roster, opening_options
+from .effects import ChoiceRequired, IllegalPlay
+
+STATIC = Path(__file__).resolve().parents[2] / "web"
+_sessions = {}
+_lock = RLock()
+
+
+
+def labelled_choices(session, exc, command=None):
+    """Show names for indexed public/chooser-visible cards, without exposing hidden hands."""
+    own = session.state.fighter(session.human_side)
+    foe = session.state.opponent(session.human_side)
+    key = exc.choice_name
+    card_name = exc.card_name
+    titles = {
+        "hand_index": "Choose a card from your hand",
+        "discard_index": "Choose a card from your discard pile",
+        "sacrifice_kimarite": "Choose a Kimarite to sacrifice",
+        "temporary_index": "Choose an opponent Temporary to disrupt",
+        "uwate_card_index": "Choose a revealed card",
+        "opponent_deck_index": "Choose a revealed opponent deck card to discard",
+        "opponent_hand_index": "Choose a position in opponent's hidden hand",
+        "card_target": "Choose an opponent Grip-related card to remove",
+        "grip": "Choose Left or Right Grip",
+        "mode": "Choose an effect",
+        "use_optional": "Use the optional effect?",
+        "cycle_if_no_grip": "Draw and discard a card?",
+        "discard_for_grip": "Discard a card to establish Left Grip?",
+    }
+    title = titles.get(key, "Choose an option")
+    from .b10_card_info import card_info
+    options = []
+    for option in exc.options:
+        label = str(option)
+        selected_card = None
+        if isinstance(option, bool):
+            label = "Yes" if option else "No"
+        elif isinstance(option, int) and not isinstance(option, bool):
+            cards = None
+            if key == "hand_index":
+                cards = own.hand[:]
+                played_index = (command or {}).get("hand_index")
+                if isinstance(played_index, int) and 0 <= played_index < len(cards):
+                    cards.pop(played_index)
+            elif key == "discard_index":
+                cards = own.discard_pile
+            elif key == "sacrifice_kimarite":
+                cards = own.kimarite_zone
+            elif key == "temporary_index":
+                cards = [entry.card for entry in foe.temporary_zone]
+            elif key == "opponent_deck_index":
+                cards = foe.draw_pile[:3]
+            elif key == "uwate_card_index":
+                cards = own.draw_pile[:max(0, own.total_grip)]
+            elif key == "card_target":
+                from .effects import GRIP_REFERENCING_TEMPORARIES, GRIP_REFERENCING_KIMARITE
+                cards = [t.card for t in foe.temporary_zone if t.card.name in GRIP_REFERENCING_TEMPORARIES]
+                cards += [c for c in foe.kimarite_zone if c.name in GRIP_REFERENCING_KIMARITE]
+            if cards is not None and 0 <= option < len(cards):
+                selected_card = cards[option]
+                label = f"{option + 1}. {selected_card.name}"
+            elif key == "opponent_hand_index":
+                label = f"Opponent hand position {option + 1} (hidden card)"
+            else:
+                label = f"Option {option + 1}"
+        elif key == "grip":
+            label = f"{str(option).title()} Grip"
+        elif key == "mode":
+            modes = {
+                "draw": "Draw 1 card", "remove": "Remove a Temporary",
+                "reduce_grip": "Reduce opponent Grip", "remove_card": "Remove opponent card",
+                "grip": "Reduce opponent Grip", "temporary": "Disrupt a Temporary",
+                "power_payoff": "Gain 1 Push and 1 Momentum",
+                "power_crusher": "Gain Momentum; opponent loses Power",
+                "power": "Gain 1 Power", "momentum": "Gain 1 Momentum",
+            }
+            label = modes.get(str(option), str(option).replace("_", " ").title())
+        item = {"value": option, "label": label}
+        if selected_card is not None:
+            item["card"] = card_info(selected_card)
+        options.append(item)
+    return {"choice_required": True, "message": str(exc), "card": card_name,
+            "choice_name": key, "choice_title": title, "options": options}
+
+class Handler(BaseHTTPRequestHandler):
+    def reply(self, code: int, payload: dict):
+        data = json.dumps(payload).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def body(self):
+        length = int(self.headers.get("Content-Length", "0"))
+        if not 0 < length <= 32768:
+            raise ValueError("Invalid request size")
+        return json.loads(self.rfile.read(length))
+
+    def do_GET(self):
+        path = urlsplit(self.path).path
+        if path == "/api/roster":
+            return self.reply(200, {"roster": roster()})
+        if path.startswith("/api/opening/"):
+            from urllib.parse import unquote
+            try:
+                return self.reply(200, opening_options(unquote(path.removeprefix("/api/opening/"))))
+            except ValueError as exc:
+                return self.reply(404, {"error":str(exc)})
+        if path.startswith("/api/session/"):
+            token = path.removeprefix("/api/session/")
+            with _lock:
+                session = _sessions.get(token)
+                return self.reply(200 if session else 404, public_snapshot(session) if session else {"error": "This bout expired because the game server restarted. Start a new bout.", "code":"session_expired"})
+        if path in ("/", "/index.html", "/client.js", "/style.css"):
+            data = (STATIC / ("client.js" if path == "/client.js" else "style.css" if path == "/style.css" else "index.html")).read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/javascript; charset=utf-8" if path == "/client.js" else "text/css; charset=utf-8" if path == "/style.css" else "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            return self.wfile.write(data)
+        self.reply(404, {"error": "Not found"})
+
+    def do_POST(self):
+        path = urlsplit(self.path).path
+        try:
+            data = self.body()
+            with _lock:
+                if path == "/api/session":
+                    if len(_sessions) >= 100:
+                        return self.reply(503, {"error": "Session capacity reached"})
+                    session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
+                    token = secrets.token_urlsafe(24)
+                    _sessions[token] = session
+                    return self.reply(201, {"token": token, "state":public_snapshot(session)})
+                if path.startswith("/api/session/") and path.endswith("/action"):
+                    token = path[len("/api/session/"):-len("/action")]
+                    session = _sessions.get(token)
+                    if not session:
+                        return self.reply(404, {"error": "Bout expired on server restart.", "code": "session_expired"})
+                    try:
+                        snapshot = dispatch(session, data)
+                        return self.reply(200, {"state":snapshot})
+                    except IllegalPlay as exc:
+                        return self.reply(409, {"error": str(exc), "code": "invalid_action", "state": public_snapshot(session)})
+                    except ChoiceRequired as exc:
+                        return self.reply(409, labelled_choices(session, exc, data))
+            return self.reply(404, {"error": "Not found"})
+        except (KeyError, ValueError, TypeError, IllegalPlay) as exc:
+            return self.reply(400, {"error":str(exc)})
+
+
+def main():
+    from argparse import ArgumentParser
+    p = ArgumentParser()
+    p.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8765")))
+    p.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
+    args = p.parse_args()
+    print(f"B10 browser bout listening on {args.host}:{args.port}", flush=True)
+    ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()
+
+
+if __name__ == "__main__":
+    main()
