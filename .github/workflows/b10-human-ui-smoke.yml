@@ -13,9 +13,9 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -e . pytest
-      - run: python -m pytest -q tests/test_b10_human_session.py tests/test_v5_human_bout.py
+      - run: python -m pytest -q tests/test_b10_human_session.py tests/test_v5_human_bout.py tests/test_b10_web_http.py
       - name: Verify browser assets and HTTP entry point
         run: |
           python -m compileall -q src/kimarite/b10_human_session.py src/kimarite/b10_web.py
-          test -s web/index.html && test -s web/client.js
+          test -s web/index.html && test -s web/client.js && test -s web/style.css
           python -c "from kimarite.b10_web import Handler; from kimarite.b10_human_session import roster; assert len(roster()) == 26"
