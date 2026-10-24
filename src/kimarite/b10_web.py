@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+import os
 import json
 import secrets
 from threading import RLock
@@ -84,10 +85,11 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     from argparse import ArgumentParser
     p = ArgumentParser()
-    p.add_argument("--port", type=int, default=8765)
+    p.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8765")))
+    p.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
     args = p.parse_args()
-    print(f"B10 browser bout: http://127.0.0.1:{args.port}", flush=True)
-    ThreadingHTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
+    print(f"B10 browser bout listening on {args.host}:{args.port}", flush=True)
+    ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()
 
 
 if __name__ == "__main__":
