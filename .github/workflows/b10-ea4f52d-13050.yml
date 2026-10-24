@@ -1,5 +1,6 @@
 name: B10 ea4f52d exact checkpoint 13050
 on:
+  pull_request:
   push:
     branches:
       - verify/b10-ea4f52d-13050
