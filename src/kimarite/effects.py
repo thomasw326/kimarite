@@ -661,8 +661,11 @@ def _power_water_cantrip(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
-    if fighter.discard_pile:
-        index = context.choice("discard_index")
+    # Experimental B10 UI branch: recover up to three distinct cards.
+    # Honor the existing UI's chosen first target; take the newest remaining
+    # discards for the other two without introducing a new choice contract.
+    for recovery in range(min(3, len(fighter.discard_pile))):
+        index = context.choice("discard_index") if recovery == 0 else None
         if index is None:
             index = len(fighter.discard_pile) - 1
         if not isinstance(index, int) or not 0 <= index < len(fighter.discard_pile):
