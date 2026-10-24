@@ -102,3 +102,22 @@ def test_indexed_choices_display_names_without_changing_engine_values():
     assert all("name" not in o for o in hidden["options"])
     boolean = labelled_choices(bout, ChoiceRequired("Hatakikomi", "use_optional", [True, False]))
     assert [o["label"] for o in boolean["options"]] == ["Yes", "No"]
+
+
+def test_choice_card_details_are_audited_without_changing_values():
+    from kimarite.b10_web import labelled_choices
+    from kimarite.effects import ChoiceRequired
+    from kimarite.b10_human_session import new_b10_session
+    from kimarite.catalog import card_by_name
+    from kimarite.models import Side
+    bout = new_b10_session('Arm Controller', 'The Technician', seed=42)
+    own = bout.state.fighter(Side.A)
+    own.hand = [card_by_name('Oshi'), card_by_name('Yori')]
+    result = labelled_choices(bout, ChoiceRequired('Oshi','hand_index',[0]), {'hand_index':0})
+    option = result['options'][0]
+    assert option['value'] == 0
+    assert option['card']['name'] == 'Yori'
+    assert option['card']['description_status'] == 'verified'
+    assert 'Temporary' in option['card']['description']
+    foe = labelled_choices(bout, ChoiceRequired('Hatakikomi','opponent_hand_index',[0]))
+    assert 'card' not in foe['options'][0]
