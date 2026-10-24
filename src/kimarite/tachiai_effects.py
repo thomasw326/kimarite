@@ -181,14 +181,9 @@ def resolve_prepared_tachiai(
 
         elif name == "Tsuppari":
             _shuffle_generated(state, side, [
-                Card(20001 + i * 3, "Oshi", 0, 0, 1)
-                for i in range(3)
-            ] + [
-                Card(20002 + i * 3, "Tsuki", 1, 0, 0)
-                for i in range(3)
-            ] + [
-                Card(20003 + i * 3, "Shove", 2, 0, 0)
-                for i in range(3)
+                Card(20001, "Oshi", 0, 0, 1),
+                Card(20002, "Tsuki", 1, 0, 0),
+                Card(20003, "Shove", 2, 0, 0),
             ])
 
         elif name == "Explosive Step — Fumikomi":

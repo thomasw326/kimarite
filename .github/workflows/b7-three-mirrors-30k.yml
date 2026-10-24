@@ -1,0 +1,72 @@
+name: B7 Three Fixed40 Mirrors 30k
+
+on:
+  push:
+    branches:
+      - experiment/b7-three-fixed40-mirrors-30k
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e ".[dev]"
+      - name: Test B7 rules and deck invariants
+        run: pytest -q -m 'not legacy_b7_drift'
+      - name: Six-matchup smoke, including mirrors
+        run: python scripts/b7_three_fixed40_mirrors.py --start 0 --stop 1 --output artifacts/smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b7-mirror-smoke
+          path: artifacts/smoke/
+
+  shards:
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e .
+      - name: Run 6000 bouts with seat and mirror variation
+        run: |
+          START=$(( ${{ matrix.shard }} * 500 ))
+          STOP=$(( START + 500 ))
+          python scripts/b7_three_fixed40_mirrors.py --start "$START" --stop "$STOP" --output "artifacts/shard_${{ matrix.shard }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b7-three-mirror-shard-${{ matrix.shard }}
+          path: artifacts/shard_${{ matrix.shard }}/
+
+  report:
+    needs: shards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: b7-three-mirror-shard-*
+          path: combined/
+      - name: Summarize 30000 finished bouts
+        run: python scripts/b7_three_fixed40_mirrors_report.py --input combined --output final/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: b7-three-mirror-30k-final
+          path: final/
