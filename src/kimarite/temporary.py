@@ -161,6 +161,8 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             make_unstable(state, opponent_side)
         elif name == "Morozashi":
             gain_push(state, side, 1)
+            if state.winner is None:
+                gain_momentum(state, side, 1)
         elif name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
             pass
         elif name in {"Sidestep", "Spin Away"}:
