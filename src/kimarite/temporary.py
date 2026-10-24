@@ -77,7 +77,10 @@ def remove_temporary(
         elif card.name == "Get Underneath":
             gain_momentum(state, state.opponent_side(side), 2)
 
-    fighter.discard_pile.append(card)
+    if card.name == "Salt Throw":
+        state.log(f"{card.name} is exhausted instead of entering the Discard Pile.")
+    else:
+        fighter.discard_pile.append(card)
     if (completed and not disrupted
             and card.name in {"Immovable"}):
         fighter.successful_reversal_this_turn = True
