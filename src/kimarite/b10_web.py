@@ -44,10 +44,10 @@ class Handler(BaseHTTPRequestHandler):
             with _lock:
                 session = _sessions.get(token)
                 return self.reply(200 if session else 404, public_snapshot(session) if session else {"error": "Unknown session"})
-        if path in ("/", "/index.html", "/client.js"):
-            data = (STATIC / ("client.js" if path == "/client.js" else "index.html")).read_bytes()
+        if path in ("/", "/index.html", "/client.js", "/style.css"):
+            data = (STATIC / ("client.js" if path == "/client.js" else "style.css" if path == "/style.css" else "index.html")).read_bytes()
             self.send_response(200)
-            self.send_header("Content-Type", "text/javascript; charset=utf-8" if path == "/client.js" else "text/html; charset=utf-8")
+            self.send_header("Content-Type", "text/javascript; charset=utf-8" if path == "/client.js" else "text/css; charset=utf-8" if path == "/style.css" else "text/html; charset=utf-8")
             self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(data)))
             self.end_headers()
