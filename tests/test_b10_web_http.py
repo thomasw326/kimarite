@@ -121,3 +121,18 @@ def test_choice_card_details_are_audited_without_changing_values():
     assert 'Temporary' in option['card']['description']
     foe = labelled_choices(bout, ChoiceRequired('Hatakikomi','opponent_hand_index',[0]))
     assert 'card' not in foe['options'][0]
+
+
+def test_pull_discard_choice_includes_newly_drawn_card():
+    from kimarite.b10_web import labelled_choices
+    from kimarite.effects import ChoiceRequired
+    from kimarite.b10_human_session import new_b10_session
+    from kimarite.catalog import card_by_name
+    from kimarite.models import Side
+    bout = new_b10_session("Arm Controller", "The Technician", seed=42)
+    own = bout.state.fighter(Side.A)
+    own.hand = [card_by_name("Pull"), card_by_name("Oshi"), card_by_name("Yori")]
+    own.draw_pile = [card_by_name("Shove")]
+    result = labelled_choices(bout, ChoiceRequired("Pull", "hand_index", [0, 1, 2]), {"hand_index": 0})
+    assert [x["label"] for x in result["options"]] == ["1. Oshi", "2. Yori", "3. Shove"]
+    assert result["options"][2]["card"]["description_status"] == "verified"
