@@ -83,3 +83,22 @@ def test_rejected_end_turn_returns_authoritative_selection_state():
         server.shutdown()
         server.server_close()
         worker.join(timeout=5)
+
+
+def test_indexed_choices_display_names_without_changing_engine_values():
+    from kimarite.b10_web import labelled_choices
+    from kimarite.effects import ChoiceRequired
+    from kimarite.b10_human_session import new_b10_session
+    from kimarite.catalog import card_by_name
+    from kimarite.models import Side
+    bout = new_b10_session("Arm Controller", "The Technician", seed=42)
+    own = bout.state.fighter(Side.A)
+    own.hand = [card_by_name("Oshi"), card_by_name("Tsuki"), card_by_name("Shove")]
+    result = labelled_choices(bout, ChoiceRequired("Oshi", "hand_index", [0, 1]), {"hand_index": 0})
+    assert [o["value"] for o in result["options"]] == [0, 1]
+    assert [o["label"] for o in result["options"]] == ["1. Tsuki", "2. Shove"]
+    hidden = labelled_choices(bout, ChoiceRequired("Hatakikomi", "opponent_hand_index", [0, 1]))
+    assert hidden["options"][0]["label"] == "Opponent hand position 1 (hidden card)"
+    assert all("name" not in o for o in hidden["options"])
+    boolean = labelled_choices(bout, ChoiceRequired("Hatakikomi", "use_optional", [True, False]))
+    assert [o["label"] for o in boolean["options"]] == ["Yes", "No"]
