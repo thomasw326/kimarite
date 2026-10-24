@@ -1,0 +1,145 @@
+"""UI-ready B10 human-versus-State-3-AI session, independent of terminal IO.
+
+The public snapshot intentionally exposes only human-visible information.
+No card rules, AI scoring or deck data are modified here.
+"""
+from __future__ import annotations
+
+from dataclasses import asdict, replace
+import json
+from pathlib import Path
+import random
+
+from .catalog import card_by_name
+from .human_bout import HumanBout
+from .models import BoutState, FighterState, Side, Stat, Wrestler
+from .style_ai_v5 import play_style_turn
+from .styles_v5 import STYLES
+from .tachiai import compare_tachiai, first_exchange_side
+from .tachiai_effects import resolve_prepared_tachiai
+from .turns import apply_initial_power
+
+ROSTER_PATH = Path(__file__).resolve().parents[2] / "data" / "b9_30_wrestler_decks.json"
+EXCLUDED = frozenset({"Attrition Fighter", "Disruptor", "Gripless Fighter", "Stability Master"})
+# Exactly the proxy style assignments used in the approved tournament runner.
+STYLE_PROXIES = {
+    "Dancer": "The Specialist", "Momentum Twister": "The Technician",
+    "Attrition Fighter": "Disruptor", "Gripless Fighter": "Opportunist",
+    "Hand-Size Specialist": "The Specialist", "Inside Fighter": "Mawashi Specialist",
+    "Outside Fighter": "The Technician", "Double-Grip Wrestler": "Power Grappler",
+    "Lifting Specialist": "Power Grappler", "Stability Master": "Unorthodox Powerhouse",
+    "Arm Controller": "Disruptor", "Pull-Down Specialist": "Opportunist",
+    "Counter Wrestler": "The Specialist", "Ring-Edge Defender": "Mountain",
+    "Power Finisher": "Heavy Hitter",
+}
+
+
+def roster() -> tuple[str, ...]:
+    records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
+    names = tuple(n for n in records if n not in EXCLUDED)
+    if len(names) != 26:
+        raise ValueError("The B10 human play roster must contain exactly 26 wrestlers")
+    return names
+
+
+def _fighter(name: str, record: dict, *, seed: int, ranking: int) -> FighterState:
+    rng = random.Random(seed)
+    cards = [card_by_name(n) for n in record["cards"]]
+    kimarite = [c for c in cards if c.is_kimarite]
+    ordinary = [c for c in cards if not c.is_kimarite]
+    if len(cards) != 40 or not kimarite or len(ordinary) < 2:
+        raise ValueError(f"Invalid B10 deck for {name}")
+    starting_kimarite = kimarite.pop(rng.randrange(len(kimarite)))
+    prepared = ordinary.pop(rng.randrange(len(ordinary)))
+    top = ordinary.pop(rng.randrange(len(ordinary)))
+    remaining = kimarite + ordinary
+    rng.shuffle(remaining)
+    model = STYLES[STYLE_PROXIES.get(name, name)]
+    order = list(dict.fromkeys([model.primary, model.secondary]))
+    order.extend(x.value for x in (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT) if x.value not in order)
+    stats = record["stats"]
+    wrestler = Wrestler(
+        name, stats["power"], stats["technique"], stats["spirit"],
+        starting_kimarite, prepared, top,
+        primary=Stat(order[0]), secondary=Stat(order[1]), tertiary=Stat(order[2]),
+        ranking=ranking,
+    )
+    return FighterState(wrestler, draw_pile=[top, *remaining], kimarite_zone=[starting_kimarite])
+
+
+def new_b10_session(human: str, opponent: str, *, seed: int = 20261021,
+                    max_turns: int = 100) -> HumanBout:
+    """Build the same 40-card wrestler fixtures and neutral State-3 AI as B10 testing."""
+    if human not in roster() or opponent not in roster():
+        raise ValueError("Both wrestlers must belong to the approved 26-wrestler roster")
+    if max_turns < 1:
+        raise ValueError("max_turns must be positive")
+    records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
+    a = _fighter(human, records[human], seed=seed * 2, ranking=1)
+    b = _fighter(opponent, records[opponent], seed=seed * 2 + 1, ranking=2)
+    state = BoutState(a, b)
+    comparison = compare_tachiai(a.wrestler, b.wrestler)
+    apply_initial_power(state, comparison)
+    resolve_prepared_tachiai(state, comparison)
+    if state.winner is None:
+        state.active_side = first_exchange_side(comparison, a.wrestler, b.wrestler)
+    def opponent_turn(state, side, comparison):
+        return play_style_turn(state, side, comparison, opponent)
+    session = HumanBout(state, comparison, Side.A, opponent_turn, max_turns)
+    session.advance()
+    return session
+
+
+def public_snapshot(session: HumanBout) -> dict:
+    """JSON-compatible display state; never expose opposing hidden cards."""
+    view = session.view()
+    own = session.state.fighter(session.human_side)
+    other = session.state.opponent(session.human_side)
+    def shown_card(card):
+        return {"name": card.name, "id": card.card_id, "is_kimarite":card.is_kimarite}
+    return {
+        "phase": "finished" if session.finished else
+                 "select_cards" if session.pending_selection else
+                 "human_turn" if session.awaiting_human else "ai_turn",
+        "finished": session.finished,
+        "stopped_reason": session.stopped_reason,
+        "winner": view.winner.value if view.winner is not None else None,
+        "win_method": session.state.win_method if session.finished else None,
+        "turn": view.turn_number,
+        "position": view.position,
+        "momentum": view.momentum,
+        "human": {
+            "name":own.wrestler.name, "power":view.own_power, "grip":list(view.own_grip),
+            "hand":[asdict(card) for card in view.hand],
+            "draw_count":view.own_draw_count, "discard_count":view.own_discard_count,
+            "plays_remaining":view.plays_remaining,
+            "kimarite":[shown_card(c) for c in own.kimarite_zone],
+            "temporary":[shown_card(t.card) for t in own.temporary_zone],
+        },
+        "opponent": {
+            "name":other.wrestler.name, "power":view.opponent_power,
+            "grip":list(view.opponent_grip), "hand_count":view.opponent_hand_size,
+            "draw_count":view.opponent_draw_count,"discard_count":view.opponent_discard_count,
+            "kimarite":[shown_card(c) for c in other.kimarite_zone],
+            "temporary":[shown_card(t.card) for t in other.temporary_zone],
+        },
+        "selection": {
+            "options":[asdict(c) for c in session.pending_selection.options],
+            "keep":session.pending_selection.keep
+        } if session.pending_selection else None,
+        "legal_plays":[{"hand_index":x.hand_index,"card":asdict(x.card)} for x in session.actions()],
+        "can_end_turn":session.awaiting_human and not session.finished and session.pending_selection is None,
+    }
+
+
+def dispatch(session: HumanBout, command: dict) -> dict:
+    """UI command port. State is owned by session; consumers never mutate the engine."""
+    if command["type"] == "choose_cards":
+        session.choose_cards(command["indices"])
+    elif command["type"] == "play_card":
+        session.play(command["hand_index"], choices=command.get("choices"))
+    elif command["type"] == "end_turn":
+        session.end_turn()
+    else:
+        raise ValueError("Unknown UI command")
+    return public_snapshot(session)
