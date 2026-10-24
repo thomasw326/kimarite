@@ -48,3 +48,16 @@ def test_opening_is_visible_without_revealing_opponent_draw():
     assert len(state["opening"]["human"]["tachiai_orbs"])==3
     assert "top_of_deck" not in state["opening"]["opponent"]
     assert any("Tachiai orbs" in e for e in state["events"])
+
+def test_explicit_human_opening_preserves_40_card_pool_and_ai_autoselection():
+    from kimarite.b10_human_session import opening_options, new_b10_session
+    from kimarite.models import Side
+    names=opening_options("Arm Controller")
+    chosen={"kimarite":names["kimarite"][0]["name"],"prepared":names["ordinary"][0]["name"],"top":names["ordinary"][1]["name"]}
+    bout=new_b10_session("Arm Controller","The Technician",seed=42,opening=chosen)
+    own=bout.state.fighter(Side.A).wrestler
+    assert own.starting_kimarite.name==chosen["kimarite"]
+    assert own.prepared_tachiai_card.name==chosen["prepared"]
+    assert own.top_of_deck_card.name==chosen["top"]
+    with pytest.raises(ValueError):
+        new_b10_session("Arm Controller","The Technician",seed=42,opening={"kimarite":chosen["kimarite"],"prepared":chosen["prepared"],"top":chosen["prepared"] if chosen["prepared"] not in [x["name"] for x in names["ordinary"][1:]] else "not a card"})
