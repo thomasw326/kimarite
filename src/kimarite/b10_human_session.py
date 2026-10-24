@@ -108,7 +108,7 @@ def public_snapshot(session: HumanBout) -> dict:
         return {"name": card.name, "id": card.card_id, "is_kimarite":card.is_kimarite, "power":card.power,"technique":card.technique,"spirit":card.spirit, "description":rules_text(card.name)}
     def enriched(card):
         result = asdict(card)
-        result["description"] = CARD_LIBRARY_TEXT.get(card.name.lower(), {}).get("effect", "")
+        result["description"] = rules_text(card.name)
         return result
     def recorded_play(side, name):
         return {"player":"You" if side == session.human_side else "Opponent", "card":name}
