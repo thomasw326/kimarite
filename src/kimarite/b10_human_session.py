@@ -11,6 +11,7 @@ from pathlib import Path
 import random
 
 from .catalog import card_by_name
+from .play_human import CARD_LIBRARY_TEXT
 from .human_bout import HumanBout
 from .models import BoutState, FighterState, Side, Stat, Wrestler
 from .style_ai_v5 import play_style_turn
@@ -96,8 +97,12 @@ def public_snapshot(session: HumanBout) -> dict:
     own = session.state.fighter(session.human_side)
     other = session.state.opponent(session.human_side)
     def shown_card(card):
-        return {"name": card.name, "id": card.card_id, "is_kimarite":card.is_kimarite}
+        return {"name": card.name, "id": card.card_id, "is_kimarite":card.is_kimarite, "power":card.power,"technique":card.technique,"spirit":card.spirit, "description":CARD_LIBRARY_TEXT.get(card.name.lower(), {}).get("effect", "")}
+    def recorded_play(side, name):
+        return {"player":"You" if side == session.human_side else "Opponent", "card":name}
     return {
+        "recent_plays":[recorded_play(side,name) for side,name in session.state.card_plays[-30:]],
+        "events":session.state.event_log[-30:],
         "phase": "finished" if session.finished else
                  "select_cards" if session.pending_selection else
                  "human_turn" if session.awaiting_human else "ai_turn",
