@@ -50,7 +50,7 @@ class Handler(BaseHTTPRequestHandler):
             token = path.removeprefix("/api/session/")
             with _lock:
                 session = _sessions.get(token)
-                return self.reply(200 if session else 404, public_snapshot(session) if session else {"error": "Unknown session"})
+                return self.reply(200 if session else 404, public_snapshot(session) if session else {"error": "This bout expired because the game server restarted. Start a new bout.", "code":"session_expired"})
         if path in ("/", "/index.html", "/client.js", "/style.css"):
             data = (STATIC / ("client.js" if path == "/client.js" else "style.css" if path == "/style.css" else "index.html")).read_bytes()
             self.send_response(200)
