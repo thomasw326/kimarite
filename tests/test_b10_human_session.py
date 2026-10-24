@@ -61,3 +61,24 @@ def test_explicit_human_opening_preserves_40_card_pool_and_ai_autoselection():
     assert own.top_of_deck_card.name==chosen["top"]
     with pytest.raises(ValueError):
         new_b10_session("Arm Controller","The Technician",seed=42,opening={"kimarite":chosen["kimarite"],"prepared":chosen["prepared"],"top":"not a card"})
+
+
+def test_morozashi_with_both_grips_is_playable_and_has_delayed_push():
+    from kimarite.catalog import card_by_name
+    from kimarite.models import Side, GripState
+    session = new_b10_session("Arm Controller", "The Technician", seed=42)
+    own = session.state.fighter(Side.A)
+    session.state.active_side = Side.A
+    session.state.winner = None
+    session.stopped_reason = None
+    session.awaiting_human = True
+    session.pending_selection = None
+    own.plays_remaining = 2
+    own.left_grip = GripState.GRIP
+    own.right_grip = GripState.GRIP
+    own.hand.append(card_by_name("Morozashi"))
+    idx = len(own.hand) - 1
+    assert idx in [action.hand_index for action in session.actions()]
+    assert public_snapshot(session)["human"]["hand"][idx]["unavailable_reason"] is None
+    session.play(idx)
+    assert any(t.card.name == "Morozashi" for t in own.temporary_zone) or any(t.card.name == "Morozashi" for t in session.state.fighter(Side.A).temporary_zone)
