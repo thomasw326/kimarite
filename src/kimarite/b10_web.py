@@ -20,6 +20,74 @@ _sessions = {}
 _lock = RLock()
 
 
+
+def labelled_choices(session, exc):
+    """Show names for indexed public/chooser-visible cards, without exposing hidden hands."""
+    own = session.state.fighter(session.human_side)
+    foe = session.state.opponent(session.human_side)
+    key = exc.choice_name
+    card_name = exc.card_name
+    titles = {
+        "hand_index": "Choose a card from your hand",
+        "discard_index": "Choose a card from your discard pile",
+        "sacrifice_kimarite": "Choose a Kimarite to sacrifice",
+        "temporary_index": "Choose an opponent Temporary to disrupt",
+        "uwate_card_index": "Choose a revealed card",
+        "opponent_deck_index": "Choose a revealed opponent deck card to discard",
+        "opponent_hand_index": "Choose a position in opponent's hidden hand",
+        "card_target": "Choose an opponent Grip-related card to remove",
+        "grip": "Choose Left or Right Grip",
+        "mode": "Choose an effect",
+        "use_optional": "Use the optional effect?",
+        "cycle_if_no_grip": "Draw and discard a card?",
+        "discard_for_grip": "Discard a card to establish Left Grip?",
+    }
+    title = titles.get(key, "Choose an option")
+    options = []
+    for option in exc.options:
+        label = str(option)
+        if isinstance(option, bool):
+            label = "Yes" if option else "No"
+        elif isinstance(option, int) and not isinstance(option, bool):
+            cards = None
+            if key == "hand_index":
+                cards = own.hand
+            elif key == "discard_index":
+                cards = own.discard_pile
+            elif key == "sacrifice_kimarite":
+                cards = own.kimarite_zone
+            elif key == "temporary_index":
+                cards = [entry.card for entry in foe.temporary_zone]
+            elif key == "opponent_deck_index":
+                cards = foe.draw_pile[:3]
+            elif key == "uwate_card_index":
+                cards = own.draw_pile[:max(0, own.total_grip)]
+            elif key == "card_target":
+                from .effects import GRIP_REFERENCING_TEMPORARIES, GRIP_REFERENCING_KIMARITE
+                cards = [t.card for t in foe.temporary_zone if t.card.name in GRIP_REFERENCING_TEMPORARIES]
+                cards += [c for c in foe.kimarite_zone if c.name in GRIP_REFERENCING_KIMARITE]
+            if cards is not None and 0 <= option < len(cards):
+                label = f"{option + 1}. {cards[option].name}"
+            elif key == "opponent_hand_index":
+                label = f"Opponent hand position {option + 1} (hidden card)"
+            else:
+                label = f"Option {option + 1}"
+        elif key == "grip":
+            label = f"{str(option).title()} Grip"
+        elif key == "mode":
+            modes = {
+                "draw": "Draw 1 card", "remove": "Remove a Temporary",
+                "reduce_grip": "Reduce opponent Grip", "remove_card": "Remove opponent card",
+                "grip": "Reduce opponent Grip", "temporary": "Disrupt a Temporary",
+                "power_payoff": "Gain 1 Push and 1 Momentum",
+                "power_crusher": "Gain Momentum; opponent loses Power",
+                "power": "Gain 1 Power", "momentum": "Gain 1 Momentum",
+            }
+            label = modes.get(str(option), str(option).replace("_", " ").title())
+        options.append({"value": option, "label": label})
+    return {"choice_required": True, "message": str(exc), "card": card_name,
+            "choice_name": key, "choice_title": title, "options": options}
+
 class Handler(BaseHTTPRequestHandler):
     def reply(self, code: int, payload: dict):
         data = json.dumps(payload).encode()
@@ -84,7 +152,7 @@ class Handler(BaseHTTPRequestHandler):
                     except IllegalPlay as exc:
                         return self.reply(409, {"error": str(exc), "code": "invalid_action", "state": public_snapshot(session)})
                     except ChoiceRequired as exc:
-                        return self.reply(409, {"choice_required":True, "message":str(exc), "card":exc.card_name, "choice_name":exc.choice_name, "options":[{"value":option,"label":str(option)} for option in exc.options]})
+                        return self.reply(409, labelled_choices(session, exc))
             return self.reply(404, {"error": "Not found"})
         except (KeyError, ValueError, TypeError, IllegalPlay) as exc:
             return self.reply(400, {"error":str(exc)})
