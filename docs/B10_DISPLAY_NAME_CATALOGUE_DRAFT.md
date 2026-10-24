@@ -52,12 +52,12 @@
 | Shiko Stomp | Shiko — Ritual Stomp | **REVIEW** |
 | Salt Throw | Salt Throw — Purification Ritual | Draft |
 | Stare Down | Stare Down — Test of Nerve | Draft |
-| Power Water | Power Water — Chikara-mizu Ritual | **REVIEW** |
+| Power Water | Power Water — Chikara-mizu Ritual | **APPROVED** |
 | Belt Slap | Belt Slap — Disrupting Strike | **REVIEW** |
 | Tsuri | Tsuri — Lifting Attack | Draft |
 | Yori | Yori — Forward Belt Pressure | Draft |
-| Gaburi | Gaburi — Surging Body Drive | **REVIEW** |
-| Ottsuke | Ottsuke — Arm-Blocking Pressure | **REVIEW** |
+| Gaburi | Gaburi — Belly-Driving Attack | **APPROVED** |
+| Ottsuke | Ottsuke — Forearm Clamp | **APPROVED** |
 | Hold Position | Hold Position — Stand Your Ground | Draft |
 | Immovable | Immovable — Unshakable Stance | Draft |
 | Henka | Henka — Opening Sidestep | Draft |
@@ -79,9 +79,9 @@
 | Maesabaki | Maesabaki — Hand-Fighting Control | **REVIEW** |
 | Deashi | Deashi — Opening Footwork | **REVIEW** |
 | Butsukari | Butsukari — Driving Collision | Draft |
-| Denshamichi | Denshamichi — Train-Track Charge | **REVIEW** |
+| Denshamichi | Denshamichi — Runaway Charge | **APPROVED** |
 | Spin Away | Spin Away — Escape the Line | Draft |
-| Ankogata | Ankogata — Anchored Stance | **REVIEW** |
+| Ankogata | Ankogata — Meaning pending confirmation | **DEFERRED** |
 
 ## Generated cantrip (1)
 
@@ -124,3 +124,7 @@ Use a central lookup keyed by existing names; do not rename Card.name or touch f
 
 - https://sumo.or.jp/Kimarite/show/ — Japan Sumo Association kimarite list
 - https://ozumolog.com/en/kimarite/ — English broadcast-style glosses
+
+## User approval round 1
+
+Approved display names: **Denshamichi — Runaway Charge**; **Gaburi — Belly-Driving Attack**; **Ottsuke — Forearm Clamp**; **Power Water — Chikara-mizu Ritual**. **Ankogata** remains unchanged as an internal and provisional display name until its original meaning is confirmed. Historical questions above are retained for audit; these approvals supersede their former proposals.
