@@ -77,10 +77,12 @@ class Handler(BaseHTTPRequestHandler):
                     token = path[len("/api/session/"):-len("/action")]
                     session = _sessions.get(token)
                     if not session:
-                        return self.reply(404, {"error": "Unknown session"})
+                        return self.reply(404, {"error": "Bout expired on server restart.", "code": "session_expired"})
                     try:
                         snapshot = dispatch(session, data)
                         return self.reply(200, {"state":snapshot})
+                    except IllegalPlay as exc:
+                        return self.reply(409, {"error": str(exc), "code": "invalid_action", "state": public_snapshot(session)})
                     except ChoiceRequired as exc:
                         return self.reply(409, {"choice_required":True, "message":str(exc), "card":exc.card_name, "choice_name":exc.choice_name, "options":[{"value":option,"label":str(option)} for option in exc.options]})
             return self.reply(404, {"error": "Not found"})
