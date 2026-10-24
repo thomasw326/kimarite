@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: kimarite-b10-playtest
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/roster
+    envVars:
+      - key: PORT
+        value: 8765
