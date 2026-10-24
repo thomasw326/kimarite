@@ -1,4 +1,10 @@
-# Kimarite
+# Kimarite — B10 promoted baseline
+
+**Current authoritative gameplay baseline: B10**, promoted from the successful B9 State 3 neutral-AI branch by moving `main` to exact source commit [`33fb329`](https://github.com/thomasw326/kimarite/commit/33fb329cee0e7576164d19b81347524ee7c5cd39). The unchanged gameplay snapshot is also preserved at [`baseline/b10-promoted-b9-state3`](https://github.com/thomasw326/kimarite/tree/baseline/b10-promoted-b9-state3).
+
+**Rule of record:** Treat this promoted B9 engine, card definitions, decks, and State 3 AI as the B10 implementation gospel. Do **not** copy rules from the discarded integrated B10 mainline. That replaced mainline is preserved for reference at [`archive/b10-pre-b9-promotion-2026-10-24`](https://github.com/thomasw326/kimarite/tree/archive/b10-pre-b9-promotion-2026-10-24). Any subsequently approved card or ring changes must be reapplied intentionally, reviewed and retested on top of this baseline; they are **not** silently part of this restoration. Earlier B10 card-pool reconciliation spreadsheet entries made against the discarded mainline may now be outdated and need fresh comparison.
+
+This is a promotion of **validated B9 code**, not a reconstruction or selective merge.
 
 Kimarite is a sumo-inspired tactical card game with a deterministic rules engine, AI-vs-AI simulator, and an early **V5.0 human-vs-AI terminal prototype**.
 
