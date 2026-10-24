@@ -347,6 +347,7 @@ def _shiko_stomp(
     to discard Shiko Stomp as a KeyError, despite the protection being implemented.
     """
     add_temporary(state, side, card, phase="exchange")
+    add_play(state, side, 1)
 
 
 def _salt_throw(
