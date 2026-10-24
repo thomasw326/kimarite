@@ -1,0 +1,35 @@
+name: B10 27th winning cards 780 bouts
+on:
+  push:
+    branches:
+      - experiment/b10-winning-cards-27th
+    paths:
+      - .github/workflows/b10-winning-cards-27th.yml
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  duel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e .
+      - name: Run matched 26-opponent tournament
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          python scripts/b10_winning_cards_trial.py --start-index $((SHARD * 156)) --bouts 156 --output-dir "trial_artifacts/shard_${SHARD}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: winning-cards-shard-${{ matrix.shard }}
+          path: trial_artifacts/shard_${{ matrix.shard }}/
+          if-no-files-found: error
