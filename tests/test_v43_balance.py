@@ -37,12 +37,12 @@ def test_hikiotoshi_draw_no_grip():
         s.fighter_a.draw_pile[0].name,
     } == {"Oshi", "Tsuki"}
 
-def test_morozashi_survival_only_push():
+def test_morozashi_survival_push_and_momentum():
     s = bout()
     add_temporary(s, Side.A, card_by_name("Morozashi"), phase="exchange")
     resolve_start_of_turn_temporaries(s, Side.A)
     assert s.position == 1
-    assert s.momentum == 0
+    assert s.momentum == 1
 
 
 def test_oshi_push_play_draw():
