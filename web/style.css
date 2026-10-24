@@ -4,3 +4,5 @@
 .term-link{min-height:28px;padding:1px 4px;margin:0 2px;background:transparent;color:#ffdb9e;border-bottom:2px dotted #d3b16f;border-radius:0;font:inherit;font-weight:800}.glossary-detail{background:#123034;border-left:3px solid #deb984;padding:12px;line-height:1.55}
 
 .opening-picks{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}.opening-picks label{display:grid;gap:5px}.opening-picks[hidden]{display:none}
+
+.history-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}.history-tools button{min-height:44px}.log-copy-fallback{width:100%;min-height:140px;margin-top:8px}
