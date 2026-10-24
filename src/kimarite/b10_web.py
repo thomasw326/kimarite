@@ -75,7 +75,7 @@ class Handler(BaseHTTPRequestHandler):
                         snapshot = dispatch(session, data)
                         return self.reply(200, {"state":snapshot})
                     except ChoiceRequired as exc:
-                        return self.reply(409, {"choice_required":True, "message":str(exc), "details":str(exc)})
+                        return self.reply(409, {"choice_required":True, "message":str(exc), "card":exc.card_name, "choice_name":exc.choice_name, "options":[{"value":option,"label":str(option)} for option in exc.options]})
             return self.reply(404, {"error": "Not found"})
         except (KeyError, ValueError, TypeError, IllegalPlay) as exc:
             return self.reply(400, {"error":str(exc)})
