@@ -1,1 +1,10 @@
-<!doctype html><html><head><title>Kimarite</title></head><body><h1>Kimarite B10</h1><script src="/client.js"></script></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#182a2d"><title>Kimarite · Practice Bout</title><link rel="stylesheet" href="/style.css"></head>
+<body><header><div class="eyebrow">KIMARITE · SUMO CARD GAME</div><h1>Practice Bout</h1></header><main>
+<section class="setup panel"><label>Your rikishi<select id="human"></select></label><label>Opponent<select id="opponent"></select></label><button id="start">Begin bout</button></section>
+<section class="arena panel"><div class="eyebrow" id="round">THE DOHYŌ</div><div class="dohyo"><div class="shikiri"></div><span class="rikishi left">●</span><span class="rikishi right">●</span></div><div id="tracks" class="tracks"></div></section>
+<section id="score" class="score panel" aria-live="polite"></section>
+<section id="choices" class="choice panel" aria-live="polite"></section>
+<section class="play panel"><div class="playtop"><h2>Your hand</h2><button id="end" disabled>End turn</button></div><div id="hand" class="cards"></div></section>
+<p id="notice" role="status"></p></main>
+<script src="/client.js"></script></body></html>
