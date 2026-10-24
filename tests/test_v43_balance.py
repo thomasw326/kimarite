@@ -77,3 +77,26 @@ def test_sidestep_prevents_both_players_push():
     assert s.position == 0
     assert s.side_by_side_owner is Side.A
     assert len(s.fighter_a.temporary_zone) == 1
+
+
+def test_harite_disrupts_hand_power_and_deck():
+    s = bout()
+    s.fighter_b.hand = [Card(1001, "Victim 1"), Card(1002, "Victim 2")]
+    s.fighter_b.draw_pile = [Card(1003, "Milled 1"), Card(1004, "Milled 2"), Card(1005, "Saved")]
+    s.fighter_b.power = 5
+    s.fighter_a.power = 4
+    resolve_exchange_effect(s, Side.A, card_by_name("Harite"), EffectContext())
+    assert s.fighter_a.power == 4
+    assert s.fighter_b.power == 4
+    assert len(s.fighter_b.hand) == 1
+    assert len(s.fighter_b.draw_pile) == 1
+    assert s.fighter_b.draw_pile[0].name == "Saved"
+    assert len(s.fighter_b.discard_pile) == 3
+
+
+def test_harite_empty_hand_and_deck_still_reduces_power():
+    s = bout()
+    s.fighter_b.power = 2
+    resolve_exchange_effect(s, Side.A, card_by_name("Harite"), EffectContext())
+    assert s.fighter_b.power == 1
+    assert not s.fighter_b.discard_pile
