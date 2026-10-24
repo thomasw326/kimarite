@@ -233,15 +233,25 @@ def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) 
 
 
 def _harite(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    gain_power(state, side, 1)
+    """Discard a random opponent card, reduce their Power and mill two cards."""
     opponent_side = state.opponent_side(side)
-    if not prevent_negative_effect(
-        state,
-        opponent_side,
-        source="Harite",
-        description="lose 1 Power",
+    if prevent_negative_effect(
+        state, opponent_side, source="Harite",
+        description="discard 1, lose 1 Power and mill 2",
     ):
-        lose_power(state, opponent_side, 1)
+        return
+    opponent = state.opponent(side)
+    if opponent.hand:
+        import hashlib
+        signature = repr((state.turn_number, side.value,
+                          tuple(c.card_id for c in opponent.hand),
+                          tuple((s.value, i) for s, i in state.card_play_ids)))
+        roll = int.from_bytes(hashlib.sha256(signature.encode()).digest()[:8], "big")
+        discarded = opponent.hand.pop(roll % len(opponent.hand))
+        opponent.discard_pile.append(discarded)
+        state.log(f"{opponent.wrestler.name} discards {discarded.name} to Harite.")
+    lose_power(state, opponent_side, 1)
+    mill_cards(state, opponent_side, 2)
 
 
 def _gain_left_grip(
