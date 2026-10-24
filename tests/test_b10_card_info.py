@@ -28,3 +28,14 @@ def test_ui_snapshot_offers_glossary_and_audit_state():
     for card in cards:
         assert card["description_status"] in ("verified","needs_audit")
         assert "description" in card
+
+
+def test_every_b10_pool_card_has_audited_description():
+    from kimarite.catalog import CARD_POOL, B9_CARD_POOL, STARTING_KIMARITE
+    for card in (*CARD_POOL, *B9_CARD_POOL, *STARTING_KIMARITE):
+        details=card_info(card)
+        assert details["description_status"] == "verified", card.name
+        assert details["description"].strip(), card.name
+    for name in ("Attempt Two-Handed Grip", "Attempt Deep Outside Grip", "Henka", "Morozashi", "Denshamichi"):
+        assert "Temporary" in CARD_TEXT[name]["effect"]
+    assert "both" in CARD_TEXT["Morozashi"]["effect"]
