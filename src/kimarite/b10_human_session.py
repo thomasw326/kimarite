@@ -45,6 +45,22 @@ STYLE_PROXIES = {
 }
 
 
+def management_deal(name: str, seed: int) -> dict:
+    """Deal 3 Kimarite and 6 ordinary cards, using actual approved deck copies."""
+    if name not in roster():
+        raise ValueError("Unknown wrestler")
+    data = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"][name]["cards"]
+    rng = random.Random(seed)
+    kimarite = [card_by_name(n) for n in data if card_by_name(n).is_kimarite]
+    ordinary = [card_by_name(n) for n in data if not card_by_name(n).is_kimarite]
+    if len(kimarite) < 3 or len(ordinary) < 6:
+        raise ValueError("Deck cannot supply three playable openings")
+    chosen = rng.sample(kimarite, 3) + rng.sample(ordinary, 6)
+    rng.shuffle(chosen)
+    return {"wrestler": name, "seed": seed,
+            "cards": [{**card_info(card), "deal_index": i} for i, card in enumerate(chosen)]}
+
+
 def opening_options(name: str) -> dict:
     if name not in roster():
         raise ValueError("Unknown wrestler")
