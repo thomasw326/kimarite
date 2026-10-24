@@ -22,7 +22,7 @@
 | Kotenage | Kotenage — Armlock Throw | Draft |
 | Abisetaoshi | Abisetaoshi — Backward Force-Down | Draft |
 | Shitatenage | Shitatenage — Underarm Throw | Draft |
-| Kirikaeshi | Kirikaeshi — Twisting Backward Knee Trip | **REVIEW** |
+| Kirikaeshi | Kirikaeshi — Twisting Knee Trip | **APPROVED** |
 | Okuridashi | Okuridashi — Rear Push-Out | Draft |
 | Okuritaoshi | Okuritaoshi — Rear Push-Down | Draft |
 | Sukuinage | Sukuinage — Beltless Scoop Throw | Draft |
@@ -42,14 +42,14 @@
 | Headlong Charge | Headlong Charge — All-Out Rush | Draft |
 | Nodowa | Nodowa — Throat Thrust | Draft |
 | Harite | Harite — Open-Hand Strike | Draft |
-| Gain Left Grip | Gain Left Grip — Secure the Left | **REVIEW** |
-| Gain Right Grip | Gain Right Grip — Secure the Right | **REVIEW** |
+| Gain Left Grip | Gain Left Grip | **APPROVED** |
+| Gain Right Grip | Gain Right Grip | **APPROVED** |
 | Uwate | Uwate — Outside Belt Grip | Draft |
 | Shitate | Shitate — Inside Belt Grip | Draft |
 | Attempt Two-Handed Grip | Two-Handed Grip — Secure Both Sides | Draft |
 | Attempt Deep Outside Grip | Attempt Deep Outside Grip | **APPROVED** |
 | Attempt Deep Inside Grip | Attempt Deep Inside Grip | **APPROVED** |
-| Shiko Stomp | Shiko — Ritual Stomp | **REVIEW** |
+| Shiko Stomp | Shiko — Ritual Stomp | **APPROVED** |
 | Salt Throw | Salt Throw — Purification Ritual | Draft |
 | Stare Down | Stare Down — Test of Nerve | Draft |
 | Power Water | Power Water — Chikara-mizu Ritual | **APPROVED** |
@@ -68,11 +68,11 @@
 | Regain Balance | Regain Balance — Recover Your Footing | Draft |
 | Sidestep | Sidestep — Turn Aside | **APPROVED** |
 | Use the Tawara | Use the Tawara — Ring-Edge Recovery | Draft |
-| Kannuki | Kannuki — Double-Arm Lock | **REVIEW** |
+| Kannuki | Kannuki — Double-Arm Lock | **APPROVED** |
 | Morozashi | Morozashi — Double Inside Grip | Draft |
 | Give Ground | Give Ground — Tactical Retreat | Draft |
 | Shove | Shove — Driving Hand Push | Draft |
-| Explosive Step — Fumikomi | Fumikomi — Explosive Step | **REVIEW** |
+| Explosive Step — Fumikomi | Fumikomi — Explosive Step | **APPROVED** |
 | Morotezuki | Morotezuki — Two-Handed Thrust | Draft |
 | Kachiage | Kachiage — Rising Forearm Strike | Draft |
 | Nekodamashi | Nekodamashi — Face Clap | Draft |
@@ -142,3 +142,7 @@ Approved: Driving Force — Power Surge; Belt Slap (no subtitle); Reset to Neutr
 ## User approval round 3
 
 Approved: **Ankogata — Big-Belly Sumo**; **Attempt Deep Outside Grip** (retain exact name); **Attempt Deep Inside Grip** (retain exact name); **Maesabaki — Hand-Fighting Control**; **Deashi — Advancing Footwork**; **Tsukiotoshi — Thrust-Down**. These supersede any earlier REVIEW notes for those names. The historical questions above remain for traceability.
+
+## User approval round 4
+
+Approved: **Shiko — Ritual Stomp**, **Kannuki — Double-Arm Lock**, **Kirikaeshi — Twisting Knee Trip**, **Fumikomi — Explosive Step**; preserve the original names **Gain Left Grip** and **Gain Right Grip** without subtitles. These decisions supersede the earlier REVIEW questions.
