@@ -123,7 +123,7 @@ def new_b10_session(human: str, opponent: str, *, seed: int = 20261021,
     if state.winner is None:
         state.active_side = first_exchange_side(comparison, a.wrestler, b.wrestler)
     def opponent_turn(state, side, comparison):
-        return play_style_turn(state, side, comparison, opponent)
+        return play_style_turn(state, side, comparison, STYLE_PROXIES.get(opponent, opponent))
     # Opening setup is public to the player: cards and base/printed-orb totals.
     # Preserve the frozen tournament's randomized starting selections.
     opening_events = [
