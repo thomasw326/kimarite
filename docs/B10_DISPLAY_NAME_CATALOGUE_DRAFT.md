@@ -53,7 +53,7 @@
 | Salt Throw | Salt Throw — Purification Ritual | Draft |
 | Stare Down | Stare Down — Test of Nerve | Draft |
 | Power Water | Power Water — Chikara-mizu Ritual | **APPROVED** |
-| Belt Slap | Belt Slap | **APPROVED** |
+| Belt Slap | Belt Slap | **APPROVED — pump-up ritual, not a strike** |
 | Tsuri | Tsuri — Lifting Attack | Draft |
 | Yori | Yori — Forward Belt Pressure | Draft |
 | Gaburi | Gaburi — Belly-Driving Attack | **APPROVED** |
@@ -81,7 +81,7 @@
 | Butsukari | Butsukari — Driving Collision | Draft |
 | Denshamichi | Denshamichi — Runaway Charge | **APPROVED** |
 | Spin Away | Spin Away — Escape the Line | Draft |
-| Ankogata | Ankogata — Big-Belly Sumo | **MEANING CONFIRMED; LABEL TO REVIEW** |
+| Ankogata | Ankogata — Big-Belly Sumo | **MEANING CONFIRMED — display subtitle pending approval** |
 
 ## Generated cantrip (1)
 
@@ -132,3 +132,9 @@ Approved display names: **Denshamichi — Runaway Charge**; **Gaburi — Belly-D
 ## User approval round 2 and semantic corrections
 
 Approved: **Driving Force — Power Surge**, **Belt Slap** (no subtitle), **Reset to Neutral — Break Contact**, **Sidestep — Turn Aside**, **Tottari — Arm-Bar Throw**, **Utchari — Last-Ditch Throw**. The user clarified **Belt Slap** means the pre-bout pump-up ritual (not a literal slap/strike); UI rules text should not portray it as a strike. The user clarified **Ankogata** means **big-belly sumo**, superseding the inaccurate speculative 'Anchored Stance'. Its exact player-facing subtitle remains open to review; do not treat 'big-belly sumo' as an official kimarite translation.
+
+## User approval round 2 and design clarification
+
+Approved: Driving Force — Power Surge; Belt Slap (no subtitle); Reset to Neutral — Break Contact; Sidestep — Turn Aside; Tottari — Arm-Bar Throw; Utchari — Last-Ditch Throw.
+
+**Meaning corrections:** Belt Slap describes the **pre-bout pump-up ritual**, not a physical belt strike; the old proposed “Disrupting Strike” was inaccurate. **Ankogata** means **big-belly sumo** in this project, not an anchored stance; “Ankogata — Big-Belly Sumo” is a proposed literal label pending final wording approval. These clarifications supersede the earlier open questions in the draft.
