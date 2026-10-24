@@ -116,7 +116,7 @@ def resolve_prepared_tachiai(
             gain_power(state, side, 2)
         elif name == "Harite":
             from .effects import _harite
-            _harite(state, side, card, EffectContext())
+            _harite(state, side, state.fighter(side).wrestler.prepared_tachiai_card, EffectContext())
 
     reduction = _power_push_reduction(state, comparison)
     spirit_winner, spirit_push = apply_tachiai_power_push(
