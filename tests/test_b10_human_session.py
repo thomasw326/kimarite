@@ -119,3 +119,36 @@ def test_public_discard_piles_are_inspectable_without_hidden_decks():
     assert snapshot["human"]["discard"][-1]["description_status"] == "verified"
     assert "hand" not in snapshot["opponent"]
     assert "draw_pile" not in snapshot["opponent"]
+
+
+
+def test_management_deal_uses_actual_deck_copies_and_is_reproducible():
+    from collections import Counter
+    from kimarite.b10_human_session import management_deal, ROSTER_PATH
+    import json
+    name = "Heavy Hitter"
+    a = management_deal(name, 123)
+    b = management_deal(name, 123)
+    assert a == b
+    assert len(a["cards"]) == 9
+    assert sum(c["is_kimarite"] for c in a["cards"]) == 3
+    assert len({c["deal_index"] for c in a["cards"]}) == 9
+    dealt = Counter(c["name"] for c in a["cards"])
+    source = Counter(json.loads(ROSTER_PATH.read_text())["decks"][name]["cards"])
+    assert all(n <= source[k] for k, n in dealt.items())
+    for c in a["cards"]:
+        assert c["description_status"] == "verified"
+
+
+def test_management_three_openings_accepted_by_b10_controller():
+    from kimarite.b10_human_session import management_deal, new_b10_session
+    d = management_deal("Heavy Hitter", 251)
+    groups = [c for c in d["cards"] if c["is_kimarite"]]
+    ordinary = [c for c in d["cards"] if not c["is_kimarite"]]
+    for index in range(3):
+        opening = {"kimarite": groups[index]["name"],
+                   "prepared": ordinary[index*2]["name"],
+                   "top": ordinary[index*2+1]["name"]}
+        bout = new_b10_session("Heavy Hitter", "Bulldozer",
+                               seed=252+index, opening=opening)
+        assert bout.state.fighter(bout.human_side).wrestler.starting_kimarite.name == opening["kimarite"]
