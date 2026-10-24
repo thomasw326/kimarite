@@ -1,0 +1,47 @@
+name: B10 ea4f52d exact checkpoint 13050
+on:
+  pull_request:
+  push:
+    branches:
+      - verify/b10-ea4f52d-13050
+    paths:
+      - .github/workflows/b10-ea4f52d-13050.yml
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e . pytest
+      - run: python -m compileall -q src/kimarite scripts/b9_round_robin.py
+      - run: python -m pytest -q tests/test_rules.py tests/test_v5_style_simulation.py
+  round-robin:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e .
+      - name: Run 2610 matched-schedule bouts
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          python scripts/b9_round_robin.py --bouts 2610 --start-index $((SHARD * 2610)) --fail-on-errors --output-dir "b10_artifacts/ea4f52d_shard_${SHARD}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b10-ea4f52d-shard-${{ matrix.shard }}
+          path: b10_artifacts/ea4f52d_shard_${{ matrix.shard }}/
+          if-no-files-found: error
