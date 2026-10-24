@@ -16,7 +16,7 @@
 | Katasukashi | Katasukashi — Under-Shoulder Swing-Down | Draft |
 | Hikiotoshi | Hikiotoshi — Hand Pull-Down | Draft |
 | Tottari | Tottari — Arm-Bar Throw | **APPROVED** |
-| Tsukiotoshi | Tsukiotoshi — Thrust-Down | **REVIEW** |
+| Tsukiotoshi | Tsukiotoshi — Thrust-Down | **APPROVED** |
 | Tsukitaoshi | Tsukitaoshi — Frontal Thrust-Down | Draft |
 | Tsuridashi | Tsuridashi — Lift-Out | Draft |
 | Kotenage | Kotenage — Armlock Throw | Draft |
@@ -47,8 +47,8 @@
 | Uwate | Uwate — Outside Belt Grip | Draft |
 | Shitate | Shitate — Inside Belt Grip | Draft |
 | Attempt Two-Handed Grip | Two-Handed Grip — Secure Both Sides | Draft |
-| Attempt Deep Outside Grip | Deep Outside Grip — Secure the Hold | **REVIEW** |
-| Attempt Deep Inside Grip | Deep Inside Grip — Secure the Hold | **REVIEW** |
+| Attempt Deep Outside Grip | Attempt Deep Outside Grip | **APPROVED** |
+| Attempt Deep Inside Grip | Attempt Deep Inside Grip | **APPROVED** |
 | Shiko Stomp | Shiko — Ritual Stomp | **REVIEW** |
 | Salt Throw | Salt Throw — Purification Ritual | Draft |
 | Stare Down | Stare Down — Test of Nerve | Draft |
@@ -76,12 +76,12 @@
 | Morotezuki | Morotezuki — Two-Handed Thrust | Draft |
 | Kachiage | Kachiage — Rising Forearm Strike | Draft |
 | Nekodamashi | Nekodamashi — Face Clap | Draft |
-| Maesabaki | Maesabaki — Hand-Fighting Control | **REVIEW** |
-| Deashi | Deashi — Opening Footwork | **REVIEW** |
+| Maesabaki | Maesabaki — Hand-Fighting Control | **APPROVED** |
+| Deashi | Deashi — Advancing Footwork | **APPROVED** |
 | Butsukari | Butsukari — Driving Collision | Draft |
 | Denshamichi | Denshamichi — Runaway Charge | **APPROVED** |
 | Spin Away | Spin Away — Escape the Line | Draft |
-| Ankogata | Ankogata — Big-Belly Sumo | **MEANING CONFIRMED — display subtitle pending approval** |
+| Ankogata | Ankogata — Big-Belly Sumo | **APPROVED** |
 
 ## Generated cantrip (1)
 
@@ -138,3 +138,7 @@ Approved: **Driving Force — Power Surge**, **Belt Slap** (no subtitle), **Rese
 Approved: Driving Force — Power Surge; Belt Slap (no subtitle); Reset to Neutral — Break Contact; Sidestep — Turn Aside; Tottari — Arm-Bar Throw; Utchari — Last-Ditch Throw.
 
 **Meaning corrections:** Belt Slap describes the **pre-bout pump-up ritual**, not a physical belt strike; the old proposed “Disrupting Strike” was inaccurate. **Ankogata** means **big-belly sumo** in this project, not an anchored stance; “Ankogata — Big-Belly Sumo” is a proposed literal label pending final wording approval. These clarifications supersede the earlier open questions in the draft.
+
+## User approval round 3
+
+Approved: **Ankogata — Big-Belly Sumo**; **Attempt Deep Outside Grip** (retain exact name); **Attempt Deep Inside Grip** (retain exact name); **Maesabaki — Hand-Fighting Control**; **Deashi — Advancing Footwork**; **Tsukiotoshi — Thrust-Down**. These supersede any earlier REVIEW notes for those names. The historical questions above remain for traceability.
