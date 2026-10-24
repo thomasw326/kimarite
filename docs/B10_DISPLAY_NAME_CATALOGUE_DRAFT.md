@@ -15,7 +15,7 @@
 | Hatakikomi | Hatakikomi — Slap-Down | Draft |
 | Katasukashi | Katasukashi — Under-Shoulder Swing-Down | Draft |
 | Hikiotoshi | Hikiotoshi — Hand Pull-Down | Draft |
-| Tottari | Tottari — Arm-Bar Throw | **REVIEW** |
+| Tottari | Tottari — Arm-Bar Throw | **APPROVED** |
 | Tsukiotoshi | Tsukiotoshi — Thrust-Down | **REVIEW** |
 | Tsukitaoshi | Tsukitaoshi — Frontal Thrust-Down | Draft |
 | Tsuridashi | Tsuridashi — Lift-Out | Draft |
@@ -26,7 +26,7 @@
 | Okuridashi | Okuridashi — Rear Push-Out | Draft |
 | Okuritaoshi | Okuritaoshi — Rear Push-Down | Draft |
 | Sukuinage | Sukuinage — Beltless Scoop Throw | Draft |
-| Utchari | Utchari — Ring-Edge Swing-Back | **REVIEW** |
+| Utchari | Utchari — Last-Ditch Throw | **APPROVED** |
 | Uwatedashinage | Uwatedashinage — Pulling Overarm Throw | Draft |
 | Tsuriotoshi | Tsuriotoshi — Lift-and-Drop | Draft |
 
@@ -35,7 +35,7 @@
 | Internal name | Proposed display name | Status |
 |---|---|---|
 | Oshi | Oshi — Driving Push | Draft |
-| Driving Force — Power Payoff | Driving Force — Power Surge | **REVIEW** |
+| Driving Force — Power Payoff | Driving Force — Power Surge | **APPROVED** |
 | Crushing Pressure — Power Crusher | Crushing Pressure — Overwhelming Force | **REVIEW** |
 | Tsuki | Tsuki — Straight Thrust | Draft |
 | Tsuppari | Tsuppari — Rapid-Fire Thrusts | Draft |
@@ -53,7 +53,7 @@
 | Salt Throw | Salt Throw — Purification Ritual | Draft |
 | Stare Down | Stare Down — Test of Nerve | Draft |
 | Power Water | Power Water — Chikara-mizu Ritual | **APPROVED** |
-| Belt Slap | Belt Slap — Disrupting Strike | **REVIEW** |
+| Belt Slap | Belt Slap | **APPROVED** |
 | Tsuri | Tsuri — Lifting Attack | Draft |
 | Yori | Yori — Forward Belt Pressure | Draft |
 | Gaburi | Gaburi — Belly-Driving Attack | **APPROVED** |
@@ -64,9 +64,9 @@
 | Pull | Pull — Draw Them Forward | Draft |
 | Get Underneath | Get Underneath — Low Entry | Draft |
 | Read the Move | Read the Move — Anticipate the Attack | Draft |
-| Reset to Neutral | Reset to Neutral — Break Contact | **REVIEW** |
+| Reset to Neutral | Reset to Neutral — Break Contact | **APPROVED** |
 | Regain Balance | Regain Balance — Recover Your Footing | Draft |
-| Sidestep | Sidestep — Turn Aside | **REVIEW** |
+| Sidestep | Sidestep — Turn Aside | **APPROVED** |
 | Use the Tawara | Use the Tawara — Ring-Edge Recovery | Draft |
 | Kannuki | Kannuki — Double-Arm Lock | **REVIEW** |
 | Morozashi | Morozashi — Double Inside Grip | Draft |
@@ -81,7 +81,7 @@
 | Butsukari | Butsukari — Driving Collision | Draft |
 | Denshamichi | Denshamichi — Runaway Charge | **APPROVED** |
 | Spin Away | Spin Away — Escape the Line | Draft |
-| Ankogata | Ankogata — Meaning pending confirmation | **DEFERRED** |
+| Ankogata | Ankogata — Big-Belly Sumo | **MEANING CONFIRMED; LABEL TO REVIEW** |
 
 ## Generated cantrip (1)
 
@@ -128,3 +128,7 @@ Use a central lookup keyed by existing names; do not rename Card.name or touch f
 ## User approval round 1
 
 Approved display names: **Denshamichi — Runaway Charge**; **Gaburi — Belly-Driving Attack**; **Ottsuke — Forearm Clamp**; **Power Water — Chikara-mizu Ritual**. **Ankogata** remains unchanged as an internal and provisional display name until its original meaning is confirmed. Historical questions above are retained for audit; these approvals supersede their former proposals.
+
+## User approval round 2 and semantic corrections
+
+Approved: **Driving Force — Power Surge**, **Belt Slap** (no subtitle), **Reset to Neutral — Break Contact**, **Sidestep — Turn Aside**, **Tottari — Arm-Bar Throw**, **Utchari — Last-Ditch Throw**. The user clarified **Belt Slap** means the pre-bout pump-up ritual (not a literal slap/strike); UI rules text should not portray it as a strike. The user clarified **Ankogata** means **big-belly sumo**, superseding the inaccurate speculative 'Anchored Stance'. Its exact player-facing subtitle remains open to review; do not treat 'big-belly sumo' as an official kimarite translation.
