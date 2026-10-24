@@ -182,7 +182,7 @@ def public_snapshot(session: HumanBout) -> dict:
         "glossary": GLOSSARY,
         "opening": {"human": {"starting_kimarite":card_info(own.wrestler.starting_kimarite), "prepared_tachiai":card_info(own.wrestler.prepared_tachiai_card), "top_of_deck":card_info(own.wrestler.top_of_deck_card), "base_stats":[own.wrestler.base_power,own.wrestler.base_technique,own.wrestler.base_spirit], "tachiai_orbs":[session.comparison.wrestler_a.power,session.comparison.wrestler_a.technique,session.comparison.wrestler_a.spirit]}, "opponent": {"starting_kimarite":card_info(other.wrestler.starting_kimarite), "prepared_tachiai":card_info(other.wrestler.prepared_tachiai_card), "tachiai_orbs":[session.comparison.wrestler_b.power,session.comparison.wrestler_b.technique,session.comparison.wrestler_b.spirit]}},
         "recent_plays":[recorded_play(side,name) for side,name in session.state.card_plays[-30:]],
-        "events":session.state.event_log[-30:],
+        "events":session.state.event_log[:],
         "phase": "finished" if session.finished else
                  "select_cards" if session.pending_selection else
                  "human_turn" if session.awaiting_human else "ai_turn",
