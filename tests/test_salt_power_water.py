@@ -64,6 +64,27 @@ def test_cantrip_recovers_selected_discard():
     assert cantrip not in bout.fighter_a.hand
 
 
+def test_cantrip_recovers_up_to_three_with_selected_first():
+    cantrip = Card(62, "Power Water Cantrip")
+    cards = [Card(210 + i, f"Discard {i}") for i in range(4)]
+    bout = make_bout(hand=[cantrip], discard=cards)
+    play_card(bout, Side.A, cantrip, context=EffectContext(choices={"discard_index": 0}))
+    assert cards[0] in bout.fighter_a.hand
+    assert cards[3] in bout.fighter_a.hand
+    assert cards[2] in bout.fighter_a.hand
+    assert bout.fighter_a.discard_pile == [cards[1]]
+    assert cantrip not in bout.fighter_a.hand
+
+
+def test_cantrip_recovers_only_available_discards():
+    cantrip = Card(62, "Power Water Cantrip")
+    target = Card(220, "Discard")
+    bout = make_bout(hand=[cantrip], discard=[target])
+    play_card(bout, Side.A, cantrip)
+    assert target in bout.fighter_a.hand
+    assert bout.fighter_a.discard_pile == []
+
+
 def test_cantrip_grants_play_and_draws():
     cantrip = Card(62, "Power Water Cantrip")
     drawn = Card(112, "Drawn")
