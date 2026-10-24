@@ -97,11 +97,14 @@ def new_b10_session(human: str, opponent: str, *, seed: int = 20261021,
         return play_style_turn(state, side, comparison, opponent)
     # Opening setup is public to the player: cards and base/printed-orb totals.
     # Preserve the frozen tournament's randomized starting selections.
-    state.log(f"Tachiai setup — {human}: base Power {a.wrestler.base_power}, Technique {a.wrestler.base_technique}, Spirit {a.wrestler.base_spirit}.")
-    state.log(f"Tachiai setup — {human}: starting Kimarite {a.wrestler.starting_kimarite.name}, prepared {a.wrestler.prepared_tachiai_card.name}, top deck card {a.wrestler.top_of_deck_card.name}.")
-    state.log(f"Tachiai orbs — {human}: Power {comparison.wrestler_a.power}, Technique {comparison.wrestler_a.technique}, Spirit {comparison.wrestler_a.spirit}.")
-    state.log(f"Tachiai orbs — {opponent}: Power {comparison.wrestler_b.power}, Technique {comparison.wrestler_b.technique}, Spirit {comparison.wrestler_b.spirit}.")
-    state.log(f"Opening Position {state.position:+d}, Momentum {state.momentum:+d} from {human}'s perspective after Tachiai.")
+    opening_events = [
+        f"Tachiai setup — {human}: base Power {a.wrestler.base_power}, Technique {a.wrestler.base_technique}, Spirit {a.wrestler.base_spirit}.",
+        f"Tachiai setup — {human}: starting Kimarite {a.wrestler.starting_kimarite.name}, prepared {a.wrestler.prepared_tachiai_card.name}, top deck card {a.wrestler.top_of_deck_card.name}.",
+        f"Tachiai orbs — {human}: Power {comparison.wrestler_a.power}, Technique {comparison.wrestler_a.technique}, Spirit {comparison.wrestler_a.spirit}.",
+        f"Tachiai orbs — {opponent}: Power {comparison.wrestler_b.power}, Technique {comparison.wrestler_b.technique}, Spirit {comparison.wrestler_b.spirit}.",
+        f"Opening Position {state.position:+d}, Momentum {state.momentum:+d} from {human}'s perspective after Tachiai.",
+    ]
+    state.event_log[:0] = opening_events
     session = HumanBout(state, comparison, Side.A, opponent_turn, max_turns)
     session.advance()
     return session
