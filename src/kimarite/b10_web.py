@@ -21,7 +21,7 @@ _lock = RLock()
 
 
 
-def labelled_choices(session, exc):
+def labelled_choices(session, exc, command=None):
     """Show names for indexed public/chooser-visible cards, without exposing hidden hands."""
     own = session.state.fighter(session.human_side)
     foe = session.state.opponent(session.human_side)
@@ -51,7 +51,10 @@ def labelled_choices(session, exc):
         elif isinstance(option, int) and not isinstance(option, bool):
             cards = None
             if key == "hand_index":
-                cards = own.hand
+                cards = own.hand[:]
+                played_index = (command or {}).get("hand_index")
+                if isinstance(played_index, int) and 0 <= played_index < len(cards):
+                    cards.pop(played_index)
             elif key == "discard_index":
                 cards = own.discard_pile
             elif key == "sacrifice_kimarite":
@@ -152,7 +155,7 @@ class Handler(BaseHTTPRequestHandler):
                     except IllegalPlay as exc:
                         return self.reply(409, {"error": str(exc), "code": "invalid_action", "state": public_snapshot(session)})
                     except ChoiceRequired as exc:
-                        return self.reply(409, labelled_choices(session, exc))
+                        return self.reply(409, labelled_choices(session, exc, data))
             return self.reply(404, {"error": "Not found"})
         except (KeyError, ValueError, TypeError, IllegalPlay) as exc:
             return self.reply(400, {"error":str(exc)})
