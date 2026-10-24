@@ -98,6 +98,10 @@ def public_snapshot(session: HumanBout) -> dict:
     other = session.state.opponent(session.human_side)
     def shown_card(card):
         return {"name": card.name, "id": card.card_id, "is_kimarite":card.is_kimarite, "power":card.power,"technique":card.technique,"spirit":card.spirit, "description":CARD_LIBRARY_TEXT.get(card.name.lower(), {}).get("effect", "")}
+    def enriched(card):
+        result = asdict(card)
+        result["description"] = CARD_LIBRARY_TEXT.get(card.name.lower(), {}).get("effect", "")
+        return result
     def recorded_play(side, name):
         return {"player":"You" if side == session.human_side else "Opponent", "card":name}
     return {
@@ -115,7 +119,7 @@ def public_snapshot(session: HumanBout) -> dict:
         "momentum": view.momentum,
         "human": {
             "name":own.wrestler.name, "power":view.own_power, "grip":list(view.own_grip),
-            "hand":[asdict(card) for card in view.hand],
+            "hand":[enriched(card) for card in view.hand],
             "draw_count":view.own_draw_count, "discard_count":view.own_discard_count,
             "plays_remaining":view.plays_remaining,
             "kimarite":[shown_card(c) for c in own.kimarite_zone],
@@ -129,7 +133,7 @@ def public_snapshot(session: HumanBout) -> dict:
             "temporary":[shown_card(t.card) for t in other.temporary_zone],
         },
         "selection": {
-            "options":[asdict(c) for c in session.pending_selection.options],
+            "options":[enriched(c) for c in session.pending_selection.options],
             "keep":session.pending_selection.keep
         } if session.pending_selection else None,
         "legal_plays":[{"hand_index":x.hand_index,"card":asdict(x.card)} for x in session.actions()],
