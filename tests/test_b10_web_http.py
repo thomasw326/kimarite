@@ -48,3 +48,38 @@ def test_browser_routes_and_session_round_trip():
         server.shutdown()
         server.server_close()
         worker.join(timeout=5)
+
+
+def test_rejected_end_turn_returns_authoritative_selection_state():
+    from kimarite.b10_web import _sessions
+    from kimarite.b10_human_session import new_b10_session
+    from urllib.error import HTTPError
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    worker = Thread(target=server.serve_forever, daemon=True)
+    worker.start()
+    token = "pending-selection-regression"
+    try:
+        bout = new_b10_session("Hand-Size Specialist", "Outside Fighter", seed=20261021,
+                               opening={"kimarite":"Katasukashi",
+                                        "prepared":"Attempt Two-Handed Grip",
+                                        "top":"Attempt Deep Outside Grip"})
+        assert bout.pending_selection is not None
+        _sessions[token] = bout
+        req = Request("http://127.0.0.1:" + str(server.server_port) +
+                      "/api/session/" + token + "/action",
+                      json.dumps({"type":"end_turn"}).encode(),
+                      {"Content-Type":"application/json"}, method="POST")
+        try:
+            urlopen(req, timeout=15)
+            assert False, "Ending turn with outstanding selection must be rejected"
+        except HTTPError as exc:
+            payload = json.load(exc)
+            assert exc.code == 409
+            assert payload["code"] == "invalid_action"
+            assert payload["state"]["selection"] is not None
+            assert payload["state"]["human"]["name"] == "Hand-Size Specialist"
+    finally:
+        _sessions.pop(token, None)
+        server.shutdown()
+        server.server_close()
+        worker.join(timeout=5)
