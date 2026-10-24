@@ -39,3 +39,12 @@ def test_every_b10_pool_card_has_audited_description():
     for name in ("Attempt Two-Handed Grip", "Attempt Deep Outside Grip", "Henka", "Morozashi", "Denshamichi"):
         assert "Temporary" in CARD_TEXT[name]["effect"]
     assert "both" in CARD_TEXT["Morozashi"]["effect"]
+
+
+def test_every_temporary_has_explained_effect_in_ui():
+    from kimarite.effects import TEMPORARY_CARD_NAMES
+    for name in TEMPORARY_CARD_NAMES:
+        effect=CARD_TEXT[name]['effect']
+        assert any(term in effect.lower() for term in ('temporary','while active','next turn','start of your next turn')), name
+    for name in ('Gain Left Grip','Gain Right Grip','Uwate','Shitate'):
+        assert 'prevent 1 incoming Push' in CARD_TEXT[name]['effect']
