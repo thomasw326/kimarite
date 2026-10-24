@@ -12,7 +12,7 @@ import secrets
 from threading import RLock
 from urllib.parse import urlsplit
 
-from .b10_human_session import dispatch, new_b10_session, public_snapshot, roster
+from .b10_human_session import dispatch, new_b10_session, public_snapshot, roster, opening_options
 from .effects import ChoiceRequired, IllegalPlay
 
 STATIC = Path(__file__).resolve().parents[2] / "web"
@@ -40,6 +40,12 @@ class Handler(BaseHTTPRequestHandler):
         path = urlsplit(self.path).path
         if path == "/api/roster":
             return self.reply(200, {"roster": roster()})
+        if path.startswith("/api/opening/"):
+            from urllib.parse import unquote
+            try:
+                return self.reply(200, opening_options(unquote(path.removeprefix("/api/opening/"))))
+            except ValueError as exc:
+                return self.reply(404, {"error":str(exc)})
         if path.startswith("/api/session/"):
             token = path.removeprefix("/api/session/")
             with _lock:
@@ -63,7 +69,7 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/api/session":
                     if len(_sessions) >= 100:
                         return self.reply(503, {"error": "Session capacity reached"})
-                    session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)))
+                    session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
                     token = secrets.token_urlsafe(24)
                     _sessions[token] = session
                     return self.reply(201, {"token": token, "state":public_snapshot(session)})
