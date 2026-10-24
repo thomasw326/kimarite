@@ -57,6 +57,11 @@ def labelled_choices(session, exc, command=None):
                 played_index = (command or {}).get("hand_index")
                 if isinstance(played_index, int) and 0 <= played_index < len(cards):
                     cards.pop(played_index)
+                # Pull resolves its draw before the discard choice. The
+                # original session is transactional, so expose the drawn card
+                # from the top of the unchanged draw pile in the right slot.
+                if card_name == "Pull" and own.draw_pile:
+                    cards.append(own.draw_pile[0])
             elif key == "discard_index":
                 cards = own.discard_pile
             elif key == "sacrifice_kimarite":
