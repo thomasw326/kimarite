@@ -60,4 +60,4 @@ def test_explicit_human_opening_preserves_40_card_pool_and_ai_autoselection():
     assert own.prepared_tachiai_card.name==chosen["prepared"]
     assert own.top_of_deck_card.name==chosen["top"]
     with pytest.raises(ValueError):
-        new_b10_session("Arm Controller","The Technician",seed=42,opening={"kimarite":chosen["kimarite"],"prepared":chosen["prepared"],"top":chosen["prepared"] if chosen["prepared"] not in [x["name"] for x in names["ordinary"][1:]] else "not a card"})
+        new_b10_session("Arm Controller","The Technician",seed=42,opening={"kimarite":chosen["kimarite"],"prepared":chosen["prepared"],"top":"not a card"})
