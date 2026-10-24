@@ -1,0 +1,126 @@
+# B10 proposed display-name catalogue
+
+**Draft for approval — no live UI or engine changes.** Based on all 71 distinct engine card names plus the generated Power Water Cantrip. Format: Japanese term — English meaning, or an English name with a clear evocative explanation. Engine IDs, decks, logs and rule matching remain unchanged. REVIEW means the user should approve or correct it before implementation.
+
+## Kimarite (23)
+
+| Internal name | Proposed display name | Status |
+|---|---|---|
+| Yorikiri | Yorikiri — Frontal Force-Out | Draft |
+| Oshidashi | Oshidashi — Frontal Push-Out | Draft |
+| Tsukidashi | Tsukidashi — Frontal Thrust-Out | Draft |
+| Oshitaoshi | Oshitaoshi — Frontal Push-Down | Draft |
+| Yoritaoshi | Yoritaoshi — Frontal Force-Down | Draft |
+| Uwatenage | Uwatenage — Overarm Throw | Draft |
+| Hatakikomi | Hatakikomi — Slap-Down | Draft |
+| Katasukashi | Katasukashi — Under-Shoulder Swing-Down | Draft |
+| Hikiotoshi | Hikiotoshi — Hand Pull-Down | Draft |
+| Tottari | Tottari — Arm-Bar Throw | **REVIEW** |
+| Tsukiotoshi | Tsukiotoshi — Thrust-Down | **REVIEW** |
+| Tsukitaoshi | Tsukitaoshi — Frontal Thrust-Down | Draft |
+| Tsuridashi | Tsuridashi — Lift-Out | Draft |
+| Kotenage | Kotenage — Armlock Throw | Draft |
+| Abisetaoshi | Abisetaoshi — Backward Force-Down | Draft |
+| Shitatenage | Shitatenage — Underarm Throw | Draft |
+| Kirikaeshi | Kirikaeshi — Twisting Backward Knee Trip | **REVIEW** |
+| Okuridashi | Okuridashi — Rear Push-Out | Draft |
+| Okuritaoshi | Okuritaoshi — Rear Push-Down | Draft |
+| Sukuinage | Sukuinage — Beltless Scoop Throw | Draft |
+| Utchari | Utchari — Ring-Edge Swing-Back | **REVIEW** |
+| Uwatedashinage | Uwatedashinage — Pulling Overarm Throw | Draft |
+| Tsuriotoshi | Tsuriotoshi — Lift-and-Drop | Draft |
+
+## Ordinary and Temporary cards (48)
+
+| Internal name | Proposed display name | Status |
+|---|---|---|
+| Oshi | Oshi — Driving Push | Draft |
+| Driving Force — Power Payoff | Driving Force — Power Surge | **REVIEW** |
+| Crushing Pressure — Power Crusher | Crushing Pressure — Overwhelming Force | **REVIEW** |
+| Tsuki | Tsuki — Straight Thrust | Draft |
+| Tsuppari | Tsuppari — Rapid-Fire Thrusts | Draft |
+| Headlong Charge | Headlong Charge — All-Out Rush | Draft |
+| Nodowa | Nodowa — Throat Thrust | Draft |
+| Harite | Harite — Open-Hand Strike | Draft |
+| Gain Left Grip | Gain Left Grip — Secure the Left | **REVIEW** |
+| Gain Right Grip | Gain Right Grip — Secure the Right | **REVIEW** |
+| Uwate | Uwate — Outside Belt Grip | Draft |
+| Shitate | Shitate — Inside Belt Grip | Draft |
+| Attempt Two-Handed Grip | Two-Handed Grip — Secure Both Sides | Draft |
+| Attempt Deep Outside Grip | Deep Outside Grip — Secure the Hold | **REVIEW** |
+| Attempt Deep Inside Grip | Deep Inside Grip — Secure the Hold | **REVIEW** |
+| Shiko Stomp | Shiko — Ritual Stomp | **REVIEW** |
+| Salt Throw | Salt Throw — Purification Ritual | Draft |
+| Stare Down | Stare Down — Test of Nerve | Draft |
+| Power Water | Power Water — Chikara-mizu Ritual | **REVIEW** |
+| Belt Slap | Belt Slap — Disrupting Strike | **REVIEW** |
+| Tsuri | Tsuri — Lifting Attack | Draft |
+| Yori | Yori — Forward Belt Pressure | Draft |
+| Gaburi | Gaburi — Surging Body Drive | **REVIEW** |
+| Ottsuke | Ottsuke — Arm-Blocking Pressure | **REVIEW** |
+| Hold Position | Hold Position — Stand Your Ground | Draft |
+| Immovable | Immovable — Unshakable Stance | Draft |
+| Henka | Henka — Opening Sidestep | Draft |
+| Pull | Pull — Draw Them Forward | Draft |
+| Get Underneath | Get Underneath — Low Entry | Draft |
+| Read the Move | Read the Move — Anticipate the Attack | Draft |
+| Reset to Neutral | Reset to Neutral — Break Contact | **REVIEW** |
+| Regain Balance | Regain Balance — Recover Your Footing | Draft |
+| Sidestep | Sidestep — Turn Aside | **REVIEW** |
+| Use the Tawara | Use the Tawara — Ring-Edge Recovery | Draft |
+| Kannuki | Kannuki — Double-Arm Lock | **REVIEW** |
+| Morozashi | Morozashi — Double Inside Grip | Draft |
+| Give Ground | Give Ground — Tactical Retreat | Draft |
+| Shove | Shove — Driving Hand Push | Draft |
+| Explosive Step — Fumikomi | Fumikomi — Explosive Step | **REVIEW** |
+| Morotezuki | Morotezuki — Two-Handed Thrust | Draft |
+| Kachiage | Kachiage — Rising Forearm Strike | Draft |
+| Nekodamashi | Nekodamashi — Face Clap | Draft |
+| Maesabaki | Maesabaki — Hand-Fighting Control | **REVIEW** |
+| Deashi | Deashi — Opening Footwork | **REVIEW** |
+| Butsukari | Butsukari — Driving Collision | Draft |
+| Denshamichi | Denshamichi — Train-Track Charge | **REVIEW** |
+| Spin Away | Spin Away — Escape the Line | Draft |
+| Ankogata | Ankogata — Anchored Stance | **REVIEW** |
+
+## Generated cantrip (1)
+
+| Internal name | Proposed display name | Status |
+|---|---|---|
+| Power Water Cantrip | Power Water Cantrip — Ritual Refresh | **REVIEW** |
+
+## Needs your judgement
+
+1. **Driving Force — Power Payoff:** Power Surge or Power Advantage? The current effect is conditional.
+2. **Gain Left Grip:** Keep Left rather than suggesting it always means Outside.
+3. **Gain Right Grip:** Keep Right rather than suggesting it always means Inside.
+4. **Attempt Deep Outside Grip:** Retain Attempt to express delayed payoff and disruption risk?
+5. **Attempt Deep Inside Grip:** Retain Attempt to express delayed payoff and disruption risk?
+6. **Power Water:** Chikara-mizu ritual vs the game's Power Water mechanics.
+7. **Belt Slap:** Does Disrupting Strike capture its intended identity?
+8. **Gaburi:** Surging Body Drive vs rhythmic belly thrusting.
+9. **Ottsuke:** Arm-Blocking Pressure vs Forearm Clamp.
+10. **Reset to Neutral:** Break Contact vs Clean Break.
+11. **Sidestep:** Distinguish this from Henka.
+12. **Kannuki:** Double-Arm Lock fit to gameplay?
+13. **Kirikaeshi:** Approve longer twisting knee-trip explanation?
+14. **Tottari:** Arm-Bar Throw or Arm-Bar Takedown?
+15. **Tsukiotoshi:** Thrust-Down or Thrust-Over?
+16. **Utchari:** Swing-Back or Back-Leaning Throw?
+17. **Maesabaki:** Hand-Fighting Control or Forward-Hand Control?
+18. **Deashi:** Meaning of this term in original card design?
+19. **Denshamichi:** Is Train-Track Charge intended, or another meaning?
+20. **Ankogata:** Anchored Stance is speculative; clarify meaning.
+21. **Shiko Stomp:** Shorten Shiko Stomp to Shiko?
+22. **Crushing Pressure — Power Crusher:** Assumed approved: Overwhelming Force.
+23. **Explosive Step — Fumikomi:** Fumikomi means step-in; confirm phrasing.
+24. **Power Water Cantrip:** Should generated token share ritual label?
+
+## Implementation boundary
+
+Use a central lookup keyed by existing names; do not rename Card.name or touch frozen B10 mechanics. After approval, apply consistent display labels to hand, inspectors, discard, Temporaries, opening choices, logs and tournament finishes. Require coverage tests for 72 display entries including generated-only cantrip, and preserve indexed-choice values and saved session replay.
+
+## References
+
+- https://sumo.or.jp/Kimarite/show/ — Japan Sumo Association kimarite list
+- https://ozumolog.com/en/kimarite/ — English broadcast-style glosses
