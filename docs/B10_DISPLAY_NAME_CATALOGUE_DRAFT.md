@@ -36,7 +36,7 @@
 |---|---|---|
 | Oshi | Oshi — Driving Push | Draft |
 | Driving Force — Power Payoff | Driving Force — Power Surge | **APPROVED** |
-| Crushing Pressure — Power Crusher | Crushing Pressure — Overwhelming Force | **REVIEW** |
+| Crushing Pressure — Power Crusher | Crushing Pressure — Overwhelming Force | **APPROVED** |
 | Tsuki | Tsuki — Straight Thrust | Draft |
 | Tsuppari | Tsuppari — Rapid-Fire Thrusts | Draft |
 | Headlong Charge | Headlong Charge — All-Out Rush | Draft |
@@ -87,7 +87,7 @@
 
 | Internal name | Proposed display name | Status |
 |---|---|---|
-| Power Water Cantrip | Power Water Cantrip — Ritual Refresh | **REVIEW** |
+| Power Water Cantrip | Power Water Refresh | **APPROVED** |
 
 ## Needs your judgement
 
@@ -146,3 +146,7 @@ Approved: **Ankogata — Big-Belly Sumo**; **Attempt Deep Outside Grip** (retain
 ## User approval round 4
 
 Approved: **Shiko — Ritual Stomp**, **Kannuki — Double-Arm Lock**, **Kirikaeshi — Twisting Knee Trip**, **Fumikomi — Explosive Step**; preserve the original names **Gain Left Grip** and **Gain Right Grip** without subtitles. These decisions supersede the earlier REVIEW questions.
+
+## Final naming approval
+
+The generated **Power Water Cantrip** is displayed as **Power Water Refresh** (no Japanese subtitle). **Crushing Pressure — Overwhelming Force** is approved per the earlier naming direction. All previously flagged catalogue rows have been decided; unflagged rows remain initial proposals rather than individually approved names. No internal IDs or gameplay rules change.
