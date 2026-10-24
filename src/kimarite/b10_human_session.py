@@ -11,7 +11,7 @@ from pathlib import Path
 import random
 
 from .catalog import card_by_name
-from .play_human import CARD_LIBRARY_TEXT
+
 from .human_bout import HumanBout
 from .models import BoutState, FighterState, Side, Stat, Wrestler
 from .style_ai_v5 import play_style_turn
@@ -19,6 +19,14 @@ from .styles_v5 import STYLES
 from .tachiai import compare_tachiai, first_exchange_side
 from .tachiai_effects import resolve_prepared_tachiai
 from .turns import apply_initial_power
+
+VERIFIED_CARD_TEXT = {
+    "Katasukashi": "Win condition: Opponent has no Grip; your relative Momentum is +2 or higher; you have at least 4 more cards in hand than your opponent.",
+    "Pull": "Exchange: Lose 1 Position. Gain 1 Momentum. Make the opponent Unstable. Draw 1 card, then discard 1 card from your hand.",
+    "Give Ground": "Exchange: Lose 1 Position. Gain 1 Momentum and 1 Power. Draw 1 card.",
+}
+def rules_text(name: str) -> str:
+    return VERIFIED_CARD_TEXT.get(name, "Detailed B10 rules text not yet verified — inspect card name and orbs only.")
 
 ROSTER_PATH = Path(__file__).resolve().parents[2] / "data" / "b9_30_wrestler_decks.json"
 EXCLUDED = frozenset({"Attrition Fighter", "Disruptor", "Gripless Fighter", "Stability Master"})
@@ -97,7 +105,7 @@ def public_snapshot(session: HumanBout) -> dict:
     own = session.state.fighter(session.human_side)
     other = session.state.opponent(session.human_side)
     def shown_card(card):
-        return {"name": card.name, "id": card.card_id, "is_kimarite":card.is_kimarite, "power":card.power,"technique":card.technique,"spirit":card.spirit, "description":CARD_LIBRARY_TEXT.get(card.name.lower(), {}).get("effect", "")}
+        return {"name": card.name, "id": card.card_id, "is_kimarite":card.is_kimarite, "power":card.power,"technique":card.technique,"spirit":card.spirit, "description":rules_text(card.name)}
     def enriched(card):
         result = asdict(card)
         result["description"] = CARD_LIBRARY_TEXT.get(card.name.lower(), {}).get("effect", "")
