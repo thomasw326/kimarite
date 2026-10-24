@@ -38,3 +38,13 @@ def test_human_choices_are_commands_not_terminal_prompts():
 def test_unknown_wrestler_rejected():
     with pytest.raises(ValueError):
         new_b10_session("Attrition Fighter", "Mountain")
+
+
+def test_opening_is_visible_without_revealing_opponent_draw():
+    from kimarite.b10_human_session import public_snapshot, new_b10_session
+    bout=new_b10_session("Arm Controller", "Speed Demon", seed=101)
+    state=public_snapshot(bout)
+    assert state["opening"]["human"]["starting_kimarite"]["is_kimarite"]
+    assert len(state["opening"]["human"]["tachiai_orbs"])==3
+    assert "top_of_deck" not in state["opening"]["opponent"]
+    assert any("Tachiai orbs" in e for e in state["events"])
