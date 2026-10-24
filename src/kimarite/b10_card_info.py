@@ -1,5 +1,12 @@
 """Engine-audited B10 card text for the human interface; no mechanics are changed."""
 CARD_TEXT = {
+    "Driving Force — Power Payoff": {"timing":"Exchange / Tachiai","effect":"Exchange: choose to draw 1, or with Power at least 7 gain 1 Push and 1 Momentum.","status":"verified"},
+    "Crushing Pressure — Power Crusher": {"timing":"Exchange / Tachiai","effect":"Exchange: choose to draw 1, or with Power at least 7 and a Power advantage of at least 3 gain 1 Momentum and make opponent lose 1 Power.","status":"verified"},
+    "Uwate": {"timing":"Exchange / Tachiai","effect":"Exchange: improve Left Grip; enter Temporary Zone; look at cards equal to total Grip and choose one. If Left Grip was Deep before play, play it for free; otherwise keep it. No delayed payoff.","status":"verified"},
+    "Ottsuke": {"timing":"Exchange / Tachiai","effect":"Exchange: choose to draw 1, reduce a selected opponent Grip by one level, or remove an opponent Grip-related Temporary or Kimarite; prevention applies.","status":"verified"},
+    "Maesabaki": {"timing":"Exchange / Tachiai","effect":"Exchange: reduce one opponent Grip level if possible and disrupt one opponent Temporary card if present, subject to prevention.","status":"verified"},
+    "Deashi": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Push if your current Power exceeds opponent's; gain another 1 Push if you won Tachiai Spirit.","status":"verified"},
+    "Butsukari": {"timing":"Exchange / Tachiai","effect":"Exchange: if your Power exceeds opponent's, reduce opponent Power by 1; if Momentum at least +1, make opponent Unstable. Mill 1 card.","status":"verified"},
     "Attempt Two-Handed Grip": {"timing":"Exchange / Tachiai","effect":"Exchange: Establish either Left or Right Grip at level 1. Temporary (start of your next turn): establish both Left and Right Grip at level 1. If disrupted, opponent gains 1 Momentum.","status":"verified"},
     "Attempt Deep Outside Grip": {"timing":"Exchange / Tachiai","effect":"Exchange: Establish Left Grip. Temporary (start of your next turn): set Left Grip to Deep. If disrupted, opponent gains 1 Momentum.","status":"verified"},
     "Attempt Deep Inside Grip": {"timing":"Exchange / Tachiai","effect":"Exchange: Establish Right Grip. Temporary (start of your next turn): set Right Grip to Deep. If disrupted, opponent gains 1 Momentum.","status":"verified"},
