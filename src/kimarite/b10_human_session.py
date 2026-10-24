@@ -14,7 +14,8 @@ from .catalog import card_by_name
 from .b10_card_info import card_info, GLOSSARY
 
 from .human_bout import HumanBout
-from .models import BoutState, FighterState, Side, Stat, Wrestler
+from .models import BoutState, FighterState, Side, Stat, Wrestler, GripState
+from .rules import grip_benefits_suppressed
 from .style_ai_v5 import play_style_turn
 from .styles_v5 import STYLES
 from .tachiai import compare_tachiai, first_exchange_side
@@ -148,6 +149,33 @@ def public_snapshot(session: HumanBout) -> dict:
     def enriched(card):
         result = asdict(card)
         return card_info(card)
+    legal_indices = {x.hand_index for x in session.actions()}
+    def reason(index, card):
+        if index in legal_indices:
+            return None
+        if session.finished:
+            return "The bout has ended."
+        if session.pending_selection:
+            return "Finish selecting your cards first."
+        if not session.awaiting_human:
+            return "Wait for your turn."
+        if own.plays_remaining <= 0:
+            return "No Plays remaining. End your turn."
+        if grip_benefits_suppressed(session.state, session.human_side) and card.name in {
+            "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate",
+            "Attempt Two-Handed Grip", "Attempt Deep Outside Grip",
+            "Attempt Deep Inside Grip", "Morozashi",
+        }:
+            return "Your Grip effects are suppressed (Kannuki)."
+        if card.name == "Morozashi" and own.left_grip is GripState.NONE and own.right_grip is GripState.NONE:
+            return "Morozashi requires at least one existing Grip."
+        if card.name in {"Okuridashi", "Okuritaoshi"}:
+            return "This generated Kimarite cannot be played from hand."
+        if card.name == "Headlong Charge" and not own.kimarite_zone:
+            return "Headlong Charge requires a Kimarite in your zone."
+        if card.name in {"Sidestep", "Spin Away"} and session.state.side_by_side_owner is not None:
+            return "Cannot play while already side-by-side."
+        return "This card is currently unavailable."
     def recorded_play(side, name):
         return {"player":"You" if side == session.human_side else "Opponent", "card":name}
     return {
@@ -167,7 +195,7 @@ def public_snapshot(session: HumanBout) -> dict:
         "momentum": view.momentum,
         "human": {
             "name":own.wrestler.name, "power":view.own_power, "grip":list(view.own_grip),
-            "hand":[enriched(card) for card in view.hand],
+            "hand":[{**enriched(card), "unavailable_reason":reason(i,card)} for i,card in enumerate(own.hand)],
             "draw_count":view.own_draw_count, "discard_count":view.own_discard_count,
             "plays_remaining":view.plays_remaining,
             "kimarite":[shown_card(c) for c in own.kimarite_zone],
