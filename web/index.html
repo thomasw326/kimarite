@@ -4,7 +4,8 @@
 <section class="setup panel"><label>Your rikishi<select id="human"></select></label><label>Opponent<select id="opponent"></select></label><button id="start">Begin bout</button></section>
 <section class="arena panel"><div class="eyebrow" id="round">THE DOHYŌ</div><div class="dohyo"><div class="shikiri"></div><span class="rikishi left">●</span><span class="rikishi right">●</span></div><div id="tracks" class="tracks"></div></section>
 <section id="score" class="score panel" aria-live="polite"></section>
+<section class="panel"><details open><summary><strong>Bout history — what happened</strong></summary><div id="history" class="history"></div></details></section>
 <section id="choices" class="choice panel" aria-live="polite"></section>
 <section class="play panel"><div class="playtop"><h2>Your hand</h2><button id="end" disabled>End turn</button></div><div id="hand" class="cards"></div></section>
-<p id="notice" role="status"></p></main>
+<p id="notice" role="status"></p><dialog id="inspect"><div class="inspect-head"><h2 id="inspect-name"></h2><button id="inspect-close" type="button">Close</button></div><p id="inspect-orbs"></p><p id="inspect-effect"></p><div id="inspect-actions"></div></dialog></main>
 <script src="/client.js"></script></body></html>
