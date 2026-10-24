@@ -105,3 +105,17 @@ def test_outside_fighter_can_complete_opponent_turn_after_human_plays():
     session.end_turn()
     assert session.stopped_reason is None or "Unknown V5 style" not in session.stopped_reason
     assert any(side is Side.B for side, name in session.state.card_plays) or session.finished or session.awaiting_human
+
+
+def test_public_discard_piles_are_inspectable_without_hidden_decks():
+    from kimarite.catalog import card_by_name
+    from kimarite.models import Side
+    session = new_b10_session("Arm Controller", "The Technician", seed=42)
+    session.state.fighter(Side.A).discard_pile.append(card_by_name("Yori"))
+    session.state.fighter(Side.B).discard_pile.append(card_by_name("Shove"))
+    snapshot = public_snapshot(session)
+    assert snapshot["human"]["discard"][-1]["name"] == "Yori"
+    assert snapshot["opponent"]["discard"][-1]["name"] == "Shove"
+    assert snapshot["human"]["discard"][-1]["description_status"] == "verified"
+    assert "hand" not in snapshot["opponent"]
+    assert "draw_pile" not in snapshot["opponent"]
