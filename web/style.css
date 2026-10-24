@@ -12,3 +12,5 @@
 .choice-card-wrap{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}.choice-inspect{min-height:44px;padding:10px 12px;background:transparent;border:1px solid #c9aa72;color:#f0d5a3}.choice-card-wrap>.card{width:100%}
 
 .discard-button{min-height:44px;width:100%;text-align:left;margin:8px 0}.discard-list{display:grid;gap:9px;max-height:65vh;overflow:auto}.discard-entry{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px;border-bottom:1px solid #526264}.discard-entry .choice-inspect{flex-shrink:0}
+
+.zone-entry{border-bottom:1px solid #526264;padding:7px 0}.zone-entry .zone-card{width:100%;text-align:left}.temporary-detail{margin:6px 0 4px;line-height:1.5;font-size:.9rem;white-space:normal;color:#e4d3b8}
