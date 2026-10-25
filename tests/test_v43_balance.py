@@ -100,3 +100,14 @@ def test_harite_empty_hand_and_deck_still_reduces_power():
     resolve_exchange_effect(s, Side.A, card_by_name("Harite"), EffectContext())
     assert s.fighter_b.power == 1
     assert not s.fighter_b.discard_pile
+
+
+def test_shiko_stomp_exchange_refunds_play_and_protects():
+    from kimarite.playing import play_card
+    s = bout()
+    shiko = card_by_name("Shiko Stomp")
+    s.fighter_a.hand = [shiko]
+    s.fighter_a.plays_remaining = 2
+    play_card(s, Side.A, shiko)
+    assert s.fighter_a.plays_remaining == 2
+    assert any(t.card.name == "Shiko Stomp" for t in s.fighter_a.temporary_zone)
