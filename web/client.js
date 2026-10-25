@@ -11,6 +11,7 @@ function zoneEffect(c,zone){
  if(zone==='kimarite')return (d.match(/Win:\s*(.*?)(?=\s*On play:|$)/)||[])[1]||'Winning condition not available';
  if(['Gain Left Grip','Gain Right Grip','Uwate','Shitate'].includes(c.name))return 'Blocks 1 incoming Push; consumed when used, otherwise expires at the start of your next turn.';
  if(c.name==='Shiko Stomp')return 'Prevents the next negative effect against you; persists until consumed.';
+ if(c.name==='Kannuki')return 'While active: suppresses opponent Grip benefits and Grip-building cards. Next turn: reduce both opposing Grips one level and make opponent Unstable (subject to prevention).';
  if(c.name==='Henka')return 'Blocks the first incoming Push. If it survives: gain 1 Momentum and make opponent Unstable. If disrupted: you become Unstable.';
  if(c.name==='Sidestep')return 'While side-by-side: Push is suppressed. On survival: Momentum determines favourable orientation; opponent becomes Unstable.';
  if(c.name==='Spin Away')return 'While active: Push is suppressed. On survival: Momentum determines favourable orientation. If disrupted: opponent gains Okuridashi.';
