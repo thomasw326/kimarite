@@ -37,12 +37,12 @@ def test_hikiotoshi_draw_no_grip():
         s.fighter_a.draw_pile[0].name,
     } == {"Oshi", "Tsuki"}
 
-def test_morozashi_survival_only_push():
+def test_morozashi_survival_push_and_momentum():
     s = bout()
     add_temporary(s, Side.A, card_by_name("Morozashi"), phase="exchange")
     resolve_start_of_turn_temporaries(s, Side.A)
     assert s.position == 1
-    assert s.momentum == 0
+    assert s.momentum == 1
 
 
 def test_oshi_push_play_draw():
@@ -77,3 +77,37 @@ def test_sidestep_prevents_both_players_push():
     assert s.position == 0
     assert s.side_by_side_owner is Side.A
     assert len(s.fighter_a.temporary_zone) == 1
+
+
+def test_harite_disrupts_hand_power_and_deck():
+    s = bout()
+    s.fighter_b.hand = [Card(1001, "Victim 1"), Card(1002, "Victim 2")]
+    s.fighter_b.draw_pile = [Card(1003, "Milled 1"), Card(1004, "Milled 2"), Card(1005, "Saved")]
+    s.fighter_b.power = 5
+    s.fighter_a.power = 4
+    resolve_exchange_effect(s, Side.A, card_by_name("Harite"), EffectContext())
+    assert s.fighter_a.power == 4
+    assert s.fighter_b.power == 4
+    assert len(s.fighter_b.hand) == 1
+    assert len(s.fighter_b.draw_pile) == 1
+    assert s.fighter_b.draw_pile[0].name == "Saved"
+    assert len(s.fighter_b.discard_pile) == 3
+
+
+def test_harite_empty_hand_and_deck_still_reduces_power():
+    s = bout()
+    s.fighter_b.power = 2
+    resolve_exchange_effect(s, Side.A, card_by_name("Harite"), EffectContext())
+    assert s.fighter_b.power == 1
+    assert not s.fighter_b.discard_pile
+
+
+def test_shiko_stomp_exchange_refunds_play_and_protects():
+    from kimarite.playing import play_card
+    s = bout()
+    shiko = card_by_name("Shiko Stomp")
+    s.fighter_a.hand = [shiko]
+    s.fighter_a.plays_remaining = 2
+    play_card(s, Side.A, shiko)
+    assert s.fighter_a.plays_remaining == 2
+    assert any(t.card.name == "Shiko Stomp" for t in s.fighter_a.temporary_zone)
