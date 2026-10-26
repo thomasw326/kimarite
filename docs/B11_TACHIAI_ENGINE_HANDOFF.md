@@ -24,3 +24,9 @@ Do not claim the new mode is functional or shipped before these are complete. B1
 - `src/kimarite/b11_tachiai_reveals.py`: pure multi-commit Oshi/Tsuki reveal planner, consuming sequential draw pile cards up to and including a non-family stopper for **each** committed reveal card. Tests: `tests/test_b11_tachiai_reveals.py`.
 - **Still not live**: pending phase, reveal planner and variable orb comparison are isolated modules. The classic live session, UI, and AI remain unmodified.
 - **Open correctness concern**: multiple committed cards require careful extension of `resolve_prepared_tachiai` without repeating one-time Spirit Push, and correct treatment of committed Kimarite/ordinary destinations and first-turn hand. Do not expose mode until tests cover this end-to-end.
+
+## Hidden-opponent payload milestone
+- Added `src/kimarite/b11_tachiai_public.py` with explicit allow-listed `pending_tachiai_snapshot` for the pre-commit phase. It supplies the player's three available cards but never includes AI prepared cards, opening totals, advantage data, or pre-resolution logs.
+- Added `tests/test_b11_tachiai_public.py` to check absence of sensitive opponent data before commitment and refusal to construct a pending view after commitment.
+- These components still need wiring into a real pending live session and its API routes. Do **not** claim that the deployed/current UI enforces the new rule.
+- No GitHub Actions workflow runs were returned when queried for this commit; passing CI remains **unverified**.
