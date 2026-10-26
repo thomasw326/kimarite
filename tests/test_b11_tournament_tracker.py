@@ -12,8 +12,9 @@ CLIENT = Path(__file__).resolve().parents[1] / "web" / "client.js"
 def test_finished_bout_is_bound_to_tournament_identity():
     source = CLIENT.read_text()
     assert "sessionSetup={...request,tournament_bout:i}" in source
-    assert "sessionSetup?.tournament_bout===m.round&&m.results.length===m.round" in source
+    assert "activeTournamentBout()===m.round&&m.results.length===m.round" in source
     assert "m.results.push(" in source
+    assert "sessionSetup.seed===m.seed+m.round+1" in source
 
 
 def test_next_bout_requires_recorded_result_and_rolls_back_failed_advance():
