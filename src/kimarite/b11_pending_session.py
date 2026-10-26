@@ -34,5 +34,32 @@ class PendingB11Session:
         opening = PlayerOpening.from_names(deck, names)
         return cls(human, opponent, PendingPlayerTachiai(opening))
 
+    def confirm(self, indices: list[int]) -> dict[str, Any]:
+        """Record a one-time human decision; actual resolution remains gated."""
+        if not isinstance(indices, list):
+            raise ValueError("Commitment must be a list of slot indices.")
+        self.phase.choose(indices)
+        return self.snapshot()
+
     def snapshot(self) -> dict[str, Any]:
-        return pending_tachiai_snapshot(self.phase, self.human, self.opponent)
+        if self.phase.pending:
+            return pending_tachiai_snapshot(self.phase, self.human, self.opponent)
+        decision = self.phase.decision
+        from .b10_card_info import card_info
+        return {
+            "phase": "tachiai_resolution_pending",
+            "finished": False,
+            "human": {"name": self.human},
+            "opponent": {"name": self.opponent},
+            "tachiai_choice": {
+                "cards": [card_info(c) for c in decision.allocated],
+                "committed_indices": list(decision.indices),
+                "committed": [card_info(c) for c in decision.committed],
+                "retained": [card_info(c) for c in decision.retained],
+            },
+            "opening": None,
+            "events": [],
+            "selection": None,
+            "legal_plays": [],
+            "can_end_turn": False,
+        }
