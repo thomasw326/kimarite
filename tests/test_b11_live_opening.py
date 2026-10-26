@@ -4,6 +4,7 @@ import pytest
 
 from kimarite.b10_human_session import ROSTER_PATH, roster
 from kimarite.b11_pending_session import PendingB11Session
+from kimarite.catalog import card_by_name
 from kimarite.b11_live_opening import build_resolved_b11_opening
 
 
@@ -24,7 +25,7 @@ def test_committed_bout_uses_exact_human_cards_and_has_active_exchange(indices):
     assert accounted >= 40 - len(indices)
     assert len(own.hand) == 3 - len(indices)
     assert result.state.active_side is not None or result.state.winner is not None
-    assert [c.name for c in own.kimarite_zone] == [names[i] for i in indices if __import__('kimarite.catalog', fromlist=['card_by_name']).card_by_name(names[i]).is_kimarite]
+    assert [c.name for c in own.kimarite_zone] == [names[i] for i in indices if card_by_name(names[i]).is_kimarite]
 
 
 def test_live_handoff_disallows_precommit_execution():
