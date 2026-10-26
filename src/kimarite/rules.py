@@ -316,7 +316,13 @@ def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None 
             )
         current = int(getattr(fighter, attr))
         if current > 0:
-            setattr(fighter, attr, GripState(current - 1))
+            next_grip = GripState(current - 1)
+            setattr(fighter, attr, next_grip)
+            hand_name = "Left" if attr == "left_grip" else "Right"
+            state.log(
+                f"{fighter.wrestler.name}'s {hand_name} Grip decreases "
+                f"({GripState(current).name} → {next_grip.name})."
+            )
             state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
 
 
