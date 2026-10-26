@@ -292,10 +292,16 @@ def resolve_prepared_tachiai(
         for card in cards_by_side[side]:
             fighter = state.fighter(side)
             if committed_cards is not None and side in committed_cards:
-                # B11: spent commits do not reenter the draw pile. Temporary
-                # cards remain active; committed Kimarite are never auto-zoned.
-                if card.name not in PREPARED_TEMPORARY_TACHIAI:
+                # Player Tachiai uses the same opening destinations as Classic:
+                # Kimarite starts in the Kimarite Zone, persistent pre-bout
+                # Temporaries stay active, and ordinary cards return to the
+                # bottom of the draw pile. Headlong Charge alone is spent.
+                if card.is_kimarite:
+                    fighter.kimarite_zone.append(card)
+                elif card.name == "Headlong Charge":
                     fighter.discard_pile.append(card)
+                elif card.name not in PREPARED_TEMPORARY_TACHIAI:
+                    fighter.draw_pile.append(card)
             elif card.name == "Headlong Charge":
                 if card in fighter.draw_pile:
                     fighter.draw_pile.remove(card)
