@@ -143,3 +143,20 @@ def test_http_commit_tachiai_is_one_shot_and_stays_private():
         server.shutdown()
         server.server_close()
         worker.join(timeout=5)
+
+
+@pytest.mark.parametrize("indices", [[], [0], [1, 2], [0, 1, 2]])
+def test_private_resolution_handoff_accounts_for_full_forty_card_deck(indices):
+    human, opponent = roster()[:2]
+    cards = json.loads(ROSTER_PATH.read_text())["decks"][human]["cards"][:3]
+    session = PendingB11Session.start(human, opponent, cards)
+    with pytest.raises(ValueError, match="Commit Tachiai"):
+        session.prepare_resolution()
+    session.confirm(indices)
+    prepared = session.prepare_resolution()
+    assert len(prepared.committed) == len(indices)
+    assert len(prepared.retained_hand) == 3 - len(indices)
+    assert (len(prepared.committed) + len(prepared.retained_hand)
+            + len(prepared.revealed_discard) + len(prepared.draw_pile)) == 40
+    assert session.snapshot()["opening"] is None
+    assert session.snapshot()["events"] == []
