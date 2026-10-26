@@ -189,8 +189,16 @@ def check_kimarite_zone(
         details = card_info(card)
         import re
         description = details.get("description", "")
-        win_text = re.search(r"Win:\\s*(.*?)(?=\\s*On play:|$)", description)
+        win_text = re.search(r"Win:\s*(.*?)(?=\s*On play:|$)", description)
         state.b11_victory_details = {
+            "checks": ([
+                {"label": "No Grip", "actual": winner.total_grip, "required": "= 0", "met": winner.total_grip == 0},
+                {"label": "Momentum advantage", "actual": state.momentum * state.sign(side), "required": "≥ 2", "met": state.momentum * state.sign(side) >= 2},
+                {"label": "Hand advantage", "actual": len(winner.hand) - len(opponent.hand), "required": "≥ 4", "met": len(winner.hand) - len(opponent.hand) >= 4},
+            ] if card.name == "Sukuinage" else [
+                {"label": "Effective Grip", "actual": effective_total_grip(state, side), "required": "≥ 2", "met": effective_total_grip(state, side) >= 2},
+                {"label": "Power", "actual": winner.power, "required": "≥ 10", "met": winner.power >= 10},
+            ] if card.name == "Abisetaoshi" else []),
             "kimarite": card.name,
             "requirement_text": win_text.group(1).strip() if win_text else description,
             "grip": winner.total_grip,
