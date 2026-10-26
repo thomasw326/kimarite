@@ -30,3 +30,9 @@ Do not claim the new mode is functional or shipped before these are complete. B1
 - Added `tests/test_b11_tachiai_public.py` to check absence of sensitive opponent data before commitment and refusal to construct a pending view after commitment.
 - These components still need wiring into a real pending live session and its API routes. Do **not** claim that the deployed/current UI enforces the new rule.
 - No GitHub Actions workflow runs were returned when queried for this commit; passing CI remains **unverified**.
+
+## Live resolver integration milestone
+- `src/kimarite/tachiai_effects.py::_reveal_tachiai_orbs` now uses `plan_reveals` for real fighter draw/discard piles and Tachiai comparisons, with optional `committed_cards` mapping per side. The default absent mapping falls back to each wrestler's one Classic prepared card, preserving the old public API.
+- Live-path regression tests added: `tests/test_b11_live_tachiai_reveals.py` (two sequential Oshi chains, Classic one-chain behavior, zero-commits no human reveals).
+- **Not the full new mode yet**: the encompassing `resolve_prepared_tachiai` still models other Tachiai effects around exactly one prepared card per side. Multi-card effect aggregation, destinations, opening-hand retention, pending API integration and UI are still incomplete. Do not enable the dropdown until these are safely resolved.
+- No locally executed successful tests/CI verified for these commits.
