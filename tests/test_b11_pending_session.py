@@ -26,3 +26,47 @@ def test_pending_session_rejects_impossible_allocations():
         PendingB11Session.start(human, opponent, ["Not a card", "Oshi", "Tsuki"])
     with pytest.raises(ValueError):
         PendingB11Session.start(human, opponent, ["Oshi", "Tsuki"])
+
+
+def test_http_preview_is_private_and_rejects_premature_actions():
+    from http.server import ThreadingHTTPServer
+    from threading import Thread
+    from urllib.request import Request, urlopen
+    from urllib.error import HTTPError
+    from kimarite.b10_web import Handler, _sessions
+
+    human, opponent = roster()[:2]
+    cards = json.loads(ROSTER_PATH.read_text())["decks"][human]["cards"][:3]
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    worker = Thread(target=server.serve_forever, daemon=True)
+    worker.start()
+    base = "http://127.0.0.1:" + str(server.server_port)
+    token = None
+    try:
+        payload = {"human": human, "opponent": opponent,
+                   "opening_mode": "b11_preview", "opening_cards": cards}
+        request = Request(base + "/api/session", json.dumps(payload).encode(),
+                          {"Content-Type": "application/json"}, method="POST")
+        with urlopen(request, timeout=15) as response:
+            assert response.status == 201
+            result = json.load(response)
+        token = result["token"]
+        assert result["state"]["opponent"] == {"name": opponent}
+        assert result["state"]["events"] == []
+        with urlopen(base + "/api/session/" + token, timeout=15) as response:
+            assert json.load(response) == result["state"]
+        action = Request(base + "/api/session/" + token + "/action",
+                         json.dumps({"type": "end_turn"}).encode(),
+                         {"Content-Type": "application/json"}, method="POST")
+        with pytest.raises(HTTPError) as exc:
+            urlopen(action, timeout=15)
+        assert exc.value.code == 409
+        rejected = json.load(exc.value)
+        assert rejected["code"] == "b11_preview_only"
+        assert rejected["state"] == result["state"]
+    finally:
+        if token:
+            _sessions.pop(token, None)
+        server.shutdown()
+        server.server_close()
+        worker.join(timeout=5)
