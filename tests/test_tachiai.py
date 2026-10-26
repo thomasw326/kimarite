@@ -41,21 +41,13 @@ def test_power_advantage_scaling():
 
 
 def test_technique_access_scaling():
-    assert technique_access(0) == (2, 2)
-    assert technique_access(1) == (3, 3)
-    assert technique_access(2) == (4, 3)
-    assert technique_access(3) == (5, 3)
-    assert technique_access(4) == (6, 4)
-    assert technique_access(6) == (8, 4)
-    assert technique_access(7) == (9, 5)
-    assert technique_access(9) == (11, 5)
-    assert technique_access(10) == (12, 6)
-    assert technique_access(12) == (14, 6)
-    assert technique_access(13) == (15, 7)
+    # B9/B10 approved draw-only thresholds: +1 card per full 3 Technique.
+    for advantage in range(0, 14):
+        keep = 2 + advantage // 3
+        assert technique_access(advantage) == (keep, keep)
     assert [technique_thresholds(x) for x in range(0, 14)] == [
         0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5
     ]
-
 
 def test_power_defense_blocks_spirit_push_example():
     blank = Card(99, "Blank")
