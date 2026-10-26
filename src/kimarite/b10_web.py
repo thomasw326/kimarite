@@ -173,7 +173,11 @@ class Handler(BaseHTTPRequestHandler):
                     if not session:
                         return self.reply(404, {"error": "Bout expired on server restart.", "code": "session_expired"})
                     if isinstance(session, PendingB11Session):
-                        return self.reply(409, {"error": "B11 preview has no live Tachiai resolver yet.", "code": "b11_preview_only", "state": session.snapshot()})
+                        if data.get("type") == "commit_tachiai":
+                            if not session.phase.pending:
+                                return self.reply(409, {"error": "Tachiai is already committed.", "code": "tachiai_already_committed", "state": session.snapshot()})
+                            return self.reply(200, {"state": session.confirm(data["indices"])})
+                        return self.reply(409, {"error": "B11 live resolution is not yet enabled.", "code": "b11_preview_only", "state": session.snapshot()})
                     try:
                         snapshot = dispatch(session, data)
                         return self.reply(200, {"state":snapshot})
