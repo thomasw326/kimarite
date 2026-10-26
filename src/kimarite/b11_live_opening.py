@@ -55,6 +55,7 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
         discard_pile=[],
     )
     state = BoutState(own, ai)
+    state.b11_explain_wins = True
     comparison = compare_player_tachiai(human, ai.wrestler, prepared.committed)
     # Each committed reveal chain is consumed by the live resolver once.
     apply_initial_power(state, comparison)
