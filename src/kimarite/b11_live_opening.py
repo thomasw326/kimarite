@@ -7,6 +7,7 @@ transactional start-turn and public-state integration is verified.
 from __future__ import annotations
 
 import json
+import random
 from dataclasses import dataclass
 
 from .b10_human_session import ROSTER_PATH, STYLE_PROXIES, _fighter
@@ -35,6 +36,9 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     # consume its own reveal chain exactly once from the unallocated deck.
     full_deck = [card_by_name(n) for n in json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"][pending.human]["cards"]]
     unallocated = pending.phase.decision.unallocated_deck(pending.phase.opening, full_deck)
+    # Match Classic's seeded shuffle after physical opening cards are removed.
+    # Without this, the roster JSON order groups Kimarite near the draw top.
+    random.Random(seed * 2).shuffle(unallocated)
     records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
     human_record = records[pending.human]
     ai = _fighter(pending.opponent, records[pending.opponent], seed=seed * 2 + 1, ranking=2)
