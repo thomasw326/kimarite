@@ -35,3 +35,10 @@ No changes to the frozen B10 baseline. Implement and test on B11 branch before o
 - [ ] Assign committed-card destinations and retained-card opening hand precisely.
 - [ ] Wire server commands, replays and player-controlled mode dropdown with default new mode.
 - [ ] Integrate three-card choice in tournament allocations and confirm end-to-end tests.
+
+## Opponent Tachiai information barrier — approved
+- **Before player confirms commits:** do not show AI starting Kimarite, prepared Tachiai card, top-deck card, selected/opening orb totals, reveal-chain cards, comparative advantages, or any opening effect/log that discloses those choices. Show opponent identity and already-public baseline stats only if applicable.
+- **After player confirms commits:** resolve both Tachiai openings and then reveal the opponent's Tachiai choices, legal public reveal cards, resulting orb totals and effects together. The player cannot revise commits after seeing them.
+- **Server-enforced secrecy:** pending-opening API snapshot and event history must not serialize opponent opening names, private cards, calculated totals or pre-resolution events. Do not rely on hiding the existing `opening.opponent` DOM section: withhold the data in the HTTP response. Opponent draw-pile and hand contents remain hidden even after Tachiai, unless an effect reveals them.
+- **Recovery/replay:** restoring a pending bout must re-enter the hidden-opponent phase. A replayed confirmation must not leak a second preview or reroll the AI selection.
+- **Regression tests:** assert opponent Tachiai card names/totals absent from the pending JSON and history, even when the opponent is known through a fixed seed; after confirmation public Tachiai cards and results appear while private hand/draw remains absent.
