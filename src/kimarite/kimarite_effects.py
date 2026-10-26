@@ -177,8 +177,12 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 fighter.discard_pile.append(discarded)
 
     elif card.name == "Kirikaeshi":
-        # B9: optional conversion of Power into Momentum and a card.
-        if context.choice("use_optional") is True:
+        # Human must explicitly choose; AI/Classic no-choice callers retain
+        # their established decline-by-default behaviour.
+        optional = context.choice("use_optional")
+        if context.choice("__human__") and type(optional) is not bool:
+            raise ChoiceRequired(card.name, "use_optional", [True, False])
+        if optional is True:
             from .rules import lose_power
             lose_power(state, side, 1)
             gain_momentum(state, side, 1)
