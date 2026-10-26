@@ -50,7 +50,10 @@ def labelled_choices(session, exc, command=None):
         label = str(option)
         selected_card = None
         if isinstance(option, bool):
-            label = "Yes" if option else "No"
+            if key == "use_optional" and card_name == "Kirikaeshi":
+                label = "Lose 1 Power, gain 1 Momentum, draw 1" if option else "Skip optional effect"
+            else:
+                label = "Yes" if option else "No"
         elif isinstance(option, int) and not isinstance(option, bool):
             cards = None
             if key == "hand_index":
