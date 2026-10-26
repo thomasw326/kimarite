@@ -119,9 +119,10 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0 or state.winner is not None:
         return
 
-    # Sidestep suppresses ALL Push, including its owner's.
+    # Side-by-Side suppresses ALL Push, whether entered through Sidestep
+    # or Spin Away, including Push from the initiating wrestler.
     if state.side_by_side_owner is not None:
-        state.log("Sidestep reduces all Push to 0.")
+        state.log("Side-by-Side reduces all Push to 0.")
         return
 
     defending_side = state.opponent_side(side)
