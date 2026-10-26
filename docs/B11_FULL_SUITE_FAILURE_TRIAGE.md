@@ -90,3 +90,10 @@ CI run 40303100937: **338 passed / 70 failed**. B11 focused tests and UI smoke p
 2. Repair actual active-rule defects in source with narrow regression tests.
 3. Keep full-suite workflow visible/red until its scope and historic compatibility contract are reviewed; the dedicated B11 workflow is the feature gate.
 4. CI run 40303687016: focused B11 suite success. Do not claim the 70 have been fixed.
+
+## Verified regression reduction — test isolation fix
+- Root cause: `tests/test_b7_runtime_audit.py` invoked `r26_style_final22.install_final22()`, which mutates six process-global style builder/AI bindings (including `B6_FIXED_COMPOSITION_DECK=True`) but never restored them. Later V5 tests then ran the wrong experimental rule configuration.
+- Confirmed by isolated V5 style-builder workflow (run 40305002575): **PASS** before changing gameplay source.
+- Added an autouse teardown fixture *scoped to the B7 audit test module* that restores all six original bindings after each test. No core game rules or approved card values changed.
+- Full-suite GitHub Actions run 40305193776 after fix: **51 failed / 357 passed** (previously 70 failed / 338 passed). **19 red tests resolved**, with no additional failures; focused B11 and B10 UI smoke workflows also passed.
+- Remaining 51 failures need separate era-by-era rules validation; do not suppress by blanket skipping or alter approved B11 mechanics to satisfy obsolete assertions.
