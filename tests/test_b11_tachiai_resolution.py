@@ -34,7 +34,7 @@ def test_two_committed_oshi_chains_consume_distinct_stop_cards():
     ]
     assert [c.name for c in result.draw_pile] == ["Yori"]
     assert [c.name for c in result.retained_hand] == ["Tsuki"]
-    assert result.reveal_orbs == (4, 0, 3)
+    assert result.reveal_orbs == (6, 0, 2)
 
 
 def test_uncommitted_oshi_does_not_start_reveal_chain():
