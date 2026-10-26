@@ -97,3 +97,10 @@ CI run 40303100937: **338 passed / 70 failed**. B11 focused tests and UI smoke p
 - Added an autouse teardown fixture *scoped to the B7 audit test module* that restores all six original bindings after each test. No core game rules or approved card values changed.
 - Full-suite GitHub Actions run 40305193776 after fix: **51 failed / 357 passed** (previously 70 failed / 338 passed). **19 red tests resolved**, with no additional failures; focused B11 and B10 UI smoke workflows also passed.
 - Remaining 51 failures need separate era-by-era rules validation; do not suppress by blanket skipping or alter approved B11 mechanics to satisfy obsolete assertions.
+
+## Further red-test push (October 26)
+- Added eight-way independent GitHub Actions matrix at `.github/workflows/b11-legacy-diagnostics.yml`, one historical red test per fresh Python process. This confirms many failures are true old-rule expectation mismatches rather than test-order contamination. The workflow is **diagnostic**, so it intentionally fails until those tests are reconciled.
+- R21 gauntlet manifest has **63 arms, 22 Kimarite families**, verified by direct inspection of `data/r21_kimarite_arms.json`. Tests still asserted 50 arms/18 families despite the expanded manifest. Updated `tests/test_r21_gauntlet.py` to the current manifest shape and calculate schedule length from actual arm count; isolated manifest CI job succeeded.
+- `tests/test_v5_style_round_robin.py` incorrectly equated *all planned card-slot appearances* with *completed-bout outcomes*. When a bout reaches its turn limit, an appearance still exists without a win or loss. Updated assertions to check `2 * planned_bouts` appearances vs `2 * completed` resolved outcomes, preserving non-negative unresolved counts.
+- Focused B11 and B10 UI smoke checks succeeded on commit `112bfb8`. Full pytest re-run `40306744205` initiated, latest result should be checked before reporting a revised global failure count.
+- No live gameplay rules, card orbs, approved balance, or B10 main changed.
