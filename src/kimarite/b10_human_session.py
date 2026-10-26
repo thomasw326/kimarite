@@ -218,6 +218,7 @@ def public_snapshot(session: HumanBout) -> dict:
         "stopped_reason": session.stopped_reason,
         "winner": view.winner.value if view.winner is not None else None,
         "win_method": session.state.win_method if session.finished else None,
+        "victory_details": getattr(session.state, "b11_victory_details", None) if session.finished else None,
         "turn": view.turn_number,
         "position": view.position,
         "momentum": view.momentum,
