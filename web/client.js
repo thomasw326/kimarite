@@ -60,6 +60,7 @@ function showBoutResult(g){
  $('result-method').textContent=g.win_method||'Bout ended';
  $('result-timing').textContent=(g.winner==='A'?g.human.name:g.opponent.name)+' wins · Turn '+g.turn;
  const info=g.victory_details;
+ $('result-type').textContent=info?.source&&info.source!=='kimarite'?'WINNING METHOD':'WINNING KIMARITE';
  $('result-requirements').textContent=info?.requirement_text||'See the bout history for the winning conditions.';
  const values=$('result-values');values.replaceChildren();
  if(info){
