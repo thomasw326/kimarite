@@ -13,6 +13,8 @@ from kimarite.styles_v5 import STYLES
 from kimarite.style_builds_v5 import build_style
 
 
+LIVE_ORB_OVERRIDES = {"Read the Move": (0, 1, 1)}  # Live approved print supersedes V5.1 manifest.
+
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = json.loads((ROOT / "data" / "card_pool_v5_1.json").read_text(encoding="utf-8"))
 
@@ -37,7 +39,7 @@ def test_release_catalog_orbs():
             expected = tuple(row["orbs"][key] for key in ("power", "technique", "spirit"))
         else:
             expected = (row["orbs"].count("🟣"), row["orbs"].count("🟢"), row["orbs"].count("🟠"))
-        assert (card.power, card.technique, card.spirit) == expected, row["name"]
+        assert (card.power, card.technique, card.spirit) == LIVE_ORB_OVERRIDES.get(row["name"], expected), row["name"]
 
 
 def test_fifteen_styles_prune_seven_at_baseline_and_restore_at_negative_difficulty():
