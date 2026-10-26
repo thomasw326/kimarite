@@ -1,6 +1,6 @@
 # B11 player-controlled Tachiai — approved implementation specification
 
-Status: **design approved, implementation pending**. Do not represent this mode as playable until server and client both support it. This supersedes the prior player-facing mandatory Kimarite/prepared/top-deck arrangement; retain that arrangement as a selectable **Classic opening** mode for comparison.
+Status: **implementation started; core selection and validation committed; live session integration pending**. Do not represent this mode as playable until server and client both support it. This supersedes the prior player-facing mandatory Kimarite/prepared/top-deck arrangement; retain that arrangement as a selectable **Classic opening** mode for comparison.
 
 ## UI
 - Opening mode dropdown: **Player-controlled Tachiai (default)** / **Classic opening (legacy)**. This should work in both standalone bouts and the 15-bout tournament.
@@ -25,3 +25,13 @@ Status: **design approved, implementation pending**. Do not represent this mode 
 - Fixed AI 28-card unique base + 12 ordered affinity-reviewed duplicates, difficulty = wins - losses with independently sampled integer offset in [-2,2], deck maximum 40; original seven-step priority stat pattern applied in both directions, each stat floor 0.
 
 No changes to the frozen B10 baseline. Implement and test on B11 branch before offering as default in the playable UI.
+
+## Implementation tracking
+
+- [x] Pure opening allocation, exact deck-copy ownership and zero-to-three commit partition: `src/kimarite/b11_player_opening.py`.
+- [x] Contract tests: `tests/test_b11_player_opening.py`.
+- [ ] Integrate pending player decision into the session engine *before* Tachiai resolves.
+- [ ] Resolve Tachiai contributions and eligible effects for multiple committed player cards without changing AI rules.
+- [ ] Assign committed-card destinations and retained-card opening hand precisely.
+- [ ] Wire server commands, replays and player-controlled mode dropdown with default new mode.
+- [ ] Integrate three-card choice in tournament allocations and confirm end-to-end tests.
