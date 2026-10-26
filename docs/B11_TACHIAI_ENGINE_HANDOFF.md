@@ -42,3 +42,11 @@ Do not claim the new mode is functional or shipped before these are complete. B1
 - **Fixed:** `PlayerOpening` now records unique source deck indices and removes precisely those three positions. Duplicate copies remain distinguishable even when they reference one immutable Card.
 - Replaced identity-based test assertions with slot indices and occurrence counts. Added exhaustive Classic Oshi reveal-sequence equivalence tests for all decks of 0–4 cards drawn from Oshi/Tsuki/Shove/Harite.
 - **Test execution remains unverified** (latest B11 commit had no associated workflow runs or statuses). Only static source inspection and authored test coverage have been completed. No claim of passing tests.
+
+## Verified CI checkpoint — October 26, 2026
+- Draft PR #49: https://github.com/thomasw326/kimarite/pull/49 (base `feature/b10-human-ui-session`, not merged).
+- PR-wide full pytest run 40303100937: **failure**, summary `70 failed, 338 passed`. The failures reported in the workflow summary are legacy V5 tests; no B11-named failures were observed in that summary. Do not claim full suite clean.
+- B10 human UI smoke run 40303100931: **success**.
+- Added focused CI `.github/workflows/b11-tachiai.yml` with explicit new B11 test files.
+- Focused B11 test workflow run **40303687016 completed successfully**, job `121507446090`. This verifies new opening allocation/phase/orb/reveal/privacy regressions in CI. It does not verify live player-facing integration (not yet implemented).
+- Preserve previous baseline, and investigate legacy V5 regressions independently. Do not loosen tests or alter unrelated card balance to force a green full-suite result.
