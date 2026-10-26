@@ -14,6 +14,7 @@ from urllib.parse import urlsplit
 
 from .b10_human_session import dispatch, new_b10_session, public_snapshot, roster, opening_options, management_deal
 from .effects import ChoiceRequired, IllegalPlay
+from .b11_pending_session import PendingB11Session
 
 STATIC = Path(__file__).resolve().parents[2] / "web"
 _sessions = {}
@@ -140,7 +141,7 @@ class Handler(BaseHTTPRequestHandler):
             token = path.removeprefix("/api/session/")
             with _lock:
                 session = _sessions.get(token)
-                return self.reply(200 if session else 404, public_snapshot(session) if session else {"error": "This bout expired because the game server restarted. Start a new bout.", "code":"session_expired"})
+                return self.reply(200 if session else 404, (session.snapshot() if isinstance(session, PendingB11Session) else public_snapshot(session)) if session else {"error": "This bout expired because the game server restarted. Start a new bout.", "code":"session_expired"})
         if path in ("/", "/index.html", "/client.js", "/style.css"):
             data = (STATIC / ("client.js" if path == "/client.js" else "style.css" if path == "/style.css" else "index.html")).read_bytes()
             self.send_response(200)
@@ -159,15 +160,20 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/api/session":
                     if len(_sessions) >= 100:
                         return self.reply(503, {"error": "Session capacity reached"})
-                    session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
+                    if data.get("opening_mode") == "b11_preview":
+                        session = PendingB11Session.start(data["human"], data["opponent"], data["opening_cards"])
+                    else:
+                        session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
                     token = secrets.token_urlsafe(24)
                     _sessions[token] = session
-                    return self.reply(201, {"token": token, "state":public_snapshot(session)})
+                    return self.reply(201, {"token": token, "state":session.snapshot() if isinstance(session, PendingB11Session) else public_snapshot(session)})
                 if path.startswith("/api/session/") and path.endswith("/action"):
                     token = path[len("/api/session/"):-len("/action")]
                     session = _sessions.get(token)
                     if not session:
                         return self.reply(404, {"error": "Bout expired on server restart.", "code": "session_expired"})
+                    if isinstance(session, PendingB11Session):
+                        return self.reply(409, {"error": "B11 preview has no live Tachiai resolver yet.", "code": "b11_preview_only", "state": session.snapshot()})
                     try:
                         snapshot = dispatch(session, data)
                         return self.reply(200, {"state":snapshot})
