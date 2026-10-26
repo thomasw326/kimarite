@@ -65,3 +65,17 @@ def test_http_b11_live_commit_transitions_to_playable_snapshot():
         server.shutdown()
         server.server_close()
         worker.join(timeout=5)
+
+
+def test_b11_event_history_marks_start_of_turn_checks_without_classic_change():
+    human, opponent = roster()[:2]
+    names = json.loads(ROSTER_PATH.read_text())["decks"][human]["cards"][:3]
+    pending = PendingB11Session.start(human, opponent, names, seed=23)
+    pending.confirm([0])
+    live = start_b11_human_bout(pending)
+    events = live.state.event_log
+    turn_starts = [e for e in events if e.startswith("TURN ") and " START (" in e]
+    assert turn_starts
+    assert "start-of-turn checks" in turn_starts[0]
+    assert events.index(turn_starts[0]) >= 0
+    assert live.annotate_turns is True
