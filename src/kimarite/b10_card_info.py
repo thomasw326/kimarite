@@ -40,7 +40,7 @@ CARD_TEXT = {
     "Give Ground": {"timing":"Exchange / Tachiai","effect":"Exchange: lose 1 Position, gain 1 Momentum and 1 Power, then draw 1.","status":"verified"},
     "Pull": {"timing":"Exchange / Tachiai","effect":"Exchange: lose 1 Position, gain 1 Momentum, make opponent Unstable, draw 1 then discard 1.","status":"verified"},
     "Get Underneath": {"timing":"Exchange / Tachiai","effect":"Tachiai or Exchange: gain 1 Momentum and 1 Push, then grant opponent the card's specified counter-Kimarite if the bout continues.","status":"verified"},
-    "Use the Tawara": {"timing":"Exchange","effect":"Exchange: lose 1 Position, gain 1 Momentum and search the first Kimarite in draw pile into your hand.","status":"verified"},
+    "Use the Tawara": {"timing":"Exchange / Tachiai","effect":"Exchange: lose 1 Position, gain 1 Momentum and search the first Kimarite in draw pile into your hand.","status":"verified"},
     "Reset to Neutral": {"timing":"Exchange / Tachiai","effect":"Exchange: disrupt and remove all Temporary cards on both sides; end Side-by-Side. Remove both of your Grips, reset your negative Momentum to zero; if you had Grip, gain 1 Position.","status":"verified"},
     "Read the Move": {"timing":"Exchange / Tachiai","effect":"Exchange: choose to draw 1 card, or disrupt one opponent Temporary to gain 1 Momentum; draw if opponent has no Temporary.","status":"verified"},
     "Kachiage": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 2 Power; disrupt one opponent Temporary card if present.","status":"verified"},
