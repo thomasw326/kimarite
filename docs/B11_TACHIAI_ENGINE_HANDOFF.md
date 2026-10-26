@@ -36,3 +36,9 @@ Do not claim the new mode is functional or shipped before these are complete. B1
 - Live-path regression tests added: `tests/test_b11_live_tachiai_reveals.py` (two sequential Oshi chains, Classic one-chain behavior, zero-commits no human reveals).
 - **Not the full new mode yet**: the encompassing `resolve_prepared_tachiai` still models other Tachiai effects around exactly one prepared card per side. Multi-card effect aggregation, destinations, opening-hand retention, pending API integration and UI are still incomplete. Do not enable the dropdown until these are safely resolved.
 - No locally executed successful tests/CI verified for these commits.
+
+## Verification finding and repair — card instances
+- **Confirmed bug:** `catalog.card_by_name` returns shared immutable Card records, meaning two occurrences of Oshi in a deck may refer to the same Python object. Identity-based `PlayerOpening.remaining_deck` and identity assertions were invalid for duplicates.
+- **Fixed:** `PlayerOpening` now records unique source deck indices and removes precisely those three positions. Duplicate copies remain distinguishable even when they reference one immutable Card.
+- Replaced identity-based test assertions with slot indices and occurrence counts. Added exhaustive Classic Oshi reveal-sequence equivalence tests for all decks of 0–4 cards drawn from Oshi/Tsuki/Shove/Harite.
+- **Test execution remains unverified** (latest B11 commit had no associated workflow runs or statuses). Only static source inspection and authored test coverage have been completed. No claim of passing tests.
