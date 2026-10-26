@@ -104,3 +104,11 @@ CI run 40303100937: **338 passed / 70 failed**. B11 focused tests and UI smoke p
 - `tests/test_v5_style_round_robin.py` incorrectly equated *all planned card-slot appearances* with *completed-bout outcomes*. When a bout reaches its turn limit, an appearance still exists without a win or loss. Updated assertions to check `2 * planned_bouts` appearances vs `2 * completed` resolved outcomes, preserving non-negative unresolved counts.
 - Focused B11 and B10 UI smoke checks succeeded on commit `112bfb8`. Full pytest re-run `40306744205` initiated, latest result should be checked before reporting a revised global failure count.
 - No live gameplay rules, card orbs, approved balance, or B10 main changed.
+
+## Additional verified reduction — Shiko and Morozashi
+- Full suite after the approved B11 Shiko Stomp Exchange +1 Play test correction: **47 failed, 361 passed** (GitHub Actions run 40330264735).
+- `tests/test_v5_shiko_playability.py` now expects the approved B11 Exchange Play refund and still checks persistent one-use negative-effect protection. The isolated Shiko diagnostic passed.
+- `tests/test_v5_morozashi_deep.py` now checks the approved B11 rule *requires at least one Grip* (both Grip hands may already be established) rather than the superseded exact-one condition.
+- Full suite after Morozashi expectation correction: **45 failed, 363 passed** (GitHub Actions run 40330546900).
+- Renamed the matching independent diagnostic workflow test identifier to the current Morozashi test name (commit 30f2bb1); confirm on the next workflow run.
+- **Net reduction: 70 to 45 failures**; no production mechanics or approved balance changed during this group of fixes.
