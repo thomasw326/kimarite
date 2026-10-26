@@ -31,6 +31,10 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     if pending.phase.pending:
         raise ValueError("Commit the opening before resolution.")
     prepared = pending.prepare_resolution()
+    # Reveal planning is useful for validation, but the live resolver must
+    # consume its own reveal chain exactly once from the unallocated deck.
+    full_deck = [card_by_name(n) for n in json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"][pending.human]["cards"]]
+    unallocated = pending.phase.decision.unallocated_deck(pending.phase.opening, full_deck)
     records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
     human_record = records[pending.human]
     ai = _fighter(pending.opponent, records[pending.opponent], seed=seed * 2 + 1, ranking=2)
@@ -38,7 +42,7 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     order = list(dict.fromkeys([style.primary, style.secondary]))
     order.extend(x.value for x in (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT) if x.value not in order)
     stats = human_record["stats"]
-    blank = card_by_name("Oshi")
+    blank = card_by_name("Oshi")  # unused classic-role placeholders; never zoned
     human = Wrestler(
         pending.human, stats["power"], stats["technique"], stats["spirit"],
         blank, blank, blank,
@@ -46,15 +50,13 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
         ranking=1,
     )
     own = FighterState(
-        human, draw_pile=list(prepared.draw_pile),
+        human, draw_pile=unallocated,
         hand=list(prepared.retained_hand),
-        discard_pile=list(prepared.revealed_discard),
+        discard_pile=[],
     )
     state = BoutState(own, ai)
     comparison = compare_player_tachiai(human, ai.wrestler, prepared.committed)
-    # The prepared planner consumes human reveals once. Resolve the AI chain in
-    # the engine, but do not replay already-consumed human reveal cards.
-    comparison.wrestler_a  # checked by type during regression suite
+    # Each committed reveal chain is consumed by the live resolver once.
     apply_initial_power(state, comparison)
     resolve_prepared_tachiai(
         state, comparison, committed_cards={Side.A: prepared.committed},
