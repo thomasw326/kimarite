@@ -26,9 +26,9 @@ def test_release_pool_exactly_matches_manifest():
     assert sum(not card.is_kimarite for card in CARD_POOL) == 39
     assert sum(card.is_kimarite for card in CARD_POOL) == 22
     expected_names = {entry["name"] for entry in MANIFEST["cards"]}
-    # The V5.1 manifest is historical: Tsuriotoshi was retired from the live 22-Kimarite roster.
-    # Preserve the original manifest, but compare its still-active entries to the live pool.
-    assert {card.name for card in CARD_POOL} == expected_names - {"Tsuriotoshi"}
+    # The V5.1 print pool is separate from B9's supplemental Tsuriotoshi card.
+    # Guard the historical 61-card roster without importing B9 additions.
+    assert {card.name for card in CARD_POOL} == expected_names
     selected = {card.name for card in CARD_POOL if card.is_kimarite}
     assert selected == {card.name for card in STARTING_KIMARITE}
     assert selected == set(KIMARITE_PREDICATES)
