@@ -83,5 +83,6 @@ def start_b11_human_bout(pending: PendingB11Session, *, max_turns: int = 100):
         "committed": pending.phase.decision.committed,
         "retained": pending.phase.decision.retained,
     }
+    session.annotate_turns = True
     session.advance()
     return session
