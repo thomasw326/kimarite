@@ -112,3 +112,8 @@ CI run 40303100937: **338 passed / 70 failed**. B11 focused tests and UI smoke p
 - Full suite after Morozashi expectation correction: **45 failed, 363 passed** (GitHub Actions run 40330546900).
 - Renamed the matching independent diagnostic workflow test identifier to the current Morozashi test name (commit 30f2bb1); confirm on the next workflow run.
 - **Net reduction: 70 to 45 failures**; no production mechanics or approved balance changed during this group of fixes.
+
+## Current verified checkpoint — live orb snapshots
+- Fixed historical print snapshot checks for `Read the Move` to explicitly account for current catalogue's (0 Power, 1 Technique, 1 Spirit) rather than historical V5.1 manifest's (0, 2, 1). **No card balance change**; tests now encode the live printed value as a documented override while keeping historical manifest data intact.
+- Full GitHub Actions pytest run **40331248739: 43 failed, 365 passed** (down from 45 failed, 363 passed). Both B11 focused Tachiai tests and B10 human UI smoke passed on the matching commit `c8bb108`.
+- Baseline first measured: 70 failed/338 passed; **27 red tests cleared** via validated isolation and reconciliation. Remaining 43 failures are not suppressed.
