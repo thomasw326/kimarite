@@ -17,3 +17,10 @@ This document tracks what is genuinely implemented vs pending as of commit 87e6b
 7. Run targeted and full tests plus smoke end-to-end; only then enable and report the playable mode.
 
 Do not claim the new mode is functional or shipped before these are complete. B10 main remains frozen.
+
+
+## Further engine groundwork (October 26)
+- `src/kimarite/b11_tachiai_phase.py`: one-shot `PendingPlayerTachiai` receives a validated subset of allocated slots and records committed/retained card objects, without prematurely advancing a bout. Tests: `tests/test_b11_tachiai_phase.py`.
+- `src/kimarite/b11_tachiai_reveals.py`: pure multi-commit Oshi/Tsuki reveal planner, consuming sequential draw pile cards up to and including a non-family stopper for **each** committed reveal card. Tests: `tests/test_b11_tachiai_reveals.py`.
+- **Still not live**: pending phase, reveal planner and variable orb comparison are isolated modules. The classic live session, UI, and AI remain unmodified.
+- **Open correctness concern**: multiple committed cards require careful extension of `resolve_prepared_tachiai` without repeating one-time Spirit Push, and correct treatment of committed Kimarite/ordinary destinations and first-turn hand. Do not expose mode until tests cover this end-to-end.
