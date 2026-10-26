@@ -41,6 +41,19 @@ class PendingB11Session:
         self.phase.choose(indices)
         return self.snapshot()
 
+    def prepare_resolution(self):
+        """Build the private exact-card handoff only after commitment.
+
+        Do not serialize this object to clients: it includes hidden deck cards.
+        The live multi-effect resolver will consume it when implemented.
+        """
+        if self.phase.pending:
+            raise ValueError("Commit Tachiai before preparing its resolution.")
+        from .b11_tachiai_resolution import prepare_human_tachiai
+        records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
+        deck = [card_by_name(name) for name in records[self.human]["cards"]]
+        return prepare_human_tachiai(self.phase.opening, self.phase.decision, deck)
+
     def snapshot(self) -> dict[str, Any]:
         if self.phase.pending:
             return pending_tachiai_snapshot(self.phase, self.human, self.opponent)
