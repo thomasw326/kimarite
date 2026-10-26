@@ -1,0 +1,33 @@
+name: B11 legacy failure diagnostics
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/b11-legacy-diagnostics.yml'
+      - 'src/kimarite/**'
+      - 'tests/**'
+  workflow_dispatch:
+
+jobs:
+  legacy-samples-in-isolation:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - tests/test_tachiai.py::test_technique_access_scaling
+          - tests/test_effects.py::test_oshi_gains_push_and_play_and_draws
+          - tests/test_v5_pull_underneath_sync.py::test_pull_filter_mode_draws_then_discards_without_temporary
+          - tests/test_v5_shiko_playability.py::test_shiko_stomp_exchange_play_is_legal_and_persistent
+          - tests/test_r21_gauntlet.py::test_manifest_coverage_and_ids
+          - tests/test_v5_morozashi_deep.py::test_morozashi_requires_exactly_one_gripping_hand[1-1]
+          - tests/test_v5_tottari_timing.py::test_tottari_start_check_preserves_prior_opponent_grip_event
+          - tests/test_v5_style_round_robin.py::test_slot_outcomes_reconcile_to_participants
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e '.[dev]'
+      - name: Isolate this failing test in a fresh interpreter
+        run: python -m pytest -q "${{ matrix.test }}"
