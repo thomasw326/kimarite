@@ -20,6 +20,16 @@ class TachiaiDecision:
     retained: tuple[Card, ...]
     indices: tuple[int, ...]
 
+    def unallocated_deck(self, opening: PlayerOpening, deck: Sequence[Card]) -> list[Card]:
+        """Remove exactly the three offered physical slots, not equal card objects.
+
+        The result belongs to the next Tachiai resolver. Retained cards must
+        enter the initial hand separately, never reappear in the draw pile.
+        """
+        if opening.cards != self.allocated:
+            raise ValueError("Decision belongs to a different opening.")
+        return opening.remaining_deck(deck)
+
 
 @dataclass
 class PendingPlayerTachiai:
