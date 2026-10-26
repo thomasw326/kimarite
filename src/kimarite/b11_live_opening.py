@@ -64,3 +64,24 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     if state.winner is None:
         state.active_side = first_exchange_side(comparison, human, ai.wrestler)
     return ResolvedB11Opening(state, comparison)
+
+
+def start_b11_human_bout(pending: PendingB11Session, *, max_turns: int = 100):
+    """Turn a committed opening into the existing interactive HumanBout."""
+    from .human_bout import HumanBout
+    from .style_ai_v5 import play_style_turn
+    result = build_resolved_b11_opening(pending, seed=pending.seed)
+    def opponent_turn(state, side, comparison):
+        return play_style_turn(
+            state, side, comparison,
+            STYLE_PROXIES.get(pending.opponent, pending.opponent),
+        )
+    session = HumanBout(result.state, result.comparison, Side.A, opponent_turn, max_turns)
+    # B11 public serialization must never invent Classic prepared/top slots.
+    session.b11_opening = {
+        "allocated": pending.phase.decision.allocated,
+        "committed": pending.phase.decision.committed,
+        "retained": pending.phase.decision.retained,
+    }
+    session.advance()
+    return session
