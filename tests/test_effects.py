@@ -85,7 +85,8 @@ def test_regain_balance_recovers_negative_momentum():
 
     play_card(bout, Side.A, card)
 
-    assert bout.momentum == 0
+    # One step of Momentum recovery under approved B10 rules.
+    assert bout.momentum == -1
     assert bout.fighter_a.power == 2
 
 
