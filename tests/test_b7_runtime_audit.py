@@ -15,6 +15,35 @@ from kimarite.tachiai import compare_tachiai
 from kimarite.tachiai_effects import resolve_prepared_tachiai
 
 
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def isolate_final22_global_install():
+    """Undo the R26 experimental install after each B7 audit test.
+
+    install_final22() directly mutates module-level production style build
+    bindings. Without restoration, subsequent V5 tests silently run the
+    fixed-composition experiment and fail for unrelated reasons.
+    """
+    from kimarite import style_builds_v5, style_ai_v5
+    originals = (
+        style_builds_v5.B6_FIXED_COMPOSITION_DECK,
+        style_builds_v5.CARD_POOL,
+        style_builds_v5.STARTING_KIMARITE,
+        style_builds_v5.preferred,
+        style_builds_v5.least_useful,
+        style_ai_v5.card_affinity,
+    )
+    yield
+    (style_builds_v5.B6_FIXED_COMPOSITION_DECK,
+     style_builds_v5.CARD_POOL,
+     style_builds_v5.STARTING_KIMARITE,
+     style_builds_v5.preferred,
+     style_builds_v5.least_useful,
+     style_ai_v5.card_affinity) = originals
+
+
 def new_state(name="Oshi", *, power=7, opponent_power=4, hand_extra=(),
               deck_length=6, opponent_hand=(), kimarite_deck=()):
     starter = card_by_name("Oshidashi")
