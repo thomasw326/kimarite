@@ -70,3 +70,30 @@ def test_http_preview_is_private_and_rejects_premature_actions():
         server.shutdown()
         server.server_close()
         worker.join(timeout=5)
+
+
+@pytest.mark.parametrize("indices", [[], [0], [1, 2], [0, 1, 2]])
+def test_confirm_records_once_without_exposing_opponent(indices):
+    human, opponent = roster()[:2]
+    cards = json.loads(ROSTER_PATH.read_text())["decks"][human]["cards"][:3]
+    session = PendingB11Session.start(human, opponent, cards)
+    committed = session.confirm(indices)
+    assert committed["phase"] == "tachiai_resolution_pending"
+    assert committed["tachiai_choice"]["committed_indices"] == indices
+    assert len(committed["tachiai_choice"]["retained"]) == 3 - len(indices)
+    assert committed["opponent"] == {"name": opponent}
+    assert committed["events"] == []
+    assert committed["opening"] is None
+    assert not committed["can_end_turn"]
+    assert session.snapshot() == committed
+    with pytest.raises(ValueError, match="already been made"):
+        session.confirm([])
+
+
+def test_invalid_confirmation_leaves_opening_uncommitted():
+    human, opponent = roster()[:2]
+    cards = json.loads(ROSTER_PATH.read_text())["decks"][human]["cards"][:3]
+    session = PendingB11Session.start(human, opponent, cards)
+    with pytest.raises(ValueError):
+        session.confirm([0, 0])
+    assert session.snapshot()["phase"] == "choose_tachiai"
