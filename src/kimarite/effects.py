@@ -691,7 +691,6 @@ def _power_water_cantrip(
             fighter.draw_pile.append(recycled)
             state.log(f"{fighter.wrestler.name} returns {recycled.name} to the bottom of the Draw Pile.")
     add_play(state, side, 1)
-    draw_one(state, side)
 
 
 GRIP_REFERENCING_TEMPORARIES = frozenset({
