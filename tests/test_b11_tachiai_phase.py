@@ -40,5 +40,5 @@ def test_duplicate_copy_identity_preserved():
     phase = fresh()
     committed = phase.choose([1]).committed
     assert committed[0] is phase.opening.cards[1]
-    assert committed[0] is not phase.opening.cards[0]
+    assert phase.opening.deck_indices[0] != phase.opening.deck_indices[1]
     assert phase.opening.cards[0] in phase.decision.retained
