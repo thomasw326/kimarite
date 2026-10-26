@@ -97,3 +97,49 @@ def test_invalid_confirmation_leaves_opening_uncommitted():
     with pytest.raises(ValueError):
         session.confirm([0, 0])
     assert session.snapshot()["phase"] == "choose_tachiai"
+
+
+def test_http_commit_tachiai_is_one_shot_and_stays_private():
+    from http.server import ThreadingHTTPServer
+    from threading import Thread
+    from urllib.request import Request, urlopen
+    from urllib.error import HTTPError
+    from kimarite.b10_web import Handler, _sessions
+
+    human, opponent = roster()[:2]
+    cards = json.loads(ROSTER_PATH.read_text())["decks"][human]["cards"][:3]
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    worker = Thread(target=server.serve_forever, daemon=True)
+    worker.start()
+    base = "http://127.0.0.1:" + str(server.server_port)
+    token = None
+
+    def post(path, payload):
+        request = Request(base + path, json.dumps(payload).encode(),
+                          {"Content-Type": "application/json"}, method="POST")
+        with urlopen(request, timeout=15) as response:
+            return json.load(response)
+
+    try:
+        created = post("/api/session", {"human": human, "opponent": opponent,
+                                       "opening_mode": "b11_preview", "opening_cards": cards})
+        token = created["token"]
+        path = "/api/session/" + token + "/action"
+        committed = post(path, {"type": "commit_tachiai", "indices": [0, 2]})["state"]
+        assert committed["phase"] == "tachiai_resolution_pending"
+        assert committed["opponent"] == {"name": opponent}
+        assert committed["opening"] is None
+        assert committed["events"] == []
+        assert [x["name"] for x in committed["tachiai_choice"]["committed"]] == [cards[0], cards[2]]
+        with pytest.raises(HTTPError) as duplicate:
+            post(path, {"type": "commit_tachiai", "indices": [1]})
+        assert duplicate.value.code == 409
+        assert json.load(duplicate.value)["code"] == "tachiai_already_committed"
+        with urlopen(base + "/api/session/" + token, timeout=15) as response:
+            assert json.load(response) == committed
+    finally:
+        if token:
+            _sessions.pop(token, None)
+        server.shutdown()
+        server.server_close()
+        worker.join(timeout=5)
