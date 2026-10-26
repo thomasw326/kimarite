@@ -48,7 +48,7 @@ CARD_TEXT = {
     "Ankogata": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Power and clear your Unstable status. If Power is at least 6, reduce both opponent Grips one level (two levels if Power is at least 9).","status":"verified"},
     "Morotezuki": {"timing":"Exchange / Tachiai","effect":"Exchange: each card played after Morotezuki during the same turn generates 1 Push, even if its own effect otherwise does not move Position.","status":"verified"},
     "Power Water": {"timing":"Exchange / Tachiai","effect":"Tachiai or Exchange: shuffle 6 Power Water Cantrips into draw pile, then gain 1 additional Play.","status":"verified"},
-    "Power Water Cantrip": {"timing":"Exchange / Tachiai","effect":"Exchange: recover up to 3 discarded cards (chosen target first, then newest remaining cards), gain 1 Play and draw 1.","status":"verified"},
+    "Power Water Cantrip": {"timing":"Exchange / Tachiai","effect":"Exchange: choose 1 discarded card to return to your hand; return up to 2 newest remaining discarded cards to the bottom of your Draw Pile; gain 1 Play.","status":"verified"},
     "Yorikiri": {"timing":"Kimarite","effect":"Win: usable total Grip at least 1, relative Momentum at least +1 and Position at least +2. On play: gain 1 Push if usable Grip is at least 2.","status":"verified"},
     "Oshidashi": {"timing":"Kimarite","effect":"Win: Position at least +2 and Momentum at least +2. On play: if Position at least +1, gain 1 Momentum.","status":"verified"},
     "Tsukidashi": {"timing":"Kimarite","effect":"Win: Position at least +3 and at least 3 cards played this turn. On play: if Position at least +1, gain 1 Play and draw 1.","status":"verified"},
