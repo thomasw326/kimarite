@@ -42,3 +42,14 @@ def test_duplicate_copy_identity_preserved():
     assert committed[0] is phase.opening.cards[1]
     assert phase.opening.deck_indices[0] != phase.opening.deck_indices[1]
     assert phase.opening.cards[0] in phase.decision.retained
+
+
+@pytest.mark.parametrize("indices", [[], [1], [0, 2], [0, 1, 2]])
+def test_resolution_handoff_removes_three_physical_deck_slots(indices):
+    deck = [card_by_name(n) for n in ("Shove", "Oshi", "Oshi", "Tsuki", "Oshi")]
+    opening = PlayerOpening.from_names(deck, ("Oshi", "Oshi", "Tsuki"))
+    phase = PendingPlayerTachiai(opening)
+    decision = phase.choose(indices)
+    assert [c.name for c in decision.unallocated_deck(opening, deck)] == ["Shove", "Oshi"]
+    assert len(decision.retained) + len(decision.committed) == 3
+    assert phase.decision is decision
