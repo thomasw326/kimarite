@@ -12,21 +12,34 @@ PREPARED_TEMPORARY_TACHIAI = frozenset({"Shiko Stomp", "Salt Throw", "Nekodamash
 REVEAL_FAMILY = frozenset({"Oshi", "Tsuki"})
 
 
-def _reveal_tachiai_orbs(state: BoutState, comparison: TachiaiComparison) -> None:
-    extras = {Side.A: [0, 0, 0], Side.B: [0, 0, 0]}
+def _reveal_tachiai_orbs(
+    state: BoutState,
+    comparison: TachiaiComparison,
+    *,
+    committed_cards: dict[Side, tuple[Card, ...]] | None = None,
+) -> None:
+    """Apply ordered Oshi/Tsuki chains once, for each committed reveal card.
+
+    With no explicit commits this is identical to Classic's one prepared
+    card per fighter. The B11 caller can supply all committed human cards
+    without affecting the AI's own prepared opening.
+    """
+    from .b11_tachiai_reveals import plan_reveals
+
+    extras = {Side.A: (0, 0, 0), Side.B: (0, 0, 0)}
     for side in (Side.A, Side.B):
         fighter = state.fighter(side)
-        if fighter.wrestler.prepared_tachiai_card.name not in REVEAL_FAMILY:
-            continue
-        while fighter.draw_pile:
-            card = fighter.draw_pile.pop(0)
-            extras[side][0] += card.power
-            extras[side][1] += card.technique
-            extras[side][2] += card.spirit
-            fighter.discard_pile.append(card)
+        cards = (
+            committed_cards[side]
+            if committed_cards is not None and side in committed_cards
+            else (fighter.wrestler.prepared_tachiai_card,)
+        )
+        outcome = plan_reveals(cards, fighter.draw_pile)
+        fighter.draw_pile[:] = outcome.remaining
+        fighter.discard_pile.extend(outcome.revealed)
+        extras[side] = outcome.orbs
+        for card in outcome.revealed:
             state.log(f"{fighter.wrestler.name} reveals {card.name} for Tachiai orbs.")
-            if card.name not in REVEAL_FAMILY:
-                break
     a, b = extras[Side.A], extras[Side.B]
     old_a, old_b = comparison.wrestler_a, comparison.wrestler_b
     new_a = TachiaiStats(old_a.power+a[0], old_a.technique+a[1], old_a.spirit+a[2])
