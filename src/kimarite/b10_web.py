@@ -160,8 +160,9 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/api/session":
                     if len(_sessions) >= 100:
                         return self.reply(503, {"error": "Session capacity reached"})
-                    if data.get("opening_mode") == "b11_preview":
-                        session = PendingB11Session.start(data["human"], data["opponent"], data["opening_cards"])
+                    if data.get("opening_mode") in {"b11_preview", "b11_live"}:
+                        session = PendingB11Session.start(data["human"], data["opponent"], data["opening_cards"], seed=int(data.get("seed", 20261021)))
+                        session.live_enabled = data.get("opening_mode") == "b11_live"
                     else:
                         session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
                     token = secrets.token_urlsafe(24)
@@ -176,7 +177,13 @@ class Handler(BaseHTTPRequestHandler):
                         if data.get("type") == "commit_tachiai":
                             if not session.phase.pending:
                                 return self.reply(409, {"error": "Tachiai is already committed.", "code": "tachiai_already_committed", "state": session.snapshot()})
-                            return self.reply(200, {"state": session.confirm(data["indices"])})
+                            committed_snapshot = session.confirm(data["indices"])
+                            if getattr(session, "live_enabled", False):
+                                from .b11_live_opening import start_b11_human_bout
+                                live = start_b11_human_bout(session)
+                                _sessions[token] = live
+                                return self.reply(200, {"state": public_snapshot(live)})
+                            return self.reply(200, {"state": committed_snapshot})
                         return self.reply(409, {"error": "B11 live resolution is not yet enabled.", "code": "b11_preview_only", "state": session.snapshot()})
                     try:
                         snapshot = dispatch(session, data)
