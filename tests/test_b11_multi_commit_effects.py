@@ -8,12 +8,12 @@ from kimarite.tachiai_effects import resolve_prepared_tachiai
 def test_two_shoves_apply_two_card_pushes_but_one_spirit_comparison():
     blank = Card(90001, "Blank")
     shove = card_by_name("Shove")
-    human = Wrestler("Human", 0, 0, 4, blank, blank, blank)
+    human = Wrestler("Human", 0, 0, 1, blank, blank, blank)
     ai = Wrestler("AI", 0, 0, 0, blank, blank, blank)
     state = BoutState(FighterState(human), FighterState(ai))
     comparison = compare_player_tachiai(human, ai, [shove, shove])
     resolve_prepared_tachiai(state, comparison, committed_cards={Side.A: (shove, shove)})
-    # +4 Spirit means 2 comparison Push once, plus 2 Shove Push.
+    # +1 Spirit means 1 comparison Push once, plus 2 Shove Push.
     assert state.position == 3
     assert state.winner is Side.A
     assert state.win_method == "Shove"
