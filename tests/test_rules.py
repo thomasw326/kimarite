@@ -13,14 +13,14 @@ def state() -> BoutState:
     return BoutState(FighterState(wrestler("A")), FighterState(wrestler("B")))
 
 
-def test_momentum_overflow_converts_to_push():
+def test_momentum_overflow_is_capped_without_push():
     bout = state()
     bout.momentum = 3
 
     gain_momentum(bout, Side.A, 2)
 
     assert bout.momentum == 3
-    assert bout.position == 2
+    assert bout.position == 0
     assert bout.winner is None
 
 
@@ -83,7 +83,7 @@ def test_direct_position_ringout_both_sides():
     assert bout.winner is Side.B
 
 
-def test_momentum_overflow_still_pushes():
+def test_momentum_overflow_does_not_create_push():
     bout = state()
     gain_momentum(bout, Side.A, 4)
-    assert bout.momentum == 3 and bout.position == 1
+    assert bout.momentum == 3 and bout.position == 0
