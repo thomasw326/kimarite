@@ -18,3 +18,18 @@
 .management{display:grid;gap:12px}.management label{display:grid;gap:6px}.management-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px}.management-card{min-width:0;border:1px solid #748c8a;border-radius:10px;padding:8px}.management-card>.card{width:100%;min-height:90px}.management-card small{display:block;margin-top:7px}.management-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.management-group{padding:12px;border:1px solid #b69a67;border-radius:12px;display:grid;gap:10px;min-width:0}.management-group label{font-size:13px}.management-group select{min-width:0}.management-group h3{margin:0}.management #management-next{width:100%}@media(max-width:680px){.management-groups{grid-template-columns:1fr}.management-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:380px){.management-cards{grid-template-columns:1fr}}
 
 .tournament-results{display:grid;gap:12px;margin-top:14px}.tournament-round{border:1px solid #657e7b;border-radius:12px;padding:12px}.tournament-result{display:grid;grid-template-columns:1fr 2fr 1fr 2fr;gap:8px;padding:10px 0;border-top:1px solid #435b5b}.result-win{color:#83ddb0}.result-loss{color:#f0aaa4}@media(max-width:640px){.tournament-result{grid-template-columns:1fr 1fr}.tournament-result span:last-child{grid-column:1/-1}}
+
+
+/* B11 post-bout presentation; Classic remains unchanged. */
+.bout-result{width:min(92vw,560px);max-height:88vh;border:1px solid #9a8662;border-radius:20px;padding:0;background:#132729;color:#f7f1df;box-shadow:0 25px 90px #0009}
+.bout-result::backdrop{background:#030d10cb}
+.result-inner{padding:clamp(20px,5vw,36px);text-align:center}
+.result-banner{font-size:clamp(2.8rem,10vw,5rem);font-weight:900;letter-spacing:.08em;transform:scale(1.2);opacity:0;transition:transform .4s cubic-bezier(.2,1.3,.3,1),opacity .35s}
+.result-revealed .result-banner{opacity:1;transform:scale(1)}
+.result-victory{color:#f1c769}.result-defeat{color:#f09a8c}
+.result-kimarite{margin:16px 0 22px}.result-kimarite h2{font-size:2rem;margin:.3em 0}.result-kimarite p{opacity:.8}
+.result-values{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:16px 0 22px;text-align:left}
+.result-value{background:#ffffff12;border-radius:8px;padding:10px;display:flex;justify-content:space-between;gap:8px;font-size:.9rem}
+.result-value strong{color:#f1c769}
+.result-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+@media(prefers-reduced-motion:reduce){.result-banner{transition:none;transform:none;opacity:1}}
