@@ -144,4 +144,25 @@ class BoutState:
         if self.winner is None:
             self.winner = side
             self.win_method = method
+            if getattr(self, "b11_explain_wins", False) and not hasattr(self, "b11_victory_details"):
+                source = self.win_source
+                if source == "ringout":
+                    explanation = (
+                        "Ring-out: the winning wrestler pushed the opponent "
+                        "past the ring boundary. This is an immediate win, "
+                        "not a Kimarite Zone requirement check."
+                    )
+                elif method == "Exhaustion":
+                    explanation = "Exhaustion: the opponent had no cards left to draw at the start of their turn."
+                elif method == "Power":
+                    explanation = "Power loss: the opponent's Power fell below zero during the start-of-turn Exhaustion check."
+                else:
+                    explanation = "The bout ended by a direct game effect, rather than a Kimarite Zone requirement check."
+                self.b11_victory_details = {
+                    "kimarite": method,
+                    "source": source or method.lower(),
+                    "requirement_text": explanation,
+                    "checks": [],
+                    "turn": self.turn_number,
+                }
             self.log(f"{self.fighter(side).wrestler.name} wins by {method}.")
