@@ -22,9 +22,10 @@ class PendingB11Session:
     human: str
     opponent: str
     phase: PendingPlayerTachiai
+    seed: int = 20261021
 
     @classmethod
-    def start(cls, human: str, opponent: str, names: list[str]) -> "PendingB11Session":
+    def start(cls, human: str, opponent: str, names: list[str], *, seed: int = 20261021) -> "PendingB11Session":
         if human not in roster() or opponent not in roster():
             raise ValueError("Both wrestlers must be in the approved B10 roster.")
         if not isinstance(names, list):
@@ -32,7 +33,7 @@ class PendingB11Session:
         records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
         deck = [card_by_name(name) for name in records[human]["cards"]]
         opening = PlayerOpening.from_names(deck, names)
-        return cls(human, opponent, PendingPlayerTachiai(opening))
+        return cls(human, opponent, PendingPlayerTachiai(opening), seed=seed)
 
     def confirm(self, indices: list[int]) -> dict[str, Any]:
         """Record a one-time human decision; actual resolution remains gated."""
