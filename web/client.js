@@ -63,6 +63,13 @@ function showBoutResult(g){
  $('result-requirements').textContent=info?.requirement_text||'See the bout history for the winning conditions.';
  const values=$('result-values');values.replaceChildren();
  if(info){
+  if(info.checks?.length){
+   for(const check of info.checks){
+    const row=node('div','result-value result-check');
+    row.append(node('span','',check.label+' '+(check.met?'✓':'!')),node('strong','',check.actual+' (required '+check.required+')'));
+    values.append(row);
+   }
+  }
   const fields=[['Grip',info.grip],['Effective Grip',info.effective_grip],['Power',info.power],['Momentum advantage',info.momentum_advantage],['Position advantage',info.position_advantage],['Hand advantage',info.hand_advantage]];
   for(const [name,value] of fields){const row=node('div','result-value');row.append(node('span','',name),node('strong','',String(value)));values.append(row)}
  }
