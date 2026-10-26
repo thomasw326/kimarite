@@ -672,18 +672,24 @@ def _power_water_cantrip(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
-    # Experimental B10 UI branch: recover up to three distinct cards.
-    # Honor the existing UI's chosen first target; take the newest remaining
-    # discards for the other two without introducing a new choice contract.
-    for recovery in range(min(3, len(fighter.discard_pile))):
-        index = context.choice("discard_index") if recovery == 0 else None
+    # Choose one discard to return to hand. The two newest remaining
+    # discards are recycled to the bottom of Draw Pile, never into hand.
+    count = len(fighter.discard_pile)
+    if count:
+        index = context.choice("discard_index")
         if index is None:
-            index = len(fighter.discard_pile) - 1
-        if not isinstance(index, int) or not 0 <= index < len(fighter.discard_pile):
+            if context.choice("__human__"):
+                raise ChoiceRequired(card.name, "discard_index", list(range(count)))
+            index = count - 1
+        if type(index) is not int or not 0 <= index < count:
             raise ValueError("Invalid Power Water Cantrip discard index.")
         recovered = fighter.discard_pile.pop(index)
         fighter.hand.append(recovered)
-        state.log(f"{fighter.wrestler.name} recovers {recovered.name}.")
+        state.log(f"{fighter.wrestler.name} recovers {recovered.name} into hand.")
+        for _ in range(min(2, len(fighter.discard_pile))):
+            recycled = fighter.discard_pile.pop()
+            fighter.draw_pile.append(recycled)
+            state.log(f"{fighter.wrestler.name} returns {recycled.name} to the bottom of the Draw Pile.")
     add_play(state, side, 1)
     draw_one(state, side)
 
