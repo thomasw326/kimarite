@@ -45,7 +45,11 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     style = STYLES[STYLE_PROXIES.get(pending.human, pending.human)]
     order = list(dict.fromkeys([style.primary, style.secondary]))
     order.extend(x.value for x in (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT) if x.value not in order)
-    stats = human_record["stats"]
+    # B11 human has three base points: primary 2, secondary 1, tertiary 0.
+    # AI retains its six-point roster stats to offset its two-card Tachiai.
+    stats = dict.fromkeys((Stat.POWER.value, Stat.TECHNIQUE.value, Stat.SPIRIT.value), 0)
+    stats[order[0]] = 2
+    stats[order[1]] = 1
     blank = card_by_name("Oshi")  # unused classic-role placeholders; never zoned
     human = Wrestler(
         pending.human, stats["power"], stats["technique"], stats["spirit"],
