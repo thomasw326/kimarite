@@ -134,10 +134,6 @@ async function managementRound(){const m=management;if(!m)return;const i=m.round
 const B11_STARTER_SUITE=['Yorikiri','Oshidashi','Oshi','Tsuki','Gain Left Grip','Gain Right Grip','Give Ground','Shiko Stomp'];
 let activeDraft=null;
 function saveDraft(){try{if(activeDraft)sessionStorage.setItem('kimarite_active_draft',JSON.stringify(activeDraft));else sessionStorage.removeItem('kimarite_active_draft')}catch(e){}}
-function draftKimariteCount(d){
- const kim=new Set(['Yorikiri','Oshidashi',...d.kimarite_names||[]]);
- return [...d.starting_cards,...d.picks].filter(name=>kim.has(name)).length;
-}
 async function offerDraft(){
  const d=activeDraft;if(!d)return;
  const owned=[...d.starting_cards,...d.picks];
@@ -182,8 +178,6 @@ $('management-deal').onclick=async()=>{
   if($('management-opening-mode').value==='b11_live'){
    activeDraft={human,seed,created_stats:creationChoices(),starting_cards:[...B11_STARTER_SUITE],picks:[],
      kimarite_names:[]};
-   // Current owned-card classification comes from the catalogue's live offers.
-   const classification=await api('/api/b11/draft/offer',{starting_cards:activeDraft.starting_cards,picks:[],seed});
    // Kimarite names are loaded from the same authoritative card catalogue.
    const names=await api('/api/b11/draft/catalogue');
    activeDraft.kimarite_names=names.kimarite_names;
