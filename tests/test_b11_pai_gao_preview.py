@@ -30,4 +30,4 @@ def test_pai_gao_preview_adds_base_three_cards_and_universal_one():
     assert "base[order[0]]=2;base[order[1]]=1" in source
     assert "base[k]+1+orbs[i]" in source
     assert "box.append(b11TachiaiPreview(management,i))" in source
-    assert "Before Oshi/Tsuki reveal-chain bonuses" in source
+    assert "Before reveal-chain bonuses" in source
