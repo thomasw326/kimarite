@@ -139,7 +139,7 @@ async function offerDraft(){
  const owned=[...d.starting_cards,...d.picks];
  $('b11-draft').hidden=false;$('management-board').hidden=true;$('management-deal').hidden=true;
  $('management-opening-mode').disabled=true;$('management-deck').disabled=true;$('b11-creation').hidden=true;
- $('draft-progress').textContent=owned.length+' / 28 cards · '+d.picks.length+' drafted';
+ $('draft-progress').textContent=owned.length+' / 28 cards · '+d.picks.length+' drafted · '+owned.filter(name=>d.kimarite_names.includes(name)).length+' Kimarite';
  $('draft-owned').textContent='Owned: '+owned.join(', ');
  const offers=$('draft-offers');offers.replaceChildren();
  if(owned.length===28){await finishDraft();return}
@@ -176,7 +176,11 @@ $('management-deal').onclick=async()=>{
  try{
   const human=$('management-deck').value,seed=Math.floor(Math.random()*2147483647);
   if($('management-opening-mode').value==='b11_live'){
-   activeDraft={human,seed,created_stats:creationChoices(),starting_cards:[...B11_STARTER_SUITE],picks:[],
+   const previous=management?.results?.length===15&&management.human===human?management:null;
+   const starting=previous?.next_starting_cards||B11_STARTER_SUITE;
+   const created=previous?.created_stats||creationChoices();
+   management=null;managementSave();
+   activeDraft={human,seed,created_stats:created,starting_cards:[...starting],picks:[],
      kimarite_names:[]};
    // Kimarite names are loaded from the same authoritative card catalogue.
    const names=await api('/api/b11/draft/catalogue');
