@@ -38,11 +38,12 @@ class PendingB11Session:
         records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
         if drafted_deck is not None:
             from .b11_player_draft import AVAILABLE, MAX_KIMARITE
+            from collections import Counter
             if (not isinstance(drafted_deck, list) or len(drafted_deck) != 28
-                    or len(set(drafted_deck)) != 28
-                    or any(n not in AVAILABLE for n in drafted_deck)
+                    or any(not isinstance(n, str) or n not in AVAILABLE for n in drafted_deck)
+                    or max(Counter(drafted_deck).values()) > 2
                     or not 3 <= sum(AVAILABLE[n].is_kimarite for n in drafted_deck) <= MAX_KIMARITE):
-                raise ValueError("Invalid B11 drafted deck; require 28 distinct cards and 3–8 Kimarite.")
+                raise ValueError("Invalid B11 drafted deck; require 28 cards, at most two copies per name and 3–8 Kimarite.")
         deck = [card_by_name(name) for name in (drafted_deck if drafted_deck is not None else records[human]["cards"])]
         opening = PlayerOpening.from_names(deck, names)
         return cls(human, opponent, PendingPlayerTachiai(opening), seed=seed, created_stats=created_stats, drafted_deck=drafted_deck)
