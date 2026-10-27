@@ -50,3 +50,15 @@ def test_classic_power_outcome_unchanged():
     state.b11_explain_wins=False
     state.declare_winner(Side.A,"Power")
     assert state.win_method=="Power"
+
+@pytest.mark.parametrize("position,expected",[
+    (-4,"Fumidashi"),(-3,"Fumidashi"),(-2,"Koshikudake"),
+    (0,"Koshikudake"),(2,"Koshikudake"),(3,"Fumidashi"),(4,"Fumidashi"),
+])
+def test_deck_exhaustion_is_position_based_hiwaza(position,expected):
+    state=setup()
+    state.position=position
+    state.declare_winner(Side.A,"Exhaustion")
+    assert state.win_method==expected
+    assert state.win_source=="hiwaza"
+    assert "Hiwaza" in state.b11_victory_details["requirement_text"]
