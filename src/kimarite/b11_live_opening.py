@@ -50,6 +50,9 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     stats = {"power": 0, "technique": 0, "spirit": 0}
     stats[order[0].lower()] = 2
     stats[order[1].lower()] = 1
+    if pending.created_stats is not None:
+        stats = dict(pending.created_stats)
+        order = [key.capitalize() for key in sorted(stats, key=lambda key: (-stats[key], key))]
     blank = card_by_name("Oshi")  # unused classic-role placeholders; never zoned
     human = Wrestler(
         pending.human, stats["power"], stats["technique"], stats["spirit"],
