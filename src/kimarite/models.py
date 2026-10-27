@@ -157,6 +157,9 @@ class BoutState:
                               "technique": "Hikiotoshi",
                               "spirit": "Hatakikomi"}[highest]
                     self.win_source = "power_loss"
+                elif method == "Exhaustion":
+                    method = "Fumidashi" if abs(self.position) >= 3 else "Koshikudake"
+                    self.win_source = "hiwaza"
                 elif self.win_source == "ringout":
                     # A Shove-induced force-out is always Oshidashi.
                     played = self.fighter(side).played_this_turn
@@ -172,8 +175,8 @@ class BoutState:
                         "past the ring boundary. This is an immediate win, "
                         "not a Kimarite Zone requirement check."
                     )
-                elif method == "Exhaustion":
-                    explanation = "Exhaustion: the opponent had no cards left to draw at the start of their turn."
+                elif source == "hiwaza":
+                    explanation = ("Hiwaza (non-technique): the losing wrestler accidentally steps out after running out of cards." if method == "Fumidashi" else "Hiwaza (non-technique): the losing wrestler collapses after running out of cards.")
                 elif source == "power_loss":
                     explanation = "Power loss: the opponent's Power fell below zero during the start-of-turn Exhaustion check."
                 else:
