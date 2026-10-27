@@ -23,17 +23,21 @@ class PendingB11Session:
     opponent: str
     phase: PendingPlayerTachiai
     seed: int = 20261021
+    created_stats: dict[str, int] | None = None
 
     @classmethod
-    def start(cls, human: str, opponent: str, names: list[str], *, seed: int = 20261021) -> "PendingB11Session":
+    def start(cls, human: str, opponent: str, names: list[str], *, seed: int = 20261021, created_stats: dict[str, int] | None = None) -> "PendingB11Session":
         if human not in roster() or opponent not in roster():
             raise ValueError("Both wrestlers must be in the approved B10 roster.")
         if not isinstance(names, list):
             raise ValueError("B11 opening requires three selected card names.")
+        if created_stats is not None:
+            if not isinstance(created_stats, dict) or set(created_stats) != {"power", "technique", "spirit"} or sorted(created_stats.values(), key=str) != [0, 1, 2]:
+                raise ValueError("Created wrestler stats must be an exact 2-1-0 distribution.")
         records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
         deck = [card_by_name(name) for name in records[human]["cards"]]
         opening = PlayerOpening.from_names(deck, names)
-        return cls(human, opponent, PendingPlayerTachiai(opening), seed=seed)
+        return cls(human, opponent, PendingPlayerTachiai(opening), seed=seed, created_stats=created_stats)
 
     def confirm(self, indices: list[int]) -> dict[str, Any]:
         """Record a one-time human decision; actual resolution remains gated."""
