@@ -7,6 +7,7 @@ never offered again. Generated-only finishing moves are not draftable.
 from __future__ import annotations
 
 import hashlib
+from collections import Counter
 import json
 import random
 
@@ -29,8 +30,8 @@ def validate_starting_cards(starting: list[str]) -> None:
         raise ValueError("Starting deck must contain 3–28 cards.")
     if any(not isinstance(name, str) or name not in AVAILABLE for name in starting):
         raise ValueError("Starting deck contains an unavailable card.")
-    if len(set(starting)) != len(starting):
-        raise ValueError("Starting deck must contain distinct cards.")
+    if max(Counter(starting).values()) > 2:
+        raise ValueError("Inherited starting cards may contain at most two copies per card.")
     if sum(AVAILABLE[name].is_kimarite for name in starting) > MAX_KIMARITE:
         raise ValueError("Starting deck exceeds eight Kimarite.")
 
@@ -43,7 +44,8 @@ def options_for(starting: list[str], picks: list[str], seed: int) -> list[str]:
     owned = [*starting, *picks]
     if len(owned) >= TARGET_SIZE:
         return []
-    if len(set(owned)) != len(owned) or any(n not in AVAILABLE for n in owned):
+    if (len(set(picks)) != len(picks) or set(picks) & set(starting)
+            or any(n not in AVAILABLE for n in owned)):
         raise ValueError("Draft contains unavailable or repeated cards.")
     kimarite = sum(AVAILABLE[n].is_kimarite for n in owned)
     if kimarite > MAX_KIMARITE:
@@ -76,7 +78,7 @@ def validate_draft(starting: list[str], picks: list[str], seed: int) -> list[str
 
 
 def deal_block(deck: list[str], seed: int) -> list[dict]:
-    """Sample nine distinct current-deck copies; presentation uses card_info."""
+    """Sample nine current-deck physical copies; presentation uses card_info."""
     from .b10_card_info import card_info
     if not isinstance(deck, list) or len(deck) < 9:
         raise ValueError("A block requires at least nine cards.")
