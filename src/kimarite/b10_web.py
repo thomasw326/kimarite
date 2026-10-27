@@ -164,7 +164,7 @@ class Handler(BaseHTTPRequestHandler):
                     if len(_sessions) >= 100:
                         return self.reply(503, {"error": "Session capacity reached"})
                     if data.get("opening_mode") in {"b11_preview", "b11_live"}:
-                        session = PendingB11Session.start(data["human"], data["opponent"], data["opening_cards"], seed=int(data.get("seed", 20261021)))
+                        session = PendingB11Session.start(data["human"], data["opponent"], data["opening_cards"], seed=int(data.get("seed", 20261021)), created_stats=data.get("created_stats"))
                         session.live_enabled = data.get("opening_mode") == "b11_live"
                     else:
                         session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
