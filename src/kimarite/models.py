@@ -176,7 +176,7 @@ class BoutState:
                         "not a Kimarite Zone requirement check."
                     )
                 elif source == "hiwaza":
-                    explanation = ("Hiwaza (non-technique): the losing wrestler accidentally steps out because they had no cards left to draw." if method == "Fumidashi" else "Hiwaza (non-technique): the losing wrestler collapses after running out of cards.")
+                    explanation = ("Hiwaza (non-technique): the losing wrestler accidentally steps out: no cards left to draw." if method == "Fumidashi" else "Hiwaza (non-technique): the losing wrestler collapses: no cards left to draw.")
                 elif source == "power_loss":
                     explanation = "Power loss: the opponent's Power fell below zero during the start-of-turn Exhaustion check."
                 else:
