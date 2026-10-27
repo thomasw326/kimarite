@@ -183,7 +183,7 @@ $('management-deal').onclick=async()=>{
    activeDraft={human,seed,created_stats:created,starting_cards:[...starting],picks:[],
      kimarite_names:[]};
    // Kimarite names are loaded from the same authoritative card catalogue.
-   const names=await api('/api/b11/draft/catalogue');
+   const names=await api('/api/b11/draft/catalogue',{});
    activeDraft.kimarite_names=names.kimarite_names;
    saveDraft();await offerDraft();return;
   }
