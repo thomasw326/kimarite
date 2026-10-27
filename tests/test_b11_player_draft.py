@@ -75,3 +75,27 @@ def test_drafted_deck_is_used_to_start_b11_bout():
     human=result.state.fighter_a
     assert human.wrestler.base_power==2
     assert len(human.draw_pile)+len(human.hand)+len(human.discard_pile)+len(human.kimarite_zone)<=28
+
+
+def test_inherited_copy_counts_as_physical_starter_and_cannot_be_drafted():
+    starting=[*STARTERS,"Oshi"]
+    first=options_for(starting,[],222)
+    assert "Oshi" not in first
+    assert all(AVAILABLE[n].is_kimarite for n in first)
+    picks=pick_through(starting,222)
+    deck=validate_draft(starting,picks,222)
+    assert deck.count("Oshi")==2
+    assert len(deck)==28
+    pending=PendingB11Session.start(
+        "Arm Controller","The Technician",["Oshi","Yorikiri","Oshidashi"],
+        drafted_deck=deck,
+    )
+    pending.confirm([0])
+    assert len(pending.prepare_resolution().draw_pile)+len(pending.prepare_resolution().retained_hand)<=28
+
+
+def test_draft_is_deterministic_given_same_seed_and_current_deck():
+    s=list(STARTERS)
+    assert options_for(s,[],1234)==options_for(s,[],1234)
+    first=options_for(s,[],1234)
+    assert options_for(s,[first[0]],1234)==options_for(s,[first[0]],1234)
