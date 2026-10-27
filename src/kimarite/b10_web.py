@@ -160,6 +160,9 @@ class Handler(BaseHTTPRequestHandler):
         try:
             data = self.body()
             with _lock:
+                if path == "/api/b11/draft/catalogue":
+                    from .b11_player_draft import AVAILABLE
+                    return self.reply(200, {"kimarite_names": sorted(name for name, card in AVAILABLE.items() if card.is_kimarite)})
                 if path == "/api/b11/draft/offer":
                     from .b11_player_draft import options_for, AVAILABLE
                     from .b10_card_info import card_info
