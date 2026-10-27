@@ -34,7 +34,7 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     prepared = pending.prepare_resolution()
     # Reveal planning is useful for validation, but the live resolver must
     # consume its own reveal chain exactly once from the unallocated deck.
-    full_deck = [card_by_name(n) for n in json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"][pending.human]["cards"]]
+    full_deck = [card_by_name(n) for n in (pending.drafted_deck if pending.drafted_deck is not None else json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"][pending.human]["cards"])]
     unallocated = pending.phase.decision.unallocated_deck(pending.phase.opening, full_deck)
     # Match Classic's seeded shuffle after physical opening cards are removed.
     # Without this, the roster JSON order groups Kimarite near the draw top.
