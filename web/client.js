@@ -126,6 +126,10 @@ function tournamentFinalText(m){
   const r=m.results[i];
   lines.push('Bout '+(i+1)+' · '+(r.won?'WIN':'LOSS')+' vs '+(r.opponent_name||r.opponent)+' · '+r.finish+' · Turn '+r.turns);
  }
+ const stats=calculateCardRecords(m);
+ for(const [key,label] of [['most_played_card','Most played card'],['most_played_kimarite','Most played Kimarite'],['most_winning_card','Most winning card'],['most_winning_kimarite','Most winning Kimarite']]){
+  const v=stats[key];lines.push(label+': '+(v?v.name+' ('+v.count+')':'None'));
+ }
  return lines.join('\n');
 }
 function showTournamentFinal(){
@@ -289,7 +293,35 @@ $('management-new').onclick=()=>{
  $('management-deal').click();
 };
 $('management-start').onclick=()=>managementRound().catch(e=>$('management-notice').textContent=e.message);
-$('management-next').onclick=async()=>{if(!management||management.round>=14||!game?.finished||activeTournamentBout()!==management.round||management.results.length!==management.round+1)return;management.round++;managementSave();if(management.round%3===0){try{const m=management;const d=m.draft_picks?await api('/api/b11/draft/deal',{starting_cards:m.starting_cards,picks:m.draft_picks,draft_seed:m.draft_seed,seed:m.seed+Math.floor(m.round/3)}):await api('/api/management/deal/'+encodeURIComponent(m.human)+'?seed='+(m.seed+Math.floor(m.round/3)));m.cards=d.cards;m.groups=Array.from({length:3},()=>[null,null,null]);game=null;$('management-board').hidden=false;$('management-start').disabled=true;$('management-next').hidden=true;managementBoard();managementSave();$('management-notice').textContent='Round '+(Math.floor(m.round/3)+1)+': opponents '+m.opponents.slice(m.round,m.round+3).join(', ')+'. Allocate your nine new cards.';$('management-board').scrollIntoView({behavior:'smooth'})}catch(e){management.round--;managementSave();$('management-notice').textContent='Could not deal the next round: '+e.message}}else managementRound().catch(e=>{management.round--;managementSave();$('management-notice').textContent='Could not start next bout: '+e.message;managementStatus()})};
+$('management-next').onclick=async()=>{
+ const m=management;
+ if(!m||!game?.finished||activeTournamentBout()!==m.round||m.results.length!==m.round+1)return;
+ if(m.round%3===2&&m.draft_picks){
+  if(openBlockRewards())return;
+ }
+ if(m.round>=14){
+  if(completedRewards(m))showTournamentFinal();
+  return;
+ }
+ m.round++;managementSave();
+ if(m.round%3===0){
+  try{
+   const data=m.draft_picks
+    ?await api('/api/b11/draft/deal',{starting_cards:m.starting_cards,picks:m.draft_picks,draft_seed:m.draft_seed,duplicated_indices:m.duplicated_indices||[],seed:m.seed+Math.floor(m.round/3)})
+    :await api('/api/management/deal/'+encodeURIComponent(m.human)+'?seed='+(m.seed+Math.floor(m.round/3)));
+   m.cards=data.cards;m.groups=Array.from({length:3},()=>[null,null,null]);game=null;
+   $('management-rewards').hidden=true;$('management-board').hidden=false;
+   $('management-start').disabled=true;$('management-next').hidden=true;
+   managementBoard();managementSave();
+   $('management-notice').textContent='Round '+(Math.floor(m.round/3)+1)+': deck '+(m.draft_picks?28+(m.duplicated_indices||[]).length:'roster')+' cards. Assign nine to the next three opponents.';
+   $('management-board').scrollIntoView({behavior:'smooth'});
+  }catch(e){
+   m.round--;managementSave();$('management-notice').textContent='Could not deal the next round: '+e.message;
+  }
+ }else managementRound().catch(e=>{
+  m.round--;managementSave();$('management-notice').textContent='Could not start next bout: '+e.message;managementStatus();
+ });
+};
 
 function renderPendingTachiai(g){
  game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();
@@ -336,6 +368,9 @@ function showBoutResult(g){
 $('result-review').onclick=()=>{$('bout-result').close();$('history').scrollIntoView({behavior:'smooth',block:'start'})};
 $('result-next').onclick=()=>{
  $('bout-result').close();
+ if(management&&completedBlock(management)&&unresolvedRewards(management).length){
+  openBlockRewards();return;
+ }
  if(management?.results.length===15){showTournamentFinal();return}
  const next=$('management-next');
  if(management&&next&&!next.hidden){next.click();return}
