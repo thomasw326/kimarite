@@ -64,7 +64,7 @@ CARD_TEXT = {
     "Tsukitaoshi": {"timing":"Kimarite","effect":"Win: play at least 4 cards this turn. On play: gain 1 additional Play, draw 1, then discard 1.","status":"verified"},
     "Tsuridashi": {"timing":"Kimarite","effect":"Win: usable Grip total at least 3, Position nonnegative and Power at least 6. On play: gain 1 Power, plus another if Momentum at least +2.","status":"verified"},
     "Kotenage": {"timing":"Kimarite","effect":"Win: opponent has no usable Grip, Momentum at least +1 and you hold at least 5 cards. On play: reduce a selected opponent Grip; if they have no Grip, optionally draw then discard.","status":"verified"},
-    "Abisetaoshi": {"timing":"Kimarite","effect":"Win: usable total Grip at least 2 and Power at least 10. On play: if Power at least 6, improve shallower Grip when you have no usable Grip; otherwise gain 1 Power.","status":"verified"},
+    "Abisetaoshi": {"timing":"Kimarite","effect":"Win: usable total Grip at least 2, Power at least 10 and relative Momentum at least +1. On play: if Power at least 6, improve shallower Grip when you have no usable Grip; otherwise gain 1 Power.","status":"verified"},
     "Kirikaeshi": {"timing":"Kimarite","effect":"Win: your Power at least 3 below opponent's, you are stable, opponent is Unstable and your Momentum at least +2. On play: optionally lose 1 Power to gain 1 Momentum and draw 1.","status":"verified"},
     "Okuridashi": {"timing":"Generated Kimarite","effect":"Generated-only Kimarite. Win: Position at least +2 and Momentum at least +1.","status":"verified"},
     "Okuritaoshi": {"timing":"Generated Kimarite","effect":"Generated-only Kimarite. Win: Power at least 8 and Momentum at least +1.","status":"verified"},
