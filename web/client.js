@@ -1,29 +1,38 @@
-// English-first labels are presentation only: card.name stays the stable
-// Japanese engine identity used in saves, draft validation, and effect dispatch.
-// These are conventional English glosses, not a recovered copy of the
-// earlier naming audit (which is not present in the current repository).
+// English-first card labels; original names remain untouched in saves/rules.
+// Exact approved English descriptions are taken from Google Sheets:
+// 'Kimarite Card Library' -> 'Kimarite Library'!B:C and 'Other Cards'!A,I:J.
+// Cards not explicitly sourced in those tabs remain Japanese-only.
 const CARD_ENGLISH_NAMES=Object.freeze({
- 'Oshi':'Push','Tsuki':'Thrust','Tsuppari':'Repeated Thrusts',
- 'Nodowa':'Throat Thrust','Harite':'Open-Hand Slap',
- 'Uwate':'Outside Belt Grip','Shitate':'Inside Belt Grip',
- 'Tsuri':'Lift','Yori':'Belt Drive','Gaburi':'Belt Jolt',
- 'Ottsuke':'Forearm Block','Henka':'Side-Step Feint',
- 'Kannuki':'Double Arm Lock','Morozashi':'Double Inside Grip',
- 'Yorikiri':'Frontal Force-Out','Oshidashi':'Frontal Push-Out',
- 'Tsukidashi':'Frontal Thrust-Out','Oshitaoshi':'Frontal Push-Down',
- 'Yoritaoshi':'Frontal Force-Down',
- 'Uwatenage':'Overarm Throw','Shitatenage':'Underarm Throw',
- 'Hatakikomi':'Slap-Down','Katasukashi':'Under-Shoulder Swing-Down',
- 'Hikiotoshi':'Hand Pull-Down','Tottari':'Arm-Bar Throw',
- 'Tsukiotoshi':'Thrust-Down','Tsukitaoshi':'Frontal Thrust-Down',
- 'Tsuridashi':'Lift-Out','Kotenage':'Arm-Lock Throw',
- 'Abisetaoshi':'Backward Force-Down','Kirikaeshi':'Twisting Backward Trip',
- 'Okuridashi':'Rear Push-Out','Okuritaoshi':'Rear Push-Down',
- 'Sukuinage':'Beltless Arm Throw','Utchari':'Backward Pivot Throw',
- 'Uwatedashinage':'Pulling Overarm Throw','Tsuriotoshi':'Lift-and-Drop',
- 'Morotezuki':'Two-Handed Thrust','Kachiage':'Forearm Charge',
- 'Nekodamashi':'Face Clap','Maesabaki':'Advance Handwork',
- 'Deashi':'Forward Step','Butsukari':'Collision Charge'
+ 'Oshi':"Push",
+ 'Tsuki':"Thrust",
+ 'Tsuppari':"Repeated Thrusts",
+ 'Nodowa':"Throat Grab",
+ 'Harite':"Open-Handed Slap",
+ 'Tsuri':"Lift",
+ 'Yori':"Tighten the Grip",
+ 'Henka':"Sidestep or Evasive Shift",
+ 'Yorikiri':"Force Out",
+ 'Oshidashi':"Push Out",
+ 'Tsukidashi':"Thrust Out",
+ 'Oshitaoshi':"Push Down",
+ 'Yoritaoshi':"Crush Out",
+ 'Hatakikomi':"Slap Down",
+ 'Tsukiotoshi':"Thrust Down",
+ 'Uwatenage':"Overarm Throw",
+ 'Shitatenage':"Underarm Throw",
+ 'Hikiotoshi':"Pull Down",
+ 'Okuridashi':"Rear Push Out",
+ 'Kotenage':"Arm-Lock Throw",
+ 'Uwatedashinage':"Pulling Overarm Throw",
+ 'Katasukashi':"Under-Shoulder Swing Down",
+ 'Sukuinage':"Beltless Arm Throw",
+ 'Tsukitaoshi':"Thrust Down",
+ 'Abisetaoshi':"Crush Down",
+ 'Tsuridashi':"Lift Out",
+ 'Kirikaeshi':"Reversal Leg Trip",
+ 'Okuritaoshi':"Rear Push Down",
+ 'Tottari':"Arm Bar Throw",
+ 'Utchari':"Edge Pivot Throw"
 });
 function displayCardName(name){
  if(typeof name!=='string')return name||'';
