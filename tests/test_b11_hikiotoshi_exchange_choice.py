@@ -85,3 +85,32 @@ def test_utchari_human_selects_from_two_only_when_behind():
         EffectContext(choices={"__human__":True,"utchari_card_index":1}))
     assert [c.name for c in state.fighter_a.hand]==["Give Ground"]
     assert [c.name for c in state.fighter_a.draw_pile]==["Shiko Stomp","Oshi","Tsuki"]
+
+
+@pytest.mark.parametrize(
+    "position,gained_momentum,expected",
+    [
+        (-4, True, True),
+        (-3, True, True),
+        (-2, True, False),
+        (-4, False, False),
+        (-3, False, False),
+    ],
+)
+def test_utchari_wins_at_minus_three_or_lower_only_after_momentum_gain(
+    position, gained_momentum, expected
+):
+    from kimarite.kimarite import kimarite_is_satisfied
+
+    state = state_for_hiki()
+    state.position = position
+    state.fighter_a.gained_momentum_this_turn = gained_momentum
+    assert kimarite_is_satisfied(state, Side.A, card_by_name("Utchari")) is expected
+
+
+def test_utchari_card_description_matches_new_position_boundary():
+    from kimarite.b10_card_info import CARD_TEXT
+
+    text = CARD_TEXT["Utchari"]["effect"]
+    assert "Position is -3 or lower" in text
+    assert "exactly -3" not in text
