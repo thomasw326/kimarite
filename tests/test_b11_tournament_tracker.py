@@ -56,3 +56,20 @@ def test_optional_individual_bout_and_decorative_ring_collapsed_by_default():
     assert {"human", "opponent", "start", "management-deal", "management-board", "round", "tracks"} <= parsed.ids
     assert ".setup-fields{display:grid" in css
     assert '<div id="tracks" class="tracks"></div></section>' in html
+
+
+def test_mobile_live_bout_hud_keeps_position_momentum_and_opponent_effects_visible():
+    html = (CLIENT.parent / "index.html").read_text()
+    css = (CLIENT.parent / "style.css").read_text()
+    js = CLIENT.read_text()
+    assert 'id="bout-hud"' in html and 'aria-label="Live bout status"' in html
+    assert all(f'id="hud-{label}"' in html for label in ["turn", "position", "momentum", "opponent", "effects"])
+    assert ".bout-hud{position:sticky;top:0" in css
+    assert ".bout-hud[hidden]{display:none!important}" in css
+    assert "@media (min-width:720px){.bout-hud{display:none}}" in css
+    assert "renderBoutHud(g);game=g;" in js
+    assert "renderBoutHud(g);\n game=g;" in js
+    assert "g.position===undefined||g.momentum===undefined" in js
+    assert "foe.temporary||[]" in js and "foe.kimarite||[]" in js
+    assert "zoneEffect(c,zone)" in js
+    assert "Opponent effects: none active" in js
