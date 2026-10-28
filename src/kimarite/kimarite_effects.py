@@ -211,7 +211,11 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         return  # B9 generated-only: no Exchange effect.
 
     elif card.name == "Tsuriotoshi":
-        mode = context.choice("mode") or "power"
+        mode = context.choice("mode")
+        if mode is None:
+            if context.choice("__human__"):
+                raise ChoiceRequired(card.name, "mode", ["power", "momentum", "grip"])
+            mode = "power"
         if mode == "power":
             gain_power(state, side, 1)
         elif mode == "momentum":
@@ -227,7 +231,21 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
 
     elif card.name == "Utchari":
         if relative_position(state, side) < 0:
-            draw_from_look(state, side, look=2, keep=1)
+            if not context.choice("__human__"):
+                draw_from_look(state, side, look=2, keep=1)
+            else:
+                looked = look_from_top(fighter, 2)
+                if not looked:
+                    draw_from_look(state, side, look=2, keep=1)
+                else:
+                    options = list(range(len(looked)))
+                    index = context.choice("utchari_card_index")
+                    if len(options) == 1 and index is None:
+                        index = 0
+                    if index not in options:
+                        raise ChoiceRequired(card.name, "utchari_card_index", options)
+                    keep_and_bottom(fighter, looked, [looked[index]])
+                    state.log(f"{fighter.wrestler.name} chooses {looked[index].name} from Utchari's top {len(looked)} cards.")
 
     elif card.name == "Uwatedashinage":
         draw_one(state, side)
