@@ -34,6 +34,7 @@ def labelled_choices(session, exc, command=None):
         "sacrifice_kimarite": "Choose a Kimarite to sacrifice",
         "temporary_index": "Choose an opponent Temporary to disrupt",
         "uwate_card_index": "Choose a revealed card",
+        "hikiotoshi_card_index": "Choose one of the top three cards to keep",
         "opponent_deck_index": "Choose a revealed opponent deck card to discard",
         "opponent_hand_index": "Choose a position in opponent's hidden hand",
         "card_target": "Choose an opponent Grip-related card to remove",
@@ -76,6 +77,8 @@ def labelled_choices(session, exc, command=None):
                 cards = foe.draw_pile[:3]
             elif key == "uwate_card_index":
                 cards = own.draw_pile[:max(0, own.total_grip)]
+            elif key == "hikiotoshi_card_index":
+                cards = own.draw_pile[:3]
             elif key == "card_target":
                 from .effects import GRIP_REFERENCING_TEMPORARIES, GRIP_REFERENCING_KIMARITE
                 cards = [t.card for t in foe.temporary_zone if t.card.name in GRIP_REFERENCING_TEMPORARIES]
