@@ -169,17 +169,20 @@ class Handler(BaseHTTPRequestHandler):
                     choices = options_for(data["starting_cards"], data["picks"], int(data["seed"]))
                     return self.reply(200, {"choices": [card_info(AVAILABLE[n]) for n in choices]})
                 if path == "/api/b11/draft/deal":
-                    from .b11_player_draft import validate_draft, deal_block
-                    deck = validate_draft(data["starting_cards"], data["picks"], int(data["draft_seed"]))
-                    return self.reply(200, {"cards": deal_block(deck, int(data["seed"]))})
+                    from .b11_player_draft import grow_deck, deal_block
+                    deck, ids = grow_deck(data["starting_cards"], data["picks"], int(data["draft_seed"]),
+                                          data.get("duplicated_indices", []))
+                    return self.reply(200, {"cards": deal_block(deck, int(data["seed"]), ids),
+                                            "deck_size": len(deck)})
                 if path == "/api/session":
                     if len(_sessions) >= 100:
                         return self.reply(503, {"error": "Session capacity reached"})
                     if data.get("opening_mode") in {"b11_preview", "b11_live"}:
                         drafted = None
                         if "draft_picks" in data:
-                            from .b11_player_draft import validate_draft
-                            drafted = validate_draft(data["starting_cards"], data["draft_picks"], int(data["draft_seed"]))
+                            from .b11_player_draft import grow_deck
+                            drafted, _ = grow_deck(data["starting_cards"], data["draft_picks"],
+                                                   int(data["draft_seed"]), data.get("duplicated_indices", []))
                         session = PendingB11Session.start(data["human"], data["opponent"], data["opening_cards"], seed=int(data.get("seed", 20261021)), created_stats=data.get("created_stats"), drafted_deck=drafted)
                         session.live_enabled = data.get("opening_mode") == "b11_live"
                     else:
