@@ -39,7 +39,7 @@ def victory_checks(state, side, name):
         "Tottari": [("Own Grip","raw_grip","=",0),("Opponent Grip reduced this turn","grip_reduced","=",True),("Opponent discard count","enemy_discard",">=",7)],
         "Uwatenage": [("Deep Left Grip","left","=","DEEP"),("Effective Grip","grip",">=",1),("Momentum advantage","momentum",">=",1),("Position advantage","position",">=",0)],
         "Shitatenage": [("Effective Grip","grip",">=",1),("Deep Right Grip","right","=","DEEP"),("Momentum advantage","momentum",">=",1),("Position advantage","position",">=",0)],
-        "Hatakikomi": [("Momentum advantage","momentum","<=",-2),("Power","power",">=",6)],
+        "Hatakikomi": [("Momentum advantage","momentum","<=",-2),("Power","power",">=",6),("Opponent unstable","foe_unstable","=",True)],
         "Hikiotoshi": [("Momentum advantage","momentum","<=",-2),("Position advantage","position",">=",0),("Effective Grip","grip",">=",1)],
         "Tsukitaoshi": [("Cards played this turn","plays",">=",4)],
         "Tsuridashi": [("Effective Grip","grip",">=",3),("Position advantage","position",">=",0),("Power","power",">=",6)],
@@ -50,7 +50,7 @@ def victory_checks(state, side, name):
         "Okuritaoshi": [("Power","power",">=",8),("Momentum advantage","momentum",">=",1)],
         "Tsuriotoshi": [("Power + Momentum + Grip","sum",">=",15)],
         "Sukuinage": [("Own Grip","raw_grip","=",0),("Momentum advantage","momentum",">=",2),("Hand advantage","hand_diff",">=",4)],
-        "Utchari": [("Gained Momentum this turn","gained_momentum","=",True),("Position advantage","position","=",-3)],
+        "Utchari": [("Gained Momentum this turn","gained_momentum","=",True),("Position advantage","position","<=",-3)],
         "Uwatedashinage": [("Left Grip present","left","!=","NONE"),("Effective Grip","grip",">=",1),("Momentum advantage","momentum",">=",1),("Power advantage","power_advantage","<=",-5)],
     }
     values["enemy_raw_grip"] = foe.total_grip
