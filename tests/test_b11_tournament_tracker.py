@@ -30,3 +30,29 @@ def test_pending_tachiai_clears_previous_bout_continue_button():
     pending = source.split("function renderPendingTachiai(g){", 1)[1].split("function render(", 1)[0]
     assert "if(management)managementStatus()" in pending
     assert "$('management-next').hidden=!" in source
+
+
+def test_optional_individual_bout_and_decorative_ring_collapsed_by_default():
+    from html.parser import HTMLParser
+
+    html = (CLIENT.parent / "index.html").read_text()
+    css = (CLIENT.parent / "style.css").read_text()
+
+    class Check(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.details = {}
+            self.ids = set()
+        def handle_starttag(self, tag, attrs):
+            a = dict(attrs)
+            if "id" in a:
+                self.ids.add(a["id"])
+            if tag == "details" and a.get("id") in ("single-bout-details", "dohyo-details"):
+                self.details[a["id"]] = "open" in a
+
+    parsed = Check()
+    parsed.feed(html)
+    assert parsed.details == {"single-bout-details": False, "dohyo-details": False}
+    assert {"human", "opponent", "start", "management-deal", "management-board", "round", "tracks"} <= parsed.ids
+    assert ".setup-fields{display:grid" in css
+    assert '<div id="tracks" class="tracks"></div></section>' in html
