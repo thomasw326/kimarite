@@ -5,7 +5,7 @@ from .kimarite import no_grip, power_advantage, relative_momentum, relative_posi
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
 from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, lose_momentum, reduce_grip, establish_grip
-from .selection import ai_look_keep
+from .selection import ai_look_keep, look_from_top, keep_and_bottom
 
 
 def _optional(context: EffectContext, key: str, card: Card) -> bool:
@@ -135,7 +135,25 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 draw_one(state, side)
 
     elif card.name == "Hikiotoshi":
-        draw_from_look(state, side, look=3, keep=1)
+        # Unlike the AI, the human chooses which of the top three to keep.
+        # The surrounding card action is transactional: asking for a choice
+        # must not consume the pile before the player's response.
+        if not context.choice("__human__"):
+            draw_from_look(state, side, look=3, keep=1)
+        else:
+            looked = look_from_top(fighter, 3)
+            if not looked:
+                # This is a required draw, so preserve exhaustion semantics.
+                draw_from_look(state, side, look=3, keep=1)
+            else:
+                options = list(range(len(looked)))
+                index = context.choice("hikiotoshi_card_index")
+                if len(options) == 1 and index is None:
+                    index = 0
+                if index not in options:
+                    raise ChoiceRequired(card.name, "hikiotoshi_card_index", options)
+                keep_and_bottom(fighter, looked, [looked[index]])
+                state.log(f"{fighter.wrestler.name} chooses {looked[index].name} from Hikiotoshi's top {len(looked)} cards.")
 
     elif card.name == "Tsukitaoshi":
         add_play(state, side, 1)
