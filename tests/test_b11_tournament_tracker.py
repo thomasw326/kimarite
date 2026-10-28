@@ -19,8 +19,8 @@ def test_finished_bout_is_bound_to_tournament_identity():
 
 def test_next_bout_requires_recorded_result_and_rolls_back_failed_advance():
     source = CLIENT.read_text()
-    assert "management.results.length!==management.round+1" in source
-    assert "management.round--;managementSave()" in source
+    assert "m.results.length!==m.round+1" in source
+    assert "m.round--;managementSave()" in source
     assert "Could not start next bout:" in source
     assert "Could not deal the next round:" in source
 
