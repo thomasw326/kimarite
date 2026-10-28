@@ -38,3 +38,29 @@ def test_utchari_accepts_minus_three_and_minus_four_only_with_gain():
             expected = position <= -3 and gained
             assert kimarite_is_satisfied(state, Side.A, card_by_name("Utchari")) is expected
             assert _matches_display(state, "Utchari") is expected
+
+
+def test_oshitaoshi_requires_forward_position_as_well_as_momentum_and_power():
+    for position in (-1, 0, 1, 2):
+        state = _state(momentum=2, position=position, power=8)
+        expected = position >= 1
+        assert kimarite_is_satisfied(state, Side.A, card_by_name("Oshitaoshi")) is expected
+        assert _matches_display(state, "Oshitaoshi") is expected
+    for momentum, power in ((1, 8), (2, 7)):
+        state = _state(momentum=momentum, position=1, power=power)
+        assert not kimarite_is_satisfied(state, Side.A, card_by_name("Oshitaoshi"))
+    assert "Position" in card_info(card_by_name("Oshitaoshi"))["description"]
+
+
+def test_abisetaoshi_requires_positive_momentum_without_changing_grip_or_power():
+    from kimarite.models import GripState
+    for momentum in (0, 1, 2):
+        state = _state(momentum=momentum, power=10)
+        state.fighter(Side.A).left_grip = GripState.DEEP
+        expected = momentum >= 1
+        assert kimarite_is_satisfied(state, Side.A, card_by_name("Abisetaoshi")) is expected
+        assert _matches_display(state, "Abisetaoshi") is expected
+    state = _state(momentum=1, power=10)
+    assert not kimarite_is_satisfied(state, Side.A, card_by_name("Abisetaoshi"))
+    assert _matches_display(state, "Abisetaoshi") is False
+    assert "Momentum" in card_info(card_by_name("Abisetaoshi"))["description"]
