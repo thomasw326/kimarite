@@ -37,13 +37,10 @@ class PendingB11Session:
                 raise ValueError("Created wrestler stats must be an exact 2-1-0 distribution.")
         records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
         if drafted_deck is not None:
-            from .b11_player_draft import AVAILABLE, MAX_KIMARITE
-            from collections import Counter
-            if (not isinstance(drafted_deck, list) or len(drafted_deck) != 28
-                    or any(not isinstance(n, str) or n not in AVAILABLE for n in drafted_deck)
-                    or max(Counter(drafted_deck).values()) > 2
-                    or not 3 <= sum(AVAILABLE[n].is_kimarite for n in drafted_deck) <= MAX_KIMARITE):
-                raise ValueError("Invalid B11 drafted deck; require 28 cards, at most two copies per name and 3–8 Kimarite.")
+            from .b11_player_draft import AVAILABLE
+            if (not isinstance(drafted_deck, list) or not 28 <= len(drafted_deck) <= 40
+                    or any(not isinstance(n, str) or n not in AVAILABLE for n in drafted_deck)):
+                raise ValueError("Invalid B11 grown deck; require 28–40 eligible cards.")
         deck = [card_by_name(name) for name in (drafted_deck if drafted_deck is not None else records[human]["cards"])]
         opening = PlayerOpening.from_names(deck, names)
         return cls(human, opponent, PendingPlayerTachiai(opening), seed=seed, created_stats=created_stats, drafted_deck=drafted_deck)
