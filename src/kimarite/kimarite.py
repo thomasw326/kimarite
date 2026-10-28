@@ -104,7 +104,9 @@ def _shitatenage(state: BoutState, side: Side) -> bool:
 
 
 def _hatakikomi(state: BoutState, side: Side) -> bool:
-    return relative_momentum(state, side) <= -2 and state.fighter(side).power >= 6
+    return (relative_momentum(state, side) <= -2
+            and state.fighter(side).power >= 6
+            and state.opponent(side).unstable)
 
 
 def _hikiotoshi(state: BoutState, side: Side) -> bool:
