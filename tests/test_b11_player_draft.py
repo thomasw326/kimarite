@@ -2,7 +2,7 @@
 import pytest
 
 from kimarite.b11_player_draft import (
-    STARTERS, AVAILABLE, options_for, validate_draft, deal_block,
+    STARTERS, AVAILABLE, options_for, validate_draft, deal_block, grow_deck,
 )
 from kimarite.b11_pending_session import PendingB11Session
 from kimarite.b11_live_opening import build_resolved_b11_opening
@@ -99,3 +99,39 @@ def test_draft_is_deterministic_given_same_seed_and_current_deck():
     assert options_for(s,[],1234)==options_for(s,[],1234)
     first=options_for(s,[],1234)
     assert options_for(s,[first[0]],1234)==options_for(s,[first[0]],1234)
+
+
+def test_duplicate_original_once_and_deal_its_copy():
+    s=list(STARTERS)
+    picks=pick_through(s,87)
+    deck,ids=grow_deck(s,picks,87,[0,3,10])
+    assert len(deck)==31
+    assert len(set(ids))==31
+    assert ids[28]=="duplicate:0"
+    assert deck[28]==deck[0]
+    assert deck[29]==deck[3]
+    for seed in range(25):
+        dealt=deal_block(deck,seed,ids)
+        assert len(dealt)==9
+        assert len({c["instance_id"] for c in dealt})==9
+        assert all(c["name"]==deck[ids.index(c["instance_id"])] for c in dealt)
+    with pytest.raises(ValueError):
+        grow_deck(s,picks,87,[0,0])
+    with pytest.raises(ValueError):
+        grow_deck(s,picks,87,[0,True])
+    with pytest.raises(ValueError):
+        grow_deck(s,picks,87,list(range(13)))
+
+
+def test_full_twelve_growth_and_live_start_accepts_duplicate_kimarite():
+    s=list(STARTERS)
+    picks=pick_through(s,99)
+    deck,ids=grow_deck(s,picks,99,list(range(12)))
+    assert len(deck)==40
+    pending=PendingB11Session.start(
+        "Arm Controller","The Technician",deck[:3],drafted_deck=deck,
+        created_stats={"power":2,"technique":1,"spirit":0},
+    )
+    pending.confirm([0,1])
+    result=build_resolved_b11_opening(pending)
+    assert result.state.fighter_a.wrestler.base_power==2
