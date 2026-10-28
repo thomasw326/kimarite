@@ -11,7 +11,7 @@ on:
 jobs:
   validate-69-decks:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,10 +24,10 @@ jobs:
         run: python scripts/b11_69_round_robin.py --duplicates 0 --validate-only
       - name: Validate all 69 maximum decks (40 cards)
         run: python scripts/b11_69_round_robin.py --duplicates 12 --validate-only
-      - name: Run mirrored B11 AI smoke (maximum decks)
-        run: python scripts/b11_69_round_robin.py --duplicates 12 --bouts 138 --output-dir artifacts/b11_69_max
-      - name: Run mirrored B11 AI smoke (base decks)
-        run: python scripts/b11_69_round_robin.py --duplicates 0 --bouts 138 --output-dir artifacts/b11_69_base
+      - name: Run complete 69-wrestler mirrored round robin (maximum decks)
+        run: python scripts/b11_69_round_robin.py --duplicates 12 --bouts 4692 --output-dir artifacts/b11_69_max
+      - name: Run complete 69-wrestler mirrored round robin (base decks)
+        run: python scripts/b11_69_round_robin.py --duplicates 0 --bouts 4692 --output-dir artifacts/b11_69_base
       - uses: actions/upload-artifact@v4
         if: always()
         with:
