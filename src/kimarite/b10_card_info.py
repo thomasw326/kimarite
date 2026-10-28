@@ -52,7 +52,7 @@ CARD_TEXT = {
     "Yorikiri": {"timing":"Kimarite","effect":"Win: usable total Grip at least 1, relative Momentum at least +1 and Position at least +2. On play: gain 1 Push if usable Grip is at least 2.","status":"verified"},
     "Oshidashi": {"timing":"Kimarite","effect":"Win: Position at least +2 and Momentum at least +2. On play: if Position at least +1, gain 1 Momentum.","status":"verified"},
     "Tsukidashi": {"timing":"Kimarite","effect":"Win: Position at least +3 and at least 3 cards played this turn. On play: if Position at least +1, gain 1 Play and draw 1.","status":"verified"},
-    "Oshitaoshi": {"timing":"Kimarite","effect":"Win: Momentum at least +2 and your Power at least 8. On play: gain 1 Power if Momentum at least +1; gain 1 Momentum if Power exceeds opponent's.","status":"verified"},
+    "Oshitaoshi": {"timing":"Kimarite","effect":"Win: relative Momentum at least +2, relative Position at least +1 and your Power at least 8. On play: gain 1 Power if Momentum at least +1; gain 1 Momentum if Power exceeds opponent's.","status":"verified"},
     "Yoritaoshi": {"timing":"Kimarite","effect":"Win: usable Grip at least 1, Position at least +2 and Power advantage at least +2. On play: gain 1 Power if you have usable Grip.","status":"verified"},
     "Katasukashi": {"timing":"Kimarite","effect":"Win: opponent has no Grip, Momentum at least +2, and your hand has at least 4 more cards. On play: if Momentum at least +1 and discard pile is nonempty, recover one discarded card to hand.","status":"verified"},
     "Tsukiotoshi": {"timing":"Kimarite","effect":"Win: you have no Grip, Momentum at least +1, your Power is at least 3 below opponent's, and opponent is Unstable. On play: gain 1 additional Play.","status":"verified"},
