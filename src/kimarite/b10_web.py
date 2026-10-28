@@ -35,6 +35,7 @@ def labelled_choices(session, exc, command=None):
         "temporary_index": "Choose an opponent Temporary to disrupt",
         "uwate_card_index": "Choose a revealed card",
         "hikiotoshi_card_index": "Choose one of the top three cards to keep",
+        "utchari_card_index": "Choose one of the top two cards to keep",
         "opponent_deck_index": "Choose a revealed opponent deck card to discard",
         "opponent_hand_index": "Choose a position in opponent's hidden hand",
         "card_target": "Choose an opponent Grip-related card to remove",
@@ -79,6 +80,8 @@ def labelled_choices(session, exc, command=None):
                 cards = own.draw_pile[:max(0, own.total_grip)]
             elif key == "hikiotoshi_card_index":
                 cards = own.draw_pile[:3]
+            elif key == "utchari_card_index":
+                cards = own.draw_pile[:2]
             elif key == "card_target":
                 from .effects import GRIP_REFERENCING_TEMPORARIES, GRIP_REFERENCING_KIMARITE
                 cards = [t.card for t in foe.temporary_zone if t.card.name in GRIP_REFERENCING_TEMPORARIES]
@@ -100,6 +103,7 @@ def labelled_choices(session, exc, command=None):
                 "power_payoff": "Gain 1 Push and 1 Momentum",
                 "power_crusher": "Gain Momentum; opponent loses Power",
                 "power": "Gain 1 Power", "momentum": "Gain 1 Momentum",
+                "grip": "Improve your shallower Grip",
             }
             label = modes.get(str(option), str(option).replace("_", " ").title())
         item = {"value": option, "label": label}
