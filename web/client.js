@@ -416,6 +416,8 @@ function renderBoutHud(g){
  $('hud-turn').textContent='Turn '+(g.turn??'—');
  $('hud-position').textContent='Position '+(Number(g.position)>0?'+':'')+g.position;
  $('hud-momentum').textContent='Momentum '+(Number(g.momentum)>0?'+':'')+g.momentum;
+ const own=g.human;
+ $('hud-human').textContent='You: '+(own?.name||'Rikishi')+' · Power '+(own?.power??'—')+' · Grip '+(Array.isArray(own?.grip)?own.grip.join('/'):'—');
  const foe=g.opponent;
  $('hud-opponent').textContent=(foe.name||'Opponent')+' · Power '+(foe.power??'—')+' · Grip '+(Array.isArray(foe.grip)?foe.grip.join('/'):'—');
  const list=$('hud-effects');
