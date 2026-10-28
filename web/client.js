@@ -404,7 +404,37 @@ $('management-next').onclick=async()=>{
  });
 };
 
+function renderBoutHud(g){
+ const hud=$('bout-hud');
+ if(!hud)return;
+ // Keep the strip hidden during drafting, between bouts and initial Tachiai.
+ if(!g||g.phase==='choose_tachiai'||!g.opponent||g.position===undefined||g.momentum===undefined){
+  hud.hidden=true;
+  return;
+ }
+ hud.hidden=false;
+ $('hud-turn').textContent='Turn '+(g.turn??'—');
+ $('hud-position').textContent='Position '+(Number(g.position)>0?'+':'')+g.position;
+ $('hud-momentum').textContent='Momentum '+(Number(g.momentum)>0?'+':'')+g.momentum;
+ const foe=g.opponent;
+ $('hud-opponent').textContent=(foe.name||'Opponent')+' · Power '+(foe.power??'—')+' · Grip '+(Array.isArray(foe.grip)?foe.grip.join('/'):'—');
+ const list=$('hud-effects');
+ list.replaceChildren();
+ const entries=[...(foe.temporary||[]).map(c=>({card:c,zone:'temporary'})),...(foe.kimarite||[]).map(c=>({card:c,zone:'kimarite'}))];
+ if(!entries.length){list.append(node('span','hud-no-effects','Opponent effects: none active'));return;}
+ list.append(node('span','hud-effects-label','Opponent active:'));
+ for(const {card:c,zone} of entries){
+  const effect=zoneEffect(c,zone);
+  const label=displayCardName(c.name);
+  const entry=btn((zone==='kimarite'?'Kimarite · ':'Temporary · ')+label+' — '+effect,
+    ()=>inspect({...c,description:effect,zone_only:true,timing:zone==='kimarite'?'Winning condition':'Active Temporary effect'}),
+    'hud-effect');
+  entry.title=label+': '+effect;
+  list.append(entry);
+ }
+}
 function renderPendingTachiai(g){
+ renderBoutHud(g);
  game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();
  $('round').textContent='CHOOSE TACHIAI';$('tracks').replaceChildren();
  $('score').replaceChildren(node('h2','','Your opening: '+g.human.name+' vs '+g.opponent.name));
@@ -457,7 +487,7 @@ $('result-next').onclick=()=>{
  if(management&&next&&!next.hidden){next.click();return}
  $('start').scrollIntoView({behavior:'smooth',block:'start'});
 };
-function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();
+function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();
  for(const [title,s,own] of [['YOUR RIKISHI',g.human,true],['OPPONENT',g.opponent,false]]){const box=node('div','rikishi-info');box.append(node('div','eyebrow',title),node('h2','',s.name),node('p','', 'Power '+s.power+'  ·  Grip '+s.grip.join('/')+'  ·  '+(own?'Plays '+s.plays_remaining:'Hand '+s.hand_count)));const zones=node('p','zones');zones.append(node('b','','Kimarite: '),document.createTextNode(names(s.kimarite)),node('br'),node('b','','Temporary: '),document.createTextNode(names(s.temporary)));box.append(zones);const discard=btn('Discard pile: '+s.discard_count+' · View cards',()=>showDiscard(s,own?'Your rikishi':'Opponent'),'discard-button');box.append(discard);for(const zoneName of ['kimarite','temporary']){const zone=node('div','zone-list');zone.append(node('div','eyebrow',zoneName.toUpperCase()));for(const c of s[zoneName]){const item=node('div','zone-entry');item.append(btn(displayCardName(c.name)+' · Inspect',()=>inspect({...c,description:zoneEffect(c,zoneName),zone_only:true,timing:zoneName==='kimarite'?'Winning condition':'Active Temporary effect'}),'zone-card'));item.append(node('p','temporary-detail',zoneEffect(c,zoneName)));zone.append(item)}box.append(zone)}$('score').append(box)}
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();if(g.selection){$('choices').append(node('h2','','Choose '+g.selection.keep+' cards to keep'));const strip=node('div','cards');g.selection.options.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}confirm.disabled=picked.size!==g.selection.keep});b.firstChild.textContent=(i+1)+'. '+displayCardName(c.name);const info=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');info.type='button';const wrap=node('div','choice-card-wrap');wrap.append(b,info);strip.append(wrap)});$('choices').append(strip);const confirm=btn('Keep selected cards',()=>act({type:'choose_cards',indices:[...picked]}),'confirm');confirm.disabled=g.selection.keep!==0;$('choices').append(confirm)}
