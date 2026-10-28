@@ -22,3 +22,14 @@ def test_final_results_show_five_rounds_and_all_bouts():
     assert "'Bout '+(i*3+k+1)" in js
     assert "' · '+(r.won?'WIN':'LOSS')" in js
     assert "tournamentFinalText(management)" in js
+
+
+def test_duplication_choices_show_full_rules_and_allow_inspection():
+    js = (ROOT / "web/client.js").read_text()
+    css = (ROOT / "web/style.css").read_text()
+    assert "assigned_cards:" in js and ".map(c=>({...c}))" in js
+    assert "m.cards.find(card=>card.instance_id===choice.instance_id)" in js
+    assert "node('p','reward-effect',description)" in js
+    assert "btn('Inspect full card',()=>inspect(c),'reward-inspect')" in js
+    assert "btn('Duplicate '+c.name" in js
+    assert "#management-reward-cards .reward-effect" in css
