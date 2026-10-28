@@ -70,7 +70,7 @@ CARD_TEXT = {
     "Okuritaoshi": {"timing":"Generated Kimarite","effect":"Generated-only Kimarite. Win: Power at least 8 and Momentum at least +1.","status":"verified"},
     "Tsuriotoshi": {"timing":"Kimarite","effect":"Win: your Power + relative Momentum + usable total Grip is at least 15. On play: choose gain 1 Power, 1 Momentum or improve your shallower Grip.","status":"verified"},
     "Sukuinage": {"timing":"Kimarite","effect":"Win: no Grip, Momentum at least +2, and hand advantage at least 4. On play: draw 1 if you have no Grip.","status":"verified"},
-    "Utchari": {"timing":"Kimarite","effect":"Win: you gained Momentum this turn and Position is exactly -3. On play: if behind on Position, look at 2 and keep 1.","status":"verified"},
+    "Utchari": {"timing":"Kimarite","effect":"Win: you gained Momentum this turn and Position is -3 or lower. On play: if behind on Position, look at 2 and keep 1.","status":"verified"},
     "Uwatedashinage": {"timing":"Kimarite","effect":"Win: Left Grip, Momentum at least +1, and your Power at least 5 below opponent's. On play: draw 1; optionally discard 1 card to establish Left Grip.","status":"verified"},
 }
 GLOSSARY = {
