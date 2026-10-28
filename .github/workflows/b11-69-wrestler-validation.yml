@@ -5,6 +5,10 @@ on:
     paths:
       - 'data/b11_69_wrestler_decks.json'
       - 'scripts/b11_69_round_robin.py'
+      - 'src/kimarite/kimarite.py'
+      - 'src/kimarite/b11_victory_checks.py'
+      - 'src/kimarite/b10_card_info.py'
+      - 'tests/test_b11_recent_kimarite_fixes.py'
       - '.github/workflows/b11-69-wrestler-validation.yml'
   workflow_dispatch:
 
