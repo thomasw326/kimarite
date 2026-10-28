@@ -430,7 +430,7 @@
       "name": "Hatakikomi",
       "type": "Kimarite",
       "orbs": "🟣🟠🟠",
-      "text": "WIN: Momentum ≤ −2; Power ≥ 6.\nEXCHANGE: You may lose 1 Momentum. If you do, your opponent discards 1 card from their hand. If their hand is empty, draw 1 card instead.",
+      "text": "WIN: Momentum ≤ −2; Power ≥ 6; opponent is Unstable.\nEXCHANGE: You may lose 1 Momentum. If you do, your opponent discards 1 card from their hand. If their hand is empty, draw 1 card instead.",
       "variant": "R21-HAT-C3"
     },
     {
