@@ -39,6 +39,86 @@ function activeTournamentBout(){
  }
  return null;
 }
+function completedBlock(m){
+ return m.results.length>0&&m.results.length%3===0;
+}
+function unresolvedRewards(m){
+ if(!m||m.opening_mode!=='b11_live'||!m.draft_picks||!completedBlock(m))return [];
+ return m.results.slice(-3).filter(r=>r.won&&!r.duplication_resolved);
+}
+function availableRewardCards(m,result){
+ if((m.duplicated_indices||[]).length>=12)return [];
+ return (result.assigned_cards||[]).filter(c=>{
+  if(!c.instance_id?.startsWith('original:'))return false;
+  const i=Number(c.instance_id.slice(9));
+  return Number.isInteger(i)&&i>=0&&i<28&&!(m.duplicated_indices||[]).includes(i);
+ });
+}
+function calculateCardRecords(m){
+ const plays=new Map(),wins=new Map(),kims=new Set(m.kimarite_names||[]);
+ for(const r of m.results){
+  const seen=new Set();
+  for(const name of r.human_card_plays||[]){
+   plays.set(name,(plays.get(name)||0)+1);seen.add(name);
+  }
+  if(r.won)for(const name of seen)wins.set(name,(wins.get(name)||0)+1);
+ }
+ function leader(source,onlyKimarite){
+  const candidates=[...source.entries()].filter(([name,n])=>n>0&&(!onlyKimarite||kims.has(name)));
+  candidates.sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  return candidates.length?{name:candidates[0][0],count:candidates[0][1]}:null;
+ }
+ return {
+  most_played_card:leader(plays,false),most_played_kimarite:leader(plays,true),
+  most_winning_card:leader(wins,false),most_winning_kimarite:leader(wins,true)
+ };
+}
+function completedRewards(m){
+ return !unresolvedRewards(m).length;
+}
+function updateTournamentLeaders(m){
+ m.card_records=calculateCardRecords(m);
+}
+function openBlockRewards(){
+ const m=management;if(!m||!completedBlock(m))return false;
+ const pending=unresolvedRewards(m);
+ if(!pending.length){
+  $('management-rewards').hidden=true;
+  return false;
+ }
+ const r=pending[0],i=m.results.indexOf(r);
+ const choices=availableRewardCards(m,r);
+ if(!choices.length){
+  r.duplication_resolved=true;managementSave();return openBlockRewards();
+ }
+ $('management-board').hidden=true;
+ $('management-rewards').hidden=false;
+ $('management-next').hidden=true;
+ $('management-reward-progress').textContent='Bout '+(i+1)+' victory · Choose one of your three assigned original cards to duplicate ('+
+  (28+(m.duplicated_indices||[]).length)+'/40 cards).';
+ const panel=$('management-reward-cards');panel.replaceChildren();
+ for(const c of choices){
+  const wrapper=node('div','management-card');
+  wrapper.append(card(c,()=>inspect(c)));
+  const select=btn('Duplicate '+c.name,()=>{
+   if(!management||!unresolvedRewards(management).includes(r))return;
+   const originalIndex=Number(c.instance_id.slice(9));
+   if(!Number.isInteger(originalIndex)||management.duplicated_indices.includes(originalIndex))return;
+   management.duplicated_indices.push(originalIndex);
+   r.duplicated_card=c.name;r.duplication_resolved=true;
+   managementSave();
+   if(!openBlockRewards()){
+    $('management-notice').textContent='Victory rewards resolved. Your deck now has '+(28+management.duplicated_indices.length)+' cards.';
+    managementStatus();
+    if(management.results.length===15)showTournamentFinal();
+    else $('management-next').hidden=false;
+   }
+  });
+  wrapper.append(select);panel.append(wrapper);
+ }
+ $('management-rewards').scrollIntoView({behavior:'smooth'});
+ return true;
+}
 function tournamentFinalText(m){
  const wins=m.results.filter(r=>r.won).length;
  const lines=['KIMARITE — TOURNAMENT RESULTS',m.human+' · '+wins+' wins, '+(m.results.length-wins)+' losses'];
@@ -50,11 +130,16 @@ function tournamentFinalText(m){
 }
 function showTournamentFinal(){
  const m=management;
- if(!m||m.results.length!==15)return;
+ if(!m||m.results.length!==15||!completedRewards(m))return;
  const dialog=$('tournament-final');
  const wins=m.results.filter(r=>r.won).length;
  $('tournament-final-record').textContent=wins+'–'+(15-wins);
  $('tournament-final-player').textContent=m.human+' · 15 bouts completed';
+ const records=$('tournament-card-records');records.replaceChildren();
+ const stats=calculateCardRecords(m);m.card_records=stats;managementSave();
+ const names=[['most_played_card','Most played card'],['most_played_kimarite','Most played Kimarite'],['most_winning_card','Most winning card'],['most_winning_kimarite','Most winning Kimarite']];
+ records.append(node('h3','','Tournament card records (raw counts)'));
+ for(const [key,title] of names){const result=stats[key];const line=node('div','tournament-final-bout');line.append(node('strong','',title),node('span','',result?result.name:'No qualifying plays'),node('small','',result?result.count+' '+(key.includes('winning')?'winning bouts':'plays'):'—'));records.append(line)}
  const rounds=$('tournament-final-rounds');
  rounds.replaceChildren();
  for(let i=0;i<5;i++){
@@ -81,7 +166,7 @@ $('tournament-final-copy').onclick=async()=>{
  try{await navigator.clipboard.writeText(summary);$('tournament-final-copy').textContent='Copied!'}
  catch(e){$('tournament-final-copy').textContent='Copy unavailable'}
 };
-function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;if(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null});managementSave()}const wins=m.results.filter(r=>r.won).length;progress.replaceChildren(node('h3','','Tournament · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&m.round<14);$('management-next').textContent=m.round%3===2?'Deal next round of nine cards':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result');row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',r.finish||'Finisher unavailable'));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15;$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic';if(m.results.length===15){$('management-next').hidden=true;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
+function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;if(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({name:c.name,instance_id:c.instance_id})),duplication_resolved:false});updateTournamentLeaders(m);managementSave()}const wins=m.results.filter(r=>r.won).length;progress.replaceChildren(node('h3','','Tournament · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve victories / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result');row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',r.finish||'Finisher unavailable'));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15;$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic';if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
 const CREATED_STAT_NAMES={power:'Power',technique:'Technique',spirit:'Spirit'};
 function creationChoices(){
  const food=$('create-food').value,training=$('create-training').value;
@@ -130,7 +215,7 @@ function b11TachiaiPreview(m,group){
  return box;
 }
 function managementBoard(){if(!management)return;const chosen=management.groups.flat().filter(x=>x!==null);const cards=$('management-cards');cards.replaceChildren();for(const c of management.cards){const selected=chosen.includes(c.deal_index);const wrapper=node('div','management-card');wrapper.append(card(c,()=>inspect(c)));wrapper.append(node('small','',selected?'Assigned to a bout':'Available'));cards.append(wrapper)}const groups=$('management-groups');groups.replaceChildren();for(let i=0;i<3;i++){const box=node('div','management-group');box.append(node('h3','','Round '+(Math.floor(management.round/3)+1)+' · Bout '+(i+1)+' vs '+management.opponents[Math.floor(management.round/3)*3+i]));for(let j=0;j<3;j++){const classic=management.opening_mode==='classic';const type=classic?(j===0?'Kimarite':j===1?'Prepared Tachiai':'First draw'):('Opening card '+(j+1));const select=node('select','');const blank=node('option','',type+' — choose');blank.value='';select.append(blank);for(const c of management.cards){if(classic&&(j===0?!c.is_kimarite:c.is_kimarite))continue;if(chosen.includes(c.deal_index)&&management.groups[i][j]!==c.deal_index)continue;const o=node('option','',c.name+' · '+(c.deal_index+1));o.value=c.deal_index;select.append(o)}select.value=management.groups[i][j]===null?'':String(management.groups[i][j]);select.onchange=()=>{management.groups[i][j]=select.value===''?null:Number(select.value);managementSave();managementBoard()};box.append(node('label','',type),select)}if(management.opening_mode!=='classic')box.append(b11TachiaiPreview(management,i));groups.append(box)}$('management-start').disabled=chosen.length!==9}
-async function managementRound(){const m=management;if(!m)return;const i=m.round;const group=i%3;const take=k=>m.cards.find(c=>c.deal_index===m.groups[group][k]).name;if(m.results.length!==i)throw new Error('Tournament is out of sync: '+m.results.length+' completed, expected '+i+'. Cannot advance safely.');const request={human:m.human,opponent:m.opponents[i],seed:m.seed+i+1};if(m.opening_mode==='classic')request.opening={kimarite:take(0),prepared:take(1),top:take(2)};else {request.opening_mode='b11_live';request.opening_cards=[take(0),take(1),take(2)];if(m.created_stats)request.created_stats=m.created_stats;if(m.draft_picks){request.starting_cards=m.starting_cards;request.draft_picks=m.draft_picks;request.draft_seed=m.draft_seed}}const r=await api('/api/session',request);sessionSetup={...request,tournament_bout:i};actionJournal=[];token=r.token;game=null;render(r.state);$('seed-used').textContent='Bout seed: '+request.seed;$('management-notice').textContent='Bout '+(i+1)+': '+request.human+' vs '+request.opponent;managementSave();document.querySelector('.arena').scrollIntoView({behavior:'smooth'})}
+async function managementRound(){const m=management;if(!m)return;const i=m.round;const group=i%3;const take=k=>m.cards.find(c=>c.deal_index===m.groups[group][k]).name;if(m.results.length!==i)throw new Error('Tournament is out of sync: '+m.results.length+' completed, expected '+i+'. Cannot advance safely.');const request={human:m.human,opponent:m.opponents[i],seed:m.seed+i+1};if(m.opening_mode==='classic')request.opening={kimarite:take(0),prepared:take(1),top:take(2)};else {request.opening_mode='b11_live';request.opening_cards=[take(0),take(1),take(2)];if(m.created_stats)request.created_stats=m.created_stats;if(m.draft_picks){request.starting_cards=m.starting_cards;request.draft_picks=m.draft_picks;request.draft_seed=m.draft_seed;request.duplicated_indices=m.duplicated_indices||[]}}const r=await api('/api/session',request);sessionSetup={...request,tournament_bout:i};actionJournal=[];token=r.token;game=null;render(r.state);$('seed-used').textContent='Bout seed: '+request.seed;$('management-notice').textContent='Bout '+(i+1)+': '+request.human+' vs '+request.opponent;managementSave();document.querySelector('.arena').scrollIntoView({behavior:'smooth'})}
 const B11_STARTER_SUITE=['Yorikiri','Oshidashi','Oshi','Tsuki','Gain Left Grip','Gain Right Grip','Give Ground','Shiko Stomp'];
 let activeDraft=null;
 function saveDraft(){try{if(activeDraft)sessionStorage.setItem('kimarite_active_draft',JSON.stringify(activeDraft));else sessionStorage.removeItem('kimarite_active_draft')}catch(e){}}
@@ -164,7 +249,7 @@ async function finishDraft(){
  const roster=[...$('opponent').options].map(o=>o.value).filter(v=>v&&v!=='__random__'&&v!==d.human);
  for(let i=roster.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[roster[i],roster[j]]=[roster[j],roster[i]]}
  management={human:d.human,seed:d.seed,opening_mode:'b11_live',created_stats:d.created_stats,
-   starting_cards:d.starting_cards,draft_picks:d.picks,draft_seed:d.seed,
+   starting_cards:d.starting_cards,draft_picks:d.picks,draft_seed:d.seed,kimarite_names:d.kimarite_names,duplicated_indices:[],
    cards:first.cards,groups:Array.from({length:3},()=>[null,null,null]),
    opponents:roster.slice(0,15),round:0,results:[]};
  activeDraft=null;saveDraft();
