@@ -77,13 +77,34 @@ def validate_draft(starting: list[str], picks: list[str], seed: int) -> list[str
     return deck
 
 
-def deal_block(deck: list[str], seed: int) -> list[dict]:
+def grow_deck(starting: list[str], picks: list[str], draft_seed: int,
+              duplicated_indices: list[int]) -> tuple[list[str], list[str]]:
+    """Build a 28–40 card pool from distinct physical original positions."""
+    originals = validate_draft(starting, picks, draft_seed)
+    if (not isinstance(duplicated_indices, list)
+            or len(duplicated_indices) > 12
+            or any(type(i) is not int or not 0 <= i < 28 for i in duplicated_indices)
+            or len(set(duplicated_indices)) != len(duplicated_indices)):
+        raise ValueError("At most 12 distinct originals may be duplicated.")
+    return (
+        originals + [originals[i] for i in duplicated_indices],
+        [f"original:{i}" for i in range(28)]
+        + [f"duplicate:{i}" for i in duplicated_indices],
+    )
+
+
+def deal_block(deck: list[str], seed: int, ids: list[str] | None = None) -> list[dict]:
     """Sample nine current-deck physical copies; presentation uses card_info."""
     from .b10_card_info import card_info
     if not isinstance(deck, list) or len(deck) < 9:
         raise ValueError("A block requires at least nine cards.")
     if any(name not in AVAILABLE for name in deck):
         raise ValueError("Unknown card in player deck.")
+    if ids is None:
+        ids = [f"original:{i}" for i in range(len(deck))]
+    if len(ids) != len(deck) or len(set(ids)) != len(ids):
+        raise ValueError("Invalid physical card identities.")
     rng = random.Random(seed)
-    selected = rng.sample(deck, 9)
-    return [{**card_info(card_by_name(n)), "deal_index": i} for i, n in enumerate(selected)]
+    selected = rng.sample(range(len(deck)), 9)
+    return [{**card_info(card_by_name(deck[j])), "deal_index": i,
+             "instance_id": ids[j]} for i, j in enumerate(selected)]
