@@ -63,7 +63,7 @@ def test_mobile_live_bout_hud_keeps_position_momentum_and_opponent_effects_visib
     css = (CLIENT.parent / "style.css").read_text()
     js = CLIENT.read_text()
     assert 'id="bout-hud"' in html and 'aria-label="Live bout status"' in html
-    assert all(f'id="hud-{label}"' in html for label in ["turn", "position", "momentum", "opponent", "effects"])
+    assert all(f'id="hud-{label}"' in html for label in ["turn", "position", "momentum", "human", "opponent", "effects"])
     assert ".bout-hud{position:sticky;top:0" in css
     assert ".bout-hud[hidden]{display:none!important}" in css
     assert "@media (min-width:720px){.bout-hud{display:none}}" in css
@@ -73,3 +73,14 @@ def test_mobile_live_bout_hud_keeps_position_momentum_and_opponent_effects_visib
     assert "foe.temporary||[]" in js and "foe.kimarite||[]" in js
     assert "zoneEffect(c,zone)" in js
     assert "Opponent effects: none active" in js
+
+
+def test_mobile_hud_displays_player_power_and_left_right_grip():
+    js = CLIENT.read_text()
+    html = (CLIENT.parent / "index.html").read_text()
+    assert 'id="hud-human"' in html
+    assert "const own=g.human;" in js
+    assert "$('hud-human').textContent=" in js
+    assert "own?.power" in js
+    assert "Array.isArray(own?.grip)?own.grip.join('/')" in js
+    assert "$('hud-opponent').textContent=" in js
