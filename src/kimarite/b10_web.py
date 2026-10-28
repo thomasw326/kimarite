@@ -59,19 +59,21 @@ def labelled_choices(session, exc, command=None):
         elif isinstance(option, int) and not isinstance(option, bool):
             cards = None
             if key == "hand_index":
-                cards = own.hand[:]
-                played_index = (command or {}).get("hand_index")
-                if isinstance(played_index, int) and 0 <= played_index < len(cards):
-                    cards.pop(played_index)
-                # Pull resolves its draw before the discard choice. The
-                # original session is transactional, so expose the drawn card
-                # from the top of the unchanged draw pile in the right slot.
-                if card_name == "Pull" and own.draw_pile:
-                    cards.append(own.draw_pile[0])
+                cards = getattr(exc, "visible_cards", None)
+                if cards is None:
+                    # Legacy direct calls may not include a transactional
+                    # preview. Do not guess that a newly drawn card occupies
+                    # an existing hand slot.
+                    cards = own.hand[:]
+                    played_index = (command or {}).get("hand_index")
+                    if isinstance(played_index, int) and 0 <= played_index < len(cards):
+                        cards.pop(played_index)
+                    if card_name == "Pull" and own.draw_pile:
+                        cards.append(own.draw_pile[0])
             elif key == "discard_index":
-                cards = own.discard_pile
+                cards = getattr(exc, "visible_cards", own.discard_pile)
             elif key == "sacrifice_kimarite":
-                cards = own.kimarite_zone
+                cards = getattr(exc, "visible_cards", own.kimarite_zone)
             elif key == "temporary_index":
                 cards = [entry.card for entry in foe.temporary_zone]
             elif key == "opponent_deck_index":
@@ -92,7 +94,7 @@ def labelled_choices(session, exc, command=None):
             elif key == "opponent_hand_index":
                 label = f"Opponent hand position {option + 1} (hidden card)"
             else:
-                label = f"Option {option + 1}"
+                label = f"Card position {option + 1} (name unavailable)" if key == "hand_index" else f"Option {option + 1}"
         elif key == "grip":
             label = f"{str(option).title()} Grip"
         elif key == "mode":
