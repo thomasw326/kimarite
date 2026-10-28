@@ -542,7 +542,7 @@
       "name": "Utchari",
       "type": "Kimarite",
       "orbs": "🟢🟢",
-      "text": "WIN: You gained Momentum this turn; Position = −3.\nEXCHANGE: If Position < 0, look at the top 2 cards of your Draw Pile. Put 1 into your hand and the other on the bottom of your Draw Pile.",
+      "text": "WIN: You gained Momentum this turn; Position ≤ −3.\nEXCHANGE: If Position < 0, look at the top 2 cards of your Draw Pile. Put 1 into your hand and the other on the bottom of your Draw Pile.",
       "variant": "R21-UTC-F2"
     },
     {
