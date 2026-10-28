@@ -30,5 +30,7 @@ jobs:
           python -m pip install -e '.[dev]'
       - name: Validate browser JavaScript syntax
         run: node --check web/client.js
+      - name: Check tournament record tiebreaks
+        run: node tests/b11_card_records.cjs
       - name: Run B11 Tachiai regression tests
         run: python -m pytest -q tests/test_b11_player_opening.py tests/test_b11_player_tachiai.py tests/test_b11_tachiai_phase.py tests/test_b11_tachiai_reveals.py tests/test_b11_tachiai_public.py tests/test_b11_live_tachiai_reveals.py tests/test_b11_tachiai_reveal_equivalence.py tests/test_b11_pending_session.py tests/test_b11_tachiai_resolution.py tests/test_b11_multi_commit_effects.py tests/test_b11_live_opening.py tests/test_b11_live_session.py tests/test_b11_side_by_side_log.py tests/test_b11_committed_destinations.py tests/test_b11_grip_reduction_log.py tests/test_b11_sukuinage_win_explanation.py tests/test_b11_draw_shuffle.py tests/test_b11_result_screen_data.py tests/test_b11_all_kimarite_checks.py tests/test_b11_direct_win_explanation.py tests/test_b11_predraft_integrity.py tests/test_b11_15_bout_simulation.py tests/test_b11_kirikaeshi_optional.py tests/test_b11_tournament_tracker.py tests/test_b11_power_water_cantrip.py tests/test_b11_tournament_final.py tests/test_b11_three_stat_points.py tests/test_b11_pai_gao_preview.py tests/test_b11_finish_flavour.py tests/test_b11_hiwaza.py tests/test_b11_character_creation.py tests/test_b11_player_draft.py
