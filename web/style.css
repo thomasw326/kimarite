@@ -47,3 +47,9 @@
 @media(max-width:580px){.tournament-final-bout{grid-template-columns:1fr 1fr}.tournament-final-bout small{grid-column:1/-1;text-align:left}}
 
 .tachiai-preview{margin:12px 0 4px;padding:12px;border:1px solid #66807b;border-radius:10px;background:#ffffff10}.tachiai-preview p{margin:5px 0;font-variant-numeric:tabular-nums}.tachiai-preview small{display:block;margin-top:7px;opacity:.78}
+
+/* Show readable rules directly on each post-block duplication candidate. */
+#management-reward-cards .reward-card{display:flex;flex-direction:column;gap:9px}
+#management-reward-cards .reward-effect{font-size:14px;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;color:#f5ebd6;margin:2px 0;flex:1}
+#management-reward-cards .reward-inspect{background:#35555a;color:#fff;border:1px solid #9aada8;min-height:42px}
+#management-reward-cards .reward-card>button:last-child{width:100%}
