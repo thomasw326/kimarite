@@ -116,7 +116,19 @@ def submit_card_action(
 
     trial = deepcopy(state)
     trial_card = trial.fighter(side).hand[hand_index]
-    play_card(trial, side, trial_card, context=EffectContext(comparison=comparison, choices={"__human__": True, **dict(choices or {})}))
+    try:
+        play_card(trial, side, trial_card, context=EffectContext(comparison=comparison, choices={"__human__": True, **dict(choices or {})}))
+    except ChoiceRequired as exc:
+        # The trial already reflects effects that precede the choice (such as
+        # draw-then-discard), while the committed state remains unchanged.
+        # Send the *trial* cards to the chooser, not stale pre-play hand slots.
+        if exc.choice_name == "hand_index":
+            exc.visible_cards = list(trial.fighter(side).hand)
+        elif exc.choice_name == "discard_index":
+            exc.visible_cards = list(trial.fighter(side).discard_pile)
+        elif exc.choice_name == "sacrifice_kimarite":
+            exc.visible_cards = list(trial.fighter(side).kimarite_zone)
+        raise
     # Preserve the BoutState object identity so callers can retain their handle.
     # All nested state belongs to the accepted transaction from this point on.
     state.__dict__.update(trial.__dict__)
