@@ -63,15 +63,49 @@ function calculateCardRecords(m){
   }
   if(r.won)for(const name of seen)wins.set(name,(wins.get(name)||0)+1);
  }
- function leader(source,onlyKimarite){
-  const candidates=[...source.entries()].filter(([name,n])=>n>0&&(!onlyKimarite||kims.has(name)));
-  candidates.sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
-  return candidates.length?{name:candidates[0][0],count:candidates[0][1]}:null;
+ // Only cards tied for the highest raw count are eligible for a category.
+ // Find distinct category winners wherever possible; a sole count leader
+ // cannot be displaced merely to make the results more varied.
+ const categories=[
+  ['most_played_card',plays,false],
+  ['most_played_kimarite',plays,true],
+  ['most_winning_card',wins,false],
+  ['most_winning_kimarite',wins,true]
+ ];
+ const candidates=new Map();
+ for(const [key,counts,kimariteOnly] of categories){
+  const eligible=[...counts.entries()].filter(([name,n])=>n>0&&(!kimariteOnly||kims.has(name)));
+  const best=eligible.length?Math.max(...eligible.map(([,n])=>n)):0;
+  candidates.set(key,eligible.filter(([,n])=>n===best).map(([name])=>name).sort((a,b)=>a.localeCompare(b)));
  }
- return {
-  most_played_card:leader(plays,false),most_played_kimarite:leader(plays,true),
-  most_winning_card:leader(wins,false),most_winning_kimarite:leader(wins,true)
- };
+ const keys=categories.map(([key])=>key);
+ // Maximum bipartite matching: first reserve sole leaders, then use
+ // augmenting paths to maximize the number of different displayed cards.
+ const order=[...keys].sort((a,b)=>candidates.get(a).length-candidates.get(b).length||keys.indexOf(a)-keys.indexOf(b));
+ const cardOwner=new Map();
+ function match(key,seen){
+  for(const name of candidates.get(key)){
+   if(seen.has(name))continue;
+   seen.add(name);
+   const previous=cardOwner.get(name);
+   if(previous===undefined||match(previous,seen)){
+    cardOwner.set(name,key);return true;
+   }
+  }
+  return false;
+ }
+ for(const key of order)match(key,new Set());
+ const selected=new Map([...cardOwner].map(([name,key])=>[key,name]));
+ // When overlap cannot be avoided, still report the true leader.
+ for(const key of keys){
+  if(!selected.has(key)&&candidates.get(key).length)selected.set(key,candidates.get(key)[0]);
+ }
+ const records={};
+ for(const [key,counts] of categories){
+  const name=selected.get(key);
+  records[key]=name?{name,count:counts.get(name)}:null;
+ }
+ return records;
 }
 function completedRewards(m){
  return !unresolvedRewards(m).length;
