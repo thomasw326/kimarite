@@ -51,3 +51,37 @@ def test_hatakikomi_optional_remains_optional():
     assert e.value.choice_name=="use_optional"
     resolve_kimarite_play_effect(state,Side.A,card_by_name("Hatakikomi"),EffectContext(choices={"__human__":True,"use_optional":False}))
     assert state.momentum==0
+
+
+def test_tsuriotoshi_human_must_choose_effect():
+    state=state_for_hiki()
+    with pytest.raises(ChoiceRequired) as exc:
+        resolve_kimarite_play_effect(
+            state,Side.A,card_by_name("Tsuriotoshi"),EffectContext(choices={"__human__":True}))
+    assert exc.value.choice_name=="mode"
+    assert exc.value.options==["power","momentum","grip"]
+    before=state.fighter_a.power
+    resolve_kimarite_play_effect(
+        state,Side.A,card_by_name("Tsuriotoshi"),
+        EffectContext(choices={"__human__":True,"mode":"power"}))
+    assert state.fighter_a.power==before+1
+
+
+def test_utchari_human_selects_from_two_only_when_behind():
+    state=state_for_hiki()
+    state.position=-1
+    before=list(state.fighter_a.draw_pile)
+    with pytest.raises(ChoiceRequired) as exc:
+        resolve_kimarite_play_effect(
+            state,Side.A,card_by_name("Utchari"),EffectContext(choices={"__human__":True}))
+    assert exc.value.choice_name=="utchari_card_index"
+    assert exc.value.options==[0,1]
+    assert state.fighter_a.draw_pile==before
+    labels=labelled_choices(
+        type("Session",(),{"state":state,"human_side":Side.A})(),exc.value)
+    assert [o["label"] for o in labels["options"]]==["1. Tsuki","2. Give Ground"]
+    resolve_kimarite_play_effect(
+        state,Side.A,card_by_name("Utchari"),
+        EffectContext(choices={"__human__":True,"utchari_card_index":1}))
+    assert [c.name for c in state.fighter_a.hand]==["Give Ground"]
+    assert [c.name for c in state.fighter_a.draw_pile]==["Shiko Stomp","Oshi","Tsuki"]
