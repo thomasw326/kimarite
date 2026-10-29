@@ -162,3 +162,38 @@ def test_ottsuke_records_kimarite_removal():
 
     assert bout.kimarite_removals == [(Side.A, "Tsuridashi")]
     assert bout.fighter_b.kimarite_zone == []
+
+
+def test_momentum_drive_converts_positive_momentum_to_push_without_spending_it():
+    card = card_by_name("Momentum Drive")
+    bout = bout_with_hand([card])
+    bout.momentum = 2
+
+    play_card(bout, Side.A, card)
+
+    assert bout.position == 2
+    assert bout.momentum == 2
+
+
+def test_momentum_drive_builds_momentum_when_neutral_or_behind():
+    card = card_by_name("Momentum Drive")
+    for initial_momentum in (0, -2):
+        bout = bout_with_hand([card])
+        bout.momentum = initial_momentum
+
+        play_card(bout, Side.A, card)
+
+        assert bout.position == 0
+        assert bout.momentum == initial_momentum + 1
+
+
+def test_momentum_drive_uses_current_players_relative_momentum():
+    card = card_by_name("Momentum Drive")
+    bout = bout_with_hand([])
+    bout.fighter_b.hand = [card]
+    bout.momentum = -2
+
+    play_card(bout, Side.B, card)
+
+    assert bout.position == -2
+    assert bout.momentum == -2
