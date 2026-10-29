@@ -44,7 +44,14 @@ def _best_grip_to_reduce(state: BoutState, side: Side) -> str:
         return "left"
     if int(opponent.right_grip) > int(opponent.left_grip):
         return "right"
-    return "left"
+    # On equal levels, disrupt a threatened deep-hand finisher first.
+    threatened = {card.name for card in opponent.kimarite_zone}
+    if "Uwatenage" in threatened and "Shitatenage" not in threatened:
+        return "left"
+    if "Shitatenage" in threatened and "Uwatenage" not in threatened:
+        return "right"
+    # Stable across the bout: seat A targets left, seat B targets right.
+    return "left" if side is Side.A else "right"
 
 
 def _best_hand_index(state: BoutState, side: Side, *, prefer_discard: bool) -> int:
