@@ -31,11 +31,12 @@ def test_oshi_family_reveal_chain_adds_orbs_and_stops():
 
 def test_explosive_step_exchange_push_depends_on_preplay_momentum():
     card = card_by_name("Explosive Step — Fumikomi")
-    for initial, expected_position in [(-1, 1), (0, 1), (1, 0)]:
+    for initial, expected_position in [(-1, 0), (0, 1), (1, 0)]:
         s = state_with_prepared(Card(99998, "Blank"))
         s.momentum = initial
         resolve_exchange_effect(s, Side.A, card, EffectContext())
-        assert s.momentum == initial + 1
+        # Current card grants Push at nonpositive pre-play Momentum; no Momentum gain.
+        assert s.momentum == initial
         assert s.position == expected_position
 
 

@@ -142,6 +142,50 @@ class BoutState:
 
     def declare_winner(self, side: Side, method: str) -> None:
         if self.winner is None:
+            # B11-only presentation: give Power-loss knockdowns traditional
+            # Kimarite names. This does not alter the winning condition.
+            if getattr(self, "b11_explain_wins", False):
+                if method == "Power":
+                    wrestler = self.fighter(side).wrestler
+                    highest = max(
+                        (("power", wrestler.base_power),
+                         ("technique", wrestler.base_technique),
+                         ("spirit", wrestler.base_spirit)),
+                        key=lambda pair: pair[1],
+                    )[0]
+                    method = {"power": "Tsukiotoshi",
+                              "technique": "Hikiotoshi",
+                              "spirit": "Hatakikomi"}[highest]
+                    self.win_source = "power_loss"
+                elif method == "Exhaustion":
+                    method = "Fumidashi" if abs(self.position) >= 3 else "Koshikudake"
+                    self.win_source = "hiwaza"
+                elif self.win_source == "ringout":
+                    # A Shove-induced force-out is always Oshidashi.
+                    played = self.fighter(side).played_this_turn
+                    if played and played[-1].name == "Shove":
+                        method = "Oshidashi"
             self.winner = side
             self.win_method = method
+            if getattr(self, "b11_explain_wins", False) and not hasattr(self, "b11_victory_details"):
+                source = self.win_source
+                if source == "ringout":
+                    explanation = (
+                        "Ring-out: the winning wrestler pushed the opponent "
+                        "past the ring boundary. This is an immediate win, "
+                        "not a Kimarite Zone requirement check."
+                    )
+                elif source == "hiwaza":
+                    explanation = ("Hiwaza (non-technique): the losing wrestler accidentally steps out: no cards left to draw." if method == "Fumidashi" else "Hiwaza (non-technique): the losing wrestler collapses: no cards left to draw.")
+                elif source == "power_loss":
+                    explanation = "Power loss: the opponent's Power fell below zero during the start-of-turn Exhaustion check."
+                else:
+                    explanation = "The bout ended by a direct game effect, rather than a Kimarite Zone requirement check."
+                self.b11_victory_details = {
+                    "kimarite": method,
+                    "source": source or method.lower(),
+                    "requirement_text": explanation,
+                    "checks": [],
+                    "turn": self.turn_number,
+                }
             self.log(f"{self.fighter(side).wrestler.name} wins by {method}.")

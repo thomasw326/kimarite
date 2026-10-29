@@ -60,4 +60,6 @@ def test_abisetaoshi_current_exchange_and_win_threshold():
     state.fighter_a.power = 9
     assert not kimarite_is_satisfied(state, Side.A, card)
     state.fighter_a.power = 10
+    assert not kimarite_is_satisfied(state, Side.A, card)
+    state.momentum = 1
     assert kimarite_is_satisfied(state, Side.A, card)

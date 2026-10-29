@@ -5,7 +5,7 @@ from .kimarite import no_grip, power_advantage, relative_momentum, relative_posi
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
 from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, lose_momentum, reduce_grip, establish_grip
-from .selection import ai_look_keep
+from .selection import ai_look_keep, look_from_top, keep_and_bottom
 
 
 def _optional(context: EffectContext, key: str, card: Card) -> bool:
@@ -135,7 +135,25 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 draw_one(state, side)
 
     elif card.name == "Hikiotoshi":
-        draw_from_look(state, side, look=3, keep=1)
+        # Unlike the AI, the human chooses which of the top three to keep.
+        # The surrounding card action is transactional: asking for a choice
+        # must not consume the pile before the player's response.
+        if not context.choice("__human__"):
+            draw_from_look(state, side, look=3, keep=1)
+        else:
+            looked = look_from_top(fighter, 3)
+            if not looked:
+                # This is a required draw, so preserve exhaustion semantics.
+                draw_from_look(state, side, look=3, keep=1)
+            else:
+                options = list(range(len(looked)))
+                index = context.choice("hikiotoshi_card_index")
+                if len(options) == 1 and index is None:
+                    index = 0
+                if index not in options:
+                    raise ChoiceRequired(card.name, "hikiotoshi_card_index", options)
+                keep_and_bottom(fighter, looked, [looked[index]])
+                state.log(f"{fighter.wrestler.name} chooses {looked[index].name} from Hikiotoshi's top {len(looked)} cards.")
 
     elif card.name == "Tsukitaoshi":
         add_play(state, side, 1)
@@ -177,8 +195,12 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 fighter.discard_pile.append(discarded)
 
     elif card.name == "Kirikaeshi":
-        # B9: optional conversion of Power into Momentum and a card.
-        if context.choice("use_optional") is True:
+        # Human must explicitly choose; AI/Classic no-choice callers retain
+        # their established decline-by-default behaviour.
+        optional = context.choice("use_optional")
+        if context.choice("__human__") and type(optional) is not bool:
+            raise ChoiceRequired(card.name, "use_optional", [True, False])
+        if optional is True:
             from .rules import lose_power
             lose_power(state, side, 1)
             gain_momentum(state, side, 1)
@@ -189,7 +211,11 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         return  # B9 generated-only: no Exchange effect.
 
     elif card.name == "Tsuriotoshi":
-        mode = context.choice("mode") or "power"
+        mode = context.choice("mode")
+        if mode is None:
+            if context.choice("__human__"):
+                raise ChoiceRequired(card.name, "mode", ["power", "momentum", "grip"])
+            mode = "power"
         if mode == "power":
             gain_power(state, side, 1)
         elif mode == "momentum":
@@ -205,7 +231,21 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
 
     elif card.name == "Utchari":
         if relative_position(state, side) < 0:
-            draw_from_look(state, side, look=2, keep=1)
+            if not context.choice("__human__"):
+                draw_from_look(state, side, look=2, keep=1)
+            else:
+                looked = look_from_top(fighter, 2)
+                if not looked:
+                    draw_from_look(state, side, look=2, keep=1)
+                else:
+                    options = list(range(len(looked)))
+                    index = context.choice("utchari_card_index")
+                    if len(options) == 1 and index is None:
+                        index = 0
+                    if index not in options:
+                        raise ChoiceRequired(card.name, "utchari_card_index", options)
+                    keep_and_bottom(fighter, looked, [looked[index]])
+                    state.log(f"{fighter.wrestler.name} chooses {looked[index].name} from Utchari's top {len(looked)} cards.")
 
     elif card.name == "Uwatedashinage":
         draw_one(state, side)

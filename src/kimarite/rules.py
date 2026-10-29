@@ -119,9 +119,10 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0 or state.winner is not None:
         return
 
-    # Sidestep suppresses ALL Push, including its owner's.
+    # Side-by-Side suppresses ALL Push, whether entered through Sidestep
+    # or Spin Away, including Push from the initiating wrestler.
     if state.side_by_side_owner is not None:
-        state.log("Sidestep reduces all Push to 0.")
+        state.log("Side-by-Side reduces all Push to 0.")
         return
 
     defending_side = state.opponent_side(side)
@@ -307,15 +308,22 @@ def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None 
             attr = _grip_attr(hand)
         else:
             # Deterministic generic reduction: reduce the deeper grip first,
-            # then Left before Right on ties. Card-specific choice can override later.
+            # then attacker's seat A chooses Left, seat B Right on ties.
             attr = (
                 "left_grip"
-                if int(fighter.left_grip) >= int(fighter.right_grip)
+                if (int(fighter.left_grip) > int(fighter.right_grip) or
+                    (fighter.left_grip == fighter.right_grip and state.opponent_side(side) is Side.A))
                 else "right_grip"
             )
         current = int(getattr(fighter, attr))
         if current > 0:
-            setattr(fighter, attr, GripState(current - 1))
+            next_grip = GripState(current - 1)
+            setattr(fighter, attr, next_grip)
+            hand_name = "Left" if attr == "left_grip" else "Right"
+            state.log(
+                f"{fighter.wrestler.name}'s {hand_name} Grip decreases "
+                f"({GripState(current).name} → {next_grip.name})."
+            )
             state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
 
 
