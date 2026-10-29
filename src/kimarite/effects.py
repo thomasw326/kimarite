@@ -448,6 +448,15 @@ def _give_ground(state: BoutState, side: Side, card: Card, context: EffectContex
 
 
 
+def _momentum_drive(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    # Momentum is not spent: this rewards securing a positive advantage.
+    positive_momentum = state.momentum * state.sign(side)
+    if positive_momentum > 0:
+        gain_push(state, side, positive_momentum)
+    else:
+        gain_momentum(state, side, 1)
+
+
 def _headlong_charge(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
@@ -936,6 +945,7 @@ def _ankogata(state: BoutState, side: Side, card: Card, context: EffectContext) 
                 reduce_grip(state, opponent_side, hand=hand)
 
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
+    "Momentum Drive": _momentum_drive,
     "Morotezuki": _morotezuki,
     "Nekodamashi": _nekodamashi,
     "Maesabaki": _maesabaki,
