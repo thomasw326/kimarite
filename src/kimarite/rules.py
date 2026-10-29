@@ -308,10 +308,11 @@ def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None 
             attr = _grip_attr(hand)
         else:
             # Deterministic generic reduction: reduce the deeper grip first,
-            # then Left before Right on ties. Card-specific choice can override later.
+            # then attacker's seat A chooses Left, seat B Right on ties.
             attr = (
                 "left_grip"
-                if int(fighter.left_grip) >= int(fighter.right_grip)
+                if (int(fighter.left_grip) > int(fighter.right_grip) or
+                    (fighter.left_grip == fighter.right_grip and state.opponent_side(side) is Side.A))
                 else "right_grip"
             )
         current = int(getattr(fighter, attr))
