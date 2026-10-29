@@ -17,6 +17,7 @@ def state_for(method):
 def test_abisetaoshi_result_captures_power_grip_and_checks():
     state, winner, loser = state_for("Abisetaoshi")
     winner.power = 11
+    state.momentum = 1
     winner.left_grip = GripState.GRIP
     winner.right_grip = GripState.GRIP
     check_kimarite_zone(state, Side.A)
@@ -43,6 +44,7 @@ def test_no_extra_result_capture_in_classic():
     state, winner, loser = state_for("Abisetaoshi")
     state.b11_explain_wins = False
     winner.power = 11
+    state.momentum = 1
     winner.left_grip = GripState.DEEP
     check_kimarite_zone(state, Side.A)
     assert state.winner is Side.A
