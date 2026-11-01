@@ -22,7 +22,7 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
 
     assert state.fighter_a.power == 4
     assert state.fighter_b.power == 6
-    assert state.position == 2
+    assert state.position == 1
     assert state.winner is None
     assert state.win_method is None
     assert state.active_side is not None  # Revised opening no longer forces a ringout.
