@@ -122,8 +122,12 @@ def _replay_from_discard_and_exhaust(
 
     if selected.is_kimarite:
         # Replayed Kimarite grant only their on-play effect, not a lasting win threat.
-        if selected in fighter.kimarite_zone:
-            fighter.kimarite_zone.remove(selected)
+        # Duplicates share card values; remove the most recently played copy,
+        # not an earlier identical finisher already in the zone.
+        for zone_index in range(len(fighter.kimarite_zone) - 1, -1, -1):
+            if fighter.kimarite_zone[zone_index] == selected:
+                fighter.kimarite_zone.pop(zone_index)
+                break
     else:
         new_temporaries = [
             instance for instance in fighter.temporary_zone
