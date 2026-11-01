@@ -69,6 +69,9 @@ CARD_POOL: tuple[Card, ...] = (
     Card(11004, "Sukuinage", 1, 1, 1, True),
     Card(11005, "Utchari", 0, 2, 0, True),
     Card(11006, "Uwatedashinage", 0, 2, 1, True),
+    # B11 approved Deep Right Grip family.
+    Card(12011, "Shitatedashinage", 0, 2, 1, True),
+    Card(12012, "Shitatehineri", 0, 2, 1, True),
 )
 
 # B9-specific cards live outside the historical 61-card V5 print pool.
@@ -112,6 +115,8 @@ STARTING_KIMARITE: tuple[Card, ...] = (
     Card(1020, "Sukuinage", 1, 1, 1, True),
     Card(1021, "Utchari", 0, 2, 0, True),
     Card(1022, "Uwatedashinage", 0, 2, 1, True),
+    Card(1023, "Shitatedashinage", 0, 2, 1, True),
+    Card(1024, "Shitatehineri", 0, 2, 1, True),
 )
 
 
