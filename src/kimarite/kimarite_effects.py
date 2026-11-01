@@ -4,7 +4,7 @@ from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, dr
 from .kimarite import no_grip, power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
-from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, lose_momentum, reduce_grip, establish_grip
+from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, gain_push, lose_momentum, reduce_grip, establish_grip
 from .selection import ai_look_keep
 
 
@@ -48,6 +48,106 @@ def _discard_one_from_hand(state: BoutState, side: Side, card: Card, context: Ef
     discarded = fighter.hand.pop(index)
     fighter.discard_pile.append(discarded)
     state.log(f"{fighter.wrestler.name} discards {discarded.name} with {card.name}.")
+
+
+
+def _replay_from_discard_and_exhaust(
+    state: BoutState, side: Side, source: Card, context: EffectContext
+) -> None:
+    """Free-play a legal discarded card and exhaust it after its normal effects.
+
+    A replayed Temporary stays active until it leaves its Temporary Zone,
+    when it is exhausted instead of discarded. All other replayed cards are
+    exhausted immediately after their on-play effects.
+    """
+    from .legality import can_play_card
+    from .playing import play_card
+
+    fighter = state.fighter(side)
+    if not fighter.discard_pile:
+        return
+
+    legal_indices = []
+    fighter.plays_remaining += 1
+    try:
+        for index, candidate in enumerate(fighter.discard_pile):
+            fighter.hand.append(candidate)
+            try:
+                if can_play_card(state, side, candidate):
+                    legal_indices.append(index)
+            finally:
+                fighter.hand.pop()
+    finally:
+        fighter.plays_remaining -= 1
+    if not legal_indices:
+        return
+
+    key = ("replay_discard_index" if state.replay_depth == 0
+           else f"replay_discard_index_{state.replay_depth}")
+    index = context.choice(key)
+    if index is None:
+        if context.choice("__human__") and len(legal_indices) > 1:
+            raise ChoiceRequired(source.name, key, legal_indices)
+        from .ai import _card_priority
+        index = max(
+            legal_indices,
+            key=lambda candidate_index: _card_priority(
+                fighter.discard_pile[candidate_index], state, side
+            ),
+        )
+    if index not in legal_indices:
+        raise ChoiceRequired(source.name, key, legal_indices)
+
+    selected = fighter.discard_pile.pop(index)
+    existing_temporaries = {id(instance) for instance in fighter.temporary_zone}
+    fighter.hand.append(selected)
+    fighter.plays_remaining += 1  # The replay spends this bonus Play, not a normal Play.
+    state.log(f"{fighter.wrestler.name} replays {selected.name} from discard with Shitatehineri.")
+
+    nested_context = context
+    if not context.choice("__human__"):
+        # AI must also make the replayed card's own choices, if it has any.
+        from .ai import _context_for_card
+        suggested = _context_for_card(state, side, selected, context.comparison)
+        nested_context = EffectContext(
+            comparison=context.comparison,
+            choices={**(suggested.choices or {}), **(context.choices or {})},
+        )
+
+    state.replay_depth += 1
+    try:
+        play_card(state, side, selected, context=nested_context)
+    finally:
+        state.replay_depth -= 1
+
+    if selected.is_kimarite:
+        # Replayed Kimarite grant only their on-play effect, not a lasting win threat.
+        if selected in fighter.kimarite_zone:
+            fighter.kimarite_zone.remove(selected)
+    else:
+        new_temporaries = [
+            instance for instance in fighter.temporary_zone
+            if id(instance) not in existing_temporaries and instance.card == selected
+        ]
+        if new_temporaries:
+            new_temporaries[-1].exhaust_on_leave = True
+            state.log(
+                f"{selected.name} will Exhaust when its Temporary effect ends."
+            )
+            return
+
+        # Ordinary cards normally enter discard after resolution; move the
+        # replayed copy to Exhaust without touching any other duplicate.
+        for discard_index in range(len(fighter.discard_pile) - 1, -1, -1):
+            if fighter.discard_pile[discard_index] == selected:
+                fighter.discard_pile.pop(discard_index)
+                break
+        else:
+            if selected in fighter.hand:
+                fighter.hand.remove(selected)
+
+    fighter.exhaust_pile.append(selected)
+    state.log(f"{selected.name} is Exhausted after its Shitatehineri replay.")
 
 
 def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -116,6 +216,21 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     elif card.name == "Shitatenage":
         if fighter.right_grip is not GripState.NONE:
             gain_momentum(state, side, 1)
+
+    elif card.name == "Shitatedashinage":
+        if fighter.right_grip is GripState.DEEP:
+            # Recover never increases a nonnegative track; draw is conditional
+            # on Deep Right Grip, not on whether recovery succeeds.
+            if relative_position(state, side) < 0:
+                gain_push(state, side, 1)
+            if relative_momentum(state, side) < 0:
+                gain_momentum(state, side, 1)
+            if state.winner is None:
+                draw_one(state, side)
+
+    elif card.name == "Shitatehineri":
+        if fighter.right_grip is GripState.DEEP:
+            _replay_from_discard_and_exhaust(state, side, card, context)
 
     elif card.name == "Hatakikomi":
         if _optional(context, "use_optional", card):
