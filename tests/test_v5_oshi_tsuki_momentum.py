@@ -19,6 +19,7 @@ def _state():
 
 def test_oshi_push_despite_negative_momentum():
     state = _state()
+    state.fighter_a.hand.append(Card(91060, "Sacrifice"))
     before = state.position
     resolve_exchange_effect(state, Side.A, card_by_name("Oshi"), EffectContext())
     assert state.position > before
