@@ -12,6 +12,7 @@ def test_tottari_start_check_preserves_prior_opponent_grip_event():
     state = BoutState(FighterState(a), FighterState(b))
     state.fighter_a.kimarite_zone.append(card_by_name("Tottari"))
     state.fighter_a.opponent_grip_reduced_this_turn = True
+    state.fighter_b.discard_pile = [card_by_name("Shove")] * 7
     start_exchange_turn(state, Side.A, compare_tachiai(a, b))
     assert state.winner is Side.A
     assert state.win_method == "Tottari"
