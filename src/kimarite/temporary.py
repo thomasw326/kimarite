@@ -75,9 +75,13 @@ def remove_temporary(
         }:
             gain_momentum(state, state.opponent_side(side), 1)
 
-    fighter.discard_pile.append(card)
+    if instance.exhaust_on_leave:
+        fighter.exhaust_pile.append(card)
+        state.log(f"{card.name} is Exhausted after its Shitatehineri replay.")
+    else:
+        fighter.discard_pile.append(card)
     if (completed and not disrupted
-            and card.name in {"Immovable"}):
+            and card.name in {"Immovable", "Henka", "Kannuki", "Sidestep"}):
         fighter.successful_reversal_this_turn = True
         state.reversal_completions.append((side, card.name, state.turn_number))
         state.log(f"{card.name} successfully completes its Reversal.")

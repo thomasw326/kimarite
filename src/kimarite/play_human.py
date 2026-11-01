@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 import secrets
 
-from .catalog import PLAYTEST_WRESTLERS, CARD_POOL
+from .catalog import PLAYTEST_WRESTLERS, CARD_POOL, B11_CARD_POOL
 from .effects import ChoiceRequired, IllegalPlay
 from .human_bout import HumanBout
 from .models import Side
@@ -282,8 +282,18 @@ CARD_LIBRARY_TEXT = {
   },
   "shitatenage": {
     "timing": "Start & End of Turn",
-    "effect": "Deep Right Grip · Momentum 1+ · Position 0+",
-    "notes": "New V4.3 optional Kimarite. Mirrors Uwatenage, substituting Deep Right Grip for Deep Left Grip. Supersedes prior Momentum 2+ / conditional Grip version."
+    "effect": "Win: Deep Right Grip, Momentum +1 or higher, Position nonnegative.",
+    "notes": "Exchange: If you have Right Grip, gain 1 Momentum."
+  },
+  "shitatedashinage": {
+    "timing": "Start & End of Turn",
+    "effect": "Win: Deep Right Grip, opponent Unstable, Momentum nonnegative.",
+    "notes": "Exchange: If Right Grip is Deep, Recover 1 Push, Recover 1 Momentum, and draw 1 card. Recover Push works only at negative Position; Recover Momentum works only at negative Momentum. The draw also requires Deep Right Grip."
+  },
+  "shitatehineri": {
+    "timing": "Start & End of Turn",
+    "effect": "Win: Deep Right Grip, more usable total Grip than opponent, you are Stable, opponent has no Temporaries.",
+    "notes": "Exchange: If Right Grip is Deep, choose a legally playable card in your Discard Pile. Play it for free, then Exhaust it. Exhaust means remove it from this bout, not return it to hand or discard. A replayed Temporary keeps its effects until it leaves the Temporary Zone, then Exhausts. A replayed Kimarite resolves its on-play effect but does not remain as a win threat."
   }
 }
 
@@ -297,7 +307,7 @@ def _card_lookup(raw: str) -> bool:
     if not raw.startswith("/"):
         return False
     query = raw[1:].strip().casefold()
-    card = next((c for c in CARD_POOL if c.name.casefold() == query), None)
+    card = next((c for c in (*CARD_POOL, *B11_CARD_POOL) if c.name.casefold() == query), None)
     if card is None:
         print(f"Unknown card: {raw[1:]}. Try /oshi.")
         return True
@@ -383,6 +393,12 @@ def _ask_effect_choices(bout: HumanBout, hand_index: int) -> None:
         except ChoiceRequired as requirement:
             print(f"{requirement.card_name}: choose {requirement.choice_name}")
             for i, option in enumerate(requirement.options):
+                if requirement.choice_name.startswith("replay_discard_index"):
+                    pile = bout.state.fighter(bout.human_side).discard_pile
+                    if isinstance(option, int) and 0 <= option < len(pile):
+                        card = pile[option]
+                        print(f"  {i}: {card.name} [P{card.power} T{card.technique} S{card.spirit}]")
+                        continue
                 if requirement.choice_name == "uwate_card_index":
                     # Uwate looks at the unchanged top of the draw pile.
                     # The engine tests choices on a clone until one is accepted.
