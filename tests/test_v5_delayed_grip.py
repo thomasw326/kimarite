@@ -29,7 +29,7 @@ def test_yori_delayed_momentum_depends_on_grip_comparison():
     resolve_exchange_effect(s, Side.A, card_by_name("Yori"), EffectContext())
     assert s.position == 1
     resolve_start_of_turn_temporaries(s, Side.A)
-    assert s.momentum == 3
+    assert s.momentum == 2  # Current Yori delayed bonus for superior Grip.
 
 
 def test_gaburi_creates_kimarite_only_if_power_exceeds_opponent():
