@@ -31,6 +31,7 @@ def labelled_choices(session, exc, command=None):
     titles = {
         "hand_index": "Choose a card from your hand",
         "discard_index": "Choose a card from your discard pile",
+        "replay_discard_index": "Choose a discarded card to play, then Exhaust",
         "sacrifice_kimarite": "Choose a Kimarite to sacrifice",
         "temporary_index": "Choose an opponent Temporary to disrupt",
         "uwate_card_index": "Choose a revealed card",
@@ -45,7 +46,7 @@ def labelled_choices(session, exc, command=None):
         "cycle_if_no_grip": "Draw and discard a card?",
         "discard_for_grip": "Discard a card to establish Left Grip?",
     }
-    title = titles.get(key, "Choose an option")
+    title = titles.get(key, "Choose a discarded card to play, then Exhaust" if key.startswith("replay_discard_index") else "Choose an option")
     from .b10_card_info import card_info
     options = []
     for option in exc.options:
@@ -70,7 +71,7 @@ def labelled_choices(session, exc, command=None):
                         cards.pop(played_index)
                     if card_name == "Pull" and own.draw_pile:
                         cards.append(own.draw_pile[0])
-            elif key == "discard_index":
+            elif key == "discard_index" or key.startswith("replay_discard_index"):
                 cards = getattr(exc, "visible_cards", own.discard_pile)
             elif key == "sacrifice_kimarite":
                 cards = getattr(exc, "visible_cards", own.kimarite_zone)

@@ -59,6 +59,8 @@ CARD_TEXT = {
     "Tottari": {"timing":"Kimarite","effect":"Win: you have no Grip, reduced opponent Grip this turn, and opponent discard pile contains at least 7 cards. On play: look at top 3 opponent deck cards and discard a selected one.","status":"verified"},
     "Uwatenage": {"timing":"Kimarite","effect":"Win: Deep Left Grip, Momentum at least +1 and Position nonnegative. On play: establish Left Grip if Momentum nonnegative.","status":"verified"},
     "Shitatenage": {"timing":"Kimarite","effect":"Win: Deep Right Grip, Momentum at least +1 and Position nonnegative. On play: gain 1 Momentum if you have Right Grip.","status":"verified"},
+    "Shitatedashinage": {"timing":"Kimarite","effect":"Win: Deep Right Grip, opponent Unstable, and own relative Momentum at least 0. Exchange: If Right Grip is Deep, Recover 1 Push, Recover 1 Momentum, and draw 1 card.","status":"verified"},
+    "Shitatehineri": {"timing":"Kimarite","effect":"Win: Deep Right Grip, greater usable total Grip than your opponent, you are Stable, and opponent has no active Temporaries. Exchange: If Right Grip is Deep, choose a legal card in your Discard Pile. Play it for free, then Exhaust it.","status":"verified"},
     "Hatakikomi": {"timing":"Kimarite","effect":"Win: Momentum at most -2, your Power at least 6, and opponent is Unstable. On play: optionally lose 1 Momentum to discard an opponent card; if opponent hand is empty, draw instead.","status":"verified"},
     "Hikiotoshi": {"timing":"Kimarite","effect":"Win: Momentum at most -2, Position nonnegative and usable Grip at least 1. On play: look at top 3 deck cards; keep 1.","status":"verified"},
     "Tsukitaoshi": {"timing":"Kimarite","effect":"Win: play at least 4 cards this turn. On play: gain 1 additional Play, draw 1, then discard 1.","status":"verified"},
@@ -86,6 +88,8 @@ GLOSSARY = {
     "Push": "Ring movement caused by a card or the opening clash; separate from Momentum.",
     "Draw": "Move a card from your draw pile into your hand according to the current effect.",
     "Discard": "Move a card from your hand to the discard pile.",
+    "Recover": "Recover Push gains Push only when your relative Position is negative; Recover Momentum gains Momentum only when your relative Momentum is negative. Neither can take the relevant track above zero.",
+    "Exhaust": "Remove a card from this bout. A card replayed by Shitatehineri is Exhausted after its normal effects resolve; ongoing Temporary effects resolve or are disrupted before the card leaves play and is Exhausted.",
 }
 def card_info(card):
     entry = CARD_TEXT.get(card.name, {})
