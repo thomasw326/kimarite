@@ -43,7 +43,8 @@ def test_tsuppari_chains_after_oshi():
     play_card(bout, Side.A, oshi)
     play_card(bout, Side.A, tsuppari)
 
-    assert bout.momentum == -1
+    # Tsuppari's approved B11 chain supplies Push, not a Momentum penalty.
+    assert bout.momentum == 0
     assert bout.position == 2
     assert [c.name for c in bout.fighter_a.played_this_turn] == ["Oshi", "Tsuppari"]
     assert bout.fighter_a.plays_remaining == 2

@@ -106,7 +106,7 @@ def test_nodowa_power_applies_before_spirit_push_resistance():
     assert state.position == 0
 
 
-def test_harite_power_applies_before_spirit_push_resistance():
+def test_harite_negative_effect_applies_before_spirit_push_resistance():
     from kimarite.catalog import card_by_name
     from kimarite.tachiai_effects import resolve_prepared_tachiai
 
@@ -120,11 +120,13 @@ def test_harite_power_applies_before_spirit_push_resistance():
     state = BoutState(FighterState(a), FighterState(b))
     resolve_prepared_tachiai(state, comparison)
 
-    assert state.fighter_b.power == 1
+    # Current B11 Harite lowers the opponent's Power, rather than
+    # granting Power to Harite's owner (the historic bonus was removed).
+    assert state.fighter_b.power == 0
     assert state.fighter_a.power == -1
     assert state.position == 0
 
-    # Without Harite's Power modifiers, the same printed-orb
+    # Without Harite's negative Power effect, the same printed-orb
     # comparison would produce incoming Spirit Push.
     baseline = BoutState(FighterState(a), FighterState(b))
     from kimarite.tachiai import apply_tachiai_power_push
