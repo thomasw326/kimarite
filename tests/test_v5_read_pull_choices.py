@@ -34,18 +34,21 @@ def test_read_the_move_remove_option_disrupts_temporary():
     assert state.momentum == 1
 
 
-def test_pull_filter_option_does_not_create_temporary():
+def test_pull_legacy_filter_choice_has_no_effect_on_immediate_rules():
     state = bout()
     resolve_exchange_effect(state, Side.A, card_by_name("Pull"),
                             EffectContext(choices={"mode": "filter"}))
     assert not state.fighter_a.temporary_zone
-    assert [c.name for c in state.fighter_a.discard_pile] == ["Oshi", "Pull"]
+    assert [c.name for c in state.fighter_a.discard_pile] == ["Oshi"]
+    assert (state.position, state.momentum) == (-1, 1)
+    assert state.fighter_b.unstable
 
 
-def test_pull_reversal_option_preserves_temporary():
+def test_pull_legacy_reversal_choice_cannot_create_temporary():
     state = bout()
     state.fighter_a.discard_pile = [card_by_name("Harite")]
     resolve_exchange_effect(state, Side.A, card_by_name("Pull"),
                             EffectContext(choices={"mode": "reversal"}))
-    assert len(state.fighter_a.temporary_zone) == 1
-    assert state.fighter_a.draw_pile[0].name == "Harite"
+    assert not state.fighter_a.temporary_zone
+    assert [c.name for c in state.fighter_a.discard_pile] == ["Harite", "Oshi"]
+    assert state.fighter_b.unstable
