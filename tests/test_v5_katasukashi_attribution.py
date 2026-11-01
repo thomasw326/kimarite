@@ -12,7 +12,7 @@ def test_katasukashi_records_triggering_card():
     b = Wrestler("B", 2, 2, 2, k, blank, blank)
     state = BoutState(FighterState(a, kimarite_zone=[k]), FighterState(b))
     state.turn_number = 2
-    state.momentum = 1
+    state.momentum = 2
     state.fighter_a.hand = [blank] * 5
     lose_position(state, Side.A, 1, source="Give Ground")
     assert check_kimarite_zone(state, Side.A).name == "Katasukashi"
