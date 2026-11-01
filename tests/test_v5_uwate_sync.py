@@ -29,7 +29,7 @@ def test_uwate_without_deep_grip_looks_and_draws():
 
 def test_uwate_deep_grip_plays_selected_card_free():
     state = bout()
-    state.fighter_a.left_grip = GripState.GRIP
+    state.fighter_a.left_grip = GripState.DEEP
     play_card(state, Side.A, state.fighter_a.hand[0],
               context=EffectContext(choices={"uwate_card_index": 0}))
     assert state.fighter_a.left_grip is GripState.DEEP
