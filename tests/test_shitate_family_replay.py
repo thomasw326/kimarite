@@ -201,6 +201,7 @@ def test_replay_another_shitatehineri_does_not_duplicate_or_loop():
         "Shitatehineri", "Shove"
     ]
     assert not s.fighter_a.discard_pile
+    assert [c.name for c in s.fighter_a.kimarite_zone] == ["Shitatehineri"]
     assert s.fighter_a.plays_remaining == 1
 
 
