@@ -254,6 +254,26 @@ def _contexts_for_card(
             ))
         return options
 
+    if card.name == "Shitatehineri":
+        # Simulate every legal discard target so the AI values the actual
+        # replayed effect instead of ignoring a required card selection.
+        if fighter.right_grip is not GripState.DEEP:
+            return [base]
+        from .legality import can_play_card
+        variants = []
+        fighter.plays_remaining += 1
+        try:
+            for index, replay in enumerate(fighter.discard_pile):
+                fighter.hand.append(replay)
+                try:
+                    if can_play_card(state, side, replay):
+                        variants.append(_context_variant(base, replay_discard_index=index))
+                finally:
+                    fighter.hand.pop()
+        finally:
+            fighter.plays_remaining -= 1
+        return variants or [base]
+
     if card.name == "Katasukashi":
         if fighter.discard_pile:
             return [_context_variant(base, discard_index=_best_discard_index(state, side))]
