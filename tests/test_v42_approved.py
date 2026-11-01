@@ -18,7 +18,7 @@ def test_approved_orbs_and_uncapped_power():
     a = card_by_name("Abisetaoshi")
     assert (a.power, a.technique, a.spirit) == (3, 0, 0)
     assert (push_from_power_advantage(1), push_from_power_advantage(3),
-            push_from_power_advantage(5), push_from_power_advantage(7)) == (1, 2, 3, 4)
+            push_from_power_advantage(5), push_from_power_advantage(7)) == (1, 1, 2, 3)
 
 
 def test_tsuridashi_total_grip_three_and_power_six():
@@ -53,7 +53,7 @@ def test_gain_left_grip_deepens_and_protects_one_push():
 
 
 def test_approved_kinematic_finishes():
-    s = BoutState(fighter("A"), fighter("B"), momentum=-2, position=2)
+    s = BoutState(fighter("A"), fighter("B"), momentum=-2, position=3)
     s.fighter_a.cards_played_this_turn = 4
     assert kimarite_is_satisfied(s, Side.A, card_by_name("Tsukidashi"))
     s.position = -2
@@ -66,6 +66,7 @@ def test_regain_balance_conditional_power():
     s = BoutState(fighter("A"), fighter("B"), momentum=-1)
     s.fighter_a.draw_pile = [card_by_name("Oshi")]
     resolve_exchange_effect(s, Side.A, card_by_name("Regain Balance"), EffectContext())
-    assert s.momentum == 1
+    # Current Regain Balance recovers one Momentum, not two.
+    assert s.momentum == 0
     assert s.fighter_a.power == 2
     assert len(s.fighter_a.hand) == 1

@@ -13,14 +13,14 @@ def state() -> BoutState:
     return BoutState(FighterState(wrestler("A")), FighterState(wrestler("B")))
 
 
-def test_momentum_overflow_converts_to_push():
+def test_momentum_overflow_converts_excess_to_push():
     bout = state()
     bout.momentum = 3
 
     gain_momentum(bout, Side.A, 2)
 
     assert bout.momentum == 3
-    assert bout.position == 2
+    assert bout.position == 2  # Two excess Momentum becomes two Push.
     assert bout.winner is None
 
 
@@ -83,7 +83,7 @@ def test_direct_position_ringout_both_sides():
     assert bout.winner is Side.B
 
 
-def test_momentum_overflow_still_pushes():
+def test_momentum_overflow_push_at_zero_position():
     bout = state()
     gain_momentum(bout, Side.A, 4)
     assert bout.momentum == 3 and bout.position == 1

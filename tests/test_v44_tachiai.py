@@ -19,10 +19,11 @@ def test_spirit_generates_push_and_power_defends():
     comparison = compare_tachiai(a, b)
     state = BoutState(FighterState(a), FighterState(b))
     winner, push = apply_tachiai_power_push(state, comparison)
-    # Spirit advantage 7 gives 4 Push, Power disadvantage 4 defends 2.
+    # Current 1/4/7 Spirit threshold: advantage 7 gives 3 Push;
+    # Power defense of 2 reduces this to one.
     assert winner is Side.A
-    assert push == 2
-    assert state.position == 2
+    assert push == 1
+    assert state.position == 1
 
 
 def test_power_advantage_by_itself_creates_no_push():
@@ -36,8 +37,8 @@ def test_power_advantage_by_itself_creates_no_push():
 
 def test_technique_card_access_new_thresholds():
     assert [technique_access(x) for x in range(0, 8)] == [
-        (2, 2), (3, 3), (4, 3), (5, 4),
-        (6, 4), (7, 5), (8, 5), (9, 6),
+        (2, 2), (2, 2), (2, 2), (3, 3),
+        (3, 3), (3, 3), (4, 4), (4, 4),
     ]
     assert [technique_thresholds(x) for x in (1, 4, 7, 10)] == [1, 2, 3, 4]
 

@@ -42,6 +42,7 @@ class HumanBout:
     turn_started: bool = False
     stopped_reason: str | None = None
     pending_selection: CardSelection | None = None
+    annotate_turns: bool = False  # B11 review logs; Classic chronology unchanged.
 
     @classmethod
     def new(
@@ -125,6 +126,8 @@ class HumanBout:
                         # A card-access request must not partially consume
                         # a turn, a discard, or the exhaustion Power penalty.
                         trial = deepcopy(self.state)
+                        if self.annotate_turns:
+                            trial.log(f"TURN {trial.turn_number + 1} — {trial.fighter(side).wrestler.name} START (start-of-turn checks)")
 
                         def request_selection(looked: list[Card], keep: int) -> list[Card]:
                             raise _NeedCardSelection(looked, keep)
@@ -143,6 +146,8 @@ class HumanBout:
                             return
                         self.state.__dict__.update(trial.__dict__)
                     else:
+                        if self.annotate_turns:
+                            self.state.log(f"TURN {self.state.turn_number + 1} — {self.state.fighter(side).wrestler.name} START (start-of-turn checks)")
                         start_exchange_turn(self.state, side, self.comparison)
                 except NotImplementedError as exc:
                     self.stopped_reason = str(exc)
@@ -173,6 +178,8 @@ class HumanBout:
             raise IllegalPlay(f"Select exactly {pending.keep} distinct valid indices.")
 
         trial = deepcopy(self.state)
+        if self.annotate_turns:
+            trial.log(f"TURN {trial.turn_number + 1} — {trial.fighter(self.human_side).wrestler.name} START (start-of-turn checks)")
 
         def chosen(looked: list[Card], keep: int) -> list[Card]:
             if keep != pending.keep or tuple(_view(c) for c in looked) != pending.options:
@@ -200,6 +207,8 @@ class HumanBout:
         side = self.state.active_side
         assert side is not None
         try:
+            if self.annotate_turns:
+                self.state.log(f"TURN {self.state.turn_number} — {self.state.fighter(side).wrestler.name} END (end-of-turn victory check)")
             end_exchange_turn(self.state, side)
         except NotImplementedError as exc:
             self.stopped_reason = str(exc)

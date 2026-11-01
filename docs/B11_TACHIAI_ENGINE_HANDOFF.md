@@ -1,0 +1,52 @@
+# B11 Tachiai development handoff
+
+This document tracks what is genuinely implemented vs pending as of commit 87e6b29.
+
+## Implemented (not yet wired into live bouts)
+- `src/kimarite/b11_player_opening.py`: validates three allocated cards against actual deck counts; partitions zero to three selected indices into committed and retained; removes the exact three selected instances from draw pile.
+- `src/kimarite/b11_player_tachiai.py`: computes human Tachiai as base Power/Technique/Spirit +1 each + printed orbs of committed cards only. Compares against unchanged AI `prepared_stats`.
+- `tests/test_b11_player_opening.py`, `tests/test_b11_player_tachiai.py`: regression cases authored; successful CI execution **not yet verified**.
+
+## Next implementation steps (do not skip)
+1. Modify live `new_b10_session` flow to construct pending player-controlled opening without calling `resolve_prepared_tachiai` before player choice; preserve exact legacy construction under Classic mode.
+2. Add command to choose 0–3 commits, validate server side, then resume resolution. Never allow other session actions before opening is resolved.
+3. Generalize Tachiai effect resolution: AI has one prepared card, human can have 0–3 committed cards; each eligible prepared-card effect applies, including Oshi/Tsuki reveal chains. Avoid double resolving Spirit Push / opening position or recycling committed cards incorrectly.
+4. Clarify committed Kimarite destination vs ordinary committed cards, and ensure retained cards are delivered into the normal first-turn hand without accidentally being discarded or drawn twice.
+5. Expose API phase and snapshot to client; add actual UI decision screen and dropdown (new default, Classic preserved).
+6. Update nine-card tournament assignment to unrestricted three-card groups in new mode while maintaining old one-Kimarite/two-ordinary constraint in Classic mode.
+7. Run targeted and full tests plus smoke end-to-end; only then enable and report the playable mode.
+
+Do not claim the new mode is functional or shipped before these are complete. B10 main remains frozen.
+
+
+## Further engine groundwork (October 26)
+- `src/kimarite/b11_tachiai_phase.py`: one-shot `PendingPlayerTachiai` receives a validated subset of allocated slots and records committed/retained card objects, without prematurely advancing a bout. Tests: `tests/test_b11_tachiai_phase.py`.
+- `src/kimarite/b11_tachiai_reveals.py`: pure multi-commit Oshi/Tsuki reveal planner, consuming sequential draw pile cards up to and including a non-family stopper for **each** committed reveal card. Tests: `tests/test_b11_tachiai_reveals.py`.
+- **Still not live**: pending phase, reveal planner and variable orb comparison are isolated modules. The classic live session, UI, and AI remain unmodified.
+- **Open correctness concern**: multiple committed cards require careful extension of `resolve_prepared_tachiai` without repeating one-time Spirit Push, and correct treatment of committed Kimarite/ordinary destinations and first-turn hand. Do not expose mode until tests cover this end-to-end.
+
+## Hidden-opponent payload milestone
+- Added `src/kimarite/b11_tachiai_public.py` with explicit allow-listed `pending_tachiai_snapshot` for the pre-commit phase. It supplies the player's three available cards but never includes AI prepared cards, opening totals, advantage data, or pre-resolution logs.
+- Added `tests/test_b11_tachiai_public.py` to check absence of sensitive opponent data before commitment and refusal to construct a pending view after commitment.
+- These components still need wiring into a real pending live session and its API routes. Do **not** claim that the deployed/current UI enforces the new rule.
+- No GitHub Actions workflow runs were returned when queried for this commit; passing CI remains **unverified**.
+
+## Live resolver integration milestone
+- `src/kimarite/tachiai_effects.py::_reveal_tachiai_orbs` now uses `plan_reveals` for real fighter draw/discard piles and Tachiai comparisons, with optional `committed_cards` mapping per side. The default absent mapping falls back to each wrestler's one Classic prepared card, preserving the old public API.
+- Live-path regression tests added: `tests/test_b11_live_tachiai_reveals.py` (two sequential Oshi chains, Classic one-chain behavior, zero-commits no human reveals).
+- **Not the full new mode yet**: the encompassing `resolve_prepared_tachiai` still models other Tachiai effects around exactly one prepared card per side. Multi-card effect aggregation, destinations, opening-hand retention, pending API integration and UI are still incomplete. Do not enable the dropdown until these are safely resolved.
+- No locally executed successful tests/CI verified for these commits.
+
+## Verification finding and repair — card instances
+- **Confirmed bug:** `catalog.card_by_name` returns shared immutable Card records, meaning two occurrences of Oshi in a deck may refer to the same Python object. Identity-based `PlayerOpening.remaining_deck` and identity assertions were invalid for duplicates.
+- **Fixed:** `PlayerOpening` now records unique source deck indices and removes precisely those three positions. Duplicate copies remain distinguishable even when they reference one immutable Card.
+- Replaced identity-based test assertions with slot indices and occurrence counts. Added exhaustive Classic Oshi reveal-sequence equivalence tests for all decks of 0–4 cards drawn from Oshi/Tsuki/Shove/Harite.
+- **Test execution remains unverified** (latest B11 commit had no associated workflow runs or statuses). Only static source inspection and authored test coverage have been completed. No claim of passing tests.
+
+## Verified CI checkpoint — October 26, 2026
+- Draft PR #49: https://github.com/thomasw326/kimarite/pull/49 (base `feature/b10-human-ui-session`, not merged).
+- PR-wide full pytest run 40303100937: **failure**, summary `70 failed, 338 passed`. The failures reported in the workflow summary are legacy V5 tests; no B11-named failures were observed in that summary. Do not claim full suite clean.
+- B10 human UI smoke run 40303100931: **success**.
+- Added focused CI `.github/workflows/b11-tachiai.yml` with explicit new B11 test files.
+- Focused B11 test workflow run **40303687016 completed successfully**, job `121507446090`. This verifies new opening allocation/phase/orb/reveal/privacy regressions in CI. It does not verify live player-facing integration (not yet implemented).
+- Preserve previous baseline, and investigate legacy V5 regressions independently. Do not loosen tests or alter unrelated card balance to force a green full-suite result.

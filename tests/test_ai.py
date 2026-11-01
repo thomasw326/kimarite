@@ -71,3 +71,33 @@ def test_next_turn_threat_state_clears_transient_kimarite_flags():
     assert future.fighter_b.lost_position_this_turn is False
     assert future.fighter_b.opponent_grip_reduced_this_turn is False
     assert bout.fighter_b.cards_played_this_turn == 4
+
+
+def test_equal_grip_removal_uses_attacker_seat():
+    from kimarite.rules import reduce_grip
+    for attacking, expected in ((Side.A, "left"), (Side.B, "right")):
+        bout = BoutState(FighterState(wrestler("A")), FighterState(wrestler("B")))
+        target = bout.opponent_side(attacking)
+        victim = bout.fighter(target)
+        victim.left_grip = GripState.GRIP
+        victim.right_grip = GripState.GRIP
+        reduce_grip(bout, target)
+        assert (victim.left_grip is GripState.NONE) == (expected == "left")
+        assert (victim.right_grip is GripState.NONE) == (expected == "right")
+
+
+def test_ai_grip_tie_break_honours_finish_threat_before_seat():
+    from kimarite.ai import _best_grip_to_reduce
+    for attacking in (Side.A, Side.B):
+        for threat, expected in (("Uwatenage", "left"), ("Shitatenage", "right")):
+            bout = BoutState(FighterState(wrestler("A")), FighterState(wrestler("B")))
+            target = bout.opponent(attacking)
+            target.left_grip = GripState.DEEP
+            target.right_grip = GripState.DEEP
+            target.kimarite_zone = [card_by_name(threat)]
+            assert _best_grip_to_reduce(bout, attacking) == expected
+        bout = BoutState(FighterState(wrestler("A")), FighterState(wrestler("B")))
+        target = bout.opponent(attacking)
+        target.left_grip = GripState.DEEP
+        target.right_grip = GripState.DEEP
+        assert _best_grip_to_reduce(bout, attacking) == ("left" if attacking is Side.A else "right")

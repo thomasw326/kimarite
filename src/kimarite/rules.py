@@ -23,7 +23,8 @@ def _distance_past_cap(value: int) -> int:
 
 
 def _track_at_favorable_cap(state: BoutState, side: Side, kind: str) -> bool:
-    cap = _cap_for(side)
+    # Momentum caps at ±3, while B11 Position extends safely to ±4.
+    cap = (TRACK_MAX if kind == "momentum" else POSITION_MAX) * state.sign(side)
     return (state.momentum if kind == "momentum" else state.position) == cap
 
 
@@ -70,7 +71,7 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Push.")
         next_kind = "momentum"
 
-    if excess == 0 or kind == "momentum":
+    if excess == 0:
         return
 
     # Overflow converts 1:1. If the destination track is already capped for
@@ -92,6 +93,24 @@ def lose_momentum(state: BoutState, side: Side, amount: int) -> None:
     gain_momentum(state, state.opponent_side(side), amount)
 
 
+def recover_momentum(state: BoutState, side: Side, amount: int = 1) -> None:
+    """Restore negative relative Momentum toward zero, never beyond zero."""
+    if amount < 0:
+        raise ValueError("amount must be non-negative")
+    shortfall = max(0, -state.momentum * state.sign(side))
+    if shortfall:
+        gain_momentum(state, side, min(shortfall, amount))
+
+
+def recover_push(state: BoutState, side: Side, amount: int = 1) -> None:
+    """Gain Push only while Position is negative, and only up to neutral."""
+    if amount < 0:
+        raise ValueError("amount must be non-negative")
+    shortfall = max(0, -state.position * state.sign(side))
+    if shortfall:
+        gain_push(state, side, min(shortfall, amount))
+
+
 def _break_sidestep_from_push(state: BoutState, side: Side) -> None:
     """A Push against Side-by-Side breaks Sidestep before that Push resolves."""
     owner = state.side_by_side_owner
@@ -107,7 +126,7 @@ def _break_sidestep_from_push(state: BoutState, side: Side) -> None:
     for instance in list(fighter.temporary_zone):
         if instance.card.name == "Sidestep":
             fighter.temporary_zone.remove(instance)
-            fighter.discard_pile.append(instance.card)
+            (fighter.exhaust_pile if instance.exhaust_on_leave else fighter.discard_pile).append(instance.card)
             state.log(
                 f"{state.fighter(side).wrestler.name}'s Push breaks Sidestep; "
                 f"{state.fighter(side).wrestler.name} takes the favorable orientation."
@@ -119,9 +138,10 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0 or state.winner is not None:
         return
 
-    # Sidestep suppresses ALL Push, including its owner's.
+    # Side-by-Side suppresses ALL Push, whether entered through Sidestep
+    # or Spin Away, including Push from the initiating wrestler.
     if state.side_by_side_owner is not None:
-        state.log("Sidestep reduces all Push to 0.")
+        state.log("Side-by-Side reduces all Push to 0.")
         return
 
     defending_side = state.opponent_side(side)
@@ -146,7 +166,7 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
             break
         if instance.card.name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
             defender.temporary_zone.remove(instance)
-            defender.discard_pile.append(instance.card)
+            (defender.exhaust_pile if instance.exhaust_on_leave else defender.discard_pile).append(instance.card)
             state.temporary_outcomes.append((defending_side, instance.card.name, "protected"))
             state.log(f"{instance.card.name} prevents 1 incoming Push.")
             amount -= 1
@@ -307,15 +327,22 @@ def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None 
             attr = _grip_attr(hand)
         else:
             # Deterministic generic reduction: reduce the deeper grip first,
-            # then Left before Right on ties. Card-specific choice can override later.
+            # then attacker's seat A chooses Left, seat B Right on ties.
             attr = (
                 "left_grip"
-                if int(fighter.left_grip) >= int(fighter.right_grip)
+                if (int(fighter.left_grip) > int(fighter.right_grip) or
+                    (fighter.left_grip == fighter.right_grip and state.opponent_side(side) is Side.A))
                 else "right_grip"
             )
         current = int(getattr(fighter, attr))
         if current > 0:
-            setattr(fighter, attr, GripState(current - 1))
+            next_grip = GripState(current - 1)
+            setattr(fighter, attr, next_grip)
+            hand_name = "Left" if attr == "left_grip" else "Right"
+            state.log(
+                f"{fighter.wrestler.name}'s {hand_name} Grip decreases "
+                f"({GripState(current).name} → {next_grip.name})."
+            )
             state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
 
 

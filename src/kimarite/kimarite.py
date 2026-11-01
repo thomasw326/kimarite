@@ -61,6 +61,7 @@ def _tsukidashi(state: BoutState, side: Side) -> bool:
 def _oshitaoshi(state: BoutState, side: Side) -> bool:
     return (
         relative_momentum(state, side) >= 2
+        and relative_position(state, side) >= 1
         and state.fighter(side).power >= 8
     )
 
@@ -103,8 +104,30 @@ def _shitatenage(state: BoutState, side: Side) -> bool:
     )
 
 
+def _shitatedashinage(state: BoutState, side: Side) -> bool:
+    return (
+        state.fighter(side).right_grip is GripState.DEEP
+        and effective_total_grip(state, side) > 0
+        and state.opponent(side).unstable
+        and relative_momentum(state, side) >= 0
+    )
+
+
+def _shitatehineri(state: BoutState, side: Side) -> bool:
+    fighter = state.fighter(side)
+    return (
+        fighter.right_grip is GripState.DEEP
+        and not fighter.unstable
+        and not state.opponent(side).temporary_zone
+        and effective_total_grip(state, side)
+        > effective_total_grip(state, state.opponent_side(side))
+    )
+
+
 def _hatakikomi(state: BoutState, side: Side) -> bool:
-    return relative_momentum(state, side) <= -2 and state.fighter(side).power >= 6
+    return (relative_momentum(state, side) <= -2
+            and state.fighter(side).power >= 6
+            and state.opponent(side).unstable)
 
 
 def _hikiotoshi(state: BoutState, side: Side) -> bool:
@@ -132,7 +155,9 @@ def _kotenage(state: BoutState, side: Side) -> bool:
 
 
 def _abisetaoshi(state: BoutState, side: Side) -> bool:
-    return effective_total_grip(state, side) >= 2 and state.fighter(side).power >= 10
+    return (effective_total_grip(state, side) >= 2
+            and state.fighter(side).power >= 10
+            and relative_momentum(state, side) >= 1)
 
 
 def _kirikaeshi(state: BoutState, side: Side) -> bool:
@@ -162,7 +187,7 @@ def _sukuinage(state: BoutState, side: Side) -> bool:
 
 
 def _utchari(state: BoutState, side: Side) -> bool:
-    return state.fighter(side).gained_momentum_this_turn and relative_position(state, side) == -3
+    return state.fighter(side).gained_momentum_this_turn and relative_position(state, side) <= -3
 
 
 def _uwatedashinage(state: BoutState, side: Side) -> bool:
@@ -190,6 +215,8 @@ KIMARITE_PREDICATES: dict[str, Predicate] = {
     "Tottari": _tottari,
     "Uwatenage": _uwatenage,
     "Shitatenage": _shitatenage,
+    "Shitatedashinage": _shitatedashinage,
+    "Shitatehineri": _shitatehineri,
     "Hatakikomi": _hatakikomi,
     "Hikiotoshi": _hikiotoshi,
     "Tsukitaoshi": _tsukitaoshi,

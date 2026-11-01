@@ -26,7 +26,7 @@ def prevent_negative_effect(
         if instance.card.name != "Shiko Stomp":
             continue
         fighter.temporary_zone.remove(instance)
-        fighter.discard_pile.append(instance.card)
+        (fighter.exhaust_pile if instance.exhaust_on_leave else fighter.discard_pile).append(instance.card)
         state.log(
             f"Shiko Stomp prevents {source}: {description} "
             f"against {fighter.wrestler.name}."

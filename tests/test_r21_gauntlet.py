@@ -27,9 +27,9 @@ def sample():
 
 def test_manifest_coverage_and_ids():
     arms = load_arms()
-    assert len(arms) == 50
-    assert len({a.arm_id for a in arms}) == 50
-    assert len({a.kimarite for a in arms}) == 18
+    assert len(arms) == 63  # R25 manifest now includes 22 families
+    assert len({a.arm_id for a in arms}) == 63
+    assert len({a.kimarite for a in arms}) == 22
     assert all(a.arm_id.startswith("R21-") for a in arms)
     assert all(a.orbs and a.exchange_text and a.win_text for a in arms)
 
@@ -48,18 +48,18 @@ def test_every_arm_has_executable_predicate_and_effect():
         variant_exchange(state, Side.A, card, EffectContext())
 
 
-def test_50_arm_schedule():
+def test_current_manifest_arm_schedule():
     arms = load_arms()
     assert len(generic_roster()) == 108
     scheduled = list(schedule(arms))
-    assert len(scheduled) == 50 * 2 * 648
+    assert len(scheduled) == len(arms) * 2 * 648
     assert Counter((a.arm_id, a.placement) for a in scheduled)[
         ("R21-HIK-RS", "starting")
     ] == 648
 
 
 def test_one_setup_each_arm_each_placement():
-    # Setup and isolated predicate must work in either seat with all 50 arms.
+    # Setup and isolated predicate must work in either seat with every current manifest arm.
     arms = load_arms()
     schedule_items = iter(schedule(arms))
     for arm in arms:

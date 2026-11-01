@@ -16,11 +16,11 @@ def setup():
     return state, compare_tachiai(a, b)
 
 
-def test_pull_ai_explores_both_printed_modes():
+def test_pull_ai_uses_current_single_immediate_exchange_mode():
     state, comparison = setup()
-    state.fighter_a.discard_pile = [card_by_name("Harite")]
     contexts = _contexts_for_card(state, Side.A, card_by_name("Pull"), comparison)
-    assert {c.choice("mode") for c in contexts} == {"filter", "reversal"}
+    assert len(contexts) == 1
+    assert contexts[0].choice("mode") is None
 
 
 def test_read_the_move_ai_explores_removal_and_draw():

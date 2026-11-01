@@ -35,7 +35,8 @@ def test_explosive_step_exchange_push_depends_on_preplay_momentum():
         s = state_with_prepared(Card(99998, "Blank"))
         s.momentum = initial
         resolve_exchange_effect(s, Side.A, card, EffectContext())
-        assert s.momentum == initial + 1
+        # Current card grants Push at nonpositive pre-play Momentum; no Momentum gain.
+        assert s.momentum == initial
         assert s.position == expected_position
 
 

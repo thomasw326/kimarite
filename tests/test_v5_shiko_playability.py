@@ -1,4 +1,4 @@
-"""Regression: Shiko Stomp must be a playable persistent defense, not a buff."""
+"""Regression: Shiko Stomp persists and refunds its Exchange Play (B11)."""
 
 from kimarite.ai import candidate_plays
 from kimarite.catalog import card_by_name
@@ -34,7 +34,7 @@ def test_shiko_stomp_exchange_play_is_legal_and_persistent():
     power_before = state.fighter_a.power
 
     play_card(state, Side.A, shiko)
-    assert state.fighter_a.plays_remaining == 0  # No +1 Play buff.
+    assert state.fighter_a.plays_remaining == 1  # B11: Exchange refunds 1 Play.
     assert state.fighter_a.power == power_before  # No stat buff.
     assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Shiko Stomp"]
     assert not any(c.name == "Shiko Stomp" for c in state.fighter_a.discard_pile)
@@ -64,4 +64,4 @@ def test_shiko_stomp_visible_to_tactical_and_style_ai():
     played = play_style_turn(state, Side.A, comparison, "Pressure Fighter")
     assert played == ["Shiko Stomp"]
     assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Shiko Stomp"]
-    assert state.fighter_a.plays_remaining == 0
+    assert state.fighter_a.plays_remaining == 1

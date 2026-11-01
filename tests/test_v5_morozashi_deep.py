@@ -36,7 +36,7 @@ def test_morozashi_adds_other_hand_without_downgrading(hand, depth):
     (GripState.GRIP, GripState.GRIP),
     (GripState.DEEP, GripState.GRIP),
 ])
-def test_morozashi_requires_exactly_one_gripping_hand(left, right):
+def test_morozashi_requires_at_least_one_gripping_hand(left, right):
     base = card_by_name("Oshi")
     w = Wrestler("W", 2, 2, 2, base, base, base)
     state = BoutState(FighterState(w), FighterState(w))
@@ -45,4 +45,5 @@ def test_morozashi_requires_exactly_one_gripping_hand(left, right):
     state.fighter_a.plays_remaining = 2
     state.fighter_a.left_grip = left
     state.fighter_a.right_grip = right
-    assert not can_play_card(state, Side.A, card)
+    # B11: already having both Grips is legal; only zero Grip is invalid.
+    assert can_play_card(state, Side.A, card) is (left != GripState.NONE or right != GripState.NONE)

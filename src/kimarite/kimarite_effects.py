@@ -4,8 +4,8 @@ from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, dr
 from .kimarite import no_grip, power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
-from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, lose_momentum, reduce_grip, establish_grip
-from .selection import ai_look_keep
+from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, recover_push, recover_momentum, lose_momentum, reduce_grip, establish_grip
+from .selection import ai_look_keep, look_from_top, keep_and_bottom
 
 
 def _optional(context: EffectContext, key: str, card: Card) -> bool:
@@ -48,6 +48,110 @@ def _discard_one_from_hand(state: BoutState, side: Side, card: Card, context: Ef
     discarded = fighter.hand.pop(index)
     fighter.discard_pile.append(discarded)
     state.log(f"{fighter.wrestler.name} discards {discarded.name} with {card.name}.")
+
+
+
+def _replay_from_discard_and_exhaust(
+    state: BoutState, side: Side, source: Card, context: EffectContext
+) -> None:
+    """Free-play a legal discarded card and exhaust it after its normal effects.
+
+    A replayed Temporary stays active until it leaves its Temporary Zone,
+    when it is exhausted instead of discarded. All other replayed cards are
+    exhausted immediately after their on-play effects.
+    """
+    from .legality import can_play_card
+    from .playing import play_card
+
+    fighter = state.fighter(side)
+    if not fighter.discard_pile:
+        return
+
+    legal_indices = []
+    fighter.plays_remaining += 1
+    try:
+        for index, candidate in enumerate(fighter.discard_pile):
+            fighter.hand.append(candidate)
+            try:
+                if can_play_card(state, side, candidate):
+                    legal_indices.append(index)
+            finally:
+                fighter.hand.pop()
+    finally:
+        fighter.plays_remaining -= 1
+    if not legal_indices:
+        return
+
+    key = ("replay_discard_index" if state.replay_depth == 0
+           else f"replay_discard_index_{state.replay_depth}")
+    index = context.choice(key)
+    if index is None:
+        if context.choice("__human__") and len(legal_indices) > 1:
+            raise ChoiceRequired(source.name, key, legal_indices)
+        from .ai import _card_priority
+        index = max(
+            legal_indices,
+            key=lambda candidate_index: _card_priority(
+                fighter.discard_pile[candidate_index], state, side
+            ),
+        )
+    if index not in legal_indices:
+        raise ChoiceRequired(source.name, key, legal_indices)
+
+    selected = fighter.discard_pile.pop(index)
+    existing_temporaries = {id(instance) for instance in fighter.temporary_zone}
+    fighter.hand.append(selected)
+    fighter.plays_remaining += 1  # The replay spends this bonus Play, not a normal Play.
+    state.log(f"{fighter.wrestler.name} replays {selected.name} from discard with Shitatehineri.")
+
+    nested_context = context
+    if not context.choice("__human__"):
+        # AI must also make the replayed card's own choices, if it has any.
+        from .ai import _context_for_card
+        suggested = _context_for_card(state, side, selected, context.comparison)
+        nested_context = EffectContext(
+            comparison=context.comparison,
+            choices={**(suggested.choices or {}), **(context.choices or {})},
+        )
+
+    state.replay_depth += 1
+    try:
+        play_card(state, side, selected, context=nested_context)
+    finally:
+        state.replay_depth -= 1
+
+    if selected.is_kimarite:
+        # Replayed Kimarite grant only their on-play effect, not a lasting win threat.
+        # Duplicates share card values; remove the most recently played copy,
+        # not an earlier identical finisher already in the zone.
+        for zone_index in range(len(fighter.kimarite_zone) - 1, -1, -1):
+            if fighter.kimarite_zone[zone_index] == selected:
+                fighter.kimarite_zone.pop(zone_index)
+                break
+    else:
+        new_temporaries = [
+            instance for instance in fighter.temporary_zone
+            if id(instance) not in existing_temporaries and instance.card == selected
+        ]
+        if new_temporaries:
+            new_temporaries[-1].exhaust_on_leave = True
+            state.log(
+                f"{selected.name} will Exhaust when its Temporary effect ends."
+            )
+            return
+
+        # Ordinary cards normally enter discard after resolution; move the
+        # replayed copy to Exhaust without touching any other duplicate.
+        for discard_index in range(len(fighter.discard_pile) - 1, -1, -1):
+            if fighter.discard_pile[discard_index] == selected:
+                fighter.discard_pile.pop(discard_index)
+                break
+        else:
+            if selected in fighter.hand:
+                fighter.hand.remove(selected)
+
+    fighter.exhaust_pile.append(selected)
+    state.log(f"{selected.name} is Exhausted after its Shitatehineri replay.")
 
 
 def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -117,6 +221,19 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         if fighter.right_grip is not GripState.NONE:
             gain_momentum(state, side, 1)
 
+    elif card.name == "Shitatedashinage":
+        if fighter.right_grip is GripState.DEEP:
+            # Recover never increases a nonnegative track; draw is conditional
+            # on Deep Right Grip, not on whether recovery succeeds.
+            recover_push(state, side, 1)
+            recover_momentum(state, side, 1)
+            if state.winner is None:
+                draw_one(state, side)
+
+    elif card.name == "Shitatehineri":
+        if fighter.right_grip is GripState.DEEP:
+            _replay_from_discard_and_exhaust(state, side, card, context)
+
     elif card.name == "Hatakikomi":
         if _optional(context, "use_optional", card):
             lose_momentum(state, side, 1)
@@ -135,7 +252,25 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 draw_one(state, side)
 
     elif card.name == "Hikiotoshi":
-        draw_from_look(state, side, look=3, keep=1)
+        # Unlike the AI, the human chooses which of the top three to keep.
+        # The surrounding card action is transactional: asking for a choice
+        # must not consume the pile before the player's response.
+        if not context.choice("__human__"):
+            draw_from_look(state, side, look=3, keep=1)
+        else:
+            looked = look_from_top(fighter, 3)
+            if not looked:
+                # This is a required draw, so preserve exhaustion semantics.
+                draw_from_look(state, side, look=3, keep=1)
+            else:
+                options = list(range(len(looked)))
+                index = context.choice("hikiotoshi_card_index")
+                if len(options) == 1 and index is None:
+                    index = 0
+                if index not in options:
+                    raise ChoiceRequired(card.name, "hikiotoshi_card_index", options)
+                keep_and_bottom(fighter, looked, [looked[index]])
+                state.log(f"{fighter.wrestler.name} chooses {looked[index].name} from Hikiotoshi's top {len(looked)} cards.")
 
     elif card.name == "Tsukitaoshi":
         add_play(state, side, 1)
@@ -177,8 +312,12 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 fighter.discard_pile.append(discarded)
 
     elif card.name == "Kirikaeshi":
-        # B9: optional conversion of Power into Momentum and a card.
-        if context.choice("use_optional") is True:
+        # Human must explicitly choose; AI/Classic no-choice callers retain
+        # their established decline-by-default behaviour.
+        optional = context.choice("use_optional")
+        if context.choice("__human__") and type(optional) is not bool:
+            raise ChoiceRequired(card.name, "use_optional", [True, False])
+        if optional is True:
             from .rules import lose_power
             lose_power(state, side, 1)
             gain_momentum(state, side, 1)
@@ -189,7 +328,11 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         return  # B9 generated-only: no Exchange effect.
 
     elif card.name == "Tsuriotoshi":
-        mode = context.choice("mode") or "power"
+        mode = context.choice("mode")
+        if mode is None:
+            if context.choice("__human__"):
+                raise ChoiceRequired(card.name, "mode", ["power", "momentum", "grip"])
+            mode = "power"
         if mode == "power":
             gain_power(state, side, 1)
         elif mode == "momentum":
@@ -205,7 +348,21 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
 
     elif card.name == "Utchari":
         if relative_position(state, side) < 0:
-            draw_from_look(state, side, look=2, keep=1)
+            if not context.choice("__human__"):
+                draw_from_look(state, side, look=2, keep=1)
+            else:
+                looked = look_from_top(fighter, 2)
+                if not looked:
+                    draw_from_look(state, side, look=2, keep=1)
+                else:
+                    options = list(range(len(looked)))
+                    index = context.choice("utchari_card_index")
+                    if len(options) == 1 and index is None:
+                        index = 0
+                    if index not in options:
+                        raise ChoiceRequired(card.name, "utchari_card_index", options)
+                    keep_and_bottom(fighter, looked, [looked[index]])
+                    state.log(f"{fighter.wrestler.name} chooses {looked[index].name} from Utchari's top {len(looked)} cards.")
 
     elif card.name == "Uwatedashinage":
         draw_one(state, side)

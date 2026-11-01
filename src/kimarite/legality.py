@@ -28,11 +28,8 @@ def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
         return False
 
     if card.name == "Morozashi":
-        return (
-            (fighter.left_grip is not GripState.NONE and fighter.right_grip is GripState.NONE)
-            or
-            (fighter.right_grip is not GripState.NONE and fighter.left_grip is GripState.NONE)
-        )
+        # Morozashi may provide delayed Push even with both Grips secured.
+        return fighter.left_grip is not GripState.NONE or fighter.right_grip is not GripState.NONE
 
     if card.name in {"Sidestep", "Spin Away"}:
         return state.side_by_side_owner is None

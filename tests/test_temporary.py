@@ -92,7 +92,7 @@ def test_hold_position_prevents_opponent_push_while_active():
     assert bout.position == 0
 
 
-def test_use_tawara_prevents_push_and_gains_momentum():
+def test_use_tawara_concedes_position_and_gains_momentum():
     card = card_by_name("Use the Tawara")
     bout = bout_with_hand([card])
     play_card(
@@ -104,7 +104,7 @@ def test_use_tawara_prevents_push_and_gains_momentum():
 
     gain_push(bout, Side.B, 1)
 
-    assert bout.position == -1
+    assert bout.position == -2  # Tawara costs 1, then opponent Push costs 1.
     assert bout.momentum == 1
 
 

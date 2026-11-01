@@ -64,13 +64,34 @@ def test_cantrip_recovers_selected_discard():
     assert cantrip not in bout.fighter_a.hand
 
 
-def test_cantrip_grants_play_and_draws():
+def test_cantrip_returns_one_to_hand_and_two_newest_to_bottom_of_draw():
+    cantrip = Card(62, "Power Water Cantrip")
+    cards = [Card(210 + i, f"Discard {i}") for i in range(4)]
+    bout = make_bout(hand=[cantrip], discard=cards)
+    play_card(bout, Side.A, cantrip, context=EffectContext(choices={"discard_index": 0}))
+    assert bout.fighter_a.hand == [cards[0]]
+    assert bout.fighter_a.draw_pile == [cards[3], cards[2]]
+    assert bout.fighter_a.discard_pile == [cards[1]]
+    assert cantrip not in bout.fighter_a.hand
+
+
+def test_cantrip_recovers_only_available_discards():
+    cantrip = Card(62, "Power Water Cantrip")
+    target = Card(220, "Discard")
+    bout = make_bout(hand=[cantrip], discard=[target])
+    play_card(bout, Side.A, cantrip)
+    assert target in bout.fighter_a.hand
+    assert bout.fighter_a.discard_pile == []
+
+
+def test_cantrip_grants_play_without_unconditional_draw():
     cantrip = Card(62, "Power Water Cantrip")
     drawn = Card(112, "Drawn")
     bout = make_bout(hand=[cantrip], draw=[drawn])
     play_card(bout, Side.A, cantrip)
     assert bout.fighter_a.plays_remaining == 2
-    assert drawn in bout.fighter_a.hand
+    assert bout.fighter_a.hand == []
+    assert bout.fighter_a.draw_pile == [drawn]
 
 
 def test_salt_throw_recycles_bottom_discard():

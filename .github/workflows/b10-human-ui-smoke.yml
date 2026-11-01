@@ -1,0 +1,23 @@
+name: B10 human UI session smoke
+on:
+  push:
+    branches: [feature/b10-human-ui-session]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e . pytest
+      - run: python -m pytest -q tests/test_b10_human_session.py tests/test_v5_human_bout.py tests/test_b10_web_http.py tests/test_b10_card_info.py
+      - name: Validate browser JavaScript
+        run: node --check web/client.js
+      - name: Verify browser assets and HTTP entry point
+        run: |
+          python -m compileall -q src/kimarite/b10_human_session.py src/kimarite/b10_web.py
+          test -s web/index.html && test -s web/client.js && test -s web/style.css
+          python -c "from kimarite.b10_web import Handler; from kimarite.b10_human_session import roster; assert len(roster()) == 26"

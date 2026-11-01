@@ -12,10 +12,11 @@ def test_katasukashi_requires_hand_advantage_and_opponent_no_grip():
     state = BoutState(FighterState(a, kimarite_zone=[k], hand=[blank] * 5), FighterState(b))
     state.momentum = 0
     assert not kimarite_is_satisfied(state, Side.A, k)
-    state.momentum = 1
+    state.momentum = 2
     assert kimarite_is_satisfied(state, Side.A, k)
     state.fighter_b.left_grip = GripState.GRIP
     assert not kimarite_is_satisfied(state, Side.A, k)
     state.fighter_b.left_grip = GripState.NONE
+    state.fighter_a.hand.pop()
     state.fighter_a.hand.pop()
     assert not kimarite_is_satisfied(state, Side.A, k)

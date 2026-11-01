@@ -36,9 +36,9 @@ def test_slot_outcomes_reconcile_to_participants():
     result = run_round_robin(repetitions=1, max_turns=30)
     for role in ("Starting Kimarite", "Tachiai", "Top"):
         group = result["card_slot_outcomes"][role]
-        assert sum(x["appearances"] for x in group.values()) == 420
-        assert sum(x["wins"] + x["losses"] for x in group.values()) == 420
-        assert all(x["appearances"] == x["wins"] + x["losses"] for x in group.values())
+        assert sum(x["appearances"] for x in group.values()) == 2 * result["planned_bouts"]
+        assert sum(x["wins"] + x["losses"] for x in group.values()) == 2 * result["completed"]
+        assert all(x["appearances"] >= x["wins"] + x["losses"] for x in group.values())
     shuffled = result["card_slot_outcomes"]["Shuffled"]
     assert shuffled
     assert all(x["appearances"] == x["wins"] + x["losses"] for x in shuffled.values())

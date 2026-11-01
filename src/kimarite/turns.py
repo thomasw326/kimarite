@@ -173,6 +173,36 @@ def check_kimarite_zone(
         sources = [source for event_side, turn, source, amount in state.position_loss_events
                    if event_side is side and turn == state.turn_number]
         state.katasukashi_win_sources = list(dict.fromkeys(sources)) or ["unknown"]
+    if getattr(state, "b11_explain_wins", False) and card.name == "Sukuinage":
+        grip = state.fighter(side).total_grip
+        momentum = state.momentum * state.sign(side)
+        hand_advantage = len(state.fighter(side).hand) - len(state.opponent(side).hand)
+        state.log(
+            f"Sukuinage conditions satisfied: Grip {grip} (required 0); "
+            f"Momentum advantage {momentum} (required ≥2); "
+            f"Hand advantage {hand_advantage} (required ≥4)."
+        )
+    if getattr(state, "b11_explain_wins", False):
+        winner = state.fighter(side)
+        opponent = state.opponent(side)
+        from .b11_victory_checks import victory_checks
+        from .b10_card_info import card_info
+        details = card_info(card)
+        import re
+        description = details.get("description", "")
+        win_text = re.search(r"Win:\s*(.*?)(?=\s*On play:|$)", description)
+        state.b11_victory_details = {
+            "checks": victory_checks(state, side, card.name),
+            "kimarite": card.name,
+            "requirement_text": win_text.group(1).strip() if win_text else description,
+            "grip": winner.total_grip,
+            "effective_grip": effective_total_grip(state, side),
+            "power": winner.power,
+            "momentum_advantage": state.momentum * state.sign(side),
+            "position_advantage": state.position * state.sign(side),
+            "hand_advantage": len(winner.hand) - len(opponent.hand),
+            "turn": state.turn_number,
+        }
     state.win_source = "kimarite"
     state.winning_kimarite_card_id = card.card_id
     state.declare_winner(side, card.name)

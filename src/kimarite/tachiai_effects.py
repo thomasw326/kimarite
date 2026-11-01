@@ -12,21 +12,34 @@ PREPARED_TEMPORARY_TACHIAI = frozenset({"Shiko Stomp", "Salt Throw", "Nekodamash
 REVEAL_FAMILY = frozenset({"Oshi", "Tsuki"})
 
 
-def _reveal_tachiai_orbs(state: BoutState, comparison: TachiaiComparison) -> None:
-    extras = {Side.A: [0, 0, 0], Side.B: [0, 0, 0]}
+def _reveal_tachiai_orbs(
+    state: BoutState,
+    comparison: TachiaiComparison,
+    *,
+    committed_cards: dict[Side, tuple[Card, ...]] | None = None,
+) -> None:
+    """Apply ordered Oshi/Tsuki chains once, for each committed reveal card.
+
+    With no explicit commits this is identical to Classic's one prepared
+    card per fighter. The B11 caller can supply all committed human cards
+    without affecting the AI's own prepared opening.
+    """
+    from .b11_tachiai_reveals import plan_reveals
+
+    extras = {Side.A: (0, 0, 0), Side.B: (0, 0, 0)}
     for side in (Side.A, Side.B):
         fighter = state.fighter(side)
-        if fighter.wrestler.prepared_tachiai_card.name not in REVEAL_FAMILY:
-            continue
-        while fighter.draw_pile:
-            card = fighter.draw_pile.pop(0)
-            extras[side][0] += card.power
-            extras[side][1] += card.technique
-            extras[side][2] += card.spirit
-            fighter.discard_pile.append(card)
+        cards = (
+            committed_cards[side]
+            if committed_cards is not None and side in committed_cards
+            else (fighter.wrestler.prepared_tachiai_card,)
+        )
+        outcome = plan_reveals(cards, fighter.draw_pile)
+        fighter.draw_pile[:] = outcome.remaining
+        fighter.discard_pile.extend(outcome.revealed)
+        extras[side] = outcome.orbs
+        for card in outcome.revealed:
             state.log(f"{fighter.wrestler.name} reveals {card.name} for Tachiai orbs.")
-            if card.name not in REVEAL_FAMILY:
-                break
     a, b = extras[Side.A], extras[Side.B]
     old_a, old_b = comparison.wrestler_a, comparison.wrestler_b
     new_a = TachiaiStats(old_a.power+a[0], old_a.technique+a[1], old_a.spirit+a[2])
@@ -55,30 +68,31 @@ def _opponent_stats(comparison: TachiaiComparison, side: Side):
     return comparison.wrestler_b if side is Side.A else comparison.wrestler_a
 
 
-def _activate_prebout_shiko(state: BoutState, side: Side) -> None:
-    card = state.fighter(side).wrestler.prepared_tachiai_card
-    if card.name == "Shiko Stomp":
-        add_temporary(state, side, card, phase="pre-bout")
+def _activate_prebout_shiko(state: BoutState, side: Side, cards: tuple[Card, ...]) -> None:
+    for card in cards:
+        if card.name == "Shiko Stomp":
+            add_temporary(state, side, card, phase="pre-bout")
 
 
-def _power_push_reduction(state: BoutState, comparison: TachiaiComparison) -> int:
+def _power_push_reduction(state: BoutState, comparison: TachiaiComparison, cards_by_side: dict[Side, tuple[Card, ...]]) -> int:
     winner = comparison.spirit_winner
     if winner is None:
         return 0
 
     loser = state.opponent_side(winner)
-    card = state.fighter(loser).wrestler.prepared_tachiai_card
-    if card.name not in {"Hold Position", "Immovable", "Sidestep", "Give Ground"}:
+    protective = {"Hold Position", "Immovable", "Sidestep", "Give Ground"}
+    cards = [c for c in cards_by_side[loser] if c.name in protective]
+    if not cards:
         return 0
 
-    if prevent_negative_effect(
-        state,
-        winner,
-        source=card.name,
-        description="reduce Tachiai Push from the Spirit comparison",
-    ):
-        return 0
-    return 1 if card.name in {"Sidestep", "Give Ground"} else 2
+    reduction = 0
+    for card in cards:
+        if not prevent_negative_effect(
+            state, winner, source=card.name,
+            description="reduce Tachiai Push from the Spirit comparison",
+        ):
+            reduction += 1 if card.name in {"Sidestep", "Give Ground"} else 2
+    return reduction
 
 
 def resolve_prepared_tachiai(
@@ -86,17 +100,22 @@ def resolve_prepared_tachiai(
     comparison: TachiaiComparison,
     *,
     sacrifice_choices: dict[Side, int | None] | None = None,
+    committed_cards: dict[Side, tuple[Card, ...]] | None = None,
 ) -> None:
     """Resolve prepared Tachiai cards, including cards without a Tachiai-specific effect."""
+    cards_by_side = {side: (committed_cards[side] if committed_cards is not None and side in committed_cards
+                             else (state.fighter(side).wrestler.prepared_tachiai_card,))
+                     for side in (Side.A, Side.B)}
     for side in (Side.A, Side.B):
-        _activate_prebout_shiko(state, side)
-    _reveal_tachiai_orbs(state, comparison)
+        _activate_prebout_shiko(state, side, cards_by_side[side])
+    _reveal_tachiai_orbs(state, comparison, committed_cards=cards_by_side)
     state.tachiai_spirit_advantage_a = comparison.spirit_advantage_a
 
     # Resolve Tachiai Power modifiers before Spirit Push resistance.
     headlong_sacrificed = {Side.A: False, Side.B: False}
     for side in (Side.A, Side.B):
-        name = state.fighter(side).wrestler.prepared_tachiai_card.name
+      for card in cards_by_side[side]:
+        name = card.name
         if name in {"Hold Position", "Immovable"}:
             gain_power(state, side, 2)
         elif name == "Headlong Charge":
@@ -115,15 +134,10 @@ def resolve_prepared_tachiai(
         elif name == "Nodowa":
             gain_power(state, side, 2)
         elif name == "Harite":
-            gain_power(state, side, 1)
-            opponent_side = state.opponent_side(side)
-            if not prevent_negative_effect(
-                state, opponent_side, source="Harite",
-                description="lose 1 Power",
-            ):
-                lose_power(state, opponent_side, 1)
+            from .effects import _harite
+            _harite(state, side, card, EffectContext())
 
-    reduction = _power_push_reduction(state, comparison)
+    reduction = _power_push_reduction(state, comparison, cards_by_side)
     spirit_winner, spirit_push = apply_tachiai_power_push(
         state, comparison, reduction=reduction
     )
@@ -139,9 +153,9 @@ def resolve_prepared_tachiai(
     reset_position = False
 
     for side in (Side.A, Side.B):
+      for card in cards_by_side[side]:
         fighter = state.fighter(side)
         opponent_side = state.opponent_side(side)
-        card = fighter.wrestler.prepared_tachiai_card
         name = card.name
 
         if name == "Headlong Charge":
@@ -254,7 +268,7 @@ def resolve_prepared_tachiai(
         return
 
     for side in (Side.A, Side.B):
-        if (state.fighter(side).wrestler.prepared_tachiai_card.name == "Shove"
+        if (any(card.name == "Shove" for card in cards_by_side[side])
                 and state.position * state.sign(side) == 3):
             state.win_source = "Shove Tachiai"
             state.declare_winner(side, "Shove")
@@ -267,20 +281,30 @@ def resolve_prepared_tachiai(
     # BEGIN APPROVED MILL/RECYCLE V1
     # Prepared explosive cards pay their Tachiai mill cost after opening effects.
     for side in (Side.A, Side.B):
-        name = state.fighter(side).wrestler.prepared_tachiai_card.name
+      for card in cards_by_side[side]:
+        name = card.name
         if name in {"Headlong Charge", "Explosive Step — Fumikomi"}:
             from .effects import mill_cards
             mill_cards(state, side, 2)
     # END APPROVED MILL/RECYCLE V1
 
     for side in (Side.A, Side.B):
-        card = state.fighter(side).wrestler.prepared_tachiai_card
-        if card.name == "Headlong Charge":
-            # Prepared Headlong Charge is spent, not returned to the deck.
-            # The style builder seeds this card on the bottom already.
+        for card in cards_by_side[side]:
             fighter = state.fighter(side)
-            if card in fighter.draw_pile:
-                fighter.draw_pile.remove(card)
-            fighter.discard_pile.append(card)
-        elif card.name not in PREPARED_TEMPORARY_TACHIAI:
-            state.fighter(side).draw_pile.append(card)
+            if committed_cards is not None and side in committed_cards:
+                # Player Tachiai uses the same opening destinations as Classic:
+                # Kimarite starts in the Kimarite Zone, persistent pre-bout
+                # Temporaries stay active, and ordinary cards return to the
+                # bottom of the draw pile. Headlong Charge alone is spent.
+                if card.is_kimarite:
+                    fighter.kimarite_zone.append(card)
+                elif card.name == "Headlong Charge":
+                    fighter.discard_pile.append(card)
+                elif card.name not in PREPARED_TEMPORARY_TACHIAI:
+                    fighter.draw_pile.append(card)
+            elif card.name == "Headlong Charge":
+                if card in fighter.draw_pile:
+                    fighter.draw_pile.remove(card)
+                fighter.discard_pile.append(card)
+            elif card.name not in PREPARED_TEMPORARY_TACHIAI:
+                fighter.draw_pile.append(card)
