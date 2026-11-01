@@ -2,7 +2,9 @@
 
 Kimarite is a sumo-inspired tactical card game with a deterministic rules engine, automated balance simulations, and a browser-based **Human vs AI practice bout**.
 
-## Canonical B11 release and mainline policy
+## Current approved build: B12 (locked B11 engine)
+
+**B12 is a release lock and naming milestone, not a gameplay redesign.** The locked engine snapshot is [`release/b12-locked`](https://github.com/thomasw326/kimarite/tree/release/b12-locked), anchored to commit `414f09ac696fbbaa6560626c823742f1b822c544`. It retains the approved B11 browser, Tachiai, Exchange, Shitate and AI rules. B12 does not approve or finalize the provisional 69 wrestler decks; the live playtest roster remains separate. See [B12 release lock](docs/B12_RELEASE_LOCK.md).
 
 **`main` is the authoritative approved game build.** New work must branch from the most recently approved B11 mainline, not from an older V5, B9 or B10 experiment. Once the designer approves a mechanic or a build as current, the next release retains it unless an explicit later decision supersedes it.
 
