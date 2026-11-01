@@ -92,6 +92,24 @@ def lose_momentum(state: BoutState, side: Side, amount: int) -> None:
     gain_momentum(state, state.opponent_side(side), amount)
 
 
+def recover_momentum(state: BoutState, side: Side, amount: int = 1) -> None:
+    """Restore negative relative Momentum toward zero, never beyond zero."""
+    if amount < 0:
+        raise ValueError("amount must be non-negative")
+    shortfall = max(0, -state.momentum * state.sign(side))
+    if shortfall:
+        gain_momentum(state, side, min(shortfall, amount))
+
+
+def recover_push(state: BoutState, side: Side, amount: int = 1) -> None:
+    """Gain Push only while Position is negative, and only up to neutral."""
+    if amount < 0:
+        raise ValueError("amount must be non-negative")
+    shortfall = max(0, -state.position * state.sign(side))
+    if shortfall:
+        gain_push(state, side, min(shortfall, amount))
+
+
 def _break_sidestep_from_push(state: BoutState, side: Side) -> None:
     """A Push against Side-by-Side breaks Sidestep before that Push resolves."""
     owner = state.side_by_side_owner
