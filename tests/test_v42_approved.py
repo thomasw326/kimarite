@@ -53,7 +53,7 @@ def test_gain_left_grip_deepens_and_protects_one_push():
 
 
 def test_approved_kinematic_finishes():
-    s = BoutState(fighter("A"), fighter("B"), momentum=-2, position=2)
+    s = BoutState(fighter("A"), fighter("B"), momentum=-2, position=3)
     s.fighter_a.cards_played_this_turn = 4
     assert kimarite_is_satisfied(s, Side.A, card_by_name("Tsukidashi"))
     s.position = -2
