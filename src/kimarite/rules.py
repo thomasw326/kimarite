@@ -23,7 +23,8 @@ def _distance_past_cap(value: int) -> int:
 
 
 def _track_at_favorable_cap(state: BoutState, side: Side, kind: str) -> bool:
-    cap = _cap_for(side)
+    # Momentum caps at ±3, while B11 Position extends safely to ±4.
+    cap = (TRACK_MAX if kind == "momentum" else POSITION_MAX) * state.sign(side)
     return (state.momentum if kind == "momentum" else state.position) == cap
 
 
@@ -70,7 +71,7 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Push.")
         next_kind = "momentum"
 
-    if excess == 0 or kind == "momentum":
+    if excess == 0:
         return
 
     # Overflow converts 1:1. If the destination track is already capped for
