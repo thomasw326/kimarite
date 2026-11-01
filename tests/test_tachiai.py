@@ -42,16 +42,18 @@ def test_power_advantage_scaling():
 
 def test_technique_access_scaling():
     assert technique_access(0) == (2, 2)
-    assert technique_access(1) == (3, 3)
-    assert technique_access(2) == (4, 3)
-    assert technique_access(3) == (5, 3)
-    assert technique_access(4) == (6, 4)
-    assert technique_access(6) == (8, 4)
-    assert technique_access(7) == (9, 5)
-    assert technique_access(9) == (11, 5)
-    assert technique_access(10) == (12, 6)
-    assert technique_access(12) == (14, 6)
-    assert technique_access(13) == (15, 7)
+    # Current B11 draw-only access increases both look and keep at +3,
+    # +6, +9, and +12 rather than using retired V4 thresholds.
+    assert technique_access(1) == (2, 2)
+    assert technique_access(2) == (2, 2)
+    assert technique_access(3) == (3, 3)
+    assert technique_access(4) == (3, 3)
+    assert technique_access(6) == (4, 4)
+    assert technique_access(7) == (4, 4)
+    assert technique_access(9) == (5, 5)
+    assert technique_access(10) == (5, 5)
+    assert technique_access(12) == (6, 6)
+    assert technique_access(13) == (6, 6)
     assert [technique_thresholds(x) for x in range(0, 14)] == [
         0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5
     ]
