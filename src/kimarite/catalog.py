@@ -69,9 +69,6 @@ CARD_POOL: tuple[Card, ...] = (
     Card(11004, "Sukuinage", 1, 1, 1, True),
     Card(11005, "Utchari", 0, 2, 0, True),
     Card(11006, "Uwatedashinage", 0, 2, 1, True),
-    # B11 approved Deep Right Grip family.
-    Card(12011, "Shitatedashinage", 0, 2, 1, True),
-    Card(12012, "Shitatehineri", 0, 2, 1, True),
 )
 
 # B9-specific cards live outside the historical 61-card V5 print pool.
@@ -87,6 +84,14 @@ B9_CARD_POOL: tuple[Card, ...] = (
     Card(12008, "Spin Away", 0, 1, 2),
     Card(12009, "Ankogata", 3, 0, 0),
     Card(12010, "Tsuriotoshi", 2, 1, 0, True),
+)
+
+
+# B11 additions are separate from the frozen V5.1 61-card release manifest.
+# Deck authors can opt into these specialist finishers by name.
+B11_CARD_POOL: tuple[Card, ...] = (
+    Card(13001, "Shitatedashinage", 0, 2, 1, True),
+    Card(13002, "Shitatehineri", 0, 2, 1, True),
 )
 
 
@@ -115,13 +120,11 @@ STARTING_KIMARITE: tuple[Card, ...] = (
     Card(1020, "Sukuinage", 1, 1, 1, True),
     Card(1021, "Utchari", 0, 2, 0, True),
     Card(1022, "Uwatedashinage", 0, 2, 1, True),
-    Card(1023, "Shitatedashinage", 0, 2, 1, True),
-    Card(1024, "Shitatehineri", 0, 2, 1, True),
 )
 
 
 def card_by_id(card_id: int) -> Card:
-    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL):
+    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL, *B11_CARD_POOL):
         if card.card_id == card_id:
             return card
     raise KeyError(card_id)
@@ -132,7 +135,7 @@ def card_by_name(name: str, *, prefer_starting_kimarite: bool = False) -> Card:
         (STARTING_KIMARITE, CARD_POOL)
         if prefer_starting_kimarite
         else (CARD_POOL, STARTING_KIMARITE)
-    ) + (B9_CARD_POOL,)
+    ) + (B9_CARD_POOL, B11_CARD_POOL)
     for group in groups:
         for card in group:
             if card.name == name:
