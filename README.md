@@ -2,11 +2,15 @@
 
 Kimarite is a sumo-inspired tactical card game with a deterministic rules engine, automated balance simulations, and a browser-based **Human vs AI practice bout**.
 
-## Current builds and change-control
+## Canonical B11 release and mainline policy
 
-- **Approved B10 balance baseline:** `311dec7de8a0e3ef30365eeb8f0b8cd832912a4f` on `main`. Treat card effects, orb counts, wrestler decks, overflow ring rules, and the B10 State 3 AI as frozen unless a balance change is explicitly approved.
-- **Human vs AI UI work:** `feature/b10-human-ui-session`, [PR #48](https://github.com/thomasw326/kimarite/pull/48). UI documentation, readability, session recovery, and isolated bug fixes belong here. **Do not merge it into main without explicit approval.**
-- Experimental V5 and historic round-robin programs are separate from the approved B10 game; do not use old V5 prototypes as a source of current B10 card wording.
+**`main` is the authoritative approved game build.** New work must branch from the most recently approved B11 mainline, not from an older V5, B9 or B10 experiment. Once the designer approves a mechanic or a build as current, the next release retains it unless an explicit later decision supersedes it.
+
+B11 brings together the live browser-based Human vs AI interface, player-controlled Tachiai, current Kimarite rules, the 69-wrestler data and validation, and the 28-card draft with up to 12 duplicates. See `docs/BUILD_MAINLINE_POLICY.md` for the update procedure and release checks. The Shitatedashinage and Shitatehineri finishers use the separate B11 card pool so the historical 61-card V5.1 manifest remains reproducible.
+
+Historical branches (`experiment/*`, `feature/b10-*`, `release/b11-playtest`, and old B11 patch branches) are reference snapshots only. They are **not** substitutes for the current approved build. To avoid accidental reversions, open future work from `main`, run current B11 tests, and merge the approved change into `main` after tests pass. Never silently restore older card balance or AI behavior.
+
+The following B10 practice-bout and tournament notes document the original interface lineage. Newer B11 screens and workflows may supersede specific B10 setup details.
 
 ## Play Human vs AI (browser practice bout)
 

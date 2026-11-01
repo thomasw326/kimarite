@@ -1,4 +1,4 @@
-name: B11 legacy failure diagnostics
+name: B11 isolated regression checks
 
 on:
   pull_request:
@@ -17,7 +17,7 @@ jobs:
         test:
           - tests/test_tachiai.py::test_technique_access_scaling
           - tests/test_effects.py::test_oshi_gains_push_and_play_and_draws
-          - tests/test_v5_pull_underneath_sync.py::test_pull_filter_mode_draws_then_discards_without_temporary
+          - tests/test_v5_pull_underneath_sync.py::test_pull_exchange_is_immediate_draw_discard_and_unstable
           - tests/test_v5_shiko_playability.py::test_shiko_stomp_exchange_play_is_legal_and_persistent
           - tests/test_r21_gauntlet.py::test_manifest_coverage_and_ids
           - tests/test_v5_morozashi_deep.py::test_morozashi_requires_at_least_one_gripping_hand[1-1]
@@ -29,5 +29,5 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -e '.[dev]'
-      - name: Isolate this failing test in a fresh interpreter
+      - name: Check this regression in a clean interpreter
         run: python -m pytest -q "${{ matrix.test }}"
