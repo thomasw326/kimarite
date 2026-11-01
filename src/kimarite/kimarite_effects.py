@@ -4,7 +4,7 @@ from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, dr
 from .kimarite import no_grip, power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
-from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, gain_push, lose_momentum, reduce_grip, establish_grip
+from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, recover_push, recover_momentum, lose_momentum, reduce_grip, establish_grip
 from .selection import ai_look_keep
 
 
@@ -221,10 +221,8 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         if fighter.right_grip is GripState.DEEP:
             # Recover never increases a nonnegative track; draw is conditional
             # on Deep Right Grip, not on whether recovery succeeds.
-            if relative_position(state, side) < 0:
-                gain_push(state, side, 1)
-            if relative_momentum(state, side) < 0:
-                gain_momentum(state, side, 1)
+            recover_push(state, side, 1)
+            recover_momentum(state, side, 1)
             if state.winner is None:
                 draw_one(state, side)
 
