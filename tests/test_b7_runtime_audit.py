@@ -5,6 +5,32 @@ are explicitly marked xfail so the audit does not pretend they're passing.
 """
 from __future__ import annotations
 
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def restore_global_final22_experiment():
+    """R26 installs monkeypatch-like module globals; never leak into later tests.
+
+    In particular B6_FIXED_COMPOSITION_DECK=True silently changes all style
+    decks and affinity, causing dozens of unrelated test failures depending
+    on test collection order.
+    """
+    from kimarite import style_builds_v5, style_ai_v5
+
+    attributes = {
+        (style_builds_v5, name): getattr(style_builds_v5, name)
+        for name in ("B6_FIXED_COMPOSITION_DECK", "CARD_POOL",
+                     "STARTING_KIMARITE", "preferred", "least_useful")
+    }
+    attributes[(style_ai_v5, "card_affinity")] = style_ai_v5.card_affinity
+    try:
+        yield
+    finally:
+        for (module, name), original in attributes.items():
+            setattr(module, name, original)
+
+
 from kimarite.ai import candidate_plays
 from kimarite.catalog import card_by_name
 from kimarite.effects import EffectContext, resolve_exchange_effect
