@@ -124,7 +124,10 @@ def _shitatehineri(state: BoutState, side: Side) -> bool:
 
 
 def _hatakikomi(state: BoutState, side: Side) -> bool:
-    return relative_momentum(state, side) <= -2 and state.fighter(side).power >= 6
+    # B11: the slap-down requires an already Unstable opponent.
+    return (relative_momentum(state, side) <= -2
+            and state.fighter(side).power >= 6
+            and state.opponent(side).unstable)
 
 
 def _hikiotoshi(state: BoutState, side: Side) -> bool:
@@ -182,7 +185,7 @@ def _sukuinage(state: BoutState, side: Side) -> bool:
 
 
 def _utchari(state: BoutState, side: Side) -> bool:
-    return state.fighter(side).gained_momentum_this_turn and relative_position(state, side) == -3
+    return state.fighter(side).gained_momentum_this_turn and relative_position(state, side) <= -3
 
 
 def _uwatedashinage(state: BoutState, side: Side) -> bool:
