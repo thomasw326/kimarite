@@ -5,6 +5,57 @@ are explicitly marked xfail so the audit does not pretend they're passing.
 """
 from __future__ import annotations
 
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def restore_global_final22_experiment():
+    """R26 installs monkeypatch-like module globals; never leak into later tests.
+
+    In particular B6_FIXED_COMPOSITION_DECK=True silently changes all style
+    decks and affinity, causing dozens of unrelated test failures depending
+    on test collection order.
+    """
+    from kimarite import style_builds_v5, style_ai_v5
+
+    attributes = {
+        (style_builds_v5, name): getattr(style_builds_v5, name)
+        for name in ("B6_FIXED_COMPOSITION_DECK", "CARD_POOL",
+                     "STARTING_KIMARITE", "preferred", "least_useful")
+    }
+    attributes[(style_ai_v5, "card_affinity")] = style_ai_v5.card_affinity
+    try:
+        yield
+    finally:
+        for (module, name), original in attributes.items():
+            setattr(module, name, original)
+
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _isolate_r26_final22_install(monkeypatch):
+    """The R26 installer mutates module globals; never leak them to later tests.
+
+    In particular its B6 fixed-deck toggle otherwise disables seven-card
+    exclusions in every subsequently collected style test.
+    """
+    from kimarite import style_builds_v5, style_ai_v5
+    tracked = (
+        (style_builds_v5, "B6_FIXED_COMPOSITION_DECK"),
+        (style_builds_v5, "CARD_POOL"),
+        (style_builds_v5, "STARTING_KIMARITE"),
+        (style_builds_v5, "preferred"),
+        (style_builds_v5, "least_useful"),
+        (style_ai_v5, "card_affinity"),
+    )
+    before = [(module, attr, getattr(module, attr)) for module, attr in tracked]
+    yield
+    for module, attr, value in before:
+        monkeypatch.setattr(module, attr, value)
+
+
 from kimarite.ai import candidate_plays
 from kimarite.catalog import card_by_name
 from kimarite.effects import EffectContext, resolve_exchange_effect

@@ -21,7 +21,7 @@ def bout_with_hand(cards):
 
 def test_oshi_gains_push_and_play_and_draws():
     oshi = card_by_name("Oshi")
-    bout = bout_with_hand([oshi])
+    bout = bout_with_hand([oshi, Card(8999, "Cost")])
     bout.momentum = 1
 
     play_card(bout, Side.A, oshi)
@@ -30,20 +30,20 @@ def test_oshi_gains_push_and_play_and_draws():
     assert bout.fighter_a.plays_remaining == 2
     assert bout.fighter_a.cards_played_this_turn == 1
     assert [c.name for c in bout.fighter_a.hand] == ["Draw A"]
-    assert [c.name for c in bout.fighter_a.discard_pile] == ["Draw B", "Oshi"]
+    assert [c.name for c in bout.fighter_a.discard_pile] == ["Cost", "Draw B", "Oshi"]
     assert bout.fighter_a.draw_pile == []  # Oshi mills after drawing
 
 
 def test_tsuppari_chains_after_oshi():
     oshi = card_by_name("Oshi")
     tsuppari = card_by_name("Tsuppari")
-    bout = bout_with_hand([oshi, tsuppari])
+    bout = bout_with_hand([oshi, tsuppari, Card(8999, "Cost")])
     bout.fighter_a.draw_pile = [Card(8101, "Draw A"), Card(8102, "Draw B"), Card(8103, "Draw C"), Card(8104, "Draw D")]
 
     play_card(bout, Side.A, oshi)
     play_card(bout, Side.A, tsuppari)
 
-    assert bout.momentum == 1
+    assert bout.momentum == -1
     assert bout.position == 2
     assert [c.name for c in bout.fighter_a.played_this_turn] == ["Oshi", "Tsuppari"]
     assert bout.fighter_a.plays_remaining == 2
