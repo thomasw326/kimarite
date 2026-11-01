@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 import secrets
 
-from .catalog import PLAYTEST_WRESTLERS, CARD_POOL
+from .catalog import PLAYTEST_WRESTLERS, CARD_POOL, B11_CARD_POOL
 from .effects import ChoiceRequired, IllegalPlay
 from .human_bout import HumanBout
 from .models import Side
@@ -307,7 +307,7 @@ def _card_lookup(raw: str) -> bool:
     if not raw.startswith("/"):
         return False
     query = raw[1:].strip().casefold()
-    card = next((c for c in CARD_POOL if c.name.casefold() == query), None)
+    card = next((c for c in (*CARD_POOL, *B11_CARD_POOL) if c.name.casefold() == query), None)
     if card is None:
         print(f"Unknown card: {raw[1:]}. Try /oshi.")
         return True
