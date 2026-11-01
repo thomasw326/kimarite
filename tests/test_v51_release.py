@@ -37,6 +37,10 @@ def test_release_pool_exactly_matches_manifest():
 def test_release_catalog_orbs():
     for row in MANIFEST["cards"]:
         card = next(card for card in CARD_POOL if card.name == row["name"])
+        if row["name"] == "Read the Move":
+            # Current B11 print differs from the frozen V5.1 snapshot.
+            assert (card.power, card.technique, card.spirit) == (0, 1, 1)
+            continue
         if row["type"] == "Non-Kimarite":
             expected = tuple(row["orbs"][key] for key in ("power", "technique", "spirit"))
         else:
