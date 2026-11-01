@@ -81,7 +81,7 @@ def remove_temporary(
     else:
         fighter.discard_pile.append(card)
     if (completed and not disrupted
-            and card.name in {"Immovable"}):
+            and card.name in {"Immovable", "Henka", "Kannuki", "Sidestep"}):
         fighter.successful_reversal_this_turn = True
         state.reversal_completions.append((side, card.name, state.turn_number))
         state.log(f"{card.name} successfully completes its Reversal.")
