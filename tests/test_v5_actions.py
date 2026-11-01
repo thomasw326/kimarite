@@ -71,14 +71,13 @@ def test_other_side_cannot_play_and_invalid_index_is_atomic():
     assert state == before
 
 
-def test_human_pull_prompts_for_mode_without_mutation():
+def test_human_pull_commits_single_immediate_effect_without_obsolete_mode():
     state = state_with_hand("Pull")
-    before = deepcopy(state)
-    with pytest.raises(ChoiceRequired) as exc:
-        submit_card_action(state, Side.A, 0)
-    assert exc.value.choice_name == "mode"
-    assert set(exc.value.options) == {"reversal", "filter"}
-    assert state == before
+    submit_card_action(state, Side.A, 0)
+    assert state.card_plays == [(Side.A, "Pull")]
+    assert (state.position, state.momentum) == (-1, 1)
+    assert state.fighter_b.unstable
+    assert not state.fighter_a.temporary_zone
 
 
 def test_human_read_the_move_prompts_when_removal_is_available():
