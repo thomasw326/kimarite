@@ -107,7 +107,7 @@ def _break_sidestep_from_push(state: BoutState, side: Side) -> None:
     for instance in list(fighter.temporary_zone):
         if instance.card.name == "Sidestep":
             fighter.temporary_zone.remove(instance)
-            fighter.discard_pile.append(instance.card)
+            (fighter.exhaust_pile if instance.exhaust_on_leave else fighter.discard_pile).append(instance.card)
             state.log(
                 f"{state.fighter(side).wrestler.name}'s Push breaks Sidestep; "
                 f"{state.fighter(side).wrestler.name} takes the favorable orientation."
@@ -146,7 +146,7 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
             break
         if instance.card.name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
             defender.temporary_zone.remove(instance)
-            defender.discard_pile.append(instance.card)
+            (defender.exhaust_pile if instance.exhaust_on_leave else defender.discard_pile).append(instance.card)
             state.temporary_outcomes.append((defending_side, instance.card.name, "protected"))
             state.log(f"{instance.card.name} prevents 1 incoming Push.")
             amount -= 1
