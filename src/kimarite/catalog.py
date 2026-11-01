@@ -87,6 +87,14 @@ B9_CARD_POOL: tuple[Card, ...] = (
 )
 
 
+# B11 additions are separate from the frozen V5.1 61-card release manifest.
+# Deck authors can opt into these specialist finishers by name.
+B11_CARD_POOL: tuple[Card, ...] = (
+    Card(13001, "Shitatedashinage", 0, 2, 1, True),
+    Card(13002, "Shitatehineri", 0, 2, 1, True),
+)
+
+
 # Starting Kimarite are game definitions, not necessarily present in the
 # current 45-card shuffled pool snapshot. Synthetic IDs are engine-only.
 STARTING_KIMARITE: tuple[Card, ...] = (
@@ -116,7 +124,7 @@ STARTING_KIMARITE: tuple[Card, ...] = (
 
 
 def card_by_id(card_id: int) -> Card:
-    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL):
+    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL, *B11_CARD_POOL):
         if card.card_id == card_id:
             return card
     raise KeyError(card_id)
@@ -127,7 +135,7 @@ def card_by_name(name: str, *, prefer_starting_kimarite: bool = False) -> Card:
         (STARTING_KIMARITE, CARD_POOL)
         if prefer_starting_kimarite
         else (CARD_POOL, STARTING_KIMARITE)
-    ) + (B9_CARD_POOL,)
+    ) + (B9_CARD_POOL, B11_CARD_POOL)
     for group in groups:
         for card in group:
             if card.name == name:

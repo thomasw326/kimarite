@@ -195,6 +195,8 @@ KIMARITE_PREDICATES: dict[str, Predicate] = {
     "Tottari": _tottari,
     "Uwatenage": _uwatenage,
     "Shitatenage": _shitatenage,
+    "Shitatedashinage": _shitatedashinage,
+    "Shitatehineri": _shitatehineri,
     "Hatakikomi": _hatakikomi,
     "Hikiotoshi": _hikiotoshi,
     "Tsukitaoshi": _tsukitaoshi,

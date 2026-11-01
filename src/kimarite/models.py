@@ -59,6 +59,8 @@ class TemporaryInstance:
     entered_turn: int
     entered_phase: str
     opponent_gained_push_while_active: bool = False
+    # Shitatehineri replays keep delayed effects, then exhaust on departure.
+    exhaust_on_leave: bool = False
 
 
 @dataclass
@@ -89,6 +91,7 @@ class FighterState:
     unstable: bool = False
     turns_started: int = 0
     unstable_recovery_turn: int = 0
+    exhaust_pile: list[Card] = field(default_factory=list)
 
     @property
     def total_grip(self) -> int:
@@ -122,6 +125,8 @@ class BoutState:
     position_loss_events: list[tuple[Side, int, str, int]] = field(default_factory=list)
     katasukashi_win_sources: list[str] = field(default_factory=list)
     event_log: list[str] = field(default_factory=list)
+    # Internal depth for independently chosen chained Shitatehineri replays.
+    replay_depth: int = 0
 
     def fighter(self, side: Side) -> FighterState:
         return self.fighter_a if side is Side.A else self.fighter_b
