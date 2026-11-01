@@ -128,7 +128,7 @@ def test_human_replay_selection_is_transactional_and_exhausts_free_play():
     assert s.fighter_a.cards_played_this_turn == 2
     assert s.card_plays == [(Side.A, "Shitatehineri"), (Side.A, "Shove")]
     assert [c.name for c in s.fighter_a.exhaust_pile] == ["Shove"]
-    assert not s.fighter_a.discard_pile
+    assert [c.name for c in s.fighter_a.discard_pile] == ["Gain Right Grip"]
     assert [c.name for c in s.fighter_a.kimarite_zone] == ["Shitatehineri"]
 
 
