@@ -14,7 +14,7 @@ def test_human_uwate_requires_look_selection_and_rolls_back():
     state = BoutState(
         FighterState(wrestler, hand=[card_by_name("Uwate")],
                      draw_pile=[card_by_name("Shove"), card_by_name("Tsuri")],
-                     left_grip=GripState.GRIP),
+                     left_grip=GripState.DEEP),
         FighterState(wrestler, power=3), active_side=Side.A,
     )
     before = deepcopy(state)
