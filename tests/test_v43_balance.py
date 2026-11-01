@@ -48,10 +48,11 @@ def test_morozashi_survival_only_push():
 def test_oshi_push_play_draw():
     s = bout()
     s.momentum = 1
-    s.fighter_a.draw_pile = [card_by_name("Tsuki")]
+    s.fighter_a.draw_pile = [card_by_name("Tsuki"), card_by_name("Shove")]
+    s.fighter_a.hand.append(Card(9999, "Sacrifice"))
     resolve_exchange_effect(s, Side.A, card_by_name("Oshi"), EffectContext())
     assert [card.name for card in s.fighter_a.hand] == ["Tsuki"]
-    assert s.fighter_a.discard_pile == []
+    assert [c.name for c in s.fighter_a.discard_pile] == ["Sacrifice", "Shove"]
     assert s.fighter_a.plays_remaining == 3
     assert s.position == 1
 
