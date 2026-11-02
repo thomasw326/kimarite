@@ -31,7 +31,7 @@ def test_committed_ordinary_recycles_to_bottom_of_draw_pile():
     deck = json.loads(ROSTER_PATH.read_text())["decks"][human]["cards"]
     from kimarite.catalog import card_by_name
     ordinary = [n for n in deck if not card_by_name(n).is_kimarite and n not in
-                {"Shiko Stomp", "Salt Throw", "Nekodamashi", "Headlong Charge", "Oshi", "Tsuki"}]
+                {"Sonkyo", "Salt Throw", "Nekodamashi", "Headlong Charge", "Oshi", "Tsuki"}]
     assert len(ordinary) >= 3
     own = opening(ordinary[:3], [0])
     assert own.draw_pile[-1].name == ordinary[0]
