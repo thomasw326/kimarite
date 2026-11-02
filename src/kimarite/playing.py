@@ -9,6 +9,7 @@ from .effects import (
 from .kimarite_effects import resolve_kimarite_play_effect
 from .legality import can_play_card
 from .models import BoutState, Card, Side
+from .rules import discard_normally, gain_momentum, lose_momentum
 
 
 def play_card(
@@ -37,6 +38,23 @@ def play_card(
     state.card_plays.append((side, card.name))
     state.card_play_ids.append((side, card.card_id))
     state.log(f"{fighter.wrestler.name} plays {card.name}.")
+
+    # Playing later cards fuels Hakkeyoi! immediately; its opponent reaction
+    # occurs once on the opponent's third card before the next owner's turn.
+    previous_hakkeyoi = sum(
+        played.name == "Hakkeyoi!" for played in fighter.played_this_turn[:-1]
+    )
+    for _ in range(previous_hakkeyoi):
+        if state.winner is None:
+            gain_momentum(state, side, 1)
+    if fighter.cards_played_this_turn == 3:
+        opponent_side = state.opponent_side(side)
+        for instance in tuple(state.fighter(opponent_side).temporary_zone):
+            if instance.card.name == "Hakkeyoi!" and state.winner is None:
+                lose_momentum(state, opponent_side, 1)
+
+    if state.winner is not None:
+        return
     if primed:
         from .rules import gain_push
         gain_push(state, side, 1)
@@ -71,4 +89,4 @@ def play_card(
     elif card.name not in TEMPORARY_CARD_NAMES and not (
         getattr(state, "r20_active", False) and card.name == "Henka"
     ):
-        fighter.discard_pile.append(card)
+        discard_normally(state, side, card)
