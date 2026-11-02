@@ -252,9 +252,9 @@ def effective_total_grip(
 ) -> int:
     """Return usable Grip without mutating state during inspection.
 
-    If Kannuki suppresses Grip and Shiko Stomp is available, pure callers see
+    If Kannuki suppresses Grip and Sonkyo is available, pure callers see
     the protected Grip as usable. Actual gameplay callers may set
-    consume_prevention=True to spend Shiko Stomp on that negative effect.
+    consume_prevention=True to spend Sonkyo on that negative effect.
     """
     if not grip_benefits_suppressed(state, side):
         return state.fighter(side).total_grip
