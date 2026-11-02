@@ -8,7 +8,7 @@ from .tachiai import TachiaiComparison, TachiaiStats, apply_tachiai_power_push, 
 from .temporary import add_temporary
 
 
-PREPARED_TEMPORARY_TACHIAI = frozenset({"Shiko Stomp", "Salt Throw", "Nekodamashi"})
+PREPARED_TEMPORARY_TACHIAI = frozenset({"Sonkyo", "Salt Throw", "Nekodamashi"})
 REVEAL_FAMILY = frozenset({"Oshi", "Tsuki"})
 
 
@@ -70,7 +70,7 @@ def _opponent_stats(comparison: TachiaiComparison, side: Side):
 
 def _activate_prebout_shiko(state: BoutState, side: Side, cards: tuple[Card, ...]) -> None:
     for card in cards:
-        if card.name == "Shiko Stomp":
+        if card.name == "Sonkyo":
             add_temporary(state, side, card, phase="pre-bout")
 
 
@@ -163,7 +163,7 @@ def resolve_prepared_tachiai(
                 momentum_delta[side] += 1
                 extra_push[side] += 1
 
-        elif name == "Shiko Stomp":
+        elif name == "Sonkyo":
             pass
         elif name == "Nekodamashi":
             make_unstable(state, opponent_side)
