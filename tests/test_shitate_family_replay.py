@@ -171,12 +171,12 @@ def test_replayed_temporary_exhausts_after_disruption_with_normal_penalty():
 
 
 def test_replayed_shiko_stomp_stays_active_then_exhausts_when_consumed():
-    s = state_with(discard=("Shiko Stomp",))
+    s = state_with(discard=("Sonkyo",))
     play_card(s, Side.A, s.fighter_a.hand[0])
     assert s.fighter_a.temporary_zone[0].exhaust_on_leave
     assert prevent_negative_effect(s, Side.A, source="test", description="test")
     assert not s.fighter_a.temporary_zone
-    assert [c.name for c in s.fighter_a.exhaust_pile] == ["Shiko Stomp"]
+    assert [c.name for c in s.fighter_a.exhaust_pile] == ["Sonkyo"]
 
 
 def test_replayed_grip_shield_exhausts_when_push_is_prevented():
