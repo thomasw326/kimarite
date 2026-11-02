@@ -43,7 +43,7 @@ def snapshot():
     data = json.loads(DECK_FILE.read_text(encoding="utf-8"))
     counts = data["copy_count"]
     assert len(counts) == 28 and sum(counts.values()) == 40
-    assert counts["Yorikiri (YOR-C1)"] == 1 and counts["Shiko Stomp"] == 1
+    assert counts["Yorikiri (YOR-C1)"] == 1 and counts["Sonkyo"] == 1
     assert all(isinstance(v, int) and v > 0 for v in counts.values())
     assert "Power Water Cantrip" not in counts
     return counts
@@ -328,7 +328,7 @@ def report(root, output):
         "pressure_fighter_deck": snapshot(),
         "shiko_stomp_plays_by_style": {
             style: sum(t["played_uses"] for (s, opp, card), t in totals.items()
-                       if s == style and opp == "ALL" and card == "Shiko Stomp")
+                       if s == style and opp == "ALL" and card == "Sonkyo")
             for style in STYLES
         },
         "note": "Pressure Fighter draft40 fixed with copies and YOR-C1; opponents reroll 13 distinct noncore cards every bout. V5.2/B7 AI + PR18 Shiko fix.",
@@ -366,7 +366,7 @@ def report(root, output):
         "- B7 / V5.2 rules; same 27+13 Fast Grappler and Technician opponent builds.",
         "- Pressure Fighter uses fixed exact 40 physical cards including duplicate Oshi/Tsuki etc.",
         "- Pressure Fighter alone uses **Yorikiri YOR-C1**; opponents retain B7 YOR-C3.",
-        "- PR #18 Shiko Stomp registry fix included; no card buffs.",
+        "- PR #18 Sonkyo registry fix included; no card buffs.",
         "",
         "| Opponent | PF wins | Opponent wins | PF win % |",
         "|---|---:|---:|---:|",
@@ -374,7 +374,7 @@ def report(root, output):
     for opp, res in result["matchups"].items():
         md.append(f"| {opp} | {res['pressure_wins']:,} | "
                   f"{res['opponent_wins']:,} | {res['pressure_win_pct']:.2f}% |")
-    md += ["", "Shiko Stomp played uses by style: "
+    md += ["", "Sonkyo played uses by style: "
            + ", ".join(f"{k} = {v}"
                        for k, v in result["shiko_stomp_plays_by_style"].items())]
     (output / "summary.md").write_text("\n".join(md) + "\n")
