@@ -261,7 +261,7 @@ def _harite(state: BoutState, side: Side, card: Card, context: EffectContext) ->
                           tuple((s.value, i) for s, i in state.card_play_ids)))
         roll = int.from_bytes(hashlib.sha256(signature.encode()).digest()[:8], "big")
         discarded = opponent.hand.pop(roll % len(opponent.hand))
-        discard_normally(state, opponent_side if "opponent_side" in locals() else state.opponent_side(side), discarded)
+        discard_normally(state, state.opponent_side(side), discarded)
         state.log(f"{opponent.wrestler.name} discards {discarded.name} to Harite.")
     lose_power(state, opponent_side, 1)
     mill_cards(state, opponent_side, 2)
@@ -589,7 +589,7 @@ def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) ->
                           tuple((s.value, i) for s, i in state.card_play_ids)))
         roll = int.from_bytes(hashlib.sha256(signature.encode()).digest()[:8], "big")
         discarded = opponent.hand.pop(roll % len(opponent.hand))
-        discard_normally(state, opponent_side if "opponent_side" in locals() else state.opponent_side(side), discarded)
+        discard_normally(state, state.opponent_side(side), discarded)
     mill_cards(state, state.opponent_side(side), 1)
 
 
