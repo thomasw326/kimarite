@@ -202,14 +202,14 @@
     {
       "sheet_row": 17,
       "print_number": "16",
-      "name": "Shiko Stomp",
+      "name": "Sonkyo",
       "copy": 1,
       "card_type": "Non-Kimarite",
       "power": 0,
       "technique": 0,
       "spirit": 0,
       "timing": "Tachiai / Exchange — Persistent Temporary",
-      "effect": "Tachiai / Exchange: Put Shiko Stomp into your Temporary Zone. It does not leave your Temporary Zone at the beginning of your turn. If an opponent's effect would negatively affect you or something you control, prevent that effect and discard Shiko Stomp instead.",
+      "effect": "Tachiai / Exchange: Put Sonkyo into your Temporary Zone. It does not leave your Temporary Zone at the beginning of your turn. If an opponent's effect would negatively affect you or something you control, prevent that effect and discard Sonkyo instead.",
       "classification": "Fixed Playtest · This chat: revised"
     },
     {
