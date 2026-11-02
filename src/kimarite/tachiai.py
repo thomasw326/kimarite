@@ -81,7 +81,7 @@ def push_from_power_advantage(advantage: int) -> int:
 
 
 def technique_thresholds(advantage: int) -> int:
-    """Historical stepped threshold helper; B12 Tachiai Power now blocks 1-for-1."""
+    """Power defense thresholds: 1, 4, 7, 10, 13... (unchanged)."""
     return 0 if advantage <= 0 else 1 + (advantage - 1) // 3
 
 
@@ -158,8 +158,8 @@ def apply_tachiai_power_push(
     1. Spirit advantage generates Push at thresholds 1/4/7/...
     2. Explicit anti-Spirit-Push effects reduce that Spirit contribution.
     3. Prepared card effects generate bonus Push; opposing Push is netted.
-    4. The defending wrestler blocks 1 net Push per point of *effective*
-       Power advantage, after Tachiai Power effects have been applied once.
+    4. The defender blocks Push at the original Power-advantage thresholds
+       1, 4, 7, 10, ... using effective Power after Tachiai modifiers.
     5. Apply the remaining Push once, including immediate force-outs.
 
     The caller must first initialise fighter Power from the Tachiai stats
@@ -183,7 +183,7 @@ def apply_tachiai_power_push(
     attacker = Side.A if signed_push > 0 else Side.B
     defender = state.opponent_side(attacker)
     effective_power_lead = state.fighter(defender).power - state.fighter(attacker).power
-    blocks = max(0, effective_power_lead)
+    blocks = technique_thresholds(effective_power_lead)
     net_push = max(0, abs(signed_push) - blocks)
     apply_tachiai_push(state, attacker, net_push)
     return (attacker, net_push)
