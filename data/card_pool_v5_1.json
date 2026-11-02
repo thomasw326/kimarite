@@ -156,7 +156,7 @@
       "text": "Exchange: Establish Right Grip at Level 1 (without reducing an existing higher Grip). Temporary: Remains until the beginning of your next turn. If it survives, set your Right Grip to Deep (2). If removed or prevented before then, lose 1 Momentum."
     },
     {
-      "name": "Shiko Stomp",
+      "name": "Sonkyo",
       "id": 17,
       "type": "Non-Kimarite",
       "orbs": {
@@ -164,7 +164,7 @@
         "technique": 1,
         "spirit": 1
       },
-      "text": "Tachiai / Exchange: Enter a persistent Temporary. When an opponent effect would negatively affect you or something you control, prevent that effect and discard Shiko Stomp. It does not expire at the beginning of your turn."
+      "text": "Tachiai / Exchange: Enter a persistent Temporary. When an opponent effect would negatively affect you or something you control, prevent that effect and discard Sonkyo. It does not expire at the beginning of your turn."
     },
     {
       "name": "Salt Throw",
