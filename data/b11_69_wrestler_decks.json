@@ -27,7 +27,7 @@
         "Hold Position",
         "Yorikiri",
         "Read the Move",
-        "Shiko Stomp",
+        "Sonkyo",
         "Stare Down",
         "Regain Balance",
         "Ottsuke",
@@ -68,7 +68,7 @@
         "Oshi",
         "Shove",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Gain Right Grip",
         "Gain Left Grip",
         "Uwate",
@@ -98,7 +98,7 @@
         "Oshi",
         "Shove",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Uwate",
         "Shitate"
       ]
@@ -121,7 +121,7 @@
         "Katasukashi",
         "Tsukiotoshi",
         "Hold Position",
-        "Shiko Stomp",
+        "Sonkyo",
         "Ottsuke",
         "Sidestep",
         "Regain Balance",
@@ -149,7 +149,7 @@
         "Shitatenage",
         "Sukuinage",
         "Hold Position",
-        "Shiko Stomp",
+        "Sonkyo",
         "Ottsuke"
       ]
     },
@@ -220,7 +220,7 @@
         "Oshi",
         "Shove",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Gain Left Grip",
         "Uwate",
@@ -248,7 +248,7 @@
         "Oshi",
         "Shove",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Gain Left Grip"
       ]
@@ -273,7 +273,7 @@
         "Katasukashi",
         "Kirikaeshi",
         "Hold Position",
-        "Shiko Stomp",
+        "Sonkyo",
         "Ottsuke",
         "Regain Balance",
         "Read the Move",
@@ -327,7 +327,7 @@
         "Harite",
         "Explosive Step — Fumikomi",
         "Read the Move",
-        "Shiko Stomp",
+        "Sonkyo",
         "Stare Down",
         "Regain Balance",
         "Ottsuke",
@@ -374,7 +374,7 @@
         "Katasukashi",
         "Kirikaeshi",
         "Hold Position",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Sidestep",
         "Regain Balance",
@@ -432,7 +432,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
@@ -481,7 +481,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
@@ -527,7 +527,7 @@
         "Hold Position",
         "Yorikiri",
         "Read the Move",
-        "Shiko Stomp",
+        "Sonkyo",
         "Stare Down",
         "Regain Balance",
         "Ottsuke",
@@ -576,7 +576,7 @@
         "Regain Balance",
         "Give Ground",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Yori",
         "Tsuki",
@@ -631,7 +631,7 @@
         "Kannuki",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
@@ -675,7 +675,7 @@
         "Belt Slap",
         "Crushing Pressure — Power Crusher",
         "Stare Down",
-        "Shiko Stomp",
+        "Sonkyo",
         "Regain Balance",
         "Hatakikomi",
         "Pull",
@@ -736,7 +736,7 @@
         "Sidestep",
         "Get Underneath",
         "Power Water",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Tsuppari",
@@ -775,7 +775,7 @@
         "Belt Slap",
         "Crushing Pressure — Power Crusher",
         "Stare Down",
-        "Shiko Stomp",
+        "Sonkyo",
         "Regain Balance",
         "Hatakikomi",
         "Pull",
@@ -836,7 +836,7 @@
         "Gain Right Grip",
         "Hold Position",
         "Immovable",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Tsuppari",
@@ -874,7 +874,7 @@
         "Katasukashi",
         "Kirikaeshi",
         "Hold Position",
-        "Shiko Stomp",
+        "Sonkyo",
         "Sidestep",
         "Regain Balance",
         "Read the Move",
@@ -925,7 +925,7 @@
         "Belt Slap",
         "Crushing Pressure — Power Crusher",
         "Stare Down",
-        "Shiko Stomp",
+        "Sonkyo",
         "Regain Balance",
         "Hatakikomi",
         "Pull",
@@ -978,7 +978,7 @@
         "Immovable",
         "Hold Position",
         "Read the Move",
-        "Shiko Stomp",
+        "Sonkyo",
         "Stare Down",
         "Regain Balance",
         "Ottsuke",
@@ -1031,7 +1031,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
@@ -1133,7 +1133,7 @@
         "Read the Move",
         "Hold Position",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Get Underneath",
         "Use the Tawara"
@@ -1181,7 +1181,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
@@ -1236,7 +1236,7 @@
         "Sidestep",
         "Get Underneath",
         "Power Water",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Oshidashi",
@@ -1286,7 +1286,7 @@
         "Gain Right Grip",
         "Hold Position",
         "Immovable",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Sidestep",
@@ -1322,7 +1322,7 @@
         "Katasukashi",
         "Kirikaeshi",
         "Hold Position",
-        "Shiko Stomp",
+        "Sonkyo",
         "Sidestep",
         "Regain Balance",
         "Read the Move",
@@ -1350,7 +1350,7 @@
         "Shitatenage",
         "Sukuinage",
         "Hold Position",
-        "Shiko Stomp"
+        "Sonkyo"
       ]
     },
     "Shishi": {
@@ -1383,7 +1383,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi"
@@ -1427,7 +1427,7 @@
         "Immovable",
         "Hold Position",
         "Read the Move",
-        "Shiko Stomp",
+        "Sonkyo",
         "Stare Down",
         "Regain Balance",
         "Ottsuke",
@@ -1479,7 +1479,7 @@
         "Shove",
         "Get Underneath",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Yori",
         "Stare Down",
@@ -1531,7 +1531,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
@@ -1583,7 +1583,7 @@
         "Read the Move",
         "Hold Position",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Get Underneath",
         "Use the Tawara"
@@ -1633,7 +1633,7 @@
         "Read the Move",
         "Hold Position",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Get Underneath",
         "Use the Tawara"
@@ -1681,7 +1681,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
@@ -1722,7 +1722,7 @@
         "Katasukashi",
         "Kirikaeshi",
         "Hold Position",
-        "Shiko Stomp",
+        "Sonkyo",
         "Ottsuke",
         "Sidestep",
         "Regain Balance",
@@ -1750,7 +1750,7 @@
         "Gain Left Grip",
         "Shitatenage",
         "Hold Position",
-        "Shiko Stomp"
+        "Sonkyo"
       ]
     },
     "Tokihayate": {
@@ -1781,7 +1781,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
@@ -1836,7 +1836,7 @@
         "Sidestep",
         "Get Underneath",
         "Power Water",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Tsuppari",
@@ -1883,7 +1883,7 @@
         "Read the Move",
         "Hold Position",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Get Underneath",
         "Use the Tawara"
@@ -1932,7 +1932,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
@@ -1975,7 +1975,7 @@
         "Belt Slap",
         "Crushing Pressure — Power Crusher",
         "Stare Down",
-        "Shiko Stomp",
+        "Sonkyo",
         "Regain Balance",
         "Hatakikomi",
         "Pull",
@@ -2036,7 +2036,7 @@
         "Sidestep",
         "Get Underneath",
         "Power Water",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Gain Left Grip",
@@ -2078,7 +2078,7 @@
         "Explosive Step — Fumikomi",
         "Hold Position",
         "Read the Move",
-        "Shiko Stomp",
+        "Sonkyo",
         "Stare Down",
         "Regain Balance",
         "Ottsuke",
@@ -2122,7 +2122,7 @@
         "Kirikaeshi",
         "Tsukiotoshi",
         "Hold Position",
-        "Shiko Stomp",
+        "Sonkyo",
         "Ottsuke",
         "Regain Balance",
         "Read the Move",
@@ -2150,7 +2150,7 @@
         "Gain Left Grip",
         "Katasukashi",
         "Hold Position",
-        "Shiko Stomp"
+        "Sonkyo"
       ]
     },
     "Wakatakakage": {
@@ -2173,7 +2173,7 @@
         "Katasukashi",
         "Kirikaeshi",
         "Hold Position",
-        "Shiko Stomp",
+        "Sonkyo",
         "Sidestep",
         "Regain Balance",
         "Read the Move",
@@ -2221,7 +2221,7 @@
         "Hold Position",
         "Ottsuke",
         "Driving Force",
-        "Shiko Stomp",
+        "Sonkyo",
         "Read the Move",
         "Reset to Neutral",
         "Regain Balance",
@@ -2249,7 +2249,7 @@
         "Hold Position",
         "Ottsuke",
         "Driving Force",
-        "Shiko Stomp",
+        "Sonkyo",
         "Read the Move"
       ]
     },
@@ -2276,7 +2276,7 @@
         "Give Ground",
         "Use the Tawara",
         "Get Underneath",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Yori",
         "Tsuki",
@@ -2320,7 +2320,7 @@
         "Hold Position",
         "Ottsuke",
         "Driving Force",
-        "Shiko Stomp",
+        "Sonkyo",
         "Read the Move",
         "Reset to Neutral",
         "Regain Balance",
@@ -2348,7 +2348,7 @@
         "Hold Position",
         "Ottsuke",
         "Driving Force",
-        "Shiko Stomp",
+        "Sonkyo",
         "Read the Move",
         "Reset to Neutral"
       ]
@@ -2386,7 +2386,7 @@
         "Gain Right Grip",
         "Hold Position",
         "Immovable",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Give Ground",
@@ -2427,7 +2427,7 @@
         "Explosive Step — Fumikomi",
         "Hold Position",
         "Read the Move",
-        "Shiko Stomp",
+        "Sonkyo",
         "Stare Down",
         "Regain Balance",
         "Ottsuke",
@@ -2478,7 +2478,7 @@
         "Hold Position",
         "Yorikiri",
         "Read the Move",
-        "Shiko Stomp",
+        "Sonkyo",
         "Stare Down",
         "Regain Balance",
         "Ottsuke",
@@ -2536,7 +2536,7 @@
         "Gain Right Grip",
         "Hold Position",
         "Immovable",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Hatakikomi",
@@ -2627,7 +2627,7 @@
         "Morozashi",
         "Uwatenage",
         "Ottsuke",
-        "Shiko Stomp",
+        "Sonkyo",
         "Belt Slap",
         "Regain Balance",
         "Power Water",
@@ -2676,7 +2676,7 @@
         "Belt Slap",
         "Crushing Pressure — Power Crusher",
         "Stare Down",
-        "Shiko Stomp",
+        "Sonkyo",
         "Regain Balance",
         "Pull",
         "Read the Move",
@@ -2727,7 +2727,7 @@
         "Morozashi",
         "Uwatenage",
         "Ottsuke",
-        "Shiko Stomp",
+        "Sonkyo",
         "Belt Slap",
         "Regain Balance",
         "Power Water",
@@ -2777,7 +2777,7 @@
         "Regain Balance",
         "Give Ground",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Yori",
         "Tsuki",
@@ -2825,7 +2825,7 @@
         "Belt Slap",
         "Crushing Pressure — Power Crusher",
         "Stare Down",
-        "Shiko Stomp",
+        "Sonkyo",
         "Regain Balance",
         "Hatakikomi",
         "Pull",
@@ -2883,7 +2883,7 @@
         "Read the Move",
         "Hold Position",
         "Power Water",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Get Underneath",
         "Use the Tawara"
@@ -2982,7 +2982,7 @@
         "Regain Balance",
         "Read the Move",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Oshi",
@@ -3032,7 +3032,7 @@
         "Attempt Deep Outside Grip",
         "Sukuinage",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Salt Throw",
         "Sidestep",
         "Get Underneath",
@@ -3127,7 +3127,7 @@
         "Immovable",
         "Hold Position",
         "Read the Move",
-        "Shiko Stomp",
+        "Sonkyo",
         "Stare Down",
         "Regain Balance",
         "Ottsuke",
@@ -3186,7 +3186,7 @@
         "Sidestep",
         "Get Underneath",
         "Power Water",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Driving Force",
@@ -3225,7 +3225,7 @@
         "Belt Slap",
         "Crushing Pressure — Power Crusher",
         "Stare Down",
-        "Shiko Stomp",
+        "Sonkyo",
         "Regain Balance",
         "Hatakikomi",
         "Pull",
@@ -3286,7 +3286,7 @@
         "Gain Right Grip",
         "Hold Position",
         "Immovable",
-        "Shiko Stomp"
+        "Sonkyo"
       ],
       "duplicates": [
         "Hatakikomi",
@@ -3431,7 +3431,7 @@
         "Kannuki",
         "Regain Balance",
         "Use the Tawara",
-        "Shiko Stomp",
+        "Sonkyo",
         "Power Water",
         "Tsuri",
         "Gaburi",
