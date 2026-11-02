@@ -1,0 +1,38 @@
+name: B12 experimental pooled Tachiai Push verification
+
+on:
+  push:
+    branches:
+      - experiment/b12-tachiai-push-order-v1
+    paths:
+      - 'src/kimarite/tachiai.py'
+      - 'src/kimarite/tachiai_effects.py'
+      - 'tests/test_b12_tachiai_push_order.py'
+      - 'tests/test_tachiai.py'
+      - 'tests/test_v44_tachiai.py'
+      - '.github/workflows/b12-tachiai-push-order.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tachiai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -e '.[dev]'
+      - name: B12 pooled Push plus B11/B12 Tachiai regression tests
+        run: >
+          python -m pytest -q
+          tests/test_b12_tachiai_push_order.py
+          tests/test_tachiai.py
+          tests/test_v44_tachiai.py
+          tests/test_b11_live_tachiai_reveals.py
+          tests/test_b11_tachiai_resolution.py
+          tests/test_b12_card_expansion.py
+          tests/test_orb_colours.py
