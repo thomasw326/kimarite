@@ -41,6 +41,11 @@ def _reveal_tachiai_orbs(
         for card in outcome.revealed:
             state.log(f"{fighter.wrestler.name} reveals {card.name} for Tachiai orbs.")
     a, b = extras[Side.A], extras[Side.B]
+    # apply_initial_power already copied the pre-reveal opening Power totals
+    # into persistent fighter Power. Revealed Power orbs must be added there
+    # as well or their Power defense disappears from the live Push calculation.
+    state.fighter_a.power += a[0]
+    state.fighter_b.power += b[0]
     old_a, old_b = comparison.wrestler_a, comparison.wrestler_b
     new_a = TachiaiStats(old_a.power+a[0], old_a.technique+a[1], old_a.spirit+a[2])
     new_b = TachiaiStats(old_b.power+b[0], old_b.technique+b[1], old_b.spirit+b[2])
