@@ -150,27 +150,40 @@ def apply_tachiai_power_push(
     comparison: TachiaiComparison,
     *,
     reduction: int = 0,
+    extra_push: dict[Side, int] | None = None,
 ) -> tuple[Side | None, int]:
-    """Apply fixed Spirit-comparison Push reduced by Power defense.
+    """Resolve all opening Push together, then block it using Power.
 
-    Tachiai force-out is special: Push beyond the ring edge ends the bout
-    immediately instead of converting excess Push into Momentum.
-    Card-specific Tachiai effects are resolved separately.
+    Opening order:
+    1. Spirit advantage generates Push at thresholds 1/4/7/...
+    2. Explicit anti-Spirit-Push effects reduce that Spirit contribution.
+    3. Prepared card effects generate bonus Push; opposing Push is netted.
+    4. The defending wrestler blocks 1 net Push per point of *effective*
+       Power advantage, after Tachiai Power effects have been applied once.
+    5. Apply the remaining Push once, including immediate force-outs.
+
+    The caller must first initialise fighter Power from the Tachiai stats
+    (apply_initial_power) and apply any Tachiai-specific Power modifiers.
+    This avoids adding the same starting Power advantage twice.
     """
-    winner = comparison.spirit_winner
-    if winner is None:
+    signed_push = 0
+    if comparison.spirit_winner is not None:
+        spirit_push = max(
+            0,
+            push_from_power_advantage(abs(comparison.spirit_advantage_a))
+            - max(0, reduction),
+        )
+        signed_push = spirit_push * state.sign(comparison.spirit_winner)
+
+    bonuses = extra_push or {}
+    signed_push += bonuses.get(Side.A, 0) - bonuses.get(Side.B, 0)
+    if not signed_push:
         return (None, 0)
 
-    advantage = abs(comparison.spirit_advantage_a)
-    defender = state.opponent_side(winner)
-    # Prepared-card orbs are already included in the comparison.
-    # Fighter Power changes are applied separately during Tachiai.
-    base_advantage = comparison.advantage_for(defender, Stat.POWER)
-    defender_delta = state.fighter(defender).power
-    winner_delta = state.fighter(winner).power
-    resistance = technique_thresholds(
-        base_advantage + defender_delta - winner_delta
-    )
-    push = max(0, push_from_power_advantage(advantage) - resistance - max(0, reduction))
-    apply_tachiai_push(state, winner, push)
-    return (winner, push)
+    attacker = Side.A if signed_push > 0 else Side.B
+    defender = state.opponent_side(attacker)
+    effective_power_lead = state.fighter(defender).power - state.fighter(attacker).power
+    blocks = max(0, effective_power_lead)
+    net_push = max(0, abs(signed_push) - blocks)
+    apply_tachiai_push(state, attacker, net_push)
+    return (attacker, net_push)
