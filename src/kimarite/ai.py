@@ -122,7 +122,7 @@ def _context_for_card(
             "Get Underneath": 60,
             "Use the Tawara": 55,
             "Pull": 50,
-            "Shiko Stomp": 95,
+            "Sonkyo": 95,
         }
         best = max(
             range(len(opponent.temporary_zone)),
@@ -515,11 +515,11 @@ def score_state(state: BoutState, side: Side) -> float:
     score -= 24 if fighter.unstable else 0
     score += 8 * sum(x.card.name in {"Denshamichi", "Spin Away", "Nekodamashi", "Henka", "Kannuki"} for x in fighter.temporary_zone)
 
-    # Shiko Stomp prevents a future opposing negative effect and persists
+    # Sonkyo prevents a future opposing negative effect and persists
     # until consumed. Without a state value, one-step AI treats this delayed
     # defense as a wasted Play. Additional copies have diminishing value.
-    stomp_count = sum(t.card.name == "Shiko Stomp" for t in fighter.temporary_zone)
-    opposing_stomps = sum(t.card.name == "Shiko Stomp" for t in opponent.temporary_zone)
+    stomp_count = sum(t.card.name == "Sonkyo" for t in fighter.temporary_zone)
+    opposing_stomps = sum(t.card.name == "Sonkyo" for t in opponent.temporary_zone)
     score += min(stomp_count, 1) * 17 + max(0, stomp_count - 1) * 5
     score -= min(opposing_stomps, 1) * 13 + max(0, opposing_stomps - 1) * 4
 
