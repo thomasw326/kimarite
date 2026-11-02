@@ -4,6 +4,7 @@ from kimarite.tachiai import (
     apply_tachiai_power_push, compare_tachiai, first_exchange_side,
     technique_access, technique_thresholds,
 )
+from kimarite.turns import apply_initial_power
 
 
 BLANK = Card(9000, "Blank")
@@ -15,12 +16,12 @@ def wrestler(name, power, technique, spirit, ranking=1):
 
 def test_spirit_generates_push_and_power_defends():
     a = wrestler("A", 1, 0, 7)
-    b = wrestler("B", 5, 0, 0)
+    b = wrestler("B", 3, 0, 0)
     comparison = compare_tachiai(a, b)
     state = BoutState(FighterState(a), FighterState(b))
+    apply_initial_power(state, comparison)
     winner, push = apply_tachiai_power_push(state, comparison)
-    # Current 1/4/7 Spirit threshold: advantage 7 gives 3 Push;
-    # Power defense of 2 reduces this to one.
+    # Spirit advantage 7 gives 3 Push. Power lead 2 blocks 2 Push.
     assert winner is Side.A
     assert push == 1
     assert state.position == 1
