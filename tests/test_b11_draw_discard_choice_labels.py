@@ -12,7 +12,7 @@ def bout(card_name):
     blank=card_by_name("Oshi")
     human=FighterState(Wrestler("Human",2,1,0,blank,blank,blank))
     other=FighterState(Wrestler("Other",2,1,0,blank,blank,blank))
-    human.hand=[card_by_name(card_name),card_by_name("Tsuki"),card_by_name("Give Ground"),card_by_name("Shiko Stomp")]
+    human.hand=[card_by_name(card_name),card_by_name("Tsuki"),card_by_name("Give Ground"),card_by_name("Sonkyo")]
     human.draw_pile=[card_by_name("Salt Throw"),card_by_name("Regain Balance")]
     human.plays_remaining=3
     state=BoutState(human,other)
@@ -30,13 +30,13 @@ def test_draw_then_discard_has_four_named_choices_and_preserves_state(name):
     exc=raised.value
     assert exc.choice_name=="hand_index"
     assert exc.options==[0,1,2,3]
-    assert [c.name for c in exc.visible_cards]==["Tsuki","Give Ground","Shiko Stomp","Salt Throw"]
+    assert [c.name for c in exc.visible_cards]==["Tsuki","Give Ground","Sonkyo","Salt Throw"]
     session=type("Session",(),{"state":state,"human_side":Side.A})()
     data=labelled_choices(session,exc,{"hand_index":0})
     assert [x["label"] for x in data["options"]]==[
-        "1. Tsuki","2. Give Ground","3. Shiko Stomp","4. Salt Throw"]
+        "1. Tsuki","2. Give Ground","3. Sonkyo","4. Salt Throw"]
     assert [x["card"]["name"] for x in data["options"]]==[
-        "Tsuki","Give Ground","Shiko Stomp","Salt Throw"]
+        "Tsuki","Give Ground","Sonkyo","Salt Throw"]
     assert state.fighter_a.hand==before_hand
     assert state.fighter_a.draw_pile==before_draw
     submit_card_action(state,Side.A,0,choices={"hand_index":3})
