@@ -102,8 +102,8 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
     for instance in list(fighter.temporary_zone):
         name = instance.card.name
 
-        # Shiko Stomp explicitly does not leave at the start of the owner's turn.
-        if name == "Shiko Stomp":
+        # Sonkyo explicitly does not leave at the start of the owner's turn.
+        if name == "Sonkyo":
             continue
         if name == "Salt Throw":
             if fighter.discard_pile:
