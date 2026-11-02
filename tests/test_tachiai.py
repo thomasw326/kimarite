@@ -59,9 +59,9 @@ def test_power_defense_blocks_spirit_push_example():
     apply_initial_power(state, comparison)
     winner, push = apply_tachiai_power_push(state, comparison)
     assert winner is Side.A
-    # Spirit advantage 6 => 2 Push, defender Power lead 3 => blocks both.
-    assert push == 0
-    assert state.position == 0
+    # Spirit advantage 6 => 2 Push; defender Power lead 3 blocks ONE.
+    assert push == 1
+    assert state.position == 1
 
 
 def test_power_defense_never_reverses_push():
