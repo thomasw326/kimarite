@@ -410,7 +410,18 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
 
     hand_adv = len(fighter.hand) - len(opponent.hand)
     reversal = 1.0 if fighter.successful_reversal_this_turn else 0.0
-    if card.name == "Yorikiri":
+    if card.name == "Kubinage":
+        parts = [_at_least(len(opponent.discard_pile), 15)]
+    elif card.name == "Kimedashi":
+        parts = [1.0 if fighter.total_grip == 0 else 0.0,
+                 1.0 if opponent.total_grip == 0 else 0.0,
+                 _at_least(power_adv, 3), _at_least(position, 2)]
+    elif card.name == "Kimetaoshi":
+        parts = [1.0 if fighter.total_grip == 0 else 0.0,
+                 1.0 if opponent.total_grip == 0 else 0.0,
+                 _at_least(power_adv, 4),
+                 _at_least(len(opponent.discard_pile), 10)]
+    elif card.name == "Yorikiri":
         parts = [_at_least(grip, 1), _at_least(momentum, 1), _at_least(position, 2)]
     elif card.name == "Oshidashi":
         parts = [_at_least(momentum, 2), _at_least(position, 2)]
