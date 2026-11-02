@@ -4,7 +4,7 @@ from .effects import draw_one, give_opponent_kimarite, resolve_exchange_effect, 
 from .models import BoutState, Side, Stat, Card
 from .prevention import prevent_negative_effect
 from .rules import establish_grip, gain_momentum, gain_power, lose_power, make_unstable
-from .tachiai import TachiaiComparison, TachiaiStats, apply_tachiai_power_push, apply_tachiai_push
+from .tachiai import TachiaiComparison, TachiaiStats, apply_tachiai_power_push
 from .temporary import add_temporary
 
 
@@ -137,17 +137,8 @@ def resolve_prepared_tachiai(
             from .effects import _harite
             _harite(state, side, card, EffectContext())
 
-    reduction = _power_push_reduction(state, comparison, cards_by_side)
-    spirit_winner, spirit_push = apply_tachiai_power_push(
-        state, comparison, reduction=reduction
-    )
-    if state.winner is not None:
-        return
-
-    power_push_received = {
-        Side.A: spirit_push if spirit_winner is Side.B else 0,
-        Side.B: spirit_push if spirit_winner is Side.A else 0,
-    }
+    # Collect card bonuses before applying any Tachiai Push: the defender's
+    # Power must protect against Spirit Push AND prepared-card bonus Push.
     extra_push = {Side.A: 0, Side.B: 0}
     momentum_delta = {Side.A: 0, Side.B: 0}
     reset_position = False
@@ -258,11 +249,12 @@ def resolve_prepared_tachiai(
     elif net_momentum < 0:
         gain_momentum(state, Side.B, -net_momentum)
 
-    net_push = extra_push[Side.A] - extra_push[Side.B]
-    if net_push > 0:
-        apply_tachiai_push(state, Side.A, net_push)
-    elif net_push < 0:
-        apply_tachiai_push(state, Side.B, -net_push)
+    # Resolve prepared protection against the Spirit component first, then
+    # apply the Power defense once to the net of Spirit + both card bonuses.
+    reduction = _power_push_reduction(state, comparison, cards_by_side)
+    apply_tachiai_power_push(
+        state, comparison, reduction=reduction, extra_push=extra_push
+    )
 
     if state.winner is not None:
         return
