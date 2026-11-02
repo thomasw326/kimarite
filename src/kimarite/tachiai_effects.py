@@ -8,7 +8,7 @@ from .tachiai import TachiaiComparison, TachiaiStats, apply_tachiai_power_push, 
 from .temporary import add_temporary
 
 
-PREPARED_TEMPORARY_TACHIAI = frozenset({"Sonkyo", "Salt Throw", "Nekodamashi"})
+PREPARED_TEMPORARY_TACHIAI = frozenset({"Sonkyo", "Salt Throw", "Nekodamashi", "Chiri-chozu", "Shikiri"})
 REVEAL_FAMILY = frozenset({"Oshi", "Tsuki"})
 
 
@@ -70,7 +70,7 @@ def _opponent_stats(comparison: TachiaiComparison, side: Side):
 
 def _activate_prebout_shiko(state: BoutState, side: Side, cards: tuple[Card, ...]) -> None:
     for card in cards:
-        if card.name == "Sonkyo":
+        if card.name in {"Sonkyo", "Chiri-chozu", "Shikiri"}:
             add_temporary(state, side, card, phase="pre-bout")
 
 
@@ -287,6 +287,16 @@ def resolve_prepared_tachiai(
             from .effects import mill_cards
             mill_cards(state, side, 2)
     # END APPROVED MILL/RECYCLE V1
+
+    # Kubinage explicitly mills during Tachiai as well as Exchange, based on
+    # the fighters' effective Power after the opening comparison effects.
+    for side in (Side.A, Side.B):
+        for card in cards_by_side[side]:
+            if card.name == "Kubinage" and state.winner is None:
+                power_lead = state.fighter(side).power - state.opponent(side).power
+                if power_lead > 0:
+                    from .effects import mill_cards
+                    mill_cards(state, state.opponent_side(side), (power_lead + 1) // 2)
 
     for side in (Side.A, Side.B):
         for card in cards_by_side[side]:
