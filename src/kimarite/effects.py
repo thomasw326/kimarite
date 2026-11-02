@@ -344,7 +344,7 @@ def _shiko_stomp(
     """Keep the existing one-use negative-effect prevention active until consumed.
 
     A missing Exchange registration previously caused AI candidate simulation
-    to discard Shiko Stomp as a KeyError, despite the protection being implemented.
+    to discard Sonkyo as a KeyError, despite the protection being implemented.
     """
     add_temporary(state, side, card, phase="exchange")
     add_play(state, side, 1)
@@ -964,7 +964,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Attempt Deep Outside Grip": _attempt_deep_outside,
     "Attempt Deep Inside Grip": _attempt_deep_inside,
     "Salt Throw": _salt_throw,
-    "Shiko Stomp": _shiko_stomp,
+    "Sonkyo": _shiko_stomp,
     "Stare Down": _stare_down,
     "Power Water": _power_water,
     "Power Water Cantrip": _power_water_cantrip,
@@ -1027,7 +1027,7 @@ for _name in MILL_AMOUNTS:
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
         "Salt Throw",
-        "Shiko Stomp",
+        "Sonkyo",
         "Tsuri",
         "Yori",
         "Gaburi",
