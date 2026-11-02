@@ -61,6 +61,8 @@ class TemporaryInstance:
     opponent_gained_push_while_active: bool = False
     # Shitatehineri replays keep delayed effects, then exhaust on departure.
     exhaust_on_leave: bool = False
+    # Per-instance Chiri-chozu/Shikiri draw gate; reset by turn-number change.
+    last_trigger_turn: int = -1
 
 
 @dataclass
