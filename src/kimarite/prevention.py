@@ -5,7 +5,7 @@ from .models import BoutState, Side
 
 def has_negative_effect_prevention(state: BoutState, side: Side) -> bool:
     return any(
-        instance.card.name == "Shiko Stomp"
+        instance.card.name == "Sonkyo"
         for instance in state.fighter(side).temporary_zone
     )
 
@@ -17,18 +17,18 @@ def prevent_negative_effect(
     source: str,
     description: str,
 ) -> bool:
-    """Consume Shiko Stomp to prevent one opposing negative effect.
+    """Consume Sonkyo to prevent one opposing negative effect.
 
     Returns True when the effect was prevented.
     """
     fighter = state.fighter(target_side)
     for instance in list(fighter.temporary_zone):
-        if instance.card.name != "Shiko Stomp":
+        if instance.card.name != "Sonkyo":
             continue
         fighter.temporary_zone.remove(instance)
         (fighter.exhaust_pile if instance.exhaust_on_leave else fighter.discard_pile).append(instance.card)
         state.log(
-            f"Shiko Stomp prevents {source}: {description} "
+            f"Sonkyo prevents {source}: {description} "
             f"against {fighter.wrestler.name}."
         )
         return True
