@@ -31,6 +31,15 @@ def victory_checks(state, side, name):
     }
     # (label, measured key, comparison, threshold).
     definitions = {
+        "Kubinage": [("Opponent discard count", "enemy_discard", ">=", 15)],
+        "Kimedashi": [("Own Grip", "raw_grip", "=", 0),
+                      ("Opponent Grip", "enemy_raw_grip", "=", 0),
+                      ("Power advantage", "power_advantage", ">=", 3),
+                      ("Position advantage", "position", ">=", 2)],
+        "Kimetaoshi": [("Own Grip", "raw_grip", "=", 0),
+                       ("Opponent Grip", "enemy_raw_grip", "=", 0),
+                       ("Power advantage", "power_advantage", ">=", 4),
+                       ("Opponent discard count", "enemy_discard", ">=", 10)],
         "Yorikiri": [("Effective Grip","grip",">=",1),("Momentum advantage","momentum",">=",1),("Position advantage","position",">=",2)],
         "Oshidashi": [("Position advantage","position",">=",2),("Momentum advantage","momentum",">=",2)],
         "Tsukidashi": [("Position advantage","position",">=",3),("Cards played this turn","plays",">=",3)],

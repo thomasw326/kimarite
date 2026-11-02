@@ -243,7 +243,7 @@ _SOURCE_JSON = r'''[
       "Uwatenage",
       "Gain Right Grip",
       "Pull",
-      "Shiko Stomp"
+      "Sonkyo"
     ],
     "weights": [
       1,

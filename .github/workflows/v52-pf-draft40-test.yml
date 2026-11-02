@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -e ".[dev]"
-      - name: Regression tests for B7 style AI and Shiko Stomp
+      - name: Regression tests for B7 style AI and Sonkyo
         run: python -m pytest -q tests/test_v5_shiko_playability.py tests/test_v5_style_ai.py
       - name: Run 12 paired smoke bouts
         run: python scripts/pressure_fighter_draft40_vs_random13.py run --start 0 --stop 3 --output artifacts/smoke

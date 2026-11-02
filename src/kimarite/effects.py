@@ -7,6 +7,7 @@ from .models import BoutState, Card, GripState, Side, Stat
 from .prevention import prevent_negative_effect
 from .rules import (
     effective_total_grip,
+    discard_normally,
     establish_grip,
     gain_flexible_grip,
     gain_momentum,
@@ -76,6 +77,7 @@ def draw_one(state: BoutState, side: Side) -> Card | None:
     card = fighter.draw_pile.pop(0)
     fighter.hand.append(card)
     state.log(f"{fighter.wrestler.name} draws {card.name}.")
+    _renzoku_draw_reward(state, side, 1)
     return card
 
 
@@ -95,7 +97,18 @@ def draw_from_look(
         )
         state.declare_winner(state.opponent_side(side), "Exhaustion")
         return []
-    return ai_look_keep(fighter, look, keep)
+    kept = ai_look_keep(fighter, look, keep)
+    _renzoku_draw_reward(state, side, len(kept))
+    return kept
+
+
+def _renzoku_draw_reward(state: BoutState, side: Side, count: int) -> None:
+    fighter = state.fighter(side)
+    # Only later draws within the same active turn grant extra Plays.
+    if count > 0 and state.active_side is side and state.winner is None:
+        copies = sum(card.name == "Renzoku" for card in fighter.played_this_turn)
+        if copies:
+            add_play(state, side, copies * count)
 
 
 def add_play(state: BoutState, side: Side, amount: int = 1) -> None:
@@ -144,7 +157,7 @@ def _discard_from_hand(state: BoutState, side: Side, card: Card, context: Effect
     if index not in options:
         raise ChoiceRequired(card.name, "hand_index", options)
     discarded = fighter.hand.pop(index)
-    fighter.discard_pile.append(discarded)
+    discard_normally(state, side, discarded)
     state.log(f"{fighter.wrestler.name} discards {discarded.name} with {card.name}.")
 
 
@@ -248,7 +261,7 @@ def _harite(state: BoutState, side: Side, card: Card, context: EffectContext) ->
                           tuple((s.value, i) for s, i in state.card_play_ids)))
         roll = int.from_bytes(hashlib.sha256(signature.encode()).digest()[:8], "big")
         discarded = opponent.hand.pop(roll % len(opponent.hand))
-        opponent.discard_pile.append(discarded)
+        discard_normally(state, state.opponent_side(side), discarded)
         state.log(f"{opponent.wrestler.name} discards {discarded.name} to Harite.")
     lose_power(state, opponent_side, 1)
     mill_cards(state, opponent_side, 2)
@@ -344,7 +357,7 @@ def _shiko_stomp(
     """Keep the existing one-use negative-effect prevention active until consumed.
 
     A missing Exchange registration previously caused AI candidate simulation
-    to discard Shiko Stomp as a KeyError, despite the protection being implemented.
+    to discard Sonkyo as a KeyError, despite the protection being implemented.
     """
     add_temporary(state, side, card, phase="exchange")
     add_play(state, side, 1)
@@ -576,7 +589,7 @@ def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) ->
                           tuple((s.value, i) for s, i in state.card_play_ids)))
         roll = int.from_bytes(hashlib.sha256(signature.encode()).digest()[:8], "big")
         discarded = opponent.hand.pop(roll % len(opponent.hand))
-        opponent.discard_pile.append(discarded)
+        discard_normally(state, state.opponent_side(side), discarded)
     mill_cards(state, state.opponent_side(side), 1)
 
 
@@ -935,6 +948,104 @@ def _ankogata(state: BoutState, side: Side, card: Card, context: EffectContext) 
             else:
                 reduce_grip(state, opponent_side, hand=hand)
 
+
+# B12 expansion: ordinary cards, rituals, fatigue and delayed recoil.
+def _renzoku(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    # _renzoku_draw_reward sees this card in played_this_turn.
+    pass
+
+
+def _meguri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    draw_one(state, side)
+    if state.winner is None:
+        draw_one(state, side)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
+
+
+def _nokotta(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_push(state, side, 2 if state.position * state.sign(side) < 0 else 1)
+
+
+def _hakkeyoi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _hazuoshi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_push(state, side, 1)
+    if state.winner is not None:
+        return
+    if state.fighter(side).cards_played_this_turn >= 3:
+        opponent_side = state.opponent_side(side)
+        if not prevent_negative_effect(
+            state, opponent_side, source=card.name,
+            description="become Unstable and reduce Grip",
+        ):
+            make_unstable(state, opponent_side)
+            reduce_grip(state, opponent_side, 1)
+
+
+def _inashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    lose_momentum(state, side, 1)
+    if state.winner is not None:
+        return
+    fighter = state.fighter(side)
+    if fighter.discard_pile:
+        index = context.choice("discard_index")
+        if index is None and not context.choice("__human__"):
+            from .ai import _best_discard_index
+            index = _best_discard_index(state, side)
+        options = list(range(len(fighter.discard_pile)))
+        if len(options) == 1 and index is None:
+            index = 0
+        if index not in options:
+            raise ChoiceRequired(card.name, "discard_index", options)
+        recovered = fighter.discard_pile.pop(index)
+        fighter.hand.append(recovered)
+        state.log(f"Inashi returns {recovered.name} to hand.")
+    gain_power(state, side, 1)
+    fighter.unstable = False
+    fighter.unstable_recovery_turn = 0
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _chiri_chozu(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _shikiri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    add_temporary(state, side, card, phase="exchange")
+
+
+def _aggressive_shiko_stomp(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    has_momentum_lead = state.momentum * state.sign(side) > 0
+    has_power_lead = state.fighter(side).power > state.opponent(side).power
+    gain_push(state, side, 1)
+    if state.winner is not None:
+        return
+    if has_momentum_lead:
+        gain_power(state, side, 1)
+    if has_power_lead and state.winner is None:
+        gain_momentum(state, side, 1)
+
+
+def _reckless_charge(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_push(state, side, 2)
+    if state.winner is not None:
+        return
+    gain_momentum(state, side, 1)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
+
+
+def _sheer_grit(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    gain_momentum(state, side, 2)
+    if state.winner is None and len(state.fighter(side).discard_pile) >= 7:
+        # "Exhausted" means at least seven discarded cards (fatigue window),
+        # not the terminal empty-draw-pile defeat.
+        gain_push(state, side, 1)
+
+
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Morotezuki": _morotezuki,
     "Nekodamashi": _nekodamashi,
@@ -964,7 +1075,18 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Attempt Deep Outside Grip": _attempt_deep_outside,
     "Attempt Deep Inside Grip": _attempt_deep_inside,
     "Salt Throw": _salt_throw,
-    "Shiko Stomp": _shiko_stomp,
+    "Sonkyo": _shiko_stomp,
+    "Shiko Stomp": _aggressive_shiko_stomp,
+    "Renzoku": _renzoku,
+    "Meguri": _meguri,
+    "Nokotta!": _nokotta,
+    "Hakkeyoi!": _hakkeyoi,
+    "Hazuoshi": _hazuoshi,
+    "Inashi": _inashi,
+    "Chiri-chozu": _chiri_chozu,
+    "Shikiri": _shikiri,
+    "Reckless Charge": _reckless_charge,
+    "Sheer Grit": _sheer_grit,
     "Stare Down": _stare_down,
     "Power Water": _power_water,
     "Power Water Cantrip": _power_water_cantrip,
@@ -1027,7 +1149,13 @@ for _name in MILL_AMOUNTS:
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
         "Salt Throw",
-        "Shiko Stomp",
+        "Sonkyo",
+        "Meguri",
+        "Hakkeyoi!",
+        "Inashi",
+        "Chiri-chozu",
+        "Shikiri",
+        "Reckless Charge",
         "Tsuri",
         "Yori",
         "Gaburi",

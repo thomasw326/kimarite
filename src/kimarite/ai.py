@@ -122,7 +122,7 @@ def _context_for_card(
             "Get Underneath": 60,
             "Use the Tawara": 55,
             "Pull": 50,
-            "Shiko Stomp": 95,
+            "Sonkyo": 95,
         }
         best = max(
             range(len(opponent.temporary_zone)),
@@ -410,7 +410,18 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
 
     hand_adv = len(fighter.hand) - len(opponent.hand)
     reversal = 1.0 if fighter.successful_reversal_this_turn else 0.0
-    if card.name == "Yorikiri":
+    if card.name == "Kubinage":
+        parts = [_at_least(len(opponent.discard_pile), 15)]
+    elif card.name == "Kimedashi":
+        parts = [1.0 if fighter.total_grip == 0 else 0.0,
+                 1.0 if opponent.total_grip == 0 else 0.0,
+                 _at_least(power_adv, 3), _at_least(position, 2)]
+    elif card.name == "Kimetaoshi":
+        parts = [1.0 if fighter.total_grip == 0 else 0.0,
+                 1.0 if opponent.total_grip == 0 else 0.0,
+                 _at_least(power_adv, 4),
+                 _at_least(len(opponent.discard_pile), 10)]
+    elif card.name == "Yorikiri":
         parts = [_at_least(grip, 1), _at_least(momentum, 1), _at_least(position, 2)]
     elif card.name == "Oshidashi":
         parts = [_at_least(momentum, 2), _at_least(position, 2)]
@@ -515,11 +526,11 @@ def score_state(state: BoutState, side: Side) -> float:
     score -= 24 if fighter.unstable else 0
     score += 8 * sum(x.card.name in {"Denshamichi", "Spin Away", "Nekodamashi", "Henka", "Kannuki"} for x in fighter.temporary_zone)
 
-    # Shiko Stomp prevents a future opposing negative effect and persists
+    # Sonkyo prevents a future opposing negative effect and persists
     # until consumed. Without a state value, one-step AI treats this delayed
     # defense as a wasted Play. Additional copies have diminishing value.
-    stomp_count = sum(t.card.name == "Shiko Stomp" for t in fighter.temporary_zone)
-    opposing_stomps = sum(t.card.name == "Shiko Stomp" for t in opponent.temporary_zone)
+    stomp_count = sum(t.card.name == "Sonkyo" for t in fighter.temporary_zone)
+    opposing_stomps = sum(t.card.name == "Sonkyo" for t in opponent.temporary_zone)
     score += min(stomp_count, 1) * 17 + max(0, stomp_count - 1) * 5
     score -= min(opposing_stomps, 1) * 13 + max(0, opposing_stomps - 1) * 4
 

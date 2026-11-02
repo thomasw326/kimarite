@@ -22,7 +22,7 @@ CARD_POOL: tuple[Card, ...] = (
     Card(14, "Attempt Two-Handed Grip", 0, 3, 1),
     Card(15, "Attempt Deep Outside Grip", 0, 3, 1),
     Card(16, "Attempt Deep Inside Grip", 0, 3, 1),
-    Card(17, "Shiko Stomp", 1, 1, 1),
+    Card(17, "Sonkyo", 1, 1, 1),
     Card(18, "Salt Throw", 1, 1, 3),
     Card(19, "Stare Down", 1, 1, 1),
     Card(20, "Power Water", 1, 2, 2),
@@ -95,6 +95,26 @@ B11_CARD_POOL: tuple[Card, ...] = (
 )
 
 
+
+# B12 approved expansion. Sonkyo retains the historical Shiko Stomp card ID
+# and defensive rules; the aggressive Shiko Stomp is a distinct new card.
+B12_CARD_POOL: tuple[Card, ...] = (
+    Card(14001, "Renzoku", 0, 3, 0),
+    Card(14002, "Meguri", 0, 2, 1),
+    Card(14003, "Nokotta!", 1, 0, 2),
+    Card(14004, "Hakkeyoi!", 0, 0, 3),
+    Card(14005, "Hazuoshi", 1, 1, 1),
+    Card(14006, "Inashi", 1, 1, 2),
+    Card(14007, "Chiri-chozu", 1, 3, 1),
+    Card(14008, "Shikiri", 1, 2, 2),
+    Card(14009, "Shiko Stomp", 1, 0, 4),
+    Card(14010, "Kubinage", 2, 0, 1, True),
+    Card(14011, "Kimedashi", 2, 0, 1, True),
+    Card(14012, "Kimetaoshi", 3, 0, 0, True),
+    Card(14013, "Reckless Charge", 0, 0, 3),
+    Card(14014, "Sheer Grit", 0, 0, 3),
+)
+
 # Starting Kimarite are game definitions, not necessarily present in the
 # current 45-card shuffled pool snapshot. Synthetic IDs are engine-only.
 STARTING_KIMARITE: tuple[Card, ...] = (
@@ -124,7 +144,7 @@ STARTING_KIMARITE: tuple[Card, ...] = (
 
 
 def card_by_id(card_id: int) -> Card:
-    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL, *B11_CARD_POOL):
+    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL, *B11_CARD_POOL, *B12_CARD_POOL):
         if card.card_id == card_id:
             return card
     raise KeyError(card_id)
@@ -135,7 +155,7 @@ def card_by_name(name: str, *, prefer_starting_kimarite: bool = False) -> Card:
         (STARTING_KIMARITE, CARD_POOL)
         if prefer_starting_kimarite
         else (CARD_POOL, STARTING_KIMARITE)
-    ) + (B9_CARD_POOL, B11_CARD_POOL)
+    ) + (B9_CARD_POOL, B11_CARD_POOL, B12_CARD_POOL)
     for group in groups:
         for card in group:
             if card.name == name:
@@ -181,7 +201,7 @@ ORIGINAL_WRESTLERS: dict[str, WrestlerTemplate] = {
     "Oshoma": WrestlerTemplate("Oshoma", Stat.TECHNIQUE, Stat.SPIRIT, Stat.POWER, 1, 3, 2, "Hikiotoshi", "Get Underneath", "Pull", "Multiple Push, Push+Power, other Push."),
     "Asakoryu": WrestlerTemplate("Asakoryu", Stat.TECHNIQUE, Stat.SPIRIT, Stat.POWER, 0, 3, 3, "Tottari", "Power Water", "Ottsuke", "Provide Grip, Power comparisons, Power thresholds."),
     "Wakamotoharu": WrestlerTemplate("Wakamotoharu", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 4, 0, "Yorikiri", "Gain Left Grip", "Yori", "Spirit comparisons, remove Grip, high Spirit orbs."),
-    "Hoshoryu": WrestlerTemplate("Hoshoryu", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 3, 1, "Uwatenage", "Shiko Stomp", "Attempt Deep Outside Grip", "Remove Grip, require negative, downside gamble."),
+    "Hoshoryu": WrestlerTemplate("Hoshoryu", Stat.TECHNIQUE, Stat.POWER, Stat.SPIRIT, 2, 3, 1, "Uwatenage", "Sonkyo", "Attempt Deep Outside Grip", "Remove Grip, require negative, downside gamble."),
     "Abi": WrestlerTemplate("Abi", Stat.SPIRIT, Stat.TECHNIQUE, Stat.POWER, 1, 2, 3, "Hatakikomi", "Henka", "Kannuki", "No-Spirit cards, highest Push first."),
     "Tobizaru": WrestlerTemplate("Tobizaru", Stat.SPIRIT, Stat.TECHNIQUE, Stat.POWER, 0, 2, 4, "Tsukiotoshi", "Give Ground", "Sidestep", "Power comparison, Power threshold, provide Power."),
     "Fujinokawa": WrestlerTemplate("Fujinokawa", Stat.SPIRIT, Stat.SPIRIT, Stat.TECHNIQUE, 1, 0, 5, "Tsukitaoshi", "Stare Down", "Oshi", "Lose Position, lose Momentum, require Grip."),

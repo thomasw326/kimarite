@@ -6,7 +6,7 @@ import json
 import random
 from pathlib import Path
 
-from kimarite.catalog import CARD_POOL, STARTING_KIMARITE, B11_CARD_POOL, B9_CARD_POOL
+from kimarite.catalog import CARD_POOL, STARTING_KIMARITE, B11_CARD_POOL, B9_CARD_POOL, B12_CARD_POOL
 from kimarite.kimarite import KIMARITE_PREDICATES
 from kimarite.affinity_v5 import affinity
 from kimarite.styles_v5 import STYLES
@@ -35,8 +35,9 @@ def test_release_pool_exactly_matches_manifest():
     # separately and must not alter the historical 22-card fixture.
     b11_names = {card.name for card in B11_CARD_POOL if card.is_kimarite}
     b9_only = {card.name for card in B9_CARD_POOL if card.is_kimarite}
-    assert selected == set(KIMARITE_PREDICATES) - b11_names - b9_only
-    assert b11_names | b9_only <= set(KIMARITE_PREDICATES)
+    b12_only = {card.name for card in B12_CARD_POOL if card.is_kimarite}
+    assert selected == set(KIMARITE_PREDICATES) - b11_names - b9_only - b12_only
+    assert b11_names | b9_only | b12_only <= set(KIMARITE_PREDICATES)
 
 
 def test_release_catalog_orbs():

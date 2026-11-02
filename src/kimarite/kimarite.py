@@ -197,7 +197,32 @@ def _uwatedashinage(state: BoutState, side: Side) -> bool:
             and power_advantage(state, side) <= -5)
 
 
+def _kubinage(state: BoutState, side: Side) -> bool:
+    return len(state.opponent(side).discard_pile) >= 15
+
+
+def _kimedashi(state: BoutState, side: Side) -> bool:
+    return (
+        no_grip(state, side)
+        and no_grip(state, state.opponent_side(side))
+        and power_advantage(state, side) >= 3
+        and relative_position(state, side) >= 2
+    )
+
+
+def _kimetaoshi(state: BoutState, side: Side) -> bool:
+    return (
+        no_grip(state, side)
+        and no_grip(state, state.opponent_side(side))
+        and power_advantage(state, side) >= 4
+        and len(state.opponent(side).discard_pile) >= 10
+    )
+
+
 KIMARITE_PREDICATES: dict[str, Predicate] = {
+    "Kubinage": _kubinage,
+    "Kimedashi": _kimedashi,
+    "Kimetaoshi": _kimetaoshi,
     "Uwatedashinage": _uwatedashinage,
     "Utchari": _utchari,
     "Sukuinage": _sukuinage,

@@ -62,10 +62,10 @@ def test_shiko_stomp_prepared_card_starts_in_temporary_and_persists():
     state = bout.state
 
     assert any(
-        instance.card.name == "Shiko Stomp"
+        instance.card.name == "Sonkyo"
         for instance in state.fighter_a.temporary_zone
     )
-    assert state.fighter_a.draw_pile[-1].name != "Shiko Stomp"
+    assert state.fighter_a.draw_pile[-1].name != "Sonkyo"
 
 
 def test_exchange_only_temporary_tachiai_card_goes_to_bottom():

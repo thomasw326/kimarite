@@ -1,4 +1,4 @@
-"""Regression: Shiko Stomp persists and refunds its Exchange Play (B11)."""
+"""Regression: Sonkyo persists and refunds its Exchange Play (B11)."""
 
 from kimarite.ai import candidate_plays
 from kimarite.catalog import card_by_name
@@ -13,7 +13,7 @@ from kimarite.temporary import resolve_start_of_turn_temporaries
 def shiko_state():
     starting = card_by_name("Oshidashi")
     oshi = card_by_name("Oshi")
-    shiko = card_by_name("Shiko Stomp")
+    shiko = card_by_name("Sonkyo")
     harite = card_by_name("Harite")
     a = Wrestler("A", 2, 2, 2, starting, oshi, oshi)
     b = Wrestler("B", 2, 2, 2, starting, oshi, oshi)
@@ -36,32 +36,32 @@ def test_shiko_stomp_exchange_play_is_legal_and_persistent():
     play_card(state, Side.A, shiko)
     assert state.fighter_a.plays_remaining == 1  # B11: Exchange refunds 1 Play.
     assert state.fighter_a.power == power_before  # No stat buff.
-    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Shiko Stomp"]
-    assert not any(c.name == "Shiko Stomp" for c in state.fighter_a.discard_pile)
+    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Sonkyo"]
+    assert not any(c.name == "Sonkyo" for c in state.fighter_a.discard_pile)
 
     resolve_start_of_turn_temporaries(state, Side.A)
-    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Shiko Stomp"]
+    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Sonkyo"]
 
     # It prevents one opposing negative effect, then is consumed as designed.
     state.active_side = Side.B
     play_card(state, Side.B, state.fighter_b.hand[0])
     assert state.fighter_a.power == power_before
     assert not state.fighter_a.temporary_zone
-    assert any(c.name == "Shiko Stomp" for c in state.fighter_a.discard_pile)
+    assert any(c.name == "Sonkyo" for c in state.fighter_a.discard_pile)
 
 
 def test_shiko_stomp_visible_to_tactical_and_style_ai():
     state, comparison = shiko_state()
 
     options = candidate_plays(state, Side.A, comparison)
-    assert any(option.card.name == "Shiko Stomp" for option in options)
+    assert any(option.card.name == "Sonkyo" for option in options)
 
     for style in ("Pressure Fighter", "The Technician", None):
         choice = choose_style_play(state, Side.A, comparison, style)
-        assert choice is not None and choice.card.name == "Shiko Stomp"
+        assert choice is not None and choice.card.name == "Sonkyo"
     assert not state.card_plays  # Candidate evaluations are non-mutating.
 
     played = play_style_turn(state, Side.A, comparison, "Pressure Fighter")
-    assert played == ["Shiko Stomp"]
-    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Shiko Stomp"]
+    assert played == ["Sonkyo"]
+    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Sonkyo"]
     assert state.fighter_a.plays_remaining == 1

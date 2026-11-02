@@ -11,16 +11,16 @@ from collections import Counter
 import json
 import random
 
-from .catalog import CARD_POOL, B9_CARD_POOL, B11_CARD_POOL, card_by_name
+from .catalog import CARD_POOL, B9_CARD_POOL, B11_CARD_POOL, B12_CARD_POOL, card_by_name
 
 STARTERS = ("Yorikiri", "Oshidashi", "Oshi", "Tsuki",
-            "Gain Left Grip", "Gain Right Grip", "Give Ground", "Shiko Stomp")
+            "Gain Left Grip", "Gain Right Grip", "Give Ground", "Sonkyo")
 TARGET_SIZE = 28
 MAX_KIMARITE = 8
 MIN_KIMARITE = 3
 GENERATED_ONLY = frozenset(("Okuridashi", "Okuritaoshi"))
 AVAILABLE = {
-    card.name: card for card in (*CARD_POOL, *B9_CARD_POOL, *B11_CARD_POOL)
+    card.name: card for card in (*CARD_POOL, *B9_CARD_POOL, *B11_CARD_POOL, *B12_CARD_POOL)
     if card.name not in GENERATED_ONLY
 }
 

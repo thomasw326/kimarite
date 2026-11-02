@@ -3,7 +3,7 @@ from __future__ import annotations
 from .models import BoutState, Card, GripState, Side, TemporaryInstance
 from .catalog import card_by_name
 from .prevention import prevent_negative_effect
-from .rules import establish_grip, gain_momentum, gain_power, gain_push, make_unstable, lose_momentum, reduce_grip
+from .rules import establish_grip, gain_momentum, gain_power, gain_push, make_unstable, lose_momentum, lose_position, reduce_grip, trigger_ritual_draw
 
 
 def add_temporary(
@@ -75,9 +75,15 @@ def remove_temporary(
         }:
             gain_momentum(state, state.opponent_side(side), 1)
 
+    if disrupted and card.name == "Reckless Charge":
+        # The recoil cannot be escaped by destroying its Temporary early.
+        lose_position(state, side, 1, source="Reckless Charge recoil")
+        if state.winner is None:
+            lose_momentum(state, side, 1)
+
     if instance.exhaust_on_leave:
         fighter.exhaust_pile.append(card)
-        state.log(f"{card.name} is Exhausted after its Shitatehineri replay.")
+        state.log(f"{card.name} is Exhausted as it leaves the Temporary Zone.")
     else:
         fighter.discard_pile.append(card)
     if (completed and not disrupted
@@ -92,6 +98,10 @@ def remove_temporary(
         f"{card.name} leaves {fighter.wrestler.name}'s Temporary Zone"
         + (" after disruption." if disrupted else ".")
     )
+    if completed and not disrupted and card.name != "Chiri-chozu":
+        trigger_ritual_draw(state, side, "Chiri-chozu")
+    if disrupted:
+        trigger_ritual_draw(state, state.opponent_side(side), "Shikiri")
     return card
 
 
@@ -102,8 +112,8 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
     for instance in list(fighter.temporary_zone):
         name = instance.card.name
 
-        # Shiko Stomp explicitly does not leave at the start of the owner's turn.
-        if name == "Shiko Stomp":
+        # Sonkyo explicitly does not leave at the start of the owner's turn.
+        if name in {"Sonkyo", "Meguri", "Chiri-chozu", "Shikiri"}:
             continue
         if name == "Salt Throw":
             if fighter.discard_pile:
@@ -167,6 +177,14 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             gain_push(state, side, 1)
             if state.winner is None:
                 gain_momentum(state, side, 1)
+        elif name == "Inashi":
+            gain_momentum(state, side, 2)
+        elif name == "Reckless Charge":
+            lose_position(state, side, 1, source="Reckless Charge recoil")
+            if state.winner is None:
+                lose_momentum(state, side, 1)
+        elif name == "Hakkeyoi!":
+            pass  # Expires now; the opponent's third-card trigger is immediate.
         elif name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
             pass
         elif name in {"Sidestep", "Spin Away"}:

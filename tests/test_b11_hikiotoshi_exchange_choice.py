@@ -15,7 +15,7 @@ def state_for_hiki():
     blank=card_by_name("Oshi")
     own=FighterState(Wrestler("Human",2,1,0,blank,blank,blank))
     foe=FighterState(Wrestler("Opponent",2,1,0,blank,blank,blank))
-    own.draw_pile=[card_by_name(n) for n in ["Tsuki", "Give Ground", "Shiko Stomp", "Oshi"]]
+    own.draw_pile=[card_by_name(n) for n in ["Tsuki", "Give Ground", "Sonkyo", "Oshi"]]
     return BoutState(own,foe)
 
 
@@ -33,7 +33,7 @@ def test_hikiotoshi_choice_keeps_selected_card_and_bottoms_rest():
     state=state_for_hiki()
     resolve_kimarite_play_effect(state,Side.A,card_by_name("Hikiotoshi"),EffectContext(choices={"__human__":True,"hikiotoshi_card_index":1}))
     assert [c.name for c in state.fighter_a.hand]==["Give Ground"]
-    assert [c.name for c in state.fighter_a.draw_pile]==["Oshi","Tsuki","Shiko Stomp"]
+    assert [c.name for c in state.fighter_a.draw_pile]==["Oshi","Tsuki","Sonkyo"]
 
 
 def test_hikiotoshi_choice_labels_show_real_revealed_cards():
@@ -41,7 +41,7 @@ def test_hikiotoshi_choice_labels_show_real_revealed_cards():
     session=type("Session",(),{"state":state,"human_side":Side.A})()
     exc=ChoiceRequired("Hikiotoshi","hikiotoshi_card_index",[0,1,2])
     response=labelled_choices(session,exc)
-    assert [o["label"] for o in response["options"]]==["1. Tsuki","2. Give Ground","3. Shiko Stomp"]
+    assert [o["label"] for o in response["options"]]==["1. Tsuki","2. Give Ground","3. Sonkyo"]
 
 
 def test_hatakikomi_optional_remains_optional():
@@ -84,7 +84,7 @@ def test_utchari_human_selects_from_two_only_when_behind():
         state,Side.A,card_by_name("Utchari"),
         EffectContext(choices={"__human__":True,"utchari_card_index":1}))
     assert [c.name for c in state.fighter_a.hand]==["Give Ground"]
-    assert [c.name for c in state.fighter_a.draw_pile]==["Shiko Stomp","Oshi","Tsuki"]
+    assert [c.name for c in state.fighter_a.draw_pile]==["Sonkyo","Oshi","Tsuki"]
 
 
 @pytest.mark.parametrize(

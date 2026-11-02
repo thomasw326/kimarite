@@ -16,7 +16,7 @@ def test_ai_scoring_does_not_consume_shiko_stomp():
     )
     bout.fighter_a.left_grip = GripState.GRIP
 
-    add_temporary(bout, Side.A, card_by_name("Shiko Stomp"), phase="pre-bout")
+    add_temporary(bout, Side.A, card_by_name("Sonkyo"), phase="pre-bout")
     add_temporary(bout, Side.B, card_by_name("Kannuki"), phase="exchange")
 
     before = [x.card.name for x in bout.fighter_a.temporary_zone]
@@ -24,7 +24,7 @@ def test_ai_scoring_does_not_consume_shiko_stomp():
     score_state(bout, Side.A)
 
     after = [x.card.name for x in bout.fighter_a.temporary_zone]
-    assert before == ["Shiko Stomp"]
+    assert before == ["Sonkyo"]
     assert after == before
 
 
