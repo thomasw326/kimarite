@@ -85,6 +85,36 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
     _resolve_shared_track_gain(state, side, excess, next_kind)
 
 
+def discard_normally(state: BoutState, side: Side, card) -> None:
+    """Route ordinary hand/play discards through Meguri without changing mills.
+
+    Mill, temporary removal, and explicit Exhaust effects use their own zones.
+    """
+    fighter = state.fighter(side)
+    if _has_temporary(state, side, "Meguri"):
+        fighter.draw_pile.append(card)
+        state.log(f"Meguri returns {card.name} to the bottom of the Draw Pile.")
+    else:
+        fighter.discard_pile.append(card)
+
+
+def trigger_ritual_draw(state: BoutState, side: Side, ritual: str) -> None:
+    """Draw once per active ritual instance per turn, without recursion."""
+    if state.winner is not None:
+        return
+    fighter = state.fighter(side)
+    instances = [instance for instance in fighter.temporary_zone
+                 if instance.card.name == ritual
+                 and instance.last_trigger_turn != state.turn_number]
+    for instance in instances:
+        if state.winner is not None:
+            break
+        instance.last_trigger_turn = state.turn_number
+        from .effects import draw_one
+        state.log(f"{ritual} activates.")
+        draw_one(state, side)
+
+
 def gain_momentum(state: BoutState, side: Side, amount: int) -> None:
     _resolve_shared_track_gain(state, side, amount, "momentum")
 
@@ -190,7 +220,18 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     for instance in state.fighter(defending_side).temporary_zone:
         instance.opponent_gained_push_while_active = True
 
+    previous_position = state.position
     _resolve_shared_track_gain(state, side, amount, "push")
+
+    # Meguri is exhausted only when real opposing Push moves Position against
+    # its owner; prevented/suppressed Push does not break the ritual.
+    if state.position * state.sign(defending_side) < previous_position * state.sign(defending_side):
+        from .temporary import remove_temporary
+        defender = state.fighter(defending_side)
+        for instance in list(defender.temporary_zone):
+            if instance.card.name == "Meguri":
+                instance.exhaust_on_leave = True
+                remove_temporary(state, defending_side, instance, disrupted=True)
 
 
 def gain_position(state: BoutState, side: Side, amount: int) -> None:
@@ -344,6 +385,7 @@ def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None 
                 f"({GripState(current).name} → {next_grip.name})."
             )
             state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
+            trigger_ritual_draw(state, state.opponent_side(side), "Shikiri")
 
 
 def total_grip(state: BoutState, side: Side) -> int:
