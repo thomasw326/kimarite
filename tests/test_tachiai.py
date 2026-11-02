@@ -104,9 +104,10 @@ def test_nodowa_power_applies_before_spirit_push_resistance():
 
     comparison = compare_tachiai(a, b)
     state = BoutState(FighterState(a), FighterState(b))
+    apply_initial_power(state, comparison)
     resolve_prepared_tachiai(state, comparison)
 
-    assert state.fighter_b.power == 2
+    assert state.fighter_b.power == 6
     assert state.position == 0
 
 
