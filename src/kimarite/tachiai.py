@@ -81,7 +81,7 @@ def push_from_power_advantage(advantage: int) -> int:
 
 
 def technique_thresholds(advantage: int) -> int:
-    """Count Power defense thresholds at 1, 4, 7, 10, 13..."""
+    """Historical stepped threshold helper; B12 Tachiai Power now blocks 1-for-1."""
     return 0 if advantage <= 0 else 1 + (advantage - 1) // 3
 
 
