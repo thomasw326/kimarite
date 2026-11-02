@@ -89,7 +89,7 @@ def test_get_underneath_push_blocked_but_nonpush_effects_remain():
 def test_opposing_card_push_is_netted_before_power_blocks():
     state, comp = setup(a_power=2, a_spirit=4,
                         b_power=0, b_spirit=0, b_prepared="Shove")
-    # Spirit 2 (A), Shove 1 (B) => net 1 (A); with A Power lead, no block.
+    # Spirit 2 (A), Shove 1 (B) => net 1 (A); opening Power is tied.
     resolve_prepared_tachiai(state, comp)
     assert state.position == 1
 
@@ -118,3 +118,19 @@ def test_card_only_push_pool_blocks_once_against_power(extra, expected):
     assert winner is Side.A
     assert push == expected
     assert state.position == expected
+
+def test_oshi_reveal_orbs_increase_effective_power_before_blocking():
+    state, comp = setup(a_power=0, a_spirit=3,
+                        a_prepared="Oshi", b_power=2, b_spirit=0)
+    # Oshi reveals Tsuki (1 Power) and Shove (2 Power), then stops.
+    # Power must update in both comparison and fighter state before
+    # the defender's lead is calculated: A 1+3 Power, B 3 Power.
+    state.fighter_a.draw_pile[:] = [
+        card_by_name("Tsuki"), card_by_name("Shove"), BLANK
+    ]
+    resolve_prepared_tachiai(state, comp)
+    assert comp.wrestler_a.power == 4
+    assert state.fighter_a.power == 4
+    assert state.fighter_b.power == 3
+    # Spirit diff 4 => two Push and the defender has no Power lead.
+    assert state.position == 2
