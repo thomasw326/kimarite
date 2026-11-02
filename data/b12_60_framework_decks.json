@@ -3,8 +3,8 @@
   "source_spreadsheet": "https://docs.google.com/spreadsheets/d/11-qC5jKJK9nFDl27d4ITYGY2ugygd92O-3zsJxVcf7k/edit#gid=1201201261",
   "as_of": "2026-11-02",
   "deck_status": "Proposed, not automatically approved or edited",
-  "ai_mapping_status": "PROVISIONAL TEST PROXIES. Not 60 bespoke AI profiles; must review before interpreting competitive balance.",
-  "stat_policy": "Use the approved six-point stats from each indicated live 15-style proxy.",
+  "ai_mapping_status": "SOURCE-VERIFIED: Original 29 October 60-blueprint document assigns 15 named V5 style AI personalities in consecutive groups of four frameworks. Same style_ai_v5.play_style_turn() as B11; no bespoke framework AI.",
+  "stat_policy": "Approved six-point stats and primary/secondary personality from each of the 15 grouped V5 styles; no invented per-framework stats.",
   "opening_policy": "Starting Kimarite fixed to sheet; prepared Tachiai and top card seeded uniformly from other ordinary physical card copies; actual assigned cards logged.",
   "frameworks": [
     {
@@ -55,7 +55,7 @@
         "Deashi",
         "Regain Balance"
       ],
-      "style_proxy": "Heavy Hitter"
+      "style_proxy": "Mountain"
     },
     {
       "id": "02",
@@ -155,7 +155,7 @@
         "Stare Down",
         "Kachiage"
       ],
-      "style_proxy": "Bulldozer"
+      "style_proxy": "Mountain"
     },
     {
       "id": "04",
@@ -205,7 +205,7 @@
         "Morozashi",
         "Regain Balance"
       ],
-      "style_proxy": "Power Grappler"
+      "style_proxy": "Mountain"
     },
     {
       "id": "05",
@@ -255,7 +255,7 @@
         "Regain Balance",
         "Sonkyo"
       ],
-      "style_proxy": "Power Grappler"
+      "style_proxy": "The Arsenal"
     },
     {
       "id": "06",
@@ -305,7 +305,7 @@
         "Shove",
         "Inashi"
       ],
-      "style_proxy": "The Technician"
+      "style_proxy": "The Arsenal"
     },
     {
       "id": "07",
@@ -355,7 +355,7 @@
         "Gain Right Grip",
         "Shitate"
       ],
-      "style_proxy": "The Specialist"
+      "style_proxy": "The Arsenal"
     },
     {
       "id": "08",
@@ -405,7 +405,7 @@
         "Meguri",
         "Salt Throw"
       ],
-      "style_proxy": "Mountain"
+      "style_proxy": "The Arsenal"
     },
     {
       "id": "09",
@@ -455,7 +455,7 @@
         "Meguri",
         "Sonkyo"
       ],
-      "style_proxy": "The Technician"
+      "style_proxy": "The Specialist"
     },
     {
       "id": "10",
@@ -555,7 +555,7 @@
         "Hazuoshi",
         "Shikiri"
       ],
-      "style_proxy": "Opportunist"
+      "style_proxy": "The Specialist"
     },
     {
       "id": "12",
@@ -605,7 +605,7 @@
         "Meguri",
         "Chiri-chozu"
       ],
-      "style_proxy": "Mawashi Specialist"
+      "style_proxy": "The Specialist"
     },
     {
       "id": "13",
@@ -655,7 +655,7 @@
         "Tottari",
         "Salt Throw"
       ],
-      "style_proxy": "Mountain"
+      "style_proxy": "Heavy Hitter"
     },
     {
       "id": "14",
@@ -755,7 +755,7 @@
         "Hakkeyoi!",
         "Hazuoshi"
       ],
-      "style_proxy": "Pressure Fighter"
+      "style_proxy": "Heavy Hitter"
     },
     {
       "id": "16",
@@ -855,7 +855,7 @@
         "Morotezuki",
         "Reckless Charge"
       ],
-      "style_proxy": "Charger"
+      "style_proxy": "Bulldozer"
     },
     {
       "id": "18",
@@ -905,7 +905,7 @@
         "Kachiage",
         "Sonkyo"
       ],
-      "style_proxy": "Pressure Fighter"
+      "style_proxy": "Bulldozer"
     },
     {
       "id": "19",
@@ -1055,7 +1055,7 @@
         "Driving Force — Power Payoff",
         "Hazuoshi"
       ],
-      "style_proxy": "Pressure Fighter"
+      "style_proxy": "Charger"
     },
     {
       "id": "22",
@@ -1105,7 +1105,7 @@
         "Stare Down",
         "Inashi"
       ],
-      "style_proxy": "Opportunist"
+      "style_proxy": "Charger"
     },
     {
       "id": "23",
@@ -1205,7 +1205,7 @@
         "Power Water",
         "Driving Force — Power Payoff"
       ],
-      "style_proxy": "Pressure Fighter"
+      "style_proxy": "Charger"
     },
     {
       "id": "25",
@@ -1355,7 +1355,7 @@
         "Shove",
         "Nokotta!"
       ],
-      "style_proxy": "Heavy Hitter"
+      "style_proxy": "Pressure Fighter"
     },
     {
       "id": "28",
@@ -1405,7 +1405,7 @@
         "Shove",
         "Deashi"
       ],
-      "style_proxy": "Fast Grappler"
+      "style_proxy": "Pressure Fighter"
     },
     {
       "id": "29",
@@ -1505,7 +1505,7 @@
         "Yori",
         "Tsuri"
       ],
-      "style_proxy": "Unorthodox Powerhouse"
+      "style_proxy": "Power Grappler"
     },
     {
       "id": "31",
@@ -1555,7 +1555,7 @@
         "Shikiri",
         "Shove"
       ],
-      "style_proxy": "Heavy Hitter"
+      "style_proxy": "Power Grappler"
     },
     {
       "id": "32",
@@ -1605,7 +1605,7 @@
         "Inashi",
         "Sonkyo"
       ],
-      "style_proxy": "The Arsenal"
+      "style_proxy": "Power Grappler"
     },
     {
       "id": "33",
@@ -1655,7 +1655,7 @@
         "Deashi",
         "Shove"
       ],
-      "style_proxy": "The Technician"
+      "style_proxy": "Unorthodox Powerhouse"
     },
     {
       "id": "34",
@@ -1755,7 +1755,7 @@
         "Nokotta!",
         "Shove"
       ],
-      "style_proxy": "The Specialist"
+      "style_proxy": "Unorthodox Powerhouse"
     },
     {
       "id": "36",
@@ -1805,7 +1805,7 @@
         "Tsuki",
         "Tsuppari"
       ],
-      "style_proxy": "Fast Grappler"
+      "style_proxy": "Unorthodox Powerhouse"
     },
     {
       "id": "37",
@@ -1905,7 +1905,7 @@
         "Inashi",
         "Meguri"
       ],
-      "style_proxy": "Disruptor"
+      "style_proxy": "The Technician"
     },
     {
       "id": "39",
@@ -1955,7 +1955,7 @@
         "Shove",
         "Meguri"
       ],
-      "style_proxy": "Mawashi Specialist"
+      "style_proxy": "The Technician"
     },
     {
       "id": "40",
@@ -2005,7 +2005,7 @@
         "Tsuki",
         "Stare Down"
       ],
-      "style_proxy": "The Specialist"
+      "style_proxy": "The Technician"
     },
     {
       "id": "41",
@@ -2105,7 +2105,7 @@
         "Harite",
         "Nodowa"
       ],
-      "style_proxy": "The Specialist"
+      "style_proxy": "Mawashi Specialist"
     },
     {
       "id": "43",
@@ -2155,7 +2155,7 @@
         "Power Water",
         "Hakkeyoi!"
       ],
-      "style_proxy": "The Specialist"
+      "style_proxy": "Mawashi Specialist"
     },
     {
       "id": "44",
@@ -2255,7 +2255,7 @@
         "Gain Left Grip",
         "Yori"
       ],
-      "style_proxy": "Power Grappler"
+      "style_proxy": "Opportunist"
     },
     {
       "id": "46",
@@ -2305,7 +2305,7 @@
         "Hazuoshi",
         "Power Water"
       ],
-      "style_proxy": "Mountain"
+      "style_proxy": "Opportunist"
     },
     {
       "id": "47",
@@ -2355,7 +2355,7 @@
         "Get Underneath",
         "Hakkeyoi!"
       ],
-      "style_proxy": "Charger"
+      "style_proxy": "Opportunist"
     },
     {
       "id": "48",
@@ -2405,7 +2405,7 @@
         "Ottsuke",
         "Maesabaki"
       ],
-      "style_proxy": "Speed Demon"
+      "style_proxy": "Opportunist"
     },
     {
       "id": "49",
@@ -2505,7 +2505,7 @@
         "Stare Down",
         "Hazuoshi"
       ],
-      "style_proxy": "Speed Demon"
+      "style_proxy": "Fast Grappler"
     },
     {
       "id": "51",
@@ -2555,7 +2555,7 @@
         "Tsuki",
         "Ottsuke"
       ],
-      "style_proxy": "Pressure Fighter"
+      "style_proxy": "Fast Grappler"
     },
     {
       "id": "52",
@@ -2605,7 +2605,7 @@
         "Ottsuke",
         "Sonkyo"
       ],
-      "style_proxy": "The Technician"
+      "style_proxy": "Fast Grappler"
     },
     {
       "id": "53",
@@ -2905,7 +2905,7 @@
         "Nekodamashi",
         "Deashi"
       ],
-      "style_proxy": "Opportunist"
+      "style_proxy": "Speed Demon"
     },
     {
       "id": "59",
@@ -2955,7 +2955,7 @@
         "Hazuoshi",
         "Ottsuke"
       ],
-      "style_proxy": "Fast Grappler"
+      "style_proxy": "Speed Demon"
     },
     {
       "id": "60",
@@ -3005,7 +3005,8 @@
         "Hazuoshi",
         "Nokotta!"
       ],
-      "style_proxy": "Pressure Fighter"
+      "style_proxy": "Speed Demon"
     }
-  ]
+  ],
+  "ai_mapping_source": "https://docs.google.com/document/d/1Eyd2sJUy64AIZ0QqM488pnERJfFlOLIu4EignbaT6_g/edit"
 }
