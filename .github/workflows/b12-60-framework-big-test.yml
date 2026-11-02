@@ -1,0 +1,105 @@
+name: B12 60-framework grouped big test
+
+on:
+  push:
+    branches:
+      - experiment/b12-60-big-test-v1
+    paths:
+      - 'data/b12_60_framework_decks.json'
+      - 'scripts/b12_60_big_test.py'
+      - 'scripts/b12_60_report.py'
+      - 'tests/test_b12_60_big_test.py'
+      - '.github/workflows/b12-60-framework-big-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Validate 15x4 and smoke both modes
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e '.[dev]'
+      - name: Current engine tests and B12 deck validation
+        run: python -m pytest -q tests/test_b12_60_big_test.py tests/test_b12_card_expansion.py tests/test_b11_all_kimarite_checks.py
+      - name: Validate 28-card and 40-card rosters
+        run: |
+          python scripts/b12_60_big_test.py --mode base28 --validate-only
+          python scripts/b12_60_big_test.py --mode max40 --validate-only
+      - name: Run 30 mirrored smoke pairings per deck mode (each framework participates)
+        run: |
+          python scripts/b12_60_big_test.py --mode base28 --smoke --output-dir artifacts/b12_smoke
+          python scripts/b12_60_big_test.py --mode max40 --smoke --output-dir artifacts/b12_smoke
+      - name: Verify smoke reporting end-to-end
+        run: python scripts/b12_60_report.py --input-root artifacts/b12_smoke --output-dir artifacts/b12_smoke_report --allow-partial
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b12-60-smoke-results
+          path: |
+            artifacts/b12_smoke/
+            artifacts/b12_smoke_report/
+          if-no-files-found: ignore
+
+  shards:
+    name: ${{ matrix.mode } shard ${{ matrix.shard }
+    needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        mode: [base28, max40]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -e '.[dev]'
+      - name: Seeded B12 full mirrored round robin (one global repetition per mode)
+        run: >
+          python scripts/b12_60_big_test.py
+          --mode ${{ matrix.mode }
+          --repetitions 1
+          --seed 20261102
+          --shards 12
+          --shard-index ${{ matrix.shard }
+          --output-dir artifacts/b12_shard
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b12-${{ matrix.mode }-shard-${{ matrix.shard }
+          path: artifacts/b12_shard/*.jsonl
+          if-no-files-found: ignore
+
+  combine:
+    name: Verify coverage and aggregate B12 diagnostics
+    needs: shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: b12-*-shard-*
+          path: artifacts/b12_shards
+          merge-multiple: true
+      - name: Fail on missing, duplicate or non-mirrored bouts
+        run: python scripts/b12_60_report.py --input-root artifacts/b12_shards --output-dir artifacts/b12_big_test_report --repetitions 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b12-60-combined-diagnostics
+          path: artifacts/b12_big_test_report/
+          if-no-files-found: ignore
