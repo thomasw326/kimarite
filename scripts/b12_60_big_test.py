@@ -89,9 +89,9 @@ def make_fighter(entry: dict, seed: int, ranking: int):
         raise ValueError(f"{entry['name']}: cannot assign prepared/top ordinary cards")
     # Uniform random over eligible PHYSICAL copies; names must be different.
     prepared = rng.choice(ordinary)
-    physical.remove(prepared)
+    physical = [c for c in physical if c is not prepared]
     top = rng.choice([c for c in physical if not c.is_kimarite and c.name != prepared.name])
-    physical.remove(top)
+    physical = [c for c in physical if c is not top]
     rng.shuffle(physical)
     style = STYLES[entry["style_proxy"]]
     order = list(dict.fromkeys((style.primary, style.secondary)))
