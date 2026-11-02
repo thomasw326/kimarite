@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, draw_one
+from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, draw_one, _renzoku_draw_reward
 from .kimarite import no_grip, power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
@@ -271,7 +271,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                     if index not in options:
                         raise ChoiceRequired(card.name, "opponent_hand_index", options)
                 discarded = opponent.hand.pop(index)
-                opponent.discard_pile.append(discarded)
+                discard_normally(state, opponent_side, discarded)
             else:
                 draw_one(state, side)
 
@@ -386,6 +386,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                     if index not in options:
                         raise ChoiceRequired(card.name, "utchari_card_index", options)
                     keep_and_bottom(fighter, looked, [looked[index]])
+                    _renzoku_draw_reward(state, side, 1)
                     state.log(f"{fighter.wrestler.name} chooses {looked[index].name} from Utchari's top {len(looked)} cards.")
 
     elif card.name == "Uwatedashinage":
