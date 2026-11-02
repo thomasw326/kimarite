@@ -1,14 +1,17 @@
-name: B12 60-framework grouped big test
+name: B12 7080-bout Tachiai push-order retest
 
 on:
   push:
     branches:
-      - experiment/b12-60-big-test-v1
+      - experiment/b12-60-push-order-7080-v1
     paths:
       - 'data/b12_60_framework_decks.json'
       - 'scripts/b12_60_big_test.py'
       - 'scripts/b12_60_report.py'
       - 'tests/test_b12_60_big_test.py'
+      - 'src/kimarite/tachiai.py'
+      - 'src/kimarite/tachiai_effects.py'
+      - 'tests/test_b12_tachiai_push_order.py'
       - '.github/workflows/b12-60-framework-big-test.yml'
   workflow_dispatch:
 
@@ -27,7 +30,9 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install -e '.[dev]'
       - name: Current engine tests and B12 deck validation
-        run: python -m pytest -q tests/test_b12_60_big_test.py tests/test_b12_card_expansion.py tests/test_b11_all_kimarite_checks.py
+        run: python -m pytest -q tests/test_b12_60_big_test.py tests/test_b12_tachiai_push_order.py tests/test_tachiai.py tests/test_v44_tachiai.py tests/test_setup.py tests/test_b12_card_expansion.py tests/test_b11_all_kimarite_checks.py
+      - name: Verify original B12 deck snapshot is unchanged
+        run: test "$(git hash-object data/b12_60_framework_decks.json)" = 92618ce1d60ec8591381f045547dbac3f8b056f3
       - name: Validate 28-card and 40-card rosters
         run: |
           python scripts/b12_60_big_test.py --mode base28 --validate-only
@@ -41,7 +46,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-60-smoke-results
+          name: b12-push-order-smoke-results
           path: |
             artifacts/b12_smoke/
             artifacts/b12_smoke_report/
@@ -76,7 +81,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-${{ matrix.mode }}-shard-${{ matrix.shard }}
+          name: b12-push-${{ matrix.mode }}-shard-${{ matrix.shard }}
           path: artifacts/b12_shard/*.jsonl
           if-no-files-found: ignore
 
@@ -92,7 +97,7 @@ jobs:
           python-version: '3.11'
       - uses: actions/download-artifact@v4
         with:
-          pattern: b12-*-shard-*
+          pattern: b12-push-*-shard-*
           path: artifacts/b12_shards
           merge-multiple: true
       - name: Fail on missing, duplicate or non-mirrored bouts
@@ -100,6 +105,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-60-combined-diagnostics
+          name: b12-push-order-7080-combined-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore
