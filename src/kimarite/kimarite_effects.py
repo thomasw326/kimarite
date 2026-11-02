@@ -294,6 +294,7 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 if index not in options:
                     raise ChoiceRequired(card.name, "hikiotoshi_card_index", options)
                 keep_and_bottom(fighter, looked, [looked[index]])
+                _renzoku_draw_reward(state, side, 1)
                 state.log(f"{fighter.wrestler.name} chooses {looked[index].name} from Hikiotoshi's top {len(looked)} cards.")
 
     elif card.name == "Tsukitaoshi":
