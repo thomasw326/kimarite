@@ -5,7 +5,7 @@ This branch changes opening resolution **only**. The 7,080-bout B12 baseline was
 ## Approved intended resolution
 
 1. Establish the opening comparisons using base stats, committed cards and revealed orbs (Power 🟣 / Technique 🟢 / Spirit 🟠). Initialise persistent Power once, then apply Tachiai card-specific Power modifiers (e.g. Nodowa, Hold Position, Harite).
-2. Calculate **Spirit-generated Push** at the existing Spirit-difference 1, 4, 7, ... thresholds. Apply dedicated anti-Spirit-Push effects from Hold Position, Immovable, Sidestep and Give Ground to this Spirit component.
+1a. For Oshi/Tsuki prepared reveal chains, add revealed Power orbs to both the comparison and persistent fighter Power. Otherwise these orbs would fail to block Push.\n2. Calculate **Spirit-generated Push** at the existing Spirit-difference 1, 4, 7, ... thresholds. Apply dedicated anti-Spirit-Push effects from Hold Position, Immovable, Sidestep and Give Ground to this Spirit component.
 3. Add **all prepared-card bonus Push** (Explosive Step, Shove, Stare Down, Get Underneath, sacrificed Headlong Charge, etc.). Net opposite-facing Push from the two sides.
 4. Determine the defender against the direction of net Push. Block **one Push per point by which the defender's effective Power exceeds the attacker's effective Power**. Do not double-count the Power comparison; Power is not converted into Push.
 5. Apply the resulting Push **once**; if it exceeds ring boundaries, win immediately via ring-out.
