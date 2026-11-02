@@ -4,7 +4,7 @@ from .effects import ChoiceRequired, EffectContext, add_play, draw_from_look, dr
 from .kimarite import no_grip, power_advantage, relative_momentum, relative_position
 from .models import BoutState, Card, GripState, Side
 from .prevention import prevent_negative_effect
-from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, recover_push, recover_momentum, lose_momentum, reduce_grip, establish_grip
+from .rules import effective_total_grip, establish_grip, gain_flexible_grip, gain_momentum, gain_position, lose_position, gain_power, lose_power, discard_normally, recover_push, recover_momentum, lose_momentum, reduce_grip, establish_grip
 from .selection import ai_look_keep, look_from_top, keep_and_bottom
 
 
@@ -46,7 +46,7 @@ def _discard_one_from_hand(state: BoutState, side: Side, card: Card, context: Ef
     if index not in options:
         raise ChoiceRequired(card.name, "hand_index", options)
     discarded = fighter.hand.pop(index)
-    fighter.discard_pile.append(discarded)
+    discard_normally(state, side, discarded)
     state.log(f"{fighter.wrestler.name} discards {discarded.name} with {card.name}.")
 
 
@@ -160,7 +160,31 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
     fighter = state.fighter(side)
     opponent_side = state.opponent_side(side)
 
-    if card.name == "Yorikiri":
+    if card.name == "Kubinage":
+        advantage = power_advantage(state, side)
+        if advantage > 0:
+            from .effects import mill_cards
+            mill_cards(state, opponent_side, (advantage + 1) // 2)
+
+    elif card.name == "Kimedashi":
+        if relative_position(state, side) > 0:
+            if not prevent_negative_effect(
+                state, opponent_side, source=card.name,
+                description="lose 1 Power for Position disadvantage",
+            ):
+                lose_power(state, opponent_side, 1)
+        if no_grip(state, opponent_side):
+            if not prevent_negative_effect(
+                state, opponent_side, source=card.name,
+                description="lose 1 Power for having no Grip",
+            ):
+                lose_power(state, opponent_side, 1)
+
+    elif card.name == "Kimetaoshi":
+        from .effects import mill_cards
+        mill_cards(state, opponent_side, max(0, 4 - state.opponent(side).total_grip))
+
+    elif card.name == "Yorikiri":
         if effective_total_grip(state, side) >= 2:
             from .rules import gain_push
             gain_push(state, side, 1)
