@@ -62,7 +62,7 @@ def main():
     exposure = defaultdict(tally)
     starting_kim = defaultdict(tally)
     deck_kim = defaultdict(tally)
-    finishes = defaultdict(tally)
+    finishes = defaultdict(Counter)
     contributions = defaultdict(Counter)
     temporaries = defaultdict(Counter)
     timing = defaultdict(Counter)
