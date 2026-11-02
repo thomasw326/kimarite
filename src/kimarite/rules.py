@@ -161,6 +161,7 @@ def _break_sidestep_from_push(state: BoutState, side: Side) -> None:
                 f"{state.fighter(side).wrestler.name}'s Push breaks Sidestep; "
                 f"{state.fighter(side).wrestler.name} takes the favorable orientation."
             )
+            trigger_ritual_draw(state, side, "Shikiri")
             break
 
 
