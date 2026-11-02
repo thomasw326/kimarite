@@ -21,10 +21,10 @@ def test_spirit_generates_push_and_power_defends():
     state = BoutState(FighterState(a), FighterState(b))
     apply_initial_power(state, comparison)
     winner, push = apply_tachiai_power_push(state, comparison)
-    # Spirit advantage 7 gives 3 Push. Power lead 2 blocks 2 Push.
+    # Spirit advantage 7 gives 3 Push. Power lead 2 blocks 1 Push.
     assert winner is Side.A
-    assert push == 1
-    assert state.position == 1
+    assert push == 2
+    assert state.position == 2
 
 
 def test_power_advantage_by_itself_creates_no_push():
