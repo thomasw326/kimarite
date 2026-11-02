@@ -192,6 +192,19 @@ def choose_style_play(state: BoutState, side: Side, comparison: TachiaiCompariso
                 opener_bonus = 34
             else:
                 setup_hold += 35
+        if candidate.card.name in {"Renzoku", "Hakkeyoi!"}:
+            fighter = state.fighter(side)
+            later_cards = [c for c in fighter.hand if c.card_id != candidate.card.card_id]
+            if candidate.card.name == "Renzoku":
+                drawing = {"Oshi", "Tsuki", "Tsuppari", "Power Water Cantrip",
+                           "Meguri", "Regain Balance", "Shove", "Hikiotoshi", "Tsukidashi"}
+                useful = any(c.name in drawing for c in later_cards)
+            else:
+                useful = bool(later_cards)
+            if useful and fighter.plays_remaining >= 2 and fighter.cards_played_this_turn == 0:
+                opener_bonus = 32 if candidate.card.name == "Renzoku" else 24
+            else:
+                setup_hold += 30
         # Only use neutral development weights when neither wrestler is under
         # material pressure and there is no immediate finishing opportunity.
         neutral = (abs(before_position) < 2 and abs(before_momentum) < 2
