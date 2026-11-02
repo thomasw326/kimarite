@@ -343,7 +343,6 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
         if context.choice("__human__") and type(optional) is not bool:
             raise ChoiceRequired(card.name, "use_optional", [True, False])
         if optional is True:
-            from .rules import lose_power
             lose_power(state, side, 1)
             gain_momentum(state, side, 1)
             if state.winner is None:
