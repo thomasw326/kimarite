@@ -68,8 +68,8 @@ def neutral_development_value(before: BoutState, after: BoutState, side: Side, c
         value -= 8 * (old_grip - new_grip)
     value += 3 * max(0, effective_total_grip(before, before.opponent_side(side)) -
                      effective_total_grip(after, after.opponent_side(side)))
-    new_stomps = sum(x.card.name == "Shiko Stomp" for x in b.temporary_zone)
-    old_stomps = sum(x.card.name == "Shiko Stomp" for x in a.temporary_zone)
+    new_stomps = sum(x.card.name == "Sonkyo" for x in b.temporary_zone)
+    old_stomps = sum(x.card.name == "Sonkyo" for x in a.temporary_zone)
     if new_stomps > old_stomps:
         value += 12 if old_stomps == 0 else 3
     removed = [x.card.name for x in foe_a.temporary_zone
@@ -89,7 +89,7 @@ def neutral_development_value(before: BoutState, after: BoutState, side: Side, c
         value += 7 * gained_play if remaining_useful else 0
     # An ordinary Temporary only earns a setup credit if its effect remains.
     temporary_added = len(b.temporary_zone) - len(a.temporary_zone)
-    if temporary_added > 0 and card_name != "Shiko Stomp":
+    if temporary_added > 0 and card_name != "Sonkyo":
         value += min(temporary_added, 2) * 2
     # Oshi's required extra discard is a real opportunity cost.
     # Its Draw offsets the hand count but does not restore the chosen card.
