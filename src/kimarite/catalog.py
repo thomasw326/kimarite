@@ -95,6 +95,26 @@ B11_CARD_POOL: tuple[Card, ...] = (
 )
 
 
+
+# B12 approved expansion. Sonkyo retains the historical Shiko Stomp card ID
+# and defensive rules; the aggressive Shiko Stomp is a distinct new card.
+B12_CARD_POOL: tuple[Card, ...] = (
+    Card(14001, "Renzoku", 0, 3, 0),
+    Card(14002, "Meguri", 0, 2, 1),
+    Card(14003, "Nokotta!", 1, 0, 2),
+    Card(14004, "Hakkeyoi!", 0, 0, 3),
+    Card(14005, "Hazuoshi", 1, 1, 1),
+    Card(14006, "Inashi", 1, 1, 2),
+    Card(14007, "Chiri-chozu", 1, 3, 1),
+    Card(14008, "Shikiri", 1, 2, 2),
+    Card(14009, "Shiko Stomp", 1, 0, 4),
+    Card(14010, "Kubinage", 2, 0, 1, True),
+    Card(14011, "Kimedashi", 2, 0, 1, True),
+    Card(14012, "Kimetaoshi", 3, 0, 0, True),
+    Card(14013, "Reckless Charge", 0, 0, 3),
+    Card(14014, "Sheer Grit", 0, 0, 3),
+)
+
 # Starting Kimarite are game definitions, not necessarily present in the
 # current 45-card shuffled pool snapshot. Synthetic IDs are engine-only.
 STARTING_KIMARITE: tuple[Card, ...] = (
@@ -124,7 +144,7 @@ STARTING_KIMARITE: tuple[Card, ...] = (
 
 
 def card_by_id(card_id: int) -> Card:
-    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL, *B11_CARD_POOL):
+    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL, *B11_CARD_POOL, *B12_CARD_POOL):
         if card.card_id == card_id:
             return card
     raise KeyError(card_id)
@@ -135,7 +155,7 @@ def card_by_name(name: str, *, prefer_starting_kimarite: bool = False) -> Card:
         (STARTING_KIMARITE, CARD_POOL)
         if prefer_starting_kimarite
         else (CARD_POOL, STARTING_KIMARITE)
-    ) + (B9_CARD_POOL, B11_CARD_POOL)
+    ) + (B9_CARD_POOL, B11_CARD_POOL, B12_CARD_POOL)
     for group in groups:
         for card in group:
             if card.name == name:
