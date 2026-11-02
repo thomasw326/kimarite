@@ -239,9 +239,10 @@ def main():
                "win_turn_total", "avg_turns"], timing_rows)
 
     tachiai_rows = []
-    for (mode, _, frm, metric, advantage, won), n in sorted(status.items(), key=lambda x: str(x[0])):
-        if _ != "tachiai":
+    for key, n in sorted(status.items(), key=lambda x: str(x[0])):
+        if len(key) != 6 or key[1] != "tachiai":
             continue
+        mode, _, frm, metric, advantage, won = key
         tachiai_rows.append({"mode": mode, "framework": frm, "metric": metric,
                              "advantage": advantage, "won": won, "bouts": n})
     write_csv(output / "tachiai_advantages.csv",
