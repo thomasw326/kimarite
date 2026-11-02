@@ -241,3 +241,41 @@ def test_sheer_grit_uses_exhausted_discard_threshold_seven():
         play_card(state, Side.A, card_by_name("Sheer Grit"))
         assert state.momentum == 2
         assert state.position == (0 if discarded < 7 else 1)
+
+
+def test_kubinage_prepared_tachiai_mills_before_exchange():
+    from kimarite.tachiai import compare_tachiai
+    from kimarite.tachiai_effects import resolve_prepared_tachiai
+    kubinage = card_by_name("Kubinage")
+    blank = blank_card()
+    a = Wrestler("A", 5, 0, 1, kubinage, kubinage, blank)
+    b = Wrestler("B", 0, 0, 0, blank, blank, blank)
+    state = BoutState(
+        FighterState(a, draw_pile=[blank] * 6, power=5),
+        FighterState(b, draw_pile=[blank] * 6, power=0),
+    )
+    resolve_prepared_tachiai(state, compare_tachiai(a, b))
+    assert len(state.fighter_b.discard_pile) == 3
+    assert any(card.name == "Kubinage" for card in state.fighter_a.kimarite_zone)
+
+
+def test_chiri_and_shikiri_prepared_tachiai_enter_persistent_temporaries():
+    from kimarite.tachiai import compare_tachiai
+    from kimarite.tachiai_effects import resolve_prepared_tachiai
+    chiri = card_by_name("Chiri-chozu")
+    shikiri = card_by_name("Shikiri")
+    blank = blank_card()
+    a = Wrestler("A", 2, 2, 2, blank, chiri, blank)
+    b = Wrestler("B", 2, 2, 2, blank, blank, blank)
+    state = BoutState(FighterState(a), FighterState(b))
+    resolve_prepared_tachiai(
+        state, compare_tachiai(a, b),
+        committed_cards={Side.A: (chiri, shikiri), Side.B: (blank,)},
+    )
+    assert {x.card.name for x in state.fighter_a.temporary_zone} == {
+        "Chiri-chozu", "Shikiri"
+    }
+    resolve_start_of_turn_temporaries(state, Side.A)
+    assert {x.card.name for x in state.fighter_a.temporary_zone} == {
+        "Chiri-chozu", "Shikiri"
+    }
