@@ -38,6 +38,23 @@ class Card:
         return self.spirit
 
 
+# Canonical Kimarite orb DISPLAY colours, never to be confused with stat order.
+# Engine card fields stay (power, technique, spirit); do not exchange values.
+ORB_COLOURS: dict[Stat, str] = {
+    Stat.POWER: "🟣",
+    Stat.TECHNIQUE: "🟢",
+    Stat.SPIRIT: "🟠",
+}
+
+
+def format_card_orbs(card: Card) -> str:
+    """Render printed orbs in Power/Technique/Spirit order using approved colours."""
+    return "".join(
+        ORB_COLOURS[stat] * card.orbs(stat)
+        for stat in (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT)
+    )
+
+
 @dataclass(frozen=True)
 class Wrestler:
     name: str
