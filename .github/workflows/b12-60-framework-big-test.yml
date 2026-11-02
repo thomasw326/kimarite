@@ -48,7 +48,7 @@ jobs:
           if-no-files-found: ignore
 
   shards:
-    name: ${{ matrix.mode } shard ${{ matrix.shard }
+    name: ${{ matrix.mode }} shard ${{ matrix.shard }}
     needs: smoke
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -67,16 +67,16 @@ jobs:
       - name: Seeded B12 full mirrored round robin (one global repetition per mode)
         run: >
           python scripts/b12_60_big_test.py
-          --mode ${{ matrix.mode }
+          --mode ${{ matrix.mode }}
           --repetitions 1
           --seed 20261102
           --shards 12
-          --shard-index ${{ matrix.shard }
+          --shard-index ${{ matrix.shard }}
           --output-dir artifacts/b12_shard
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-${{ matrix.mode }-shard-${{ matrix.shard }
+          name: b12-${{ matrix.mode }}-shard-${{ matrix.shard }}
           path: artifacts/b12_shard/*.jsonl
           if-no-files-found: ignore
 
