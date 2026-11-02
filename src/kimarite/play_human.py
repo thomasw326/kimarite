@@ -87,7 +87,7 @@ CARD_LIBRARY_TEXT = {
   },
   "shiko stomp": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai / Exchange: Enter a persistent Temporary. When an opponent effect would negatively affect you or something you control, prevent that effect and discard Shiko Stomp. It does not expire at the beginning of your turn.",
+    "effect": "Tachiai / Exchange: Enter a persistent Temporary. When an opponent effect would negatively affect you or something you control, prevent that effect and discard Sonkyo. It does not expire at the beginning of your turn.",
     "notes": ""
   },
   "salt throw": {
