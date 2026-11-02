@@ -254,7 +254,12 @@ def test_kubinage_prepared_tachiai_mills_before_exchange():
         FighterState(a, draw_pile=[blank] * 6, power=5),
         FighterState(b, draw_pile=[blank] * 6, power=0),
     )
-    resolve_prepared_tachiai(state, compare_tachiai(a, b))
+    # Explicit B11 player commits put prepared Kimarite in the zone;
+    # Classic one-card preparation instead returns it to the draw pile.
+    resolve_prepared_tachiai(
+        state, compare_tachiai(a, b),
+        committed_cards={Side.A: (kubinage,), Side.B: (blank,)},
+    )
     assert len(state.fighter_b.discard_pile) == 3
     assert any(card.name == "Kubinage" for card in state.fighter_a.kimarite_zone)
 
