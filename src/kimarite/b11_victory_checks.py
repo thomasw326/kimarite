@@ -46,7 +46,7 @@ def victory_checks(state, side, name):
         "Oshitaoshi": [("Momentum advantage","momentum",">=",2),("Position advantage","position",">=",1),("Power","power",">=",8)],
         "Yoritaoshi": [("Effective Grip","grip",">=",1),("Position advantage","position",">=",2),("Power advantage","power_advantage",">=",2)],
         "Katasukashi": [("Opponent Grip","enemy_raw_grip","=",0),("Momentum advantage","momentum",">=",2),("Hand advantage","hand_diff",">=",4)],
-        "Tsukiotoshi": [("Own Grip","raw_grip","=",0),("Momentum advantage","momentum",">=",1),("Power advantage","power_advantage","<=",-3),("Opponent unstable","foe_unstable","=",True)],
+        "Tsukiotoshi": [("Own Grip","raw_grip","=",0),("Momentum advantage","momentum",">=",2),("Power advantage","power_advantage","<=",-3),("Opponent unstable","foe_unstable","=",True)],
         "Tottari": [("Own Grip","raw_grip","=",0),("Opponent Grip reduced this turn","grip_reduced","=",True),("Opponent discard count","enemy_discard",">=",7)],
         "Uwatenage": [("Deep Left Grip","left","=","DEEP"),("Effective Grip","grip",">=",1),("Momentum advantage","momentum",">=",1),("Position advantage","position",">=",0)],
         "Shitatenage": [("Effective Grip","grip",">=",1),("Deep Right Grip","right","=","DEEP"),("Momentum advantage","momentum",">=",1),("Position advantage","position",">=",0)],
@@ -63,7 +63,7 @@ def victory_checks(state, side, name):
         "Okuritaoshi": [("Power","power",">=",8),("Momentum advantage","momentum",">=",1)],
         "Tsuriotoshi": [("Power + Momentum + Grip","sum",">=",15)],
         "Sukuinage": [("Own Grip","raw_grip","=",0),("Momentum advantage","momentum",">=",2),("Hand advantage","hand_diff",">=",4)],
-        "Utchari": [("Gained Momentum this turn","gained_momentum","=",True),("Position advantage","position","<=",-3)],
+        "Utchari": [("Gained Momentum this turn","gained_momentum","=",True),("Position advantage","position","<=",-4)],
         "Uwatedashinage": [("Left Grip present","left","!=","NONE"),("Effective Grip","grip",">=",1),("Momentum advantage","momentum",">=",1),("Power advantage","power_advantage","<=",-5)],
     }
     values["enemy_raw_grip"] = foe.total_grip
