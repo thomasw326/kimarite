@@ -51,7 +51,7 @@ def _yorikiri(state: BoutState, side: Side) -> bool:
 
 
 def _oshidashi(state: BoutState, side: Side) -> bool:
-    return relative_position(state, side) >= 2 and relative_momentum(state, side) >= 2
+    return relative_position(state, side) >= 3 and relative_momentum(state, side) >= 2
 
 
 def _tsukidashi(state: BoutState, side: Side) -> bool:

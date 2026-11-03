@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .models import BoutState, Card, Side, Stat, Wrestler
+from .rules import POSITION_MIN, POSITION_MAX
 
 
 @dataclass(frozen=True)
@@ -133,8 +134,8 @@ def apply_tachiai_push(
         return 0
 
     target = state.position + state.sign(side) * amount
-    if target > 3 or target < -3:
-        state.position = 3 if side is Side.A else -3
+    if target > POSITION_MAX or target < POSITION_MIN:
+        state.position = POSITION_MAX if side is Side.A else POSITION_MIN
         method = "Yorikiri" if state.fighter(side).total_grip > 0 else "Oshidashi"
         state.win_source = "ringout"
         state.declare_winner(side, method)
