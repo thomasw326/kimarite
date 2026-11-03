@@ -15,10 +15,10 @@ def test_canonical_stat_to_orb_colours():
 
 
 @pytest.mark.parametrize("name, expected", [
-    ("Explosive Step — Fumikomi", "🟠🟠🟠"),
+    ("Explosive Step — Fumikomi", "🟠🟠"),
     ("Get Underneath", "🟣🟢"),
     ("Give Ground", "🟢🟢🟠"),
-    ("Henka", "🟢🟢🟢🟢"),
+    ("Henka", "🟢🟢"),
     ("Sidestep", "🟢🟢🟢"),
     ("Stare Down", "🟣🟢🟠"),
     ("Spin Away", "🟢🟠🟠"),

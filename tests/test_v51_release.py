@@ -13,7 +13,11 @@ from kimarite.styles_v5 import STYLES
 from kimarite.style_builds_v5 import build_style
 
 
-LIVE_ORB_OVERRIDES = {"Read the Move": (0, 1, 1)}  # Live approved print supersedes V5.1 manifest.
+LIVE_ORB_OVERRIDES = {
+    "Read the Move": (0, 1, 1),
+    "Henka": (0, 2, 0),
+    "Explosive Step — Fumikomi": (0, 0, 2),
+}  # Approved live printings supersede the frozen V5.1 manifest.
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = json.loads((ROOT / "data" / "card_pool_v5_1.json").read_text(encoding="utf-8"))
