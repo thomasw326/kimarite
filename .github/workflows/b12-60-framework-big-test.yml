@@ -12,6 +12,7 @@ on:
       - 'src/kimarite/tachiai.py'
       - 'src/kimarite/tachiai_effects.py'
       - 'src/kimarite/kimarite.py'
+      - 'src/kimarite/b11_victory_checks.py'
       - 'src/kimarite/kimarite_effects.py'
       - 'src/kimarite/catalog.py'
       - 'src/kimarite/effects.py'
