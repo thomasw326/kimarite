@@ -239,7 +239,7 @@ def test_sheer_grit_uses_exhausted_discard_threshold_seven():
         state, blank = bout(hand=[card_by_name("Sheer Grit")])
         state.fighter_a.discard_pile = [blank] * discarded
         play_card(state, Side.A, card_by_name("Sheer Grit"))
-        assert state.momentum == 2
+        assert state.momentum == (1 if discarded < 7 else 2)
         assert state.position == (0 if discarded < 7 else 1)
 
 
@@ -284,3 +284,10 @@ def test_chiri_and_shikiri_prepared_tachiai_enter_persistent_temporaries():
     assert {x.card.name for x in state.fighter_a.temporary_zone} == {
         "Chiri-chozu", "Shikiri"
     }
+
+
+def test_approved_henka_and_explosive_step_orb_nerfs():
+    henka = card_by_name("Henka")
+    explosive = card_by_name("Explosive Step — Fumikomi")
+    assert (henka.power, henka.technique, henka.spirit) == (0, 2, 0)
+    assert (explosive.power, explosive.technique, explosive.spirit) == (0, 0, 2)

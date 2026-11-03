@@ -1,4 +1,4 @@
-name: B12 7080-bout Tsukidashi third-play Push retest
+name: B12 7080-bout final card nerfs retest
 
 on:
   push:
@@ -13,6 +13,9 @@ on:
       - 'src/kimarite/tachiai_effects.py'
       - 'src/kimarite/kimarite.py'
       - 'src/kimarite/kimarite_effects.py'
+      - 'src/kimarite/catalog.py'
+      - 'src/kimarite/effects.py'
+      - 'tests/test_b12_card_expansion.py'
       - 'src/kimarite/b10_card_info.py'
       - 'tests/test_v5_tsuki_kimarite_exchange.py'
       - 'tests/test_b12_position_ring_oshidashi.py'
@@ -51,7 +54,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-tsukidashi-push-smoke-results
+          name: b12-final-nerfs-smoke-results
           path: |
             artifacts/b12_smoke/
             artifacts/b12_smoke_report/
@@ -86,7 +89,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-tsuki-${{ matrix.mode }}-shard-${{ matrix.shard }}
+          name: b12-final-${{ matrix.mode }}-shard-${{ matrix.shard }}
           path: artifacts/b12_shard/*.jsonl
           if-no-files-found: ignore
 
@@ -102,7 +105,7 @@ jobs:
           python-version: '3.11'
       - uses: actions/download-artifact@v4
         with:
-          pattern: b12-tsuki-*-shard-*
+          pattern: b12-final-*-shard-*
           path: artifacts/b12_shards
           merge-multiple: true
       - name: Fail on missing, duplicate or non-mirrored bouts
@@ -110,6 +113,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-tsukidashi-push-7080-combined-diagnostics
+          name: b12-final-nerfs-7080-combined-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore

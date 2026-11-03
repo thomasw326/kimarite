@@ -1039,11 +1039,13 @@ def _reckless_charge(state: BoutState, side: Side, card: Card, context: EffectCo
 
 
 def _sheer_grit(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    gain_momentum(state, side, 2)
+    gain_momentum(state, side, 1)
     if state.winner is None and len(state.fighter(side).discard_pile) >= 7:
         # "Exhausted" means at least seven discarded cards (fatigue window),
         # not the terminal empty-draw-pile defeat.
-        gain_push(state, side, 1)
+        gain_momentum(state, side, 1)
+        if state.winner is None:
+            gain_push(state, side, 1)
 
 
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {

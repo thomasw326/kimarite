@@ -44,16 +44,16 @@ def test_card_only_push_is_blocked_by_power():
 def test_explosive_step_bonus_and_spirit_are_blocked_in_same_pool():
     state, comp = setup(a_power=0, a_spirit=1,
                         a_prepared="Explosive Step — Fumikomi", b_power=2)
-    # Spirit diff 4 => 2, Explosive Step +1 => 3, Power lead 2 => 1 block.
+    # Spirit diff 3 => 1, Explosive Step +1 => 2, Power lead 2 => 1 block.
     resolve_prepared_tachiai(state, comp)
-    assert state.position == 2
+    assert state.position == 1
 
 
 def test_full_power_block_prevents_card_bonus_ringout():
     state, comp = setup(a_power=0, a_spirit=1,
                         a_prepared="Explosive Step — Fumikomi",
                         b_power=7, position=2)
-    # Spirit 2 + card 1 = 3, fully blocked by Power lead 7 (3 blocks).
+    # Spirit 1 + card 1 = 2, fully blocked by Power lead 7 (3 blocks).
     resolve_prepared_tachiai(state, comp)
     assert state.position == 2
     assert state.winner is None

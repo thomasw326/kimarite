@@ -54,7 +54,9 @@ def test_tsukidashi_itself_counts_toward_third_card(prior_plays, expected_positi
 
 def test_tsukidashi_third_play_can_push_to_four_without_ringout():
     state = _bout(position=3)
-    state.fighter_a.cards_played_this_turn = 2
+    # This invokes the effect directly; the normal play path would count
+    # Tsukidashi itself before reaching this point.
+    state.fighter_a.cards_played_this_turn = 3
     resolve_kimarite_play_effect(state, Side.A, card_by_name("Tsukidashi"), EffectContext())
     assert state.position == 4
     assert state.winner is None
