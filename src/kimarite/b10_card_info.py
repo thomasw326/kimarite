@@ -69,7 +69,7 @@ CARD_TEXT = {
     "Oshitaoshi": {"timing":"Kimarite","effect":"Win: relative Momentum at least +2, relative Position at least +1 and your Power at least 8. On play: gain 1 Power if Momentum at least +1; gain 1 Momentum if Power exceeds opponent's.","status":"verified"},
     "Yoritaoshi": {"timing":"Kimarite","effect":"Win: usable Grip at least 1, Position at least +2 and Power advantage at least +2. On play: gain 1 Power if you have usable Grip.","status":"verified"},
     "Katasukashi": {"timing":"Kimarite","effect":"Win: opponent has no Grip, Momentum at least +2, and your hand has at least 4 more cards. On play: if Momentum at least +1 and discard pile is nonempty, recover one discarded card to hand.","status":"verified"},
-    "Tsukiotoshi": {"timing":"Kimarite","effect":"Win: you have no Grip, Momentum at least +1, your Power is at least 3 below opponent's, and opponent is Unstable. On play: gain 1 additional Play.","status":"verified"},
+    "Tsukiotoshi": {"timing":"Kimarite","effect":"Win: you have no Grip, Momentum at least +2, your Power is at least 3 below opponent's, and opponent is Unstable. On play: gain 1 additional Play.","status":"verified"},
     "Tottari": {"timing":"Kimarite","effect":"Win: you have no Grip, reduced opponent Grip this turn, and opponent discard pile contains at least 7 cards. On play: look at top 3 opponent deck cards and discard a selected one.","status":"verified"},
     "Uwatenage": {"timing":"Kimarite","effect":"Win: Deep Left Grip, Momentum at least +1 and Position nonnegative. On play: establish Left Grip if Momentum nonnegative.","status":"verified"},
     "Shitatenage": {"timing":"Kimarite","effect":"Win: Deep Right Grip, Momentum at least +1 and Position nonnegative. On play: gain 1 Momentum if you have Right Grip.","status":"verified"},
@@ -86,7 +86,7 @@ CARD_TEXT = {
     "Okuritaoshi": {"timing":"Generated Kimarite","effect":"Generated-only Kimarite. Win: Power at least 8 and Momentum at least +1.","status":"verified"},
     "Tsuriotoshi": {"timing":"Kimarite","effect":"Win: your Power + relative Momentum + usable total Grip is at least 15. On play: choose gain 1 Power, 1 Momentum or improve your shallower Grip.","status":"verified"},
     "Sukuinage": {"timing":"Kimarite","effect":"Win: no Grip, Momentum at least +2, and hand advantage at least 4. On play: draw 1 if you have no Grip.","status":"verified"},
-    "Utchari": {"timing":"Kimarite","effect":"Win: you gained Momentum this turn and Position is -3 or lower. On play: if behind on Position, look at 2 and keep 1.","status":"verified"},
+    "Utchari": {"timing":"Kimarite","effect":"Win: you gained Momentum this turn and Position is -4 or lower. On play: if behind on Position, look at 2 and keep 1.","status":"verified"},
     "Uwatedashinage": {"timing":"Kimarite","effect":"Win: Left Grip, Momentum at least +1, and your Power at least 5 below opponent's. On play: draw 1; optionally discard 1 card to establish Left Grip.","status":"verified"},
 }
 GLOSSARY = {

@@ -1,9 +1,9 @@
-name: B12 7080-bout final card nerfs retest
+name: B12 7080-bout Utchari/Tsukiotoshi threshold retest
 
 on:
   push:
     branches:
-      - experiment/b12-tsukidashi-third-play-push-v1
+      - experiment/b12-utchari-minus4-tsukiotoshi-mom2-v1
     paths:
       - 'data/b12_60_framework_decks.json'
       - 'scripts/b12_60_big_test.py'
@@ -16,6 +16,7 @@ on:
       - 'src/kimarite/catalog.py'
       - 'src/kimarite/effects.py'
       - 'tests/test_b12_card_expansion.py'
+      - 'tests/test_b12_utchari_tsukiotoshi_thresholds.py'
       - 'src/kimarite/b10_card_info.py'
       - 'tests/test_v5_tsuki_kimarite_exchange.py'
       - 'tests/test_b12_position_ring_oshidashi.py'
@@ -38,7 +39,7 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install -e '.[dev]'
       - name: Current engine tests and B12 deck validation
-        run: python -m pytest -q tests/test_b12_60_big_test.py tests/test_b12_tachiai_push_order.py tests/test_b12_position_ring_oshidashi.py tests/test_v5_tsuki_kimarite_exchange.py tests/test_tachiai.py tests/test_v44_tachiai.py tests/test_setup.py tests/test_b12_card_expansion.py tests/test_b11_all_kimarite_checks.py
+        run: python -m pytest -q tests/test_b12_60_big_test.py tests/test_b12_tachiai_push_order.py tests/test_b12_position_ring_oshidashi.py tests/test_b12_utchari_tsukiotoshi_thresholds.py tests/test_v5_tsuki_kimarite_exchange.py tests/test_tachiai.py tests/test_v44_tachiai.py tests/test_setup.py tests/test_b12_card_expansion.py tests/test_b11_all_kimarite_checks.py
       - name: Verify original B12 deck snapshot is unchanged
         run: test "$(git hash-object data/b12_60_framework_decks.json)" = 92618ce1d60ec8591381f045547dbac3f8b056f3
       - name: Validate 28-card and 40-card rosters
@@ -54,7 +55,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-final-nerfs-smoke-results
+          name: b12-thresholds-smoke-results
           path: |
             artifacts/b12_smoke/
             artifacts/b12_smoke_report/
@@ -89,7 +90,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-final-${{ matrix.mode }}-shard-${{ matrix.shard }}
+          name: b12-thresholds-${{ matrix.mode }}-shard-${{ matrix.shard }}
           path: artifacts/b12_shard/*.jsonl
           if-no-files-found: ignore
 
@@ -105,7 +106,7 @@ jobs:
           python-version: '3.11'
       - uses: actions/download-artifact@v4
         with:
-          pattern: b12-final-*-shard-*
+          pattern: b12-thresholds-*-shard-*
           path: artifacts/b12_shards
           merge-multiple: true
       - name: Fail on missing, duplicate or non-mirrored bouts
@@ -113,6 +114,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-final-nerfs-7080-combined-diagnostics
+          name: b12-thresholds-7080-combined-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore
