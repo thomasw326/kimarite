@@ -1018,15 +1018,16 @@ def _shikiri(state: BoutState, side: Side, card: Card, context: EffectContext) -
 
 
 def _aggressive_shiko_stomp(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    has_momentum_lead = state.momentum * state.sign(side) > 0
+    # Both conditions are evaluated before its Push changes Position.
+    has_position_lead = state.position * state.sign(side) > 0
     has_power_lead = state.fighter(side).power > state.opponent(side).power
     gain_push(state, side, 1)
     if state.winner is not None:
         return
-    if has_momentum_lead:
-        gain_power(state, side, 1)
-    if has_power_lead and state.winner is None:
+    if has_position_lead:
         gain_momentum(state, side, 1)
+    if has_power_lead and state.winner is None:
+        gain_power(state, side, 1)
 
 
 def _reckless_charge(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:

@@ -61,7 +61,7 @@ def test_sonkyo_and_new_shiko_are_distinct():
     state.fighter_b.power = 4
     state.momentum = 1
     play_card(state, Side.A, state.fighter_a.hand[0])
-    assert (state.position, state.momentum, state.fighter_a.power) == (1, 2, 6)
+    assert (state.position, state.momentum, state.fighter_a.power) == (1, 1, 6)
     assert not state.fighter_a.temporary_zone
     assert [c.name for c in state.fighter_a.discard_pile] == ["Shiko Stomp"]
 
@@ -291,3 +291,69 @@ def test_approved_henka_and_explosive_step_orb_nerfs():
     explosive = card_by_name("Explosive Step — Fumikomi")
     assert (henka.power, henka.technique, henka.spirit) == (0, 2, 0)
     assert (explosive.power, explosive.technique, explosive.spirit) == (0, 0, 2)
+
+
+@pytest.mark.parametrize(
+    "position,power_a,power_b,expected_position,expected_momentum,expected_power",
+    [
+        (0, 5, 4, 1, 0, 6),    # power lead only: Power, not Momentum
+        (1, 4, 5, 2, 1, 4),    # position lead only: Momentum, not Power
+        (1, 5, 4, 2, 1, 6),    # both leads: both bonuses
+        (0, 4, 5, 1, 0, 4),    # no lead: Push only
+        (-1, 4, 5, 0, 0, 4),   # reaching neutral is not a pre-play lead
+    ],
+)
+def test_shiko_stomp_checks_independent_pre_play_leads(
+    position, power_a, power_b, expected_position, expected_momentum, expected_power
+):
+    state, _ = bout(hand=[card_by_name("Shiko Stomp")])
+    state.position = position
+    state.fighter_a.power, state.fighter_b.power = power_a, power_b
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert state.position == expected_position
+    assert state.momentum == expected_momentum
+    assert state.fighter_a.power == expected_power
+    assert not state.fighter_a.temporary_zone
+
+
+def test_belt_slap_orb_change_retains_exchange_effect():
+    from kimarite.effects import resolve_exchange_effect
+    from kimarite.tachiai import TachiaiComparison
+    belt = card_by_name("Belt Slap")
+    assert (belt.power, belt.technique, belt.spirit) == (2, 0, 2)
+    assert "Belt Slap" in EXCHANGE_EFFECTS
+    # The existing Spirit lead threshold and unconditional Push remain unchanged.
+    assert "at least 3" in __import__("kimarite.b10_card_info", fromlist=["CARD_TEXT"]).CARD_TEXT["Belt Slap"]["effect"]
+
+
+def test_get_underneath_exchange_search_gives_first_opponent_kimarite_to_zone():
+    first = card_by_name("Yorikiri")
+    second = card_by_name("Oshitaoshi")
+    blank = blank_card()
+    state, _ = bout(hand=[card_by_name("Get Underneath")],
+                    opponent_draw=[blank, first, blank, second])
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert (state.position, state.momentum) == (1, 1)
+    assert [c.name for c in state.fighter_b.kimarite_zone] == ["Yorikiri"]
+    assert [c.name for c in state.fighter_b.draw_pile] == [
+        "Blank", "Blank", "Oshitaoshi"
+    ]
+    assert not state.fighter_a.temporary_zone
+
+
+def test_get_underneath_no_kimarite_in_opponent_draw_has_no_search_downside():
+    state, _ = bout(hand=[card_by_name("Get Underneath")],
+                    opponent_draw=[blank_card(), blank_card()])
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert (state.position, state.momentum) == (1, 1)
+    assert not state.fighter_b.kimarite_zone
+
+
+def test_get_underneath_search_not_repeated_without_another_kimarite():
+    first = card_by_name("Yorikiri")
+    state, _ = bout(hand=[card_by_name("Get Underneath"), card_by_name("Get Underneath")],
+                    opponent_draw=[blank_card(), first])
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert [c.name for c in state.fighter_b.kimarite_zone] == ["Yorikiri"]
+    assert (state.position, state.momentum) == (2, 2)
