@@ -49,7 +49,7 @@ def test_new_cards_registered_with_orbs():
         "Kachiage": (3, 0, 0),
         "Nekodamashi": (1, 1, 2),
         "Maesabaki": (0, 2, 1),
-        "Deashi": (2, 0, 2),
+        "Deashi": (2, 0, 1),
         "Butsukari": (2, 0, 1),
         "Denshamichi": (1, 0, 2),
         "Spin Away": (0, 1, 2),
@@ -100,7 +100,7 @@ def test_butsukari_checks_are_independent_and_mills_one():
     bout.momentum = 1
     bout.fighter_a.draw_pile = [card_by_name("Oshi")]
     effect(bout, "Butsukari")
-    assert bout.fighter_b.power == 5
+    assert bout.fighter_b.power == 4
     assert bout.fighter_b.unstable
     assert len(bout.fighter_a.discard_pile) == 1
     assert not bout.fighter_a.draw_pile
