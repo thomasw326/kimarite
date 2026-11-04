@@ -301,10 +301,10 @@ def test_approved_henka_and_explosive_step_orb_nerfs():
         (1, 5, 4, 2, 1, 6),    # Position lead -> Power, then Power lead -> Push
         (0, 4, 5, 0, 1, 4),    # no lead -> Momentum only
         (-1, 4, 5, -1, 1, 4), # no Position lead -> no Power or Push
-        (1, 4, 4, 2, 1, 5),    # Power gained from Position breaks tie -> Push
+        (1, 4, 4, 1, 1, 5),    # Power gained from Position cannot unlock Push
     ],
 )
-def test_shiko_stomp_ordered_momentum_position_power_push(
+def test_shiko_stomp_independent_pre_play_conditions(
     position, power_a, power_b, expected_position, expected_momentum, expected_power
 ):
     state, _ = bout(hand=[card_by_name("Shiko Stomp")])

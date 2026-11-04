@@ -1018,14 +1018,16 @@ def _shikiri(state: BoutState, side: Side, card: Card, context: EffectContext) -
 
 
 def _aggressive_shiko_stomp(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    # Ordered payoff: unconditional Momentum, then Position -> Power,
-    # then evaluate the current Power lead -> Push.
+    # Snapshot both conditions before the effect: Power gained here must not
+    # create an otherwise unavailable Push on the same play.
+    has_position_lead = state.position * state.sign(side) > 0
+    has_power_lead = state.fighter(side).power > state.opponent(side).power
     gain_momentum(state, side, 1)
     if state.winner is not None:
         return
-    if state.position * state.sign(side) > 0:
+    if has_position_lead:
         gain_power(state, side, 1)
-    if state.winner is None and state.fighter(side).power > state.opponent(side).power:
+    if has_power_lead and state.winner is None:
         gain_push(state, side, 1)
 
 
