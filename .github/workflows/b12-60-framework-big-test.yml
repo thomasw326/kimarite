@@ -115,7 +115,7 @@ jobs:
           path: artifacts/b12_shards
           merge-multiple: true
       - name: Fail on missing, duplicate or non-mirrored bouts
-        run: python scripts/b12_60_report.py --input-root artifacts/b12_shards --output-dir artifacts/b12_big_test_report --repetitions 1
+        run: python scripts/b12_60_report.py --input-root artifacts/b12_shards --output-dir artifacts/b12_big_test_report --repetitions 5
       - uses: actions/upload-artifact@v4
         if: always()
         with:
