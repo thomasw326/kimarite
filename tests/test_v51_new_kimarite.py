@@ -57,13 +57,13 @@ def test_sukuinage_requires_no_grip_momentum_two_and_four_extra_hand_cards():
     assert not kimarite_is_satisfied(s, Side.A, k)
 
 
-def test_utchari_requires_gaining_momentum_at_position_minus_three_or_worse():
+def test_utchari_requires_gaining_momentum_at_position_minus_four():
     s, _ = bout()
     k = card_by_name("Utchari")
     s.position = -3
     assert not kimarite_is_satisfied(s, Side.A, k)
     s.fighter_a.gained_momentum_this_turn = True
-    assert kimarite_is_satisfied(s, Side.A, k)
+    assert not kimarite_is_satisfied(s, Side.A, k)
     s.position = -4
     assert kimarite_is_satisfied(s, Side.A, k)
     s.position = -2

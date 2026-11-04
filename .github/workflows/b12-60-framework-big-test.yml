@@ -1,9 +1,9 @@
-name: B12 7080-bout Utchari/Tsukiotoshi threshold retest
+name: B12 35400-bout card-strength audit
 
 on:
   push:
     branches:
-      - experiment/b12-utchari-minus4-tsukiotoshi-mom2-v1
+      - experiment/b12-card-strength-35400-v1
     paths:
       - 'data/b12_60_framework_decks.json'
       - 'scripts/b12_60_big_test.py'
@@ -23,6 +23,10 @@ on:
       - 'tests/test_b12_position_ring_oshidashi.py'
       - 'tests/test_b12_tachiai_push_order.py'
       - '.github/workflows/b12-60-framework-big-test.yml'
+      - 'tests/test_b11_hikiotoshi_exchange_choice.py'
+      - 'tests/test_b11_recent_kimarite_fixes.py'
+      - 'tests/test_b9_cards.py'
+      - 'tests/test_v51_new_kimarite.py'
   workflow_dispatch:
 
 permissions:
@@ -56,7 +60,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-thresholds-smoke-results
+          name: b12-card-strength-smoke-results
           path: |
             artifacts/b12_smoke/
             artifacts/b12_smoke_report/
@@ -79,11 +83,11 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -e '.[dev]'
-      - name: Seeded B12 full mirrored round robin (one global repetition per mode)
+      - name: Seeded B12 mirrored round robin (five global repetitions per mode)
         run: >
           python scripts/b12_60_big_test.py
           --mode ${{ matrix.mode }}
-          --repetitions 1
+          --repetitions 5
           --seed 20261102
           --shards 12
           --shard-index ${{ matrix.shard }}
@@ -91,7 +95,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-thresholds-${{ matrix.mode }}-shard-${{ matrix.shard }}
+          name: b12-card-strength-${{ matrix.mode }}-shard-${{ matrix.shard }}
           path: artifacts/b12_shard/*.jsonl
           if-no-files-found: ignore
 
@@ -107,7 +111,7 @@ jobs:
           python-version: '3.11'
       - uses: actions/download-artifact@v4
         with:
-          pattern: b12-thresholds-*-shard-*
+          pattern: b12-card-strength-*-shard-*
           path: artifacts/b12_shards
           merge-multiple: true
       - name: Fail on missing, duplicate or non-mirrored bouts
@@ -115,6 +119,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-thresholds-7080-combined-diagnostics
+          name: b12-card-strength-35400-combined-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore
