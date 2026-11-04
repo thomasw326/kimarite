@@ -918,7 +918,7 @@ def _deashi(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 def _butsukari(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if state.fighter(side).power > state.opponent(side).power:
         if not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose Power"):
-            lose_power(state, state.opponent_side(side), 1)
+            lose_power(state, state.opponent_side(side), 2)
     if state.momentum * state.sign(side) >= 1:
         make_unstable(state, state.opponent_side(side))
     mill_cards(state, side, 1)

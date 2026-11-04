@@ -357,3 +357,25 @@ def test_get_underneath_search_not_repeated_without_another_kimarite():
     play_card(state, Side.A, state.fighter_a.hand[0])
     assert [c.name for c in state.fighter_b.kimarite_zone] == ["Yorikiri"]
     assert (state.position, state.momentum) == (2, 2)
+
+def test_butsukari_power_lead_loses_two_power_and_mills_one():
+    state, _ = bout(hand=[card_by_name("Butsukari")],
+                    draw=[blank_card(), blank_card()])
+    state.fighter_a.power = 5
+    state.fighter_b.power = 3
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert state.fighter_b.power == 1
+    assert len(state.fighter_a.draw_pile) == 1
+    assert not state.fighter_b.unstable
+
+
+def test_butsukari_without_power_lead_keeps_power_loss_conditional():
+    state, _ = bout(hand=[card_by_name("Butsukari")],
+                    draw=[blank_card(), blank_card()])
+    state.fighter_a.power = 3
+    state.fighter_b.power = 3
+    state.momentum = 1
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert state.fighter_b.power == 3
+    assert state.fighter_b.unstable
+    assert len(state.fighter_a.draw_pile) == 1
