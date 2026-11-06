@@ -544,6 +544,9 @@ def _get_underneath(
     gain_push(state, side, 1)
     if state.winner is None:
         give_opponent_kimarite(state, side, card.name)
+    # Exchange-only exhausted penalty, using the current discard size.
+    if len(state.fighter(side).discard_pile) >= 7:
+        make_unstable(state, side)
 
 
 def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:

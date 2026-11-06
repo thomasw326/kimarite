@@ -379,3 +379,34 @@ def test_butsukari_without_power_lead_keeps_power_loss_conditional():
     assert state.fighter_b.power == 3
     assert state.fighter_b.unstable
     assert len(state.fighter_a.draw_pile) == 1
+
+@pytest.mark.parametrize("discard_count,expected_unstable", [
+    (0, False), (6, False), (7, True), (8, True),
+])
+def test_get_underneath_exchange_exhausted_gives_self_unstable(
+    discard_count, expected_unstable
+):
+    state, blank = bout(hand=[card_by_name("Get Underneath")])
+    state.fighter_a.discard_pile = [blank_card()] * discard_count
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert state.fighter_a.unstable is expected_unstable
+    assert state.fighter_b.unstable is False
+    assert (state.position, state.momentum) == (1, 1)
+
+
+def test_get_underneath_tachiai_no_exhaustion_penalty():
+    from kimarite.tachiai import compare_tachiai
+    from kimarite.tachiai_effects import resolve_prepared_tachiai
+    get_underneath = card_by_name("Get Underneath")
+    blank = blank_card()
+    a = Wrestler("A", 2, 2, 2, blank, get_underneath, blank)
+    b = Wrestler("B", 2, 2, 2, blank, blank, blank)
+    state = BoutState(
+        FighterState(a, discard_pile=[blank_card()] * 7),
+        FighterState(b, draw_pile=[card_by_name("Yorikiri")]),
+    )
+    resolve_prepared_tachiai(
+        state, compare_tachiai(a, b),
+        committed_cards={Side.A: (get_underneath,), Side.B: (blank,)},
+    )
+    assert not state.fighter_a.unstable
