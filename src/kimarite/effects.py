@@ -365,7 +365,7 @@ def _salt_throw(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
-    if len(fighter.discard_pile) >= 7:
+    if fighter.discard_pile:
         fighter.draw_pile.extend(fighter.discard_pile)
         fighter.discard_pile.clear()
         state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")

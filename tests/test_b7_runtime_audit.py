@@ -325,3 +325,18 @@ def test_b7_two_real_bouts_finish_using_the_reviewed_rules():
             difficulty=0,experimental_final22=True)
         assert result.completed, result.unsupported_reason
         assert result.state.winner is not None
+
+
+@pytest.mark.parametrize("discard_count", [0, 1, 2, 6, 7, 10])
+def test_salt_throw_exchange_recycles_any_discard_count(discard_count):
+    s = new_state("Salt Throw", deck_length=3)
+    original_draw = list(s.fighter_a.draw_pile)
+    discarded = [
+        Card(950_000 + i, f"Discarded {i}") for i in range(discard_count)
+    ]
+    s.fighter_a.discard_pile = list(discarded)
+    resolve_exchange_effect(s, Side.A, card_by_name("Salt Throw"), EffectContext())
+    assert s.fighter_a.draw_pile == original_draw + discarded
+    assert not s.fighter_a.discard_pile
+    assert s.fighter_a.plays_remaining == 3
+    assert [t.card.name for t in s.fighter_a.temporary_zone] == ["Salt Throw"]
