@@ -59,7 +59,7 @@ def remove_temporary(
     if disrupted:
         if card.name in {"Denshamichi", "Spin Away"}:
             opponent_side = state.opponent_side(side)
-            finisher = "Okuritaoshi" if card.name == "Denshamichi" else "Okuridashi"
+            finisher = "Okuridashi" if card.name == "Denshamichi" else "Okuritaoshi"
             state.opponent(side).kimarite_zone.append(card_by_name(finisher))
             state.log(f"{finisher} is granted to the opponent Kimarite Zone.")
             if card.name == "Denshamichi":
