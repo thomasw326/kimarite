@@ -345,3 +345,12 @@ def test_get_underneath_is_immediate_not_temporary():
     assert bout.position == 1
     assert not bout.fighter_a.temporary_zone
 
+
+def test_nekodamashi_disruption_has_no_momentum_penalty():
+    bout = state()
+    bout.momentum = 2
+    effect(bout, "Nekodamashi")
+    instance = bout.fighter_a.temporary_zone[0]
+    remove_temporary(bout, Side.A, instance, disrupted=True)
+    assert bout.momentum == 2
+    assert not bout.fighter_a.temporary_zone

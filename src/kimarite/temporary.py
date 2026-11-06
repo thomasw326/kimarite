@@ -64,8 +64,6 @@ def remove_temporary(
             state.log(f"{finisher} is granted to the opponent Kimarite Zone.")
             if card.name == "Denshamichi":
                 state.position = state.sign(state.opponent_side(side)) * abs(state.position)
-        elif card.name == "Nekodamashi":
-            lose_momentum(state, side, 1)
         elif card.name == "Henka":
             make_unstable(state, side)
         if card.name in {
