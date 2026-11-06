@@ -286,6 +286,34 @@ def test_chiri_and_shikiri_prepared_tachiai_enter_persistent_temporaries():
     }
 
 
+def test_shikiri_exchange_grants_one_additional_play():
+    shikiri = card_by_name("Shikiri")
+    state, _ = bout(hand=[shikiri])
+    before = state.fighter_a.plays_remaining
+    play_card(state, Side.A, shikiri)
+    # The +1 Play replaces the Play spent, allowing another card this turn.
+    assert state.fighter_a.plays_remaining == before
+    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Shikiri"]
+
+
+def test_shikiri_prepared_tachiai_does_not_grant_play():
+    from kimarite.tachiai import compare_tachiai
+    from kimarite.tachiai_effects import resolve_prepared_tachiai
+
+    shikiri = card_by_name("Shikiri")
+    blank = blank_card()
+    a = Wrestler("A", 2, 2, 2, blank, shikiri, blank)
+    b = Wrestler("B", 2, 2, 2, blank, blank, blank)
+    state = BoutState(FighterState(a), FighterState(b))
+    before = state.fighter_a.plays_remaining
+    resolve_prepared_tachiai(
+        state, compare_tachiai(a, b),
+        committed_cards={Side.A: (shikiri,), Side.B: (blank,)},
+    )
+    assert state.fighter_a.plays_remaining == before
+    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Shikiri"]
+
+
 def test_approved_henka_and_explosive_step_orb_nerfs():
     henka = card_by_name("Henka")
     explosive = card_by_name("Explosive Step — Fumikomi")

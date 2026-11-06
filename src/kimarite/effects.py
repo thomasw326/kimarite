@@ -1016,6 +1016,7 @@ def _chiri_chozu(state: BoutState, side: Side, card: Card, context: EffectContex
 
 def _shikiri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     add_temporary(state, side, card, phase="exchange")
+    add_play(state, side, 1)
 
 
 def _aggressive_shiko_stomp(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
