@@ -354,3 +354,33 @@ def test_nekodamashi_disruption_has_no_momentum_penalty():
     remove_temporary(bout, Side.A, instance, disrupted=True)
     assert bout.momentum == 2
     assert not bout.fighter_a.temporary_zone
+
+
+@pytest.mark.parametrize("owner", [Side.A, Side.B])
+@pytest.mark.parametrize("relative_before", [-4, -3, -2, -1, 0, 1, 2, 3, 4])
+def test_denshamichi_disruption_always_favors_opponent_with_same_distance(
+    owner, relative_before
+):
+    """Reversal converts any owner's Position lead into a matching deficit."""
+    bout = state()
+    instance = add_temporary(bout, owner, card_by_name("Denshamichi"), phase="exchange")
+    bout.position = bout.sign(owner) * relative_before
+    prior_momentum = bout.momentum
+
+    remove_temporary(bout, owner, instance, disrupted=True)
+
+    assert bout.position * bout.sign(owner) == -abs(relative_before)
+    assert bout.position * bout.sign(bout.opponent_side(owner)) == abs(relative_before)
+    assert bout.momentum == prior_momentum
+    assert any(c.name == "Okuritaoshi" for c in bout.opponent(owner).kimarite_zone)
+    assert not any(c.name == "Okuritaoshi" for c in bout.fighter(owner).kimarite_zone)
+
+
+@pytest.mark.parametrize("owner", [Side.A, Side.B])
+def test_denshamichi_without_disruption_preserves_position_and_gives_no_finisher(owner):
+    bout = state()
+    instance = add_temporary(bout, owner, card_by_name("Denshamichi"), phase="exchange")
+    bout.position = bout.sign(owner) * 3
+    remove_temporary(bout, owner, instance, disrupted=False)
+    assert bout.position * bout.sign(owner) == 3
+    assert not any(c.name == "Okuritaoshi" for c in bout.opponent(owner).kimarite_zone)
