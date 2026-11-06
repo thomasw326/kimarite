@@ -137,14 +137,14 @@ def test_b7_oshi_requires_discard_and_draws_and_mills_through_real_play():
     assert any(p.card.name == "Oshi" for p in candidate_plays(choose, Side.A, compared))
 
 
-def test_b7_explosive_step_only_gains_push_at_nonpositive_momentum_and_mills_two():
+def test_b7_explosive_step_always_gains_push_and_mills_two():
     s = new_state("Explosive Step — Fumikomi")
     play_named(s, "Explosive Step — Fumikomi")
     assert (s.position, s.momentum, len(s.fighter_a.draw_pile)) == (1, 0, 4)
     good = new_state("Explosive Step — Fumikomi")
     good.momentum = 1
     play_named(good, "Explosive Step — Fumikomi")
-    assert (good.position, good.momentum, len(good.fighter_a.draw_pile)) == (0, 1, 4)
+    assert (good.position, good.momentum, len(good.fighter_a.draw_pile)) == (1, 1, 4)
 
 
 def test_b7_salt_throw_gets_one_play_in_exchange_but_not_tachiai():
