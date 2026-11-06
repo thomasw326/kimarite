@@ -172,9 +172,7 @@ def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 
 def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    before = state.momentum * state.sign(side)
-    if before <= 0:
-        gain_push(state, side, 1)
+    gain_push(state, side, 1)
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:

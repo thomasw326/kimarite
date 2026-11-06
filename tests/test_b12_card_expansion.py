@@ -410,3 +410,15 @@ def test_get_underneath_tachiai_no_exhaustion_penalty():
         committed_cards={Side.A: (get_underneath,), Side.B: (blank,)},
     )
     assert not state.fighter_a.unstable
+
+@pytest.mark.parametrize("relative_momentum", [-3, -1, 0, 1, 3])
+def test_explosive_step_always_pushes_and_mills_two_on_exchange(relative_momentum):
+    card = card_by_name("Explosive Step — Fumikomi")
+    state, _ = bout(hand=[card], draw=[blank_card() for _ in range(3)])
+    state.momentum = relative_momentum
+    play_card(state, Side.A, card)
+    assert state.position == 1
+    assert state.momentum == relative_momentum
+    assert len(state.fighter_a.draw_pile) == 1
+    assert sum(c.name == "Blank" for c in state.fighter_a.discard_pile) == 2
+    assert state.winner is None
