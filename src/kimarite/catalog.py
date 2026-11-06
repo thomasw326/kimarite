@@ -105,7 +105,7 @@ B12_CARD_POOL: tuple[Card, ...] = (
     Card(14004, "Hakkeyoi!", 0, 0, 3),
     Card(14005, "Hazuoshi", 1, 1, 1),
     Card(14006, "Inashi", 1, 1, 2),
-    Card(14007, "Chiri-chozu", 1, 3, 1),
+    Card(14007, "Chiri-chozu", 1, 1, 1),
     Card(14008, "Shikiri", 1, 2, 2),
     Card(14009, "Shiko Stomp", 1, 0, 4),
     Card(14010, "Kubinage", 2, 0, 1, True),

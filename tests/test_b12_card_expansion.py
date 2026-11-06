@@ -36,7 +36,7 @@ EXPECTED = {
     "Renzoku": (0, 3, 0), "Meguri": (0, 2, 1),
     "Nokotta!": (1, 0, 2), "Hakkeyoi!": (0, 0, 3),
     "Hazuoshi": (1, 1, 1), "Inashi": (1, 1, 2),
-    "Chiri-chozu": (1, 3, 1), "Shikiri": (1, 2, 2),
+    "Chiri-chozu": (1, 1, 1), "Shikiri": (1, 2, 2),
     "Shiko Stomp": (1, 0, 4),
     "Kubinage": (2, 0, 1), "Kimedashi": (2, 0, 1),
     "Kimetaoshi": (3, 0, 0),

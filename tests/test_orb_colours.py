@@ -22,7 +22,7 @@ def test_canonical_stat_to_orb_colours():
     ("Sidestep", "🟢🟢🟢"),
     ("Stare Down", "🟣🟢🟠"),
     ("Spin Away", "🟢🟠🟠"),
-    ("Chiri-chozu", "🟣🟢🟢🟢🟠"),
+    ("Chiri-chozu", "🟣🟢🟠"),
     ("Hakkeyoi!", "🟠🟠🟠"),
     ("Shiko Stomp", "🟣🟠🟠🟠🟠"),
     ("Oshi", "🟠"),
