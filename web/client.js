@@ -55,7 +55,7 @@ function zoneEffect(c,zone){
  if(c.name==='Kannuki')return 'While active: suppresses opponent Grip benefits and Grip-building cards. Next turn: reduce both opposing Grips one level and make opponent Unstable (subject to prevention).';
  if(c.name==='Henka')return 'Blocks the first incoming Push. If it survives: gain 1 Momentum and make opponent Unstable. If disrupted: you become Unstable.';
  if(c.name==='Sidestep')return 'While side-by-side: Push is suppressed. On survival: Momentum determines favourable orientation; opponent becomes Unstable.';
- if(c.name==='Spin Away')return 'While active: Push is suppressed. On survival: Momentum determines favourable orientation. If disrupted: opponent gains Okuridashi.';
+ if(c.name==='Spin Away')return 'While active: Push is suppressed. On survival: Momentum determines favourable orientation. If disrupted: opponent gains Okuritaoshi.';
  const m=d.match(/(?:Temporary(?: \([^)]*\))?|While active:|Next turn:|On each later turn:|At the start of your next turn:)[\s:]*(.*)$/i);
  return m?m[0]:d.replace(/^.*?Exchange:\s*/,'')||'Active effect unavailable';
 }
