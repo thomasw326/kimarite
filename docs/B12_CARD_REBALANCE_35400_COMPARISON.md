@@ -13,3 +13,42 @@ Experimental branch only; **no changes to the 60 source wrestler decks**, and no
 Both modes: 1770 unordered pairings × two seats × five repeats = 17,700 bouts each, 35,400 total.
 Report outputs: played-vs-unplayed, prepared Tachiai, designated top deck, inclusion/copy counts, starting/deck-origin and finishing Kimarite, win methods, contributions, exposure and timing.
 No causal interpretation of played-vs-unplayed; compare win rate shifts and card-role deltas within deck and by mode, noting sampling uncertainty.
+
+## Second-pass card-review approval set — 6 November 2026
+
+The following changes are implemented on the B12 review branch and are the
+**only additional card-balance changes approved** for the next comparison.
+The historical text above describes the *first* rebalance run, not current rules.
+
+- Get Underneath: when played during Exchange while Exhausted (7+ discarded),
+  its owner becomes Unstable. Tachiai has no new penalty.
+- Nekodamashi: remove the -1 Momentum penalty if its Temporary is disrupted.
+- Denshamichi and Spin Away: swap disrupted generated Okuri finishers.
+  Denshamichi grants opponent **Okuridashi** and reverses Position;
+  Spin Away grants opponent **Okuritaoshi** without the Denshamichi Position flip.
+- Explosive Step — Fumikomi: Exchange grants +1 Push at any Momentum; mills 2.
+  Tachiai Spirit conditional, orbs 🟠🟠 and milling unchanged.
+- Chiri-chozu: reduce orbs to 🟣🟢🟠 (1 Power, 1 Technique, 1 Spirit).
+  Permanent Temporary trigger unchanged.
+- Salt Throw: Exchange moves the entire Discard Pile to the bottom of the Draw
+  Pile without a size threshold; other effects and five orbs unchanged.
+- Shikiri: Exchange grants +1 Play and enters its permanent Temporary;
+  Tachiai only enters the Temporary; keep orbs 🟣🟢🟢🟠🟠.
+- Sheer Grit: **retain unchanged**; strong performance in its current decks is
+  insufficient justification for an immediate nerf.
+
+### Rerun protocol
+
+- Keep the original 60 deck JSON checksum and both 28 / 40 modes; existing
+  style AI and its 15-by-4 mapping remain unchanged.
+- Same seed **20261102**, 1,770 unordered matchups, mirrored directions,
+  five repeats per deck mode; target **35,400** completed bouts.
+- Smoke/test gate before 24 shards; aggregation must reject missing or
+  duplicate bouts, errors, and nonmirrored pairs.
+- In addition to per-framework outputs, `card_role_comparisons.csv` explicitly
+  reports win rates and sample sizes for **included vs excluded**, **Tachiai
+  selected vs not selected among included decks**, **top-deck selected vs not
+  selected among included decks**, and **Exchange played vs not played among
+  included decks**, both by deck mode and combined.
+- Observational split results should not be presented as causal effects.
+- Review outcomes before any further changes to the 60 wrestler decks or main.

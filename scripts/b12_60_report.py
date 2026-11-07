@@ -59,6 +59,9 @@ def main():
     assigned = defaultdict(tally)
     played = defaultdict(tally)
     included = defaultdict(tally)
+    role_comparisons = defaultdict(tally)
+    all_fighters = defaultdict(tally)
+    all_deck_cards = set()
     exposure = defaultdict(tally)
     starting_kim = defaultdict(tally)
     deck_kim = defaultdict(tally)
@@ -108,6 +111,8 @@ def main():
                 frm = f["framework"]
                 enemy = bout["fighters"]["B" if side == "A" else "A"]["framework"]
                 won = (side == win_side)
+                add(all_fighters, mode, won)
+                all_deck_cards.update(f["deck"])
                 add(framework, (mode, frm), won)
                 add(matchup, (mode, frm, enemy, side), won)
                 add(method, (mode, frm, win_source, win_method), won)
@@ -124,6 +129,20 @@ def main():
                     copy_label = f"{copies}-copy"
                     add(included, (mode, frm, card_name, copy_label), won)
                 plays_by_name = Counter(event["card"] for event in f["plays"])
+                for card_name in set(f["deck"]):
+                    add(role_comparisons, (mode, card_name, "deck_inclusion", "included"), won)
+                    add(role_comparisons, (
+                        mode, card_name, "prepared_tachiai",
+                        "selected" if f["prepared_tachiai"] == card_name else "not_selected",
+                    ), won)
+                    add(role_comparisons, (
+                        mode, card_name, "top_deck",
+                        "selected" if f["top_deck"] == card_name else "not_selected",
+                    ), won)
+                    add(role_comparisons, (
+                        mode, card_name, "exchange_play",
+                        "played" if card_name in plays_by_name else "not_played",
+                    ), won)
                 play_origin_pairs = {(event["card"], event["origin"]) for event in f["plays"]}
                 for card_name in set(f["deck"]):
                     group = "played" if card_name in plays_by_name else "unplayed"
@@ -199,6 +218,61 @@ def main():
     dump_store("card_played_vs_unplayed.csv", ["mode", "framework", "card", "play_status"], played)
     dump_store("card_inclusion.csv", ["mode", "framework", "card", "copies"], included)
     dump_store("hand_exposure.csv", ["mode", "framework", "card", "type"], exposure)
+
+    # Explicit, denominator-safe comparisons for every review. Non-inclusion
+    # uses all completed wrestler-bouts in the mode, not only card owners.
+    # Tachiai/top/Exchange counterparts are conditioned on the card's presence
+    # in the deck; these are associations, not randomized treatments.
+    compare_rows = []
+    for report_mode in ("base28", "max40", "combined"):
+        modes = ("base28", "max40") if report_mode == "combined" else (report_mode,)
+        total = {
+            key: sum(all_fighters[m][key] for m in modes)
+            for key in ("wins", "bouts")
+        }
+        for card_name in sorted(all_deck_cards):
+            included_count = {
+                key: sum(role_comparisons[(m, card_name, "deck_inclusion", "included")][key]
+                         for m in modes)
+                for key in ("wins", "bouts")
+            }
+            comparisons = [
+                ("deck_inclusion", "included", included_count),
+                ("deck_inclusion", "not_included", {
+                    key: total[key] - included_count[key]
+                    for key in ("wins", "bouts")
+                }),
+            ]
+            for metric, positive, negative in (
+                ("prepared_tachiai", "selected", "not_selected"),
+                ("top_deck", "selected", "not_selected"),
+                ("exchange_play", "played", "not_played"),
+            ):
+                parts = []
+                for category in (positive, negative):
+                    t = {
+                        key: sum(role_comparisons[(m, card_name, metric, category)][key]
+                                 for m in modes)
+                        for key in ("wins", "bouts")
+                    }
+                    parts.append(t)
+                    comparisons.append((metric, category, t))
+                if any(sum(t[key] for t in parts) != included_count[key]
+                       for key in ("wins", "bouts")):
+                    raise SystemExit(
+                        f"Comparison denominator mismatch: {report_mode}/{card_name}/{metric}"
+                    )
+            for metric, category, counts in comparisons:
+                compare_rows.append(scored_row(
+                    {"mode": report_mode, "card": card_name,
+                     "comparison": metric, "cohort": category}, counts,
+                ))
+    write_csv(
+        output / "card_role_comparisons.csv",
+        ["mode", "card", "comparison", "cohort", "wins", "bouts",
+         "win_rate_percent", "low_sample_n_lt_30"],
+        compare_rows,
+    )
     dump_store("starting_kimarite_performance.csv", ["mode", "framework", "kimarite"], starting_kim)
     dump_store("card_origin_play_rates.csv", ["mode", "framework", "card", "origin"], deck_kim)
 

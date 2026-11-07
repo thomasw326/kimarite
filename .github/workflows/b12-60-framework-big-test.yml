@@ -1,13 +1,16 @@
-name: B12 card-rebalance 35400-bout comparison
+name: B12 second-pass card-balance 35400-bout comparison
 
 on:
   push:
     branches:
-      - experiment/b12-card-review-butsukari2-35400-v1
+      - experiment/b12-shikiri-exchange-plus-play-v1
     paths:
       - 'data/b12_60_framework_decks.json'
       - 'scripts/b12_60_big_test.py'
       - 'scripts/b12_60_report.py'
+      - 'src/kimarite/temporary.py'
+      - 'tests/test_salt_power_water.py'
+      - 'tests/test_orb_colours.py'
       - 'tests/test_b12_60_big_test.py'
       - 'src/kimarite/tachiai.py'
       - 'src/kimarite/tachiai_effects.py'
