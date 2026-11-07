@@ -52,3 +52,7 @@ The historical text above describes the *first* rebalance run, not current rules
   included decks**, both by deck mode and combined.
 - Observational split results should not be presented as causal effects.
 - Review outcomes before any further changes to the 60 wrestler decks or main.
+
+## Results review — 7 November 2026
+
+The second-pass 35,400-bout comparison [completed successfully](https://github.com/thomasw326/kimarite/actions/runs/42322655349). For per-card role splits, first-pass deltas, win-condition changes, sample-size caveats and follow-up priorities, see [B12_SECOND_PASS_35400_RESULTS_REVIEW.md](B12_SECOND_PASS_35400_RESULTS_REVIEW.md). Results were reviewed without any further card changes, deck edits or release-lock changes.
