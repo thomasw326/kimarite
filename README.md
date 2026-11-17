@@ -10,6 +10,10 @@ This B12 implementation retains the B11 browser, player-controlled Tachiai, Exch
 
 **The latest designer-approved, successfully tested playable build is the authority.** If a newer complete branch becomes the approved version, promote its exact working tree to `main` after preserving the old snapshot; do not reconcile backwards against stale `main` rules. See [build governance](docs/BUILD_MAINLINE_POLICY.md) and the [itch.io release roadmap](https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit). The roadmap's BUILD AUDIT tracks current release gaps.
 
+## New-player guide
+
+The browser now includes a brief **first-visit guide** introducing the Heya (management), Dohyō (combat), deck draft, Tachiai, Kimarite, duplication rewards, and the six-tournament year. It is shown only on a fresh visit without an existing save and can be reopened at any time through **How to play**. It is introductory help, not yet a fully guided practice bout.
+
 ## Draft-first six-tournament player campaign (implemented prototype; QA pending)
 
 A player creates **one wrestler**, makes a **simple initial Power / Technique / Spirit allocation**, and drafts their starting card deck. The intended short career is **up to six tournaments**, representing a full sumo year, with **15 bouts per tournament** (at most 90 bouts). The 60 B12 wrestler frameworks are four AI/test configurations for each of 15 personalities, not player creation templates. The older 69 real-wrestler profiles were a brainstorming exercise.
@@ -49,7 +53,7 @@ Open the local address printed by the service. The hosted deployment of the deve
 - You can end a turn early with confirmation if Plays remain. **Copy log** captures the bout event history and reproducibility information.
 - The browser autosaves setup and accepted actions in session and local browser storage so it can attempt to rebuild the active bout after a refresh or server restart, including when reopening the browser. This is local single-browser persistence, not a cloud account or shared save.
 
-**Important:** The illustrated dohyo is currently **static**: the wrestler markers do not follow Position or Momentum. The numerical Position/Momentum indicators are authoritative. A moving-ring visual, ring-edge danger treatment, and ring-out animation are proposed UI work, **not yet implemented**. Choice boxes may also feel cramped when there are many options on mobile; responsive spacing is pending polish.
+**Dohyō visualization:** The illustrated ring now follows the authoritative shared **Position** track from −4 to +4 and highlights edge danger at ±4; a fifth unblocked Push crosses the boundary and causes ring-out. The markers do **not** depict independent physical wrestler coordinates or Momentum, which remains visible numerically. Full ring-out animation is not yet implemented. Choice boxes can still be cramped with many options on small screens; responsive QA and polish remain open.
 
 ### Grip and Temporary behaviour
 
