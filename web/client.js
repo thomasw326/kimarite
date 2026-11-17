@@ -800,6 +800,8 @@ function renderPendingTachiai(g){
  const strip=node('div','cards');
  const summary=node('p','zones','');
  const preview=node('div','tachiai-preview');
+ preview.setAttribute('role','status');
+ preview.setAttribute('aria-live','polite');
  const base=sessionSetup?.created_stats||b11PreviewBase(g.human.name);
  const refreshPreview=()=>{
   summary.textContent=picked.size+' committed · '+(3-picked.size)+' retained';
