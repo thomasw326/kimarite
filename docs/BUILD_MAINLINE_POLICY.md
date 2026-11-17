@@ -6,6 +6,10 @@
 
 On 16 November 2026, the tested B12 second-pass gameplay snapshot from `experiment/b12-shikiri-exchange-plus-play-v1` was promoted intact to `main` in commit `8678e487`. The preceding main snapshot is preserved as `archive/main-before-b12-second-pass-promotion-2026-11-16`. The source B12 batch completed 35,400 bouts successfully on commit `884fef39`; documentation-only changes followed.
 
+## Wrestler roster policy
+
+The current B12 wrestler design target is **60 frameworks**. The older 69-wrestler design sheets and references are historical, not a planned nine-wrestler expansion. The browser currently implements a 26-wrestler B9-derived roster; integrating and validating the 60-wrestler target is a release task. Do not misstate the 26 as the target or the 69 as the current plan.
+
 ## What counts as an approved build?
 
 - Explicit designer approvals supersede older build labels, card snapshots, AI variants and release locks.
