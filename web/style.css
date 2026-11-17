@@ -166,13 +166,15 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 .bout-layout{display:grid;grid-template-columns:minmax(350px, 41%) minmax(0,1fr);gap:10px;align-items:start}
 .bout-state,.bout-decisions{min-width:0;display:flex;flex-direction:column;gap:8px}
 .bout-state .arena{display:block}
-.bout-state #dohyo-details[open]{display:grid;grid-template-columns:170px minmax(0,1fr);grid-template-rows:auto repeat(4,auto);gap:4px 8px;align-items:center;text-align:left}
-.bout-state #dohyo-details>summary{grid-column:1/-1;padding:3px 6px;min-height:28px}
-.bout-state #round{grid-column:2;grid-row:2;font-size:11px}
-.bout-state .arena .dohyo{grid-column:1;grid-row:2/6;width:148px;height:148px;border-width:9px;margin:5px auto}
-.bout-state .ring-key{grid-column:2;grid-row:3;justify-content:flex-start;gap:7px;font-size:11px;margin:0}
-.bout-state .ring-position-label{grid-column:2;grid-row:4;margin:0;font-size:13px}
-.bout-state .ring-edge-warning{grid-column:2;grid-row:5;margin:0;padding:5px;font-size:12px}
+.bout-state #dohyo-details[open]{display:block;text-align:left}
+.bout-state #dohyo-details>summary{padding:3px 6px;min-height:28px}
+.bout-state .ring-composite{display:grid;grid-template-columns:160px minmax(0,1fr);align-items:center;gap:8px}
+.bout-state .ring-readout{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0}
+.bout-state #round{font-size:11px}
+.bout-state .arena .dohyo{width:148px;height:148px;border-width:9px;margin:5px auto}
+.bout-state .ring-key{justify-content:flex-start;gap:7px;font-size:11px;margin:0}
+.bout-state .ring-position-label{margin:0;font-size:13px}
+.bout-state .ring-edge-warning{margin:0;padding:5px;font-size:12px}
 .bout-state .tracks{margin-top:5px;gap:5px}
 .bout-state .track{padding:6px 10px;font-size:13px;flex:1;min-width:0}
 .bout-state #score{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start}
@@ -221,7 +223,7 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
  body[data-phase="dohyo"] header{flex-wrap:wrap}
  body[data-phase="dohyo"] header .game-guide-trigger{width:auto;margin-left:auto}
  .bout-state #score{grid-template-columns:1fr}
- .bout-state #dohyo-details[open]{grid-template-columns:135px minmax(0,1fr)}
+ .bout-state .ring-composite{grid-template-columns:135px minmax(0,1fr)}
  .bout-state .arena .dohyo{width:116px;height:116px}
  .bout-decisions #choices .choice-card-wrap{flex-basis:150px}
  .bout-decisions #hand .card{flex-basis:150px}
