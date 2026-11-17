@@ -10,7 +10,7 @@ from __future__ import annotations
 from copy import deepcopy
 import hashlib
 
-from .b12_division_roster import ACTIVE_AI, BASHO_COUNT, PLAYER_RANK, validate_roster
+from .b12_division_roster import ACTIVE_AI, BASHO_COUNT, PLAYER_RANK, validate_world
 
 BASHO_DAYS = 15
 BOUT_BLOCK = 3
@@ -21,7 +21,7 @@ PLAYER = "player"
 
 def new_basho(roster: dict) -> dict:
     """Create fixed opening banzuke with 42 records at 0–0."""
-    validate_roster(roster)
+    validate_world(roster)
     active = sorted((w for w in roster["wrestlers"] if w["division"] == "top"),
                     key=lambda w: w["rank"])
     if len(active) != ACTIVE_AI:
