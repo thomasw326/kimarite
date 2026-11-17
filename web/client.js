@@ -667,7 +667,7 @@ function showBoutResult(g){
  dialog.showModal();
  requestAnimationFrame(()=>dialog.classList.add('result-revealed'));
 }
-$('result-review').onclick=()=>{$('bout-result').close();$('history').scrollIntoView({behavior:'smooth',block:'start'})};
+$('result-review').onclick=()=>{$('bout-result').close();$('bout-history-details').open=true;$('bout-history-details').scrollIntoView({behavior:'smooth',block:'start'})};
 function returnToHeya(){
  if(!game?.finished)return; // No retreat from a live bout.
  if($('bout-result').open)$('bout-result').close();
