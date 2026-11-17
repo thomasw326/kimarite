@@ -6,11 +6,11 @@ Kimarite is a sumo-inspired tactical card game with a deterministic rules engine
 
 The current `main` contains the **latest tested B12 second-pass gameplay tree**, promoted from `experiment/b12-shikiri-exchange-plus-play-v1` in commit [`8678e487`](https://github.com/thomasw326/kimarite/commit/8678e487cddf40e40915fed073495db40bd8952c). The source [35,400-bout comparison run](https://github.com/thomasw326/kimarite/actions/runs/42322655349) completed successfully. Subsequent documentation and mainline validation commits do not intentionally alter the tested game mechanics.
 
-This B12 implementation retains the B11 browser, player-controlled Tachiai, Exchange and State-3 AI, then includes later approved B12 card changes. The older [`release/b12-locked`](https://github.com/thomasw326/kimarite/tree/release/b12-locked) at `414f09ac` is a preserved historical checkpoint, **not** the latest playable balance build. The current wrestler design target is **60 B12 frameworks**, with tested simulation decks in `data/b12_60_framework_decks.json`. The earlier 69-wrestler design is superseded and retained only as historical material. The present Human vs AI browser still exposes a separate **26-wrestler** selection; extending the live playable roster to the approved 60 is a release integration task, not a reason to restore 69. The browser draft supports 28 originals plus up to 12 duplicates.
+This B12 implementation retains the B11 browser, player-controlled Tachiai, Exchange and State-3 AI, then includes later approved B12 card changes. The older [`release/b12-locked`](https://github.com/thomasw326/kimarite/tree/release/b12-locked) at `414f09ac` is a preserved historical checkpoint, **not** the latest playable balance build. **The public game is draft-first:** the player creates their own wrestler and builds their own deck, without choosing a predefined wrestler from a roster. The **60 B12 wrestler frameworks** are four differentiated deck/test configurations for each of the **15 existing AI personalities**; they support balanced, consistent AI testing and may inform opponent variety, but they are **not 60 player-selectable characters**. The older **69 real-wrestler profiles** were a brainstorming exercise to inspire different styles, **not a planned playable roster**. The current browser practice prototype still exposes a **legacy 26-wrestler selector**, which must not dictate public onboarding. The draft engine supports 28 originals plus up to 12 duplicates; making that draft-created player work end-to-end is a release integration task.
 
 **The latest designer-approved, successfully tested playable build is the authority.** If a newer complete branch becomes the approved version, promote its exact working tree to `main` after preserving the old snapshot; do not reconcile backwards against stale `main` rules. See [build governance](docs/BUILD_MAINLINE_POLICY.md) and the [itch.io release roadmap](https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit). The roadmap's BUILD AUDIT tracks current release gaps.
 
-The B10 practice-bout and tournament notes below document earlier interface lineage. The B11 player-controlled opening and draft modes supersede some B10 setup details.
+The B10 practice-bout and tournament notes below document the **legacy preset-wrestler practice interface**, not the intended release player creation flow. B11 player-controlled Tachiai and draft modes provide the foundation for the draft-first player experience.
 
 ## Play Human vs AI (browser practice bout)
 
@@ -23,7 +23,7 @@ python -m kimarite.b10_web
 
 Open the local address printed by the service. The hosted deployment of the development branch may be used if configured; deployments are distinct from merging to main.
 
-### Before the bout
+### Before the bout (legacy practice mode, not the release draft-first flow)
 
 1. Choose your rikishi and opponent from the approved roster, or choose **Random Wrestler** for either/both. Each random selection resolves to an actual wrestler when the bout starts.
 2. Choose **Fixed seed** (default `20261021`) for reproducibility, or **Random seed** for a fresh bout. The actual seed and matchup are retained for session replay.
@@ -48,6 +48,8 @@ The B10 engine gives **Gain Left Grip, Gain Right Grip, Uwate, and Shitate** a o
 **Use the Tawara** no longer creates a Temporary. Some other cards produce delayed payoffs (e.g. **Yori**, **Gaburi**, **Denshamichi**, **Morozashi**) or disruption penalties; read their current UI descriptions rather than historical spreadsheet text. The UI text is in `src/kimarite/b10_card_info.py`; the engine rules remain the authority.
 
 ## Five-round management tournament (development)
+
+**Release design:** Players bring a custom wrestler and draft-created deck into this tournament, rather than needing a pre-authored wrestler identity. The preset-wrestler implementation described below is an existing prototype to be migrated.
 
 The browser now offers a **five-round management tournament** (5 × 3 = 15 bouts) alongside single-bout practice. Select one approved B10 wrestler deck and deal nine physical card copies reproducibly from that 40-card deck. To ensure each bout has a legal opening, the current prototype deals **three Kimarite and six ordinary cards**. Allocate all nine, without reuse, into three groups of three: one starting Kimarite, one prepared Tachiai and one first draw for each bout.
 
