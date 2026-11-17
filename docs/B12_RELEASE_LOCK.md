@@ -5,6 +5,8 @@
 **Snapshot branch:** `release/b12-locked` — keep this branch pinned to the approved commit; do not develop on it.  
 **Current development branch:** `main` — work must branch from this current mainline, never from an older experiment.
 
+> **Later supersession (November 2026):** This document is a historical lock for the earlier B11 engine and its then-provisional 69-wrestler design. The **current approved roster target is 60 B12 wrestler frameworks**; the extra nine are no longer planned. The latest approved, tested B12 second-pass gameplay was promoted to `main`; see the current [README](../README.md) and [build governance](BUILD_MAINLINE_POLICY.md). Historical 69 counts below describe what was provisional at the time, not today's target.
+
 ## What B12 means
 
 B12 is the name of the **approved and consolidated B11 gameplay engine**. This release milestone does **not** introduce gameplay or balance changes. It records the already merged B11 game as the next baseline, without reinstating superseded mechanics.
