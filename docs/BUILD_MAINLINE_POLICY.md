@@ -8,7 +8,11 @@ On 16 November 2026, the tested B12 second-pass gameplay snapshot from `experime
 
 ## Wrestler roster policy
 
-The current B12 wrestler design target is **60 frameworks**. The older 69-wrestler design sheets and references are historical, not a planned nine-wrestler expansion. The browser currently implements a 26-wrestler B9-derived roster; integrating and validating the 60-wrestler target is a release task. Do not misstate the 26 as the target or the 69 as the current plan.
+**Player design:** The playable character is built by the player, with chosen stats and a drafted deck. No pre-existing named wrestler, including a historical sumo inspiration, is required as a player starting character.
+
+**AI design and testing:** There are 15 existing AI personalities, each with four differentiated wrestler/deck frameworks (60 total) for consistent AI evaluation and potential opponent variety. These are **AI/test fixtures**, not a 60-character player roster. The historical 69 real-wrestler profiles were brainstorming inspiration to cover recognizable styles, not a required roster or nine additional characters.
+
+**Current implementation gap:** The existing B9-derived browser practice interface still provides 26 preset names for its player/opponent selection, even though the separate B11 draft and player-controlled opening code exists. A release candidate must connect player-created stats and drafts to the live gameplay/tournament flow, without requiring preset player identities. There is no requirement to make all 60 framework wrestlers selectable as the human player.
 
 ## What counts as an approved build?
 
