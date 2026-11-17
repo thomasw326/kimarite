@@ -50,6 +50,7 @@ def test_live_pending_choice_refreshes_preview_without_revealing_opponent():
     assert "const base=sessionSetup?.created_stats||b11PreviewBase(g.human.name)" in source
     assert "refreshPreview()" in source
     assert "refreshPreview();" in source
+    assert "preview.setAttribute(\'aria-live\',\'polite\')" in source
     assert "Opponent totals stay hidden until you confirm." in source
     assert "commit_tachiai" in source
     assert "g.opening" not in source
