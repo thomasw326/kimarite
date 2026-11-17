@@ -59,7 +59,9 @@ Between-bout returns should be easy to pass through when the player has no new d
 
 **Implemented in the first browser pass:** `web/index.html` now has separate `#heya-view` and `#dohyo-view` shells; CSS gives them different visual identities and keeps inactive controls hidden. `web/client.js` switches into the Dohyō for Tachiai/Exchange, only allows return after a finished bout, and restores the Heya location for already-returned completed bouts. The old automatic next-bout action was replaced with an explicit return to the Heya, where subsequent management decisions are made. Phase-specific tests cover location switching and saved-phase behavior.
 
-**Still outstanding:** detailed visual/UX polish, the dynamic/moving dohyo, removing the legacy preset-wrestler requirement from the public creation flow, full six-tournament career tracking and year-end summary, and manual cross-device end-to-end QA. The underlying battle engine, draft selection and AI were intentionally not changed.
+**Also implemented in the ring UI:** The `#dohyo-ring` wrestler markers now shift with the authoritative shared Position value (−4 through +4). Their movement and an explicit edge-danger highlight are visible during live combat; ±4 stays within the ring, while a further Push causes ring-out according to the unchanged rules. Pending Tachiai still hides the opposing opening/Position until it is committed. Regression coverage checks all Position extremes, hidden-opening state and accessibility labels.
+
+**Still outstanding:** detailed visual/UX polish, removing the legacy preset-wrestler requirement from the public creation flow, full six-tournament career tracking and year-end summary, and manual cross-device end-to-end QA. The underlying battle engine, draft selection and AI were intentionally not changed.
 
 Project roadmap:
 https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit
