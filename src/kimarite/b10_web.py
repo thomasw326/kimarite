@@ -75,6 +75,41 @@ def labelled_choices(session, exc, command=None):
         "discard_for_grip": "Discard a card to establish Left Grip?",
     }
     title = titles.get(key, "Choose a discarded card to play, then Exhaust" if key.startswith("replay_discard_index") else "Choose an option")
+    # Name the CONSEQUENCE, not only the source zone. For example, Oshi's
+    # hand_index is a discard cost, not another card-play selection.
+    action_help = {
+        "hand_index": ("Discard", "Choose one card to DISCARD from your hand. You are not playing the selected card."),
+        "discard_index": ("Recover", "Choose one card to RETURN from your discard pile to your hand."),
+        "sacrifice_kimarite": ("Sacrifice", "Choose a Kimarite to REMOVE from your Kimarite Zone and put in your discard pile."),
+        "temporary_index": ("Remove", "Choose an opponent Temporary to REMOVE from their active zone."),
+        "uwate_card_index": ("Play", "Choose which revealed card to PLAY with this effect."),
+        "hikiotoshi_card_index": ("Keep", "Choose which of the revealed top cards to KEEP. The others go to the bottom of your deck."),
+        "utchari_card_index": ("Keep", "Choose which of the revealed top cards to KEEP. The others go to the bottom of your deck."),
+        "opponent_deck_index": ("Discard", "Choose which revealed card to DISCARD from your opponent's deck."),
+        "opponent_hand_index": ("Discard", "Choose one position to DISCARD from your opponent's hidden hand. Card names remain hidden."),
+        "card_target": ("Remove", "Choose an opponent card to REMOVE from its active zone."),
+        "grip": ("Reduce", "Choose which of your opponent's Grips to REDUCE."),
+        "mode": ("Use", "Choose the effect to resolve."),
+        "use_optional": ("Choose", "Choose Yes to use the optional effect, or No to skip it."),
+        "cycle_if_no_grip": ("Choose", "Yes: draw a card, then discard one card from your hand. No: skip."),
+        "discard_for_grip": ("Choose", "Yes: discard one card from your hand to establish Left Grip. No: skip."),
+    }
+    if key.startswith("replay_discard_index"):
+        verb, help_text = "Play & Exhaust", "Choose a card from your discard pile to PLAY, then Exhaust after resolving its effects."
+    else:
+        verb, help_text = action_help.get(key, ("Choose", "Choose one of the available options to resolve this card."))
+    if key == "hand_index":
+        title = "Choose 1 card to DISCARD from your hand"
+    elif key == "discard_index":
+        title = "Choose 1 discarded card to RETURN to your hand"
+    elif key == "grip":
+        title = "Choose which opponent Grip to REDUCE"
+    elif key == "opponent_hand_index":
+        title = "Choose an opponent's hidden hand position to DISCARD"
+    elif key == "uwate_card_index":
+        title = "Choose a revealed card to PLAY"
+    if card_name == "Hatakikomi" and key == "use_optional":
+        help_text = "Yes: lose 1 Momentum, then discard a card from your opponent's hand (or draw if their hand is empty). No: skip."
     from .b10_card_info import card_info
     options = []
     for option in exc.options:
@@ -142,7 +177,8 @@ def labelled_choices(session, exc, command=None):
             item["card"] = card_info(selected_card)
         options.append(item)
     return {"choice_required": True, "message": str(exc), "card": card_name,
-            "choice_name": key, "choice_title": title, "options": options}
+            "choice_name": key, "choice_title": title, "choice_verb": verb,
+            "choice_help": help_text, "options": options}
 
 class Handler(BaseHTTPRequestHandler):
     def reply(self, code: int, payload: dict):
