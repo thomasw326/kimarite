@@ -63,7 +63,9 @@ Between-bout returns should be easy to pass through when the player has no new d
 
 **Created-wrestler integration:** The default Heya setup now contains a separate wrestler-name input and basic stat allocation; the drafted identity flows through the backend B11 opening and live Human-vs-AI engine without selecting one of the legacy wrestler templates. The existing B9 wrestler/classic controls have been moved under closed developer practice options. AI opponents continue to use approved roster-based style proxies. Saved tournament/draft state retains the chosen human name.
 
-**Still outstanding:** detailed visual/UX polish, full six-tournament career tracking and year-end summary, and manual cross-device end-to-end QA. The underlying battle engine, draft selection and AI were intentionally not changed.
+**Year and local save implementation:** Each tournament now carries prior tournament summaries and the same created wrestler identity/stats into its next 28-card draft. The Heya and tournament results display cumulative year scores and individual tournament scores, and the sixth tournament ends the year (90 bouts maximum). The browser retains management, draft and bout recovery state in local browser storage as well as session storage, and clears obsolete finished bout state when starting a new draft/block. This is a local single-player save, not a cloud account or public multiuser persistence.
+
+**Still outstanding:** detailed visual/UX polish, explicit design for ending a year early, verified manual end-to-end/cross-device save/resume QA, and public hosting hardening. The underlying battle engine, draft selection and AI were intentionally not changed.
 
 Project roadmap:
 https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit
