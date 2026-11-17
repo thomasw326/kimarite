@@ -82,7 +82,6 @@ function installGameGuide(){
  guide.addEventListener('close',()=>gameSaveSet('kimarite_guide_seen','1'));
  if(shouldShowGameGuide())guide.showModal();
 }
-installGameGuide();
 function clearBoutSession(){
  token=null;game=null;sessionSetup=null;actionJournal=[];
  for(const key of ['kimarite_session','kimarite_setup','kimarite_actions'])gameSaveRemove(key);
@@ -706,3 +705,4 @@ $('confirm-end-turn').onclick=()=>{$('end-confirm').close();if(game&&game.can_en
 async function resume(){try{if(JSON.parse(gameSaveGet('kimarite_active_draft')||'null')){setGameLocation('heya');return}const saved=gameSaveGet('kimarite_session');if(!saved)return;sessionSetup=JSON.parse(gameSaveGet('kimarite_setup')||'null');actionJournal=JSON.parse(gameSaveGet('kimarite_actions')||'[]');token=saved;if(sessionSetup&&Number.isSafeInteger(sessionSetup.seed))$('seed-used').textContent='Bout seed: '+sessionSetup.seed;let state;try{state=await api('/api/session/'+saved)}catch(e){if(e.data&&e.data.code==='session_expired'){state=await recoverSession()}else throw e}render(state)}catch(e){$('notice').textContent='Unable to restore the previous bout: '+e.message}}
 resume();
 api('/api/roster').then(r=>{for(const name of r.roster){const o=node('option','',name);o.value=name;$('management-deck').append(o)}for(const id of ['human','opponent']){const random=node('option','','Random Wrestler');random.value='__random__';$(id).append(random);for(const name of r.roster){const o=node('option','',name);o.value=name;$(id).append(o)}}$('human').value='Arm Controller';$('opponent').value='The Technician';loadOpening();try{const saved=JSON.parse(gameSaveGet('kimarite_management')||'null');if(saved&&Array.isArray(saved.cards)&&saved.groups){management=saved;$('management-opening-mode').value=saved.opening_mode||'classic';$('management-opening-mode').disabled=true;$('b11-creation').hidden=true;$('management-deck').value=saved.human;$('wrestler-name').value=saved.human;$('management-board').hidden=false;managementBoard();managementStatus()}else{const pending=JSON.parse(gameSaveGet('kimarite_active_draft')||'null');if(pending){activeDraft=pending;$('management-deck').value=pending.human;$('wrestler-name').value=pending.human;offerDraft().catch(e=>$('management-notice').textContent=e.message)}}}catch(e){} }).catch(e=>$('notice').textContent=e.message);
+installGameGuide();
