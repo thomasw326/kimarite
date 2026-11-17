@@ -83,7 +83,7 @@ async function api(path) {
     if(path !== '/api/shikona') throw new Error('Wrong endpoint');
     requests++;
     if(fail) throw new Error('Offline');
-    return {names:['Gozan','Kagehayate','Sano']};
+    return {names:['Gozan','Kagehayate','Sano', ...Array.from({length:57},(_,i)=>'Other'+i)]};
 }
 Math.random = () => 0;
 """ + "let playerShikonaPool=null;" + part + "\n" + js_expression
