@@ -43,6 +43,7 @@ const $=id=>document.getElementById(id);let token=null,game=null,picked=new Set(
 function setGameLocation(location){
  // Location is the current gameplay phase, not free navigation from an active bout.
  if(location!=='heya'&&location!=='dohyo')throw new Error('Unknown game location.');
+ const changed=document.body.dataset.phase!==location;
  $('heya-view').hidden=location!=='heya';
  $('dohyo-view').hidden=location!=='dohyo';
  document.body.dataset.phase=location;
@@ -51,7 +52,7 @@ function setGameLocation(location){
   ?'Plan, draft, and prepare your wrestler for the next bout.'
   :'Commit your Tachiai and fight on the clay.';
  try{sessionStorage.setItem('kimarite_ui_phase',location)}catch(e){}
- window.scrollTo(0,0);
+ if(changed)window.scrollTo(0,0);
 }
 function returnedToHeyaAfterBout(g){
  // Preserve a completed bout's return-to-Heya choice across page reloads.
