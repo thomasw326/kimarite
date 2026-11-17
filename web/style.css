@@ -150,3 +150,79 @@ body[data-phase="heya"] .bout-hud{display:none!important}
 .guide-actions{position:sticky;bottom:-1px;background:#253630;padding-top:14px;margin-top:14px}
 .guide-actions button{width:100%}
 @media(max-width:560px){.game-guide-trigger{width:100%;justify-content:center}.guide-terms dl{grid-template-columns:1fr;row-gap:2px}.guide-terms dd{margin-bottom:12px}}
+
+/* Compact battle command layout: keep the tactical state beside decisions.
+   The history is supplementary and never competes with the cards to keep. */
+body[data-phase="dohyo"] main{max-width:1480px;padding:8px 14px 18px}
+body[data-phase="dohyo"] header{display:flex;align-items:center;gap:12px;padding:7px 16px}
+body[data-phase="dohyo"] header h1{font-size:19px;margin:0}
+body[data-phase="dohyo"] header #phase-subtitle{display:none}
+body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height:38px;padding:7px 12px}
+#dohyo-view .phase-masthead{padding:8px 12px;margin:0 0 8px;border-radius:10px;box-shadow:none}
+#dohyo-view .phase-masthead h2{font-size:17px;margin:2px 0 0}
+#dohyo-view .phase-masthead .eyebrow{font-size:10px}
+#dohyo-view .phase-masthead p{display:none}
+#dohyo-view .panel{margin:0;padding:10px;min-width:0}
+.bout-layout{display:grid;grid-template-columns:minmax(350px, 41%) minmax(0,1fr);gap:10px;align-items:start}
+.bout-state,.bout-decisions{min-width:0;display:flex;flex-direction:column;gap:8px}
+.bout-state .arena{display:block}
+.bout-state #dohyo-details[open]{display:grid;grid-template-columns:170px minmax(0,1fr);grid-template-rows:auto repeat(4,auto);gap:4px 8px;align-items:center;text-align:left}
+.bout-state #dohyo-details>summary{grid-column:1/-1;padding:3px 6px;min-height:28px}
+.bout-state #round{grid-column:2;grid-row:2;font-size:11px}
+.bout-state .arena .dohyo{grid-column:1;grid-row:2/6;width:148px;height:148px;border-width:9px;margin:5px auto}
+.bout-state .ring-key{grid-column:2;grid-row:3;justify-content:flex-start;gap:7px;font-size:11px;margin:0}
+.bout-state .ring-position-label{grid-column:2;grid-row:4;margin:0;font-size:13px}
+.bout-state .ring-edge-warning{grid-column:2;grid-row:5;margin:0;padding:5px;font-size:12px}
+.bout-state .tracks{margin-top:5px;gap:5px}
+.bout-state .track{padding:6px 10px;font-size:13px;flex:1;min-width:0}
+.bout-state #score{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:start}
+.bout-state #score .rikishi-info{min-width:0;padding:8px;border:1px solid #607b78;border-radius:9px;background:#182e32}
+.bout-state #score .rikishi-info h2{font-size:15px;overflow-wrap:anywhere}
+.bout-state #score .rikishi-info .eyebrow{font-size:10px}
+.bout-state #score .rikishi-info p{font-size:12px;line-height:1.35;margin:5px 0;overflow-wrap:anywhere}
+.bout-state #score .rikishi-info .zones{font-size:11px}
+.bout-state #score .discard-button{font-size:11px;min-height:32px;margin:5px 0;padding:5px 6px}
+.bout-state #score .zone-list{max-height:100px;overflow-y:auto;padding-top:3px}
+.bout-state #score .zone-entry{padding:2px 0}
+.bout-state #score .zone-entry .zone-card{min-height:32px;margin:2px 0;padding:5px 6px;font-size:11px}
+.bout-state #score .temporary-detail{display:none}
+.bout-decisions #choices h2,.bout-decisions .play h2{font-size:17px}
+.bout-decisions #choices p{margin:7px 0;line-height:1.35}
+.bout-decisions #choices .cards{gap:7px;padding:7px 3px;max-height:265px}
+.bout-decisions #choices .choice-card-wrap{flex:0 0 clamp(140px,14vw,185px);min-width:140px}
+.bout-decisions #choices .card{width:100%;min-height:132px;flex:0 0 auto;padding:9px;font-size:13px}
+.bout-decisions #choices .choice-inspect{min-height:36px;padding:6px 9px;font-size:12px}
+.bout-decisions #choices .confirm{min-height:42px;padding:9px}
+.bout-decisions .playtop{padding:0 0 5px;position:static}
+.bout-decisions .playtop button{min-height:38px;padding:6px 12px}
+.bout-decisions #hand{gap:7px;padding:7px 2px}
+.bout-decisions #hand .card{min-height:128px;flex:0 0 143px;padding:9px;font-size:13px}
+.bout-decisions #notice{min-height:0;margin:0}
+.bout-secondary{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.bout-secondary>.panel{flex:1 1 270px}
+.bout-secondary summary{min-height:36px;padding:5px}
+.bout-secondary #history{max-height:35vh;overflow:auto}
+@media (min-width:980px) and (min-height:650px){
+ .bout-state,.bout-decisions{max-height:calc(100dvh - 132px);min-height:0}
+ .bout-state #score{overflow-y:auto;min-height:0}
+ .bout-state .arena{flex:0 0 auto}
+ .bout-decisions #choices,.bout-decisions .play{flex:0 1 auto}
+ .bout-decisions #choices .cards,.bout-decisions #hand{max-height:32dvh}
+}
+@media (max-width:979px){
+ .bout-layout{display:flex;flex-direction:column}
+ .bout-decisions{order:1;width:100%}
+ .bout-state{order:2;width:100%}
+ body[data-phase="dohyo"] .bout-hud:not([hidden]){display:block}
+ #dohyo-view .phase-masthead{margin-bottom:6px}
+ .bout-state #score{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:560px){
+ body[data-phase="dohyo"] header{flex-wrap:wrap}
+ body[data-phase="dohyo"] header .game-guide-trigger{width:auto;margin-left:auto}
+ .bout-state #score{grid-template-columns:1fr}
+ .bout-state #dohyo-details[open]{grid-template-columns:135px minmax(0,1fr)}
+ .bout-state .arena .dohyo{width:116px;height:116px}
+ .bout-decisions #choices .choice-card-wrap{flex-basis:150px}
+ .bout-decisions #hand .card{flex-basis:150px}
+}
