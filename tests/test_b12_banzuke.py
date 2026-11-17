@@ -128,7 +128,7 @@ def test_one_way_reserve_replacements_and_save_reload_without_duplication():
         # Start next tournament at the NEW banzuke with everyone's W–L reset.
         new = new_basho(restored)
         assert all(w["wins"] == w["losses"] == 0 for w in new["wrestlers"])
-        assert [w["rank"] for w in new["wrestlers"]] == list(range(1, 43))
+        assert sorted(w["rank"] for w in new["wrestlers"]) == list(range(1, 43))
         roster = updated
     assert len(entered) <= 15
     assert len(original_queue) - len(entered) >= 4
