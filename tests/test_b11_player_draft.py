@@ -18,6 +18,46 @@ def pick_through(starting, seed=9001, choice=lambda offered: offered[0]):
     return picks
 
 
+@pytest.mark.parametrize("starting", [
+    [],
+    ["Oshi"],
+    ["Oshi", "Tsuki"],
+])
+def test_inherited_draft_allows_zero_one_or_two_starting_cards(starting):
+    """A losing tournament must not require consolation filler cards."""
+    seed = 9010 + len(starting)
+    offer = options_for(starting, [], seed)
+    assert len(offer) == 3
+    assert all(AVAILABLE[name].is_kimarite for name in offer)
+    picks = pick_through(starting, seed)
+    deck = validate_draft(starting, picks, seed)
+    assert len(picks) == 28 - len(starting)
+    assert len(deck) == 28
+    assert 3 <= sum(AVAILABLE[name].is_kimarite for name in deck) <= 8
+    assert len(deal_block(deck, 1024)) == 9
+
+
+def test_twelve_inherited_cards_require_sixteen_more_picks():
+    """A perfect-tournament rollover has no forced default eight-card suite."""
+    starting = sorted(
+        name for name, card in AVAILABLE.items() if not card.is_kimarite
+    )[:12]
+    seed = 9020
+    picks = pick_through(starting, seed)
+    assert len(picks) == 16
+    deck = validate_draft(starting, picks, seed)
+    assert deck[:12] == starting
+    assert len(deck) == 28
+    assert sum(AVAILABLE[name].is_kimarite for name in deck) >= 3
+
+
+def test_starting_card_maximum_and_copy_limits_still_apply():
+    with pytest.raises(ValueError, match="0–28 cards"):
+        options_for(list(STARTERS) * 4, [], 9030)
+    with pytest.raises(ValueError, match="at most two copies"):
+        options_for(["Oshi", "Oshi", "Oshi"], [], 9030)
+
+
 def test_first_tournament_starters_and_forced_third_kimarite():
     starting=list(STARTERS)
     assert len(starting)==8
