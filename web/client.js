@@ -360,6 +360,31 @@ $('tournament-final-copy').onclick=async()=>{
  catch(e){$('tournament-final-copy').textContent='Copy unavailable'}
 };
 function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;if(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({...c})),duplication_resolved:false});updateTournamentLeaders(m);managementSave();managementBoard()}const wins=m.results.filter(r=>r.won).length;showYearStatus(m);progress.replaceChildren(node('h3','','Tournament '+(yearHistory(m).length+1)+' of 6 · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve victories / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result');row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',displayCardName(r.finish||'Finisher unavailable')));if(r.duplicated_card)row.append(node('small','','Duplicated: '+displayCardName(r.duplicated_card)));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15||!completedRewards(m);$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5;$('new-wrestler').hidden=m.opening_mode!=='b11_live'||m.results.length!==15||!completedRewards(m)||yearHistory(m).length<5;if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
+let playerShikonaPool=null;
+async function randomPlayerShikona(){
+ const field=$('wrestler-name'),notice=$('random-name-status'),button=$('random-wrestler-name');
+ button.disabled=true;
+ notice.textContent='';
+ try{
+  if(!playerShikonaPool){
+   const response=await api('/api/shikona');
+   if(!Array.isArray(response.names)||response.names.length<60)throw new Error('Fictional name list is unavailable.');
+   playerShikonaPool=response.names;
+  }
+  const previous=field.value.trim().toLocaleLowerCase();
+  const choices=playerShikonaPool.filter(name=>
+   typeof name==='string'&&name.length>0&&name.length<=32&&name.toLocaleLowerCase()!==previous);
+  if(!choices.length)throw new Error('No alternative fictional names are available.');
+  field.value=choices[Math.floor(Math.random()*choices.length)];
+  notice.textContent='Random shikona selected. You can still edit it.';
+ }catch(error){
+  notice.textContent='Could not choose a random name. You can enter one yourself.';
+ }finally{
+  button.disabled=false;
+ }
+}
+$('random-wrestler-name').onclick=randomPlayerShikona;
+
 const CREATED_STAT_NAMES={power:'Power',technique:'Technique',spirit:'Spirit'};
 function creationChoices(){
  const food=$('create-food').value,training=$('create-training').value;
