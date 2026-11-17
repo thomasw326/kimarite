@@ -12,7 +12,7 @@ On 16 November 2026, the tested B12 second-pass gameplay snapshot from `experime
 
 **AI design and testing:** There are 15 existing AI personalities, each with four differentiated wrestler/deck frameworks (60 total) for consistent AI evaluation and potential opponent variety. These are **AI/test fixtures**, not a 60-character player roster. The historical 69 real-wrestler profiles were brainstorming inspiration to cover recognizable styles, not a required roster or nine additional characters.
 
-**Current implementation gap:** The existing B9-derived browser practice interface still provides 26 preset names for its player/opponent selection, even though the separate B11 draft and player-controlled opening code exists. A release candidate must connect player-created stats and drafts to the live gameplay/tournament flow, without requiring preset player identities. There is no requirement to make all 60 framework wrestlers selectable as the human player.
+**Current player implementation:** The normal Heya creation path now accepts an independent, player-chosen wrestler name, assigns the existing 2/1/0 base stat spread, drafts 28 cards, and passes that custom identity/deck through B11 player-controlled Tachiai into live Human-vs-AI combat. No prebuilt B9/B10 player wrestler is needed. The legacy 26-name roster selection is retained only in collapsed developer practice options; AI opponents still use its approved AI proxies. The 60 framework wrestlers remain 15 AI personalities × four test configurations, not 60 human-selectable starting characters. Multi-tournament career tracking and public browser QA remain open.
 
 ## What counts as an approved build?
 
