@@ -36,7 +36,7 @@ Design tone: focused, high-contrast, immediate and dramatic; no drafting, reward
 ## Recommended transition contract
 
 1. **New wrestler -> Heya:** enter simple stat creation and initial 28-card draft. Do not force selection of a prebuilt B9/B10 wrestler.
-2. **Heya planning -> Dohyō:** for each block of three bouts, inspect the next opponents, allocate nine cards (three per bout), then commit to begin the selected bout.
+2. **Heya planning -> Dohyō:** for each block of three bouts, inspect the next opponents and allocate nine distinct physical cards (three per bout) up front. Starting a bout commits its three cards; those assignments remain locked after the result. Only cards for the unplayed bouts in the same block may be swapped or rearranged before their bouts start.
 3. **Dohyō opening -> Exchange:** interactive player Tachiai and then the live card-game fight. Keep private opponent choices hidden until permitted by rules.
 4. **Dohyō bout finished -> Heya:** present the bout result and return to the stable. Show match record and preparation for the upcoming bout, even if there are no new management decisions.
 5. **After each three-bout block -> Heya rewards:** resolve any eligible duplication rewards and the next block's card allocation before returning to the ring. Do not place this reading-heavy management inside the combat HUD.
