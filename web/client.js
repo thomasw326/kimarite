@@ -66,6 +66,23 @@ function gameSaveRemove(key){
  try{sessionStorage.removeItem(key)}catch(e){}
  try{localStorage.removeItem(key)}catch(e){}
 }
+function shouldShowGameGuide(){
+ // Do not interrupt a returning wrestler's saved draft, bout or tournament.
+ const savedManagement=gameSaveGet('kimarite_management');
+ const savedDraft=gameSaveGet('kimarite_active_draft');
+ return !gameSaveGet('kimarite_guide_seen')
+  &&(!savedManagement||savedManagement==='null')
+  &&(!savedDraft||savedDraft==='null')
+  &&!gameSaveGet('kimarite_session');
+}
+function installGameGuide(){
+ const guide=$('game-guide');
+ $('open-game-guide').onclick=()=>{if(!guide.open)guide.showModal()};
+ $('guide-dismiss').onclick=()=>guide.close();
+ guide.addEventListener('close',()=>gameSaveSet('kimarite_guide_seen','1'));
+ if(shouldShowGameGuide())guide.showModal();
+}
+installGameGuide();
 function clearBoutSession(){
  token=null;game=null;sessionSetup=null;actionJournal=[];
  for(const key of ['kimarite_session','kimarite_setup','kimarite_actions'])gameSaveRemove(key);
