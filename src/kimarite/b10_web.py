@@ -155,10 +155,19 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def body(self):
+        # The browser uses JSON POSTs. Reject text/plain form submissions,
+        # which could otherwise send simple cross-site requests without CORS
+        # preflight, and reject non-object JSON before any handler mutates state.
+        content_type = self.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+        if content_type != "application/json":
+            raise ValueError("Content-Type must be application/json")
         length = int(self.headers.get("Content-Length", "0"))
         if not 0 < length <= 32768:
             raise ValueError("Invalid request size")
-        return json.loads(self.rfile.read(length))
+        payload = json.loads(self.rfile.read(length))
+        if not isinstance(payload, dict):
+            raise ValueError("Expected a JSON object")
+        return payload
 
     def do_GET(self):
         path = urlsplit(self.path).path
