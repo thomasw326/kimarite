@@ -1,27 +1,31 @@
-# Kimarite build governance — B11 canonical mainline
+# Kimarite build governance — latest approved and tested build
 
 ## Which code is current?
 
-The **`main` branch** is the one authoritative approved build. The latest consolidated B11 release includes the browser interface and player-controlled Tachiai, the 69-wrestler data, current AI and all approved card rules. Do not choose an older branch because its historical label appears more stable or because a simulation was previously run there.
+**The current game is the latest designer-approved, successfully tested playable build — not whichever historical commit happens to be named `main`.** Keep `main` updated to that build so the branch remains a useful canonical entry point. If an experimental branch has become the approved and best tested build, **promote its complete working tree to `main`**, not the other way around.
 
-Old `experiment/*`, `feature/*` and `release/b11-playtest` branches can remain as reproducible history, but must not be used as the default starting point for ongoing game development.
+On 16 November 2026, the tested B12 second-pass gameplay snapshot from `experiment/b12-shikiri-exchange-plus-play-v1` was promoted intact to `main` in commit `8678e487`. The preceding main snapshot is preserved as `archive/main-before-b12-second-pass-promotion-2026-11-16`. The source B12 batch completed 35,400 bouts successfully on commit `884fef39`; documentation-only changes followed.
 
-## What does "locked in" mean?
+## What counts as an approved build?
 
-When the designer approves a build, rule, card or AI update as the new current version, treat that update as the baseline for all subsequent work. A proposal or test variant remains opt-in only until it is explicitly approved. Do not silently roll back approved changes or substitute an older AI, ring rule, roster, card catalogue or Tachiai flow.
+- Explicit designer approvals supersede older build labels, card snapshots, AI variants and release locks.
+- A proposed or untested new feature is not automatically part of the release build. Record its approval separately and implement/test it before including it in a promoted gameplay snapshot.
+- Do not silently revert previously approved rules, orb colors/counts, Tachiai flow, AI, wrestler decks or Kimarite conditions.
+- The full game's playable behavior is determined by its versioned source tree, not by a stale spreadsheet introduction, historical README paragraph or older release tag.
+- Preserve former baselines for reproducibility without treating them as the release target.
 
-A pull request number alone is not a version number. Before merging, compare its **ancestry** with `main` and the latest B11 user-facing branch, checking that approved functionality is not lost.
+## Promote a newer tested snapshot
 
-## Safe update procedure
+1. Identify the complete latest designer-approved, successfully tested candidate **including the actual Human vs AI implementation**. Record its full commit SHA, test evidence and any post-test documentation-only commits.
+2. Preserve the prior `main` SHA in an archive branch.
+3. **Promote the candidate's exact source tree**. Do not cherry-pick, back-port or individually reconcile approved card changes against an outdated `main` as though the old tree were authoritative.
+4. Prefer a non-destructive merge commit that keeps both histories while choosing the new candidate tree. Avoid force-pushing or erasing previous work.
+5. Run full Python tests, B11 browser/Tachiai and Shitate tests, wrestler validation and relevant smokes on the resulting new `main` commit. Investigate failures; don't call an unverified promotion a release candidate.
+6. Record the new SHA, evidence and known gaps in the Kimarite itch.io release roadmap's BUILD AUDIT and Release Checklist.
+7. Start subsequent gameplay development from the promoted `main` unless a newer approved and tested branch is designated.
 
-1. Read `main` HEAD and review the current approved game state.
-2. Start the work branch from that exact mainline commit, not a historical experiment.
-3. Apply only the approved changes. Keep old test fixtures compatible without silently changing game mechanics.
-4. Run full Python tests, focused B11 browser/Tachiai and Shitate checks, and relevant 69-wrestler validation smoke. Fix failures rather than concealing them.
-5. Merge into `main` only when the user-approved feature works and the relevant build checks are green.
-6. Record the new commit and ensure future work starts from the updated `main`.
-
-Do not force-push `main` or erase branch histories to make a build appear current. Preserve old experiments as history, not as active builds.
+The release roadmap Google Sheet is the cross-chat project index:
+https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit
 
 ## Current specialist card terminology
 
