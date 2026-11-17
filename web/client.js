@@ -343,7 +343,7 @@ $('tournament-final-copy').onclick=async()=>{
  try{await navigator.clipboard.writeText(summary);$('tournament-final-copy').textContent='Copied!'}
  catch(e){$('tournament-final-copy').textContent='Copy unavailable'}
 };
-function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;if(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({...c})),duplication_resolved:false});updateTournamentLeaders(m);managementSave()}const wins=m.results.filter(r=>r.won).length;showYearStatus(m);progress.replaceChildren(node('h3','','Tournament '+(yearHistory(m).length+1)+' of 6 · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve victories / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result');row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',displayCardName(r.finish||'Finisher unavailable')));if(r.duplicated_card)row.append(node('small','','Duplicated: '+displayCardName(r.duplicated_card)));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15||!completedRewards(m);$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5;if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
+function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;if(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({...c})),duplication_resolved:false});updateTournamentLeaders(m);managementSave()}const wins=m.results.filter(r=>r.won).length;showYearStatus(m);progress.replaceChildren(node('h3','','Tournament '+(yearHistory(m).length+1)+' of 6 · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve victories / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result');row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',displayCardName(r.finish||'Finisher unavailable')));if(r.duplicated_card)row.append(node('small','','Duplicated: '+displayCardName(r.duplicated_card)));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15||!completedRewards(m);$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5;$('new-wrestler').hidden=m.opening_mode!=='b11_live'||m.results.length!==15||!completedRewards(m)||yearHistory(m).length<5;if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
 const CREATED_STAT_NAMES={power:'Power',technique:'Technique',spirit:'Spirit'};
 function creationChoices(){
  const food=$('create-food').value,training=$('create-training').value;
@@ -497,6 +497,33 @@ $('management-new').onclick=()=>{
   $('management-deal').hidden=false;
   $('management-deal').click();
  }catch(e){$('management-notice').textContent=e.message}
+};
+$('new-wrestler').onclick=()=>{
+ if(!management||management.opening_mode!=='b11_live'||management.results.length!==15||yearHistory(management).length<5)return;
+ $('new-wrestler-confirm').showModal();
+};
+$('cancel-new-wrestler').onclick=()=>$('new-wrestler-confirm').close();
+$('confirm-new-wrestler').onclick=()=>{
+ if(!management||management.results.length!==15||yearHistory(management).length<5)return;
+ $('new-wrestler-confirm').close();
+ if($('tournament-final').open)$('tournament-final').close();
+ management=null;managementSave();
+ activeDraft=null;saveDraft();
+ clearBoutSession();
+ lastPresentedResult=null;
+ $('management-opening-mode').value='b11_live';
+ $('management-opening-mode').disabled=false;
+ $('management-deck').disabled=false;
+ $('b11-creation').hidden=false;
+ $('wrestler-name').value='Your Rikishi';
+ $('create-food').value='power';
+ $('create-training').value='technique';
+ creationChoices();
+ for(const id of ['b11-draft','management-board','management-rewards','management-progress','management-next','management-summary','management-new','new-wrestler'])$(id).hidden=true;
+ $('management-deal').hidden=false;
+ $('management-notice').textContent='New year: create your wrestler, then draft your first 28 cards.';
+ showYearStatus({tournament_history:[],results:[]});
+ setGameLocation('heya');
 };
 $('management-start').onclick=()=>managementRound().catch(e=>$('management-notice').textContent=e.message);
 $('management-next').onclick=async()=>{
