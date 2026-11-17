@@ -47,6 +47,7 @@ const $=id=>elements[id]??=( {
  addEventListener(name,fn){(this.handlers[name]??=[]).push(fn)}
 });
 """ + helper + """
+installGameGuide();
 const shownInitially=$('game-guide').open;
 $('guide-dismiss').onclick();
 const seenAfterDismiss=gameSaveGet('kimarite_guide_seen');
@@ -84,6 +85,7 @@ def test_guide_is_accessible_and_available_from_both_locations():
             assert phrase in HTML
     assert ".game-guide-dialog" in CSS
     assert ".game-guide-trigger" in CSS
+    assert JS.rstrip().endswith("installGameGuide();")
 
 
 @pytest.mark.parametrize("saved,expected", [
