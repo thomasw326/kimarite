@@ -5,7 +5,7 @@
 **Snapshot branch:** `release/b12-locked` — keep this branch pinned to the approved commit; do not develop on it.  
 **Current development branch:** `main` — work must branch from this current mainline, never from an older experiment.
 
-> **Later supersession (November 2026):** This document is a historical lock for the earlier B11 engine and its then-provisional 69-wrestler design. The **current approved roster target is 60 B12 wrestler frameworks**; the extra nine are no longer planned. The latest approved, tested B12 second-pass gameplay was promoted to `main`; see the current [README](../README.md) and [build governance](BUILD_MAINLINE_POLICY.md). Historical 69 counts below describe what was provisional at the time, not today's target.
+> **Later clarification (November 2026):** This document preserves a historical B11 engine snapshot. The 69 real-wrestler profiles were **brainstorming inspiration**, not a playable roster proposal. The 60 B12 frameworks organize **four test/deck variants per each of the 15 AI personalities**, rather than 60 human-selectable wrestlers. The intended public player character is created through the **draft system**. The latest approved, tested B12 second-pass gameplay was promoted to `main`; see the current [README](../README.md) and [build governance](BUILD_MAINLINE_POLICY.md). The 26 named browser wrestlers are legacy practice implementation details.
 
 ## What B12 means
 
