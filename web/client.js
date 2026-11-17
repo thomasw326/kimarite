@@ -476,7 +476,26 @@ function renderBoutHud(g){
   list.append(entry);
  }
 }
+function updateDohyoPosition(g){
+ // Position is the shared ring track, from the human player's perspective.
+ // +4/-4 are still inside the tawara; crossing past 4 causes ring-out.
+ const ring=$('dohyo-ring'),label=$('ring-position-label'),warning=$('ring-edge-warning');
+ const ready=Number.isInteger(g?.position)&&g.position>=-4&&g.position<=4;
+ const position=ready?g.position:0;
+ ring.style.setProperty('--ring-shift',(position*6)+'%');
+ ring.classList.toggle('dohyo-edge',ready&&Math.abs(position)===4);
+ warning.hidden=!ready||Math.abs(position)!==4||!!g.finished;
+ if(!ready){
+  label.textContent='Position: neutral · awaiting Tachiai';
+  ring.setAttribute('aria-label','Dohyō showing the neutral starting positions; awaiting Tachiai');
+  return;
+ }
+ const state=position===0?'Neutral':position>0?'Advancing toward the opponent’s edge':'Being pushed toward your edge';
+ label.textContent='Position '+(position>0?'+':'')+position+' · '+state;
+ ring.setAttribute('aria-label','Dohyō at Position '+(position>0?'+':'')+position+' of ±4. '+state+'.');
+}
 function renderPendingTachiai(g){
+ updateDohyoPosition(g);
  setGameLocation('dohyo');
  $('return-heya').hidden=true;
  renderBoutHud(g);
@@ -538,7 +557,7 @@ function returnToHeya(){
 }
 $('result-next').onclick=returnToHeya;
 $('return-heya').onclick=returnToHeya;
-function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();
+function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();
  for(const [title,s,own] of [['YOUR RIKISHI',g.human,true],['OPPONENT',g.opponent,false]]){const box=node('div','rikishi-info');box.append(node('div','eyebrow',title),node('h2','',s.name),node('p','', 'Power '+s.power+'  ·  Grip '+s.grip.join('/')+'  ·  '+(own?'Plays '+s.plays_remaining:'Hand '+s.hand_count)));const zones=node('p','zones');zones.append(node('b','','Kimarite: '),document.createTextNode(names(s.kimarite)),node('br'),node('b','','Temporary: '),document.createTextNode(names(s.temporary)));box.append(zones);const discard=btn('Discard pile: '+s.discard_count+' · View cards',()=>showDiscard(s,own?'Your rikishi':'Opponent'),'discard-button');box.append(discard);for(const zoneName of ['kimarite','temporary']){const zone=node('div','zone-list');zone.append(node('div','eyebrow',zoneName.toUpperCase()));for(const c of s[zoneName]){const item=node('div','zone-entry');item.append(btn(displayCardName(c.name)+' · Inspect',()=>inspect({...c,description:zoneEffect(c,zoneName),zone_only:true,timing:zoneName==='kimarite'?'Winning condition':'Active Temporary effect'}),'zone-card'));item.append(node('p','temporary-detail',zoneEffect(c,zoneName)));zone.append(item)}box.append(zone)}$('score').append(box)}
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();if(g.selection){$('choices').append(node('h2','','Choose '+g.selection.keep+' cards to keep'));const strip=node('div','cards');g.selection.options.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}confirm.disabled=picked.size!==g.selection.keep});b.firstChild.textContent=(i+1)+'. '+displayCardName(c.name);const info=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');info.type='button';const wrap=node('div','choice-card-wrap');wrap.append(b,info);strip.append(wrap)});$('choices').append(strip);const confirm=btn('Keep selected cards',()=>act({type:'choose_cards',indices:[...picked]}),'confirm');confirm.disabled=g.selection.keep!==0;$('choices').append(confirm)}
