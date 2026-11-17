@@ -29,5 +29,5 @@ def test_pai_gao_preview_adds_base_three_cards_and_universal_one():
     source = (Path(__file__).resolve().parents[1] / "web" / "client.js").read_text()
     assert "base[order[0]]=2;base[order[1]]=1" in source
     assert "base[k]+1+orbs[i]" in source
-    assert "box.append(b11TachiaiPreview(management,i))" in source
+    assert "box.append(b11TachiaiPreview(m,group))" in source
     assert "Before reveal-chain bonuses" in source
