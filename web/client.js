@@ -688,7 +688,7 @@ function kimariteTurnCues(g){
  const canEnd=!!g?.can_end_turn&&!g.finished;
  const readyNames=canEnd?[...new Set(g.human?.ready_kimarite||[])]:[];
  return {
-  noPlays:canEnd&&g.human?.plays_remaining===0,
+  noPlays:canEnd&&(g.human?.plays_remaining===0||(Array.isArray(g.legal_plays)&&g.legal_plays.length===0)),
   readyNames,
   winReady:readyNames.length>0,
  };
