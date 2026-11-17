@@ -250,6 +250,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(200, management_deal(name, seed))
             except (ValueError, TypeError) as exc:
                 return self.reply(400, {"error": str(exc)})
+        if path == "/api/shikona":
+            # One canonical fictional-name pool serves the player picker and
+            # the future 60-wrestler campaign. Never return real-wrestler names.
+            from .b12_division_roster import load_shikona
+            return self.reply(200, {"names": load_shikona()})
         if path == "/api/roster":
             return self.reply(200, {"roster": roster()})
         if path.startswith("/api/opening/"):

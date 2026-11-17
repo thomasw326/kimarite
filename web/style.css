@@ -118,6 +118,16 @@ body[data-phase="heya"] .bout-hud{display:none!important}
 #b11-creation input[type=text]{width:100%;min-height:48px;padding:12px;background:#182b28;color:#fff;border:1px solid #b7ac90;border-radius:8px;font:inherit}
 #b11-creation>label{display:grid;gap:7px;font-weight:700}
 #b11-creation input[type=text]:focus-visible{outline:3px solid #e9c992;outline-offset:3px}
+
+/* An optional shikona shortcut; manual naming always remains available. */
+.wrestler-name-controls{display:flex;align-items:stretch;flex-wrap:wrap;gap:8px}
+#b11-creation .wrestler-name-controls input[type=text]{flex:1 1 220px;min-width:0;width:auto}
+#random-wrestler-name{flex:0 0 auto;min-height:48px;background:#d8c49c;color:#20332c}
+#random-wrestler-name:focus-visible{outline:3px solid #f1d59d;outline-offset:2px}
+#random-name-status{font-size:13px;color:#ecdbba;margin:0;line-height:1.4}
+#random-name-status:empty{display:none}
+@media(max-width:440px){#random-wrestler-name{flex:1 1 100%}}
+
 #legacy-management-options{border:1px dashed #897b66;border-radius:10px;padding:8px 12px;background:#27312d}
 #legacy-management-options summary{color:#c9c0aa;font-size:.9rem}
 #legacy-management-options>p{color:#d3c5af;font-size:.88rem;line-height:1.45}
