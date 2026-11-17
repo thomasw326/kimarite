@@ -294,3 +294,28 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
  font-weight:800;
  line-height:1.3;
 }
+
+/* Bout opening commitment: past allocations are unmistakably locked. */
+.management-group-locked{
+ background:#273330;
+ border-color:#668979;
+ box-shadow:inset 4px 0 0 #9ebbb0;
+}
+.management-group-locked h3{color:#d2e3db}
+.management-group-locked select:disabled{
+ cursor:not-allowed;
+ opacity:.83;
+ border-color:#708880;
+ background:#364b47;
+ color:#edf5e9;
+}
+.assignment-locked-note{
+ margin:0;
+ padding:7px 10px;
+ border-radius:7px;
+ background:#39554b;
+ color:#f0f8ef;
+ font-size:13px;
+ font-weight:750;
+ line-height:1.4;
+}
