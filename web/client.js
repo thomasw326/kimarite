@@ -51,21 +51,37 @@ function setGameLocation(location){
  $('phase-subtitle').textContent=location==='heya'
   ?'Plan, draft, and prepare your wrestler for the next bout.'
   :'Commit your Tachiai and fight on the clay.';
- try{sessionStorage.setItem('kimarite_ui_phase',location)}catch(e){}
+ gameSaveSet('kimarite_ui_phase',location);
  if(changed)window.scrollTo(0,0);
+}
+function gameSaveGet(key){
+ try{const current=sessionStorage.getItem(key);if(current!==null)return current}catch(e){}
+ try{return localStorage.getItem(key)}catch(e){return null}
+}
+function gameSaveSet(key,value){
+ try{sessionStorage.setItem(key,value)}catch(e){}
+ try{localStorage.setItem(key,value)}catch(e){}
+}
+function gameSaveRemove(key){
+ try{sessionStorage.removeItem(key)}catch(e){}
+ try{localStorage.removeItem(key)}catch(e){}
+}
+function clearBoutSession(){
+ token=null;game=null;sessionSetup=null;actionJournal=[];
+ for(const key of ['kimarite_session','kimarite_setup','kimarite_actions'])gameSaveRemove(key);
 }
 function returnedToHeyaAfterBout(g){
  // Preserve a completed bout's return-to-Heya choice across page reloads.
- if(!g.finished||sessionStorage.getItem('kimarite_ui_phase')!=='heya')return false;
+ if(!g.finished||gameSaveGet('kimarite_ui_phase')!=='heya')return false;
  try{
-  const m=management||JSON.parse(sessionStorage.getItem('kimarite_management')||'null');
+  const m=management||JSON.parse(gameSaveGet('kimarite_management')||'null');
   return !!(m&&Array.isArray(m.results)&&sessionSetup
    &&sessionSetup.tournament_bout===m.round
    &&m.results.length===m.round+1);
  }catch(e){return false}
 }
 async function api(path,body){const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const v=await r.json();if(!r.ok){const e=new Error(v.message||v.error||'Request failed');e.data=v;throw e}return v}
-function rememberSession(){try{if(token)sessionStorage.setItem('kimarite_session',token);if(sessionSetup)sessionStorage.setItem('kimarite_setup',JSON.stringify(sessionSetup));sessionStorage.setItem('kimarite_actions',JSON.stringify(actionJournal))}catch(e){}}
+function rememberSession(){if(token)gameSaveSet('kimarite_session',token);if(sessionSetup)gameSaveSet('kimarite_setup',JSON.stringify(sessionSetup));gameSaveSet('kimarite_actions',JSON.stringify(actionJournal))}
 async function recoverSession(){if(!sessionSetup)throw new Error('This bout expired and has no recovery data. Please start a new bout.');const restored=await api('/api/session',sessionSetup);let state=restored.state;for(const command of actionJournal){const next=await api('/api/session/'+restored.token+'/action',command);state=next.state}token=restored.token;rememberSession();return state}
 function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
 function btn(text,fn,cls=''){const b=node('button',cls,text);b.onclick=fn;return b}
@@ -93,7 +109,7 @@ function showDiscard(owner,person){$('discard-title').textContent=person+' — D
 $('discard-close').onclick=()=>$('discard-dialog').close();
 
 let management=null;
-function managementSave(){try{sessionStorage.setItem('kimarite_management',JSON.stringify(management))}catch(e){}}
+function managementSave(){gameSaveSet('kimarite_management',JSON.stringify(management))}
 function activeTournamentBout(){
  if(!management||!sessionSetup)return null;
  if(Number.isInteger(sessionSetup.tournament_bout))return sessionSetup.tournament_bout;
@@ -395,9 +411,10 @@ function earnedNextStartingCards(m){
 }
 const B11_STARTER_SUITE=['Yorikiri','Oshidashi','Oshi','Tsuki','Gain Left Grip','Gain Right Grip','Give Ground','Sonkyo'];
 let activeDraft=null;
-function saveDraft(){try{if(activeDraft)sessionStorage.setItem('kimarite_active_draft',JSON.stringify(activeDraft));else sessionStorage.removeItem('kimarite_active_draft')}catch(e){}}
+function saveDraft(){if(activeDraft)gameSaveSet('kimarite_active_draft',JSON.stringify(activeDraft));else gameSaveRemove('kimarite_active_draft')}
 async function offerDraft(){
  const d=activeDraft;if(!d)return;
+ setGameLocation('heya');
  showYearStatus(d);
  const owned=[...d.starting_cards,...d.picks];
  $('b11-draft').hidden=false;$('management-board').hidden=true;$('management-deal').hidden=true;
@@ -431,6 +448,7 @@ async function finishDraft(){
    cards:first.cards,groups:Array.from({length:3},()=>[null,null,null]),
    opponents:roster.slice(0,15),round:0,results:[]};
  activeDraft=null;saveDraft();
+ clearBoutSession(); // Avoid resurrecting an earlier finished bout during the new tournament.
  $('b11-draft').hidden=true;$('management-board').hidden=false;$('management-progress').hidden=true;
  $('management-next').hidden=true;showYearStatus(management);managementBoard();managementSave();
  $('management-notice').textContent='Your 28-card deck is drafted. Assign the nine cards to the first three bouts.';
@@ -497,7 +515,7 @@ $('management-next').onclick=async()=>{
    const data=m.draft_picks
     ?await api('/api/b11/draft/deal',{starting_cards:m.starting_cards,picks:m.draft_picks,draft_seed:m.draft_seed,duplicated_indices:m.duplicated_indices||[],seed:m.seed+Math.floor(m.round/3)})
     :await api('/api/management/deal/'+encodeURIComponent(m.human)+'?seed='+(m.seed+Math.floor(m.round/3)));
-   m.cards=data.cards;m.groups=Array.from({length:3},()=>[null,null,null]);game=null;
+   m.cards=data.cards;m.groups=Array.from({length:3},()=>[null,null,null]);clearBoutSession();
    $('management-rewards').hidden=true;$('management-board').hidden=false;
    $('management-start').disabled=true;$('management-next').hidden=true;
    managementBoard();managementSave();
@@ -641,6 +659,6 @@ $('start').onclick=async()=>{try{const fixed=Number($('seed-fixed').value);if($(
 $('end').onclick=()=>{if(!game||!game.can_end_turn)return;const remaining=game.human.plays_remaining;if(remaining>0){$('end-confirm-message').textContent='You have '+remaining+' Play'+(remaining===1?'':'s')+' remaining. Continue playing?';$('end-confirm').showModal()}else act({type:'end_turn'})};
 $('continue-playing').onclick=()=>$('end-confirm').close();
 $('confirm-end-turn').onclick=()=>{$('end-confirm').close();if(game&&game.can_end_turn)act({type:'end_turn'})};
-async function resume(){try{const saved=sessionStorage.getItem('kimarite_session');if(!saved)return;sessionSetup=JSON.parse(sessionStorage.getItem('kimarite_setup')||'null');actionJournal=JSON.parse(sessionStorage.getItem('kimarite_actions')||'[]');token=saved;if(sessionSetup&&Number.isSafeInteger(sessionSetup.seed))$('seed-used').textContent='Bout seed: '+sessionSetup.seed;let state;try{state=await api('/api/session/'+saved)}catch(e){if(e.data&&e.data.code==='session_expired'){state=await recoverSession()}else throw e}render(state)}catch(e){$('notice').textContent='Unable to restore the previous bout: '+e.message}}
+async function resume(){try{if(JSON.parse(gameSaveGet('kimarite_active_draft')||'null')){setGameLocation('heya');return}const saved=gameSaveGet('kimarite_session');if(!saved)return;sessionSetup=JSON.parse(gameSaveGet('kimarite_setup')||'null');actionJournal=JSON.parse(gameSaveGet('kimarite_actions')||'[]');token=saved;if(sessionSetup&&Number.isSafeInteger(sessionSetup.seed))$('seed-used').textContent='Bout seed: '+sessionSetup.seed;let state;try{state=await api('/api/session/'+saved)}catch(e){if(e.data&&e.data.code==='session_expired'){state=await recoverSession()}else throw e}render(state)}catch(e){$('notice').textContent='Unable to restore the previous bout: '+e.message}}
 resume();
-api('/api/roster').then(r=>{for(const name of r.roster){const o=node('option','',name);o.value=name;$('management-deck').append(o)}for(const id of ['human','opponent']){const random=node('option','','Random Wrestler');random.value='__random__';$(id).append(random);for(const name of r.roster){const o=node('option','',name);o.value=name;$(id).append(o)}}$('human').value='Arm Controller';$('opponent').value='The Technician';loadOpening();try{const saved=JSON.parse(sessionStorage.getItem('kimarite_management')||'null');if(saved&&Array.isArray(saved.cards)&&saved.groups){management=saved;$('management-opening-mode').value=saved.opening_mode||'classic';$('management-opening-mode').disabled=true;$('b11-creation').hidden=true;$('management-deck').value=saved.human;$('wrestler-name').value=saved.human;$('management-board').hidden=false;managementBoard();managementStatus()}else{const pending=JSON.parse(sessionStorage.getItem('kimarite_active_draft')||'null');if(pending){activeDraft=pending;$('management-deck').value=pending.human;$('wrestler-name').value=pending.human;offerDraft().catch(e=>$('management-notice').textContent=e.message)}}}catch(e){} }).catch(e=>$('notice').textContent=e.message);
+api('/api/roster').then(r=>{for(const name of r.roster){const o=node('option','',name);o.value=name;$('management-deck').append(o)}for(const id of ['human','opponent']){const random=node('option','','Random Wrestler');random.value='__random__';$(id).append(random);for(const name of r.roster){const o=node('option','',name);o.value=name;$(id).append(o)}}$('human').value='Arm Controller';$('opponent').value='The Technician';loadOpening();try{const saved=JSON.parse(gameSaveGet('kimarite_management')||'null');if(saved&&Array.isArray(saved.cards)&&saved.groups){management=saved;$('management-opening-mode').value=saved.opening_mode||'classic';$('management-opening-mode').disabled=true;$('b11-creation').hidden=true;$('management-deck').value=saved.human;$('wrestler-name').value=saved.human;$('management-board').hidden=false;managementBoard();managementStatus()}else{const pending=JSON.parse(gameSaveGet('kimarite_active_draft')||'null');if(pending){activeDraft=pending;$('management-deck').value=pending.human;$('wrestler-name').value=pending.human;offerDraft().catch(e=>$('management-notice').textContent=e.message)}}}catch(e){} }).catch(e=>$('notice').textContent=e.message);
