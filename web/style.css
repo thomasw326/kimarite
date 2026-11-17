@@ -259,3 +259,38 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
  line-height:1.35;
  margin:3px 0 5px;
 }
+
+/* Card choice consequences: visible, readable action before committing. */
+#choices .choice-help{
+ margin:8px 0 10px;
+ padding:9px 12px;
+ background:#294346;
+ border-left:4px solid #e9c98a;
+ border-radius:6px;
+ color:#f7ecd6;
+ font-size:14px;
+ line-height:1.45;
+}
+#choices .choice-action-button{
+ align-items:flex-start;
+ justify-content:flex-start;
+ gap:10px;
+ text-align:left;
+ overflow-wrap:anywhere;
+}
+#choices .choice-action-verb{
+ display:block;
+ font-size:14px;
+ font-weight:900;
+ text-transform:uppercase;
+ letter-spacing:.04em;
+ color:#734423;
+ border-bottom:2px solid #b99359;
+ width:100%;
+ padding-bottom:6px;
+}
+#choices .choice-action-target{
+ display:block;
+ font-weight:800;
+ line-height:1.3;
+}
