@@ -22,8 +22,8 @@ def test_fujinokawa_tochinoshin_setup_matches_v44_tachiai_case():
 
     assert state.fighter_a.power == 4
     assert state.fighter_b.power == 6
-    # B9/B10 Spirit Push thresholds resolve this seeded opening at +1.
-    assert state.position == 1
+    # Corrected pooled Tachiai Push with unchanged 1/4/7/10 Power blocks => +2.
+    assert state.position == 2
     assert state.winner is None
     assert state.win_method is None
     assert state.active_side is not None  # Revised opening no longer forces a ringout.

@@ -36,7 +36,7 @@ EXPECTED = {
     "Renzoku": (0, 3, 0), "Meguri": (0, 2, 1),
     "Nokotta!": (1, 0, 2), "Hakkeyoi!": (0, 0, 3),
     "Hazuoshi": (1, 1, 1), "Inashi": (1, 1, 2),
-    "Chiri-chozu": (1, 3, 1), "Shikiri": (1, 2, 2),
+    "Chiri-chozu": (1, 1, 1), "Shikiri": (1, 2, 2),
     "Shiko Stomp": (1, 0, 4),
     "Kubinage": (2, 0, 1), "Kimedashi": (2, 0, 1),
     "Kimetaoshi": (3, 0, 0),
@@ -61,7 +61,7 @@ def test_sonkyo_and_new_shiko_are_distinct():
     state.fighter_b.power = 4
     state.momentum = 1
     play_card(state, Side.A, state.fighter_a.hand[0])
-    assert (state.position, state.momentum, state.fighter_a.power) == (1, 2, 6)
+    assert (state.position, state.momentum, state.fighter_a.power) == (1, 2, 5)
     assert not state.fighter_a.temporary_zone
     assert [c.name for c in state.fighter_a.discard_pile] == ["Shiko Stomp"]
 
@@ -239,7 +239,7 @@ def test_sheer_grit_uses_exhausted_discard_threshold_seven():
         state, blank = bout(hand=[card_by_name("Sheer Grit")])
         state.fighter_a.discard_pile = [blank] * discarded
         play_card(state, Side.A, card_by_name("Sheer Grit"))
-        assert state.momentum == 2
+        assert state.momentum == (1 if discarded < 7 else 2)
         assert state.position == (0 if discarded < 7 else 1)
 
 
@@ -284,3 +284,169 @@ def test_chiri_and_shikiri_prepared_tachiai_enter_persistent_temporaries():
     assert {x.card.name for x in state.fighter_a.temporary_zone} == {
         "Chiri-chozu", "Shikiri"
     }
+
+
+def test_shikiri_exchange_grants_one_additional_play():
+    shikiri = card_by_name("Shikiri")
+    state, _ = bout(hand=[shikiri])
+    before = state.fighter_a.plays_remaining
+    play_card(state, Side.A, shikiri)
+    # The +1 Play replaces the Play spent, allowing another card this turn.
+    assert state.fighter_a.plays_remaining == before
+    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Shikiri"]
+
+
+def test_shikiri_prepared_tachiai_does_not_grant_play():
+    from kimarite.tachiai import compare_tachiai
+    from kimarite.tachiai_effects import resolve_prepared_tachiai
+
+    shikiri = card_by_name("Shikiri")
+    blank = blank_card()
+    a = Wrestler("A", 2, 2, 2, blank, shikiri, blank)
+    b = Wrestler("B", 2, 2, 2, blank, blank, blank)
+    state = BoutState(FighterState(a), FighterState(b))
+    before = state.fighter_a.plays_remaining
+    resolve_prepared_tachiai(
+        state, compare_tachiai(a, b),
+        committed_cards={Side.A: (shikiri,), Side.B: (blank,)},
+    )
+    assert state.fighter_a.plays_remaining == before
+    assert [t.card.name for t in state.fighter_a.temporary_zone] == ["Shikiri"]
+
+
+def test_approved_henka_and_explosive_step_orb_nerfs():
+    henka = card_by_name("Henka")
+    explosive = card_by_name("Explosive Step — Fumikomi")
+    assert (henka.power, henka.technique, henka.spirit) == (0, 2, 0)
+    assert (explosive.power, explosive.technique, explosive.spirit) == (0, 0, 2)
+
+
+@pytest.mark.parametrize(
+    "position,power_a,power_b,expected_position,expected_momentum,expected_power",
+    [
+        (0, 5, 4, 1, 1, 5),    # only existing Power lead -> Push
+        (1, 4, 5, 1, 1, 5),    # Position lead -> Power, but no Power lead -> no Push
+        (1, 5, 4, 2, 1, 6),    # Position lead -> Power, then Power lead -> Push
+        (0, 4, 5, 0, 1, 4),    # no lead -> Momentum only
+        (-1, 4, 5, -1, 1, 4), # no Position lead -> no Power or Push
+        (1, 4, 4, 1, 1, 5),    # Power gained from Position cannot unlock Push
+    ],
+)
+def test_shiko_stomp_independent_pre_play_conditions(
+    position, power_a, power_b, expected_position, expected_momentum, expected_power
+):
+    state, _ = bout(hand=[card_by_name("Shiko Stomp")])
+    state.position = position
+    state.fighter_a.power, state.fighter_b.power = power_a, power_b
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert state.position == expected_position
+    assert state.momentum == expected_momentum
+    assert state.fighter_a.power == expected_power
+    assert not state.fighter_a.temporary_zone
+
+
+def test_belt_slap_is_unchanged_and_deashi_loses_one_spirit_orb():
+    assert tuple(getattr(card_by_name("Belt Slap"), stat) for stat in
+                 ("power", "technique", "spirit")) == (2, 0, 3)
+    assert tuple(getattr(card_by_name("Deashi"), stat) for stat in
+                 ("power", "technique", "spirit")) == (2, 0, 1)
+    assert "Belt Slap" in EXCHANGE_EFFECTS
+    assert "Deashi" in EXCHANGE_EFFECTS
+
+
+def test_get_underneath_exchange_search_gives_first_opponent_kimarite_to_zone():
+    first = card_by_name("Yorikiri")
+    second = card_by_name("Oshitaoshi")
+    blank = blank_card()
+    state, _ = bout(hand=[card_by_name("Get Underneath")],
+                    opponent_draw=[blank, first, blank, second])
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert (state.position, state.momentum) == (1, 1)
+    assert [c.name for c in state.fighter_b.kimarite_zone] == ["Yorikiri"]
+    assert [c.name for c in state.fighter_b.draw_pile] == [
+        "Blank", "Blank", "Oshitaoshi"
+    ]
+    assert not state.fighter_a.temporary_zone
+
+
+def test_get_underneath_no_kimarite_in_opponent_draw_has_no_search_downside():
+    state, _ = bout(hand=[card_by_name("Get Underneath")],
+                    opponent_draw=[blank_card(), blank_card()])
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert (state.position, state.momentum) == (1, 1)
+    assert not state.fighter_b.kimarite_zone
+
+
+def test_get_underneath_search_not_repeated_without_another_kimarite():
+    first = card_by_name("Yorikiri")
+    state, _ = bout(hand=[card_by_name("Get Underneath"), card_by_name("Get Underneath")],
+                    opponent_draw=[blank_card(), first])
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert [c.name for c in state.fighter_b.kimarite_zone] == ["Yorikiri"]
+    assert (state.position, state.momentum) == (2, 2)
+
+def test_butsukari_power_lead_loses_two_power_and_mills_one():
+    state, _ = bout(hand=[card_by_name("Butsukari")],
+                    draw=[blank_card(), blank_card()])
+    state.fighter_a.power = 5
+    state.fighter_b.power = 3
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert state.fighter_b.power == 1
+    assert len(state.fighter_a.draw_pile) == 1
+    assert not state.fighter_b.unstable
+
+
+def test_butsukari_without_power_lead_keeps_power_loss_conditional():
+    state, _ = bout(hand=[card_by_name("Butsukari")],
+                    draw=[blank_card(), blank_card()])
+    state.fighter_a.power = 3
+    state.fighter_b.power = 3
+    state.momentum = 1
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert state.fighter_b.power == 3
+    assert state.fighter_b.unstable
+    assert len(state.fighter_a.draw_pile) == 1
+
+@pytest.mark.parametrize("discard_count,expected_unstable", [
+    (0, False), (6, False), (7, True), (8, True),
+])
+def test_get_underneath_exchange_exhausted_gives_self_unstable(
+    discard_count, expected_unstable
+):
+    state, blank = bout(hand=[card_by_name("Get Underneath")])
+    state.fighter_a.discard_pile = [blank_card()] * discard_count
+    play_card(state, Side.A, state.fighter_a.hand[0])
+    assert state.fighter_a.unstable is expected_unstable
+    assert state.fighter_b.unstable is False
+    assert (state.position, state.momentum) == (1, 1)
+
+
+def test_get_underneath_tachiai_no_exhaustion_penalty():
+    from kimarite.tachiai import compare_tachiai
+    from kimarite.tachiai_effects import resolve_prepared_tachiai
+    get_underneath = card_by_name("Get Underneath")
+    blank = blank_card()
+    a = Wrestler("A", 2, 2, 2, blank, get_underneath, blank)
+    b = Wrestler("B", 2, 2, 2, blank, blank, blank)
+    state = BoutState(
+        FighterState(a, discard_pile=[blank_card()] * 7),
+        FighterState(b, draw_pile=[card_by_name("Yorikiri")]),
+    )
+    resolve_prepared_tachiai(
+        state, compare_tachiai(a, b),
+        committed_cards={Side.A: (get_underneath,), Side.B: (blank,)},
+    )
+    assert not state.fighter_a.unstable
+
+@pytest.mark.parametrize("relative_momentum", [-3, -1, 0, 1, 3])
+def test_explosive_step_always_pushes_and_mills_two_on_exchange(relative_momentum):
+    card = card_by_name("Explosive Step — Fumikomi")
+    state, _ = bout(hand=[card], draw=[blank_card() for _ in range(3)])
+    state.momentum = relative_momentum
+    play_card(state, Side.A, card)
+    assert state.position == 1
+    assert state.momentum == relative_momentum
+    assert len(state.fighter_a.draw_pile) == 1
+    assert sum(c.name == "Blank" for c in state.fighter_a.discard_pile) == 2
+    assert state.winner is None

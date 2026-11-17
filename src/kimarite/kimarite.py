@@ -51,7 +51,7 @@ def _yorikiri(state: BoutState, side: Side) -> bool:
 
 
 def _oshidashi(state: BoutState, side: Side) -> bool:
-    return relative_position(state, side) >= 2 and relative_momentum(state, side) >= 2
+    return relative_position(state, side) >= 3 and relative_momentum(state, side) >= 2
 
 
 def _tsukidashi(state: BoutState, side: Side) -> bool:
@@ -75,7 +75,7 @@ def _katasukashi(state: BoutState, side: Side) -> bool:
 
 
 def _tsukiotoshi(state: BoutState, side: Side) -> bool:
-    return (no_grip(state, side) and relative_momentum(state, side) >= 1 and power_advantage(state, side) <= -3
+    return (no_grip(state, side) and relative_momentum(state, side) >= 2 and power_advantage(state, side) <= -3
             and state.opponent(side).unstable)
 
 
@@ -187,7 +187,7 @@ def _sukuinage(state: BoutState, side: Side) -> bool:
 
 
 def _utchari(state: BoutState, side: Side) -> bool:
-    return state.fighter(side).gained_momentum_this_turn and relative_position(state, side) <= -3
+    return state.fighter(side).gained_momentum_this_turn and relative_position(state, side) <= -4
 
 
 def _uwatedashinage(state: BoutState, side: Side) -> bool:

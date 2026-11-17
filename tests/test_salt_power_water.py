@@ -94,19 +94,27 @@ def test_cantrip_grants_play_without_unconditional_draw():
     assert bout.fighter_a.draw_pile == [drawn]
 
 
-def test_salt_throw_recycles_bottom_discard():
+def test_salt_throw_recycles_all_discard_on_exchange_then_one_on_later_turn():
     salt = card_by_name("Salt Throw")
     bottom = Card(120, "Bottom")
     top = Card(121, "Top")
+    existing = Card(122, "Existing")
     bout = make_bout(
         hand=[salt],
-        draw=[Card(122, "Existing")],
+        draw=[existing],
         discard=[top, bottom],
     )
     play_card(bout, Side.A, salt)
+    assert bout.fighter_a.draw_pile == [existing, top, bottom]
+    assert bout.fighter_a.discard_pile == []
+
+    # A later turn still recycles just one of the newly discarded cards.
+    later_top = Card(123, "Later top")
+    later_bottom = Card(124, "Later bottom")
+    bout.fighter_a.discard_pile.extend([later_top, later_bottom])
     resolve_start_of_turn_temporaries(bout, Side.A)
-    assert bout.fighter_a.draw_pile[-1] == bottom
-    assert bout.fighter_a.discard_pile == [top]
+    assert bout.fighter_a.draw_pile == [existing, top, bottom, later_bottom]
+    assert bout.fighter_a.discard_pile == [later_top]
 
 
 def test_salt_throw_persists():

@@ -194,10 +194,10 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
             gain_momentum(state, side, 1)
 
     elif card.name == "Tsukidashi":
-        if relative_position(state, side) >= 1:
-            add_play(state, side, 1)
-            if state.winner is None:
-                draw_one(state, side)
+        # The normal play path counts Tsukidashi itself before this effect.
+        if fighter.cards_played_this_turn >= 3:
+            from .rules import gain_push
+            gain_push(state, side, 1)
 
     elif card.name == "Oshitaoshi":
         if relative_momentum(state, side) >= 1:

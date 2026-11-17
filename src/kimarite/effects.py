@@ -172,9 +172,7 @@ def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 
 def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    before = state.momentum * state.sign(side)
-    if before <= 0:
-        gain_push(state, side, 1)
+    gain_push(state, side, 1)
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -367,7 +365,7 @@ def _salt_throw(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
-    if len(fighter.discard_pile) >= 7:
+    if fighter.discard_pile:
         fighter.draw_pile.extend(fighter.discard_pile)
         fighter.discard_pile.clear()
         state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
@@ -544,6 +542,9 @@ def _get_underneath(
     gain_push(state, side, 1)
     if state.winner is None:
         give_opponent_kimarite(state, side, card.name)
+    # Exchange-only exhausted penalty, using the current discard size.
+    if len(state.fighter(side).discard_pile) >= 7:
+        make_unstable(state, side)
 
 
 def _use_the_tawara(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -918,7 +919,7 @@ def _deashi(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 def _butsukari(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if state.fighter(side).power > state.opponent(side).power:
         if not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose Power"):
-            lose_power(state, state.opponent_side(side), 1)
+            lose_power(state, state.opponent_side(side), 2)
     if state.momentum * state.sign(side) >= 1:
         make_unstable(state, state.opponent_side(side))
     mill_cards(state, side, 1)
@@ -1015,18 +1016,21 @@ def _chiri_chozu(state: BoutState, side: Side, card: Card, context: EffectContex
 
 def _shikiri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     add_temporary(state, side, card, phase="exchange")
+    add_play(state, side, 1)
 
 
 def _aggressive_shiko_stomp(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    has_momentum_lead = state.momentum * state.sign(side) > 0
+    # Snapshot both conditions before the effect: Power gained here must not
+    # create an otherwise unavailable Push on the same play.
+    has_position_lead = state.position * state.sign(side) > 0
     has_power_lead = state.fighter(side).power > state.opponent(side).power
-    gain_push(state, side, 1)
+    gain_momentum(state, side, 1)
     if state.winner is not None:
         return
-    if has_momentum_lead:
+    if has_position_lead:
         gain_power(state, side, 1)
     if has_power_lead and state.winner is None:
-        gain_momentum(state, side, 1)
+        gain_push(state, side, 1)
 
 
 def _reckless_charge(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -1039,11 +1043,13 @@ def _reckless_charge(state: BoutState, side: Side, card: Card, context: EffectCo
 
 
 def _sheer_grit(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    gain_momentum(state, side, 2)
+    gain_momentum(state, side, 1)
     if state.winner is None and len(state.fighter(side).discard_pile) >= 7:
         # "Exhausted" means at least seven discarded cards (fatigue window),
         # not the terminal empty-draw-pile defeat.
-        gain_push(state, side, 1)
+        gain_momentum(state, side, 1)
+        if state.winner is None:
+            gain_push(state, side, 1)
 
 
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {

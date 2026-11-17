@@ -8,6 +8,7 @@ from kimarite.tachiai import (
     technique_thresholds,
     apply_tachiai_power_push,
 )
+from kimarite.turns import apply_initial_power
 
 
 def test_tachiai_uses_base_stats_starting_kimarite_and_prepared_card():
@@ -55,8 +56,10 @@ def test_power_defense_blocks_spirit_push_example():
     b = Wrestler("B", 6, 9, 3, blank, blank, blank)
     comparison = compare_tachiai(a, b)
     state = BoutState(FighterState(a), FighterState(b))
+    apply_initial_power(state, comparison)
     winner, push = apply_tachiai_power_push(state, comparison)
     assert winner is Side.A
+    # Spirit advantage 6 => 2 Push; defender Power lead 3 blocks ONE.
     assert push == 1
     assert state.position == 1
 
@@ -67,6 +70,7 @@ def test_power_defense_never_reverses_push():
     b = Wrestler("B", 2, 2, 5, blank, blank, blank)
     comparison = compare_tachiai(a, b)
     state = BoutState(FighterState(a), FighterState(b))
+    apply_initial_power(state, comparison)
     _, push = apply_tachiai_power_push(state, comparison)
     assert push == 1
     assert state.position == 1
@@ -100,9 +104,10 @@ def test_nodowa_power_applies_before_spirit_push_resistance():
 
     comparison = compare_tachiai(a, b)
     state = BoutState(FighterState(a), FighterState(b))
+    apply_initial_power(state, comparison)
     resolve_prepared_tachiai(state, comparison)
 
-    assert state.fighter_b.power == 2
+    assert state.fighter_b.power == 6
     assert state.position == 0
 
 
@@ -113,24 +118,25 @@ def test_harite_negative_effect_applies_before_spirit_push_resistance():
     blank = Card(9902, "Blank")
     harite = card_by_name("Harite")
 
-    a = Wrestler("A", 0, 0, 5, blank, blank, blank)
+    # Equal printed opening Power: Harite's -1 Power shifts the defensive
+    # comparison and blocks 1 of the attacker's two Spirit Push.
+    a = Wrestler("A", 3, 0, 5, blank, blank, blank)
     b = Wrestler("B", 0, 0, 0, blank, harite, blank)
 
     comparison = compare_tachiai(a, b)
     state = BoutState(FighterState(a), FighterState(b))
+    apply_initial_power(state, comparison)
     resolve_prepared_tachiai(state, comparison)
 
-    # Current B11 Harite lowers the opponent's Power, rather than
-    # granting Power to Harite's owner (the historic bonus was removed).
-    assert state.fighter_b.power == 0
-    assert state.fighter_a.power == -1
-    assert state.position == 0
+    assert state.fighter_b.power == 4
+    assert state.fighter_a.power == 3
+    assert state.position == 1
 
-    # Without Harite's negative Power effect, the same printed-orb
-    # comparison would produce incoming Spirit Push.
+    # Without Harite's -1 Power, the same printed orbs produce 2 Push.
     baseline = BoutState(FighterState(a), FighterState(b))
+    apply_initial_power(baseline, comparison)
     from kimarite.tachiai import apply_tachiai_power_push
     _, baseline_push = apply_tachiai_power_push(baseline, comparison)
 
-    assert baseline_push > 0
+    assert baseline_push == 2
     assert state.position < baseline_push

@@ -28,3 +28,11 @@ The following percentages and sample sizes are from the 7,080 completed bouts in
 | 10 | Shiko Stomp | 🟣🟠🟠🟠🟠 | 123 / 214 | 57.5% |
 
 **Note:** Only print displayed orbs; Tachiai effects must be separately derived from `src/kimarite/tachiai_effects.py` and not inferred from a card's Exchange effect. The original card counts, calculations and recorded bout results are unchanged.
+
+
+### B12 three-orb Chiri-chozu rebalance (experimental)
+
+As of the B12 Chiri-chozu three-orb experiment, its current printed orbs are
+**🟣🟢🟠 (1 Power, 1 Technique, 1 Spirit)**. The Chiri-chozu row in the
+historical sample above intentionally retains its five-orb configuration to
+preserve the recorded historical result; that row is not a current card spec.

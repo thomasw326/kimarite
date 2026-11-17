@@ -49,7 +49,7 @@ def test_new_cards_registered_with_orbs():
         "Kachiage": (3, 0, 0),
         "Nekodamashi": (1, 1, 2),
         "Maesabaki": (0, 2, 1),
-        "Deashi": (2, 0, 2),
+        "Deashi": (2, 0, 1),
         "Butsukari": (2, 0, 1),
         "Denshamichi": (1, 0, 2),
         "Spin Away": (0, 1, 2),
@@ -73,7 +73,7 @@ def test_okuri_finishers_are_generated_only():
     assert kimarite_is_satisfied(bout, Side.A, card_by_name("Okuritaoshi"))
 
 
-def test_denshamichi_interruption_creates_okuritaoshi_and_flips_position():
+def test_denshamichi_interruption_creates_okuridashi_and_flips_position():
     bout = state()
     card = effect(bout, "Denshamichi")
     assert bout.momentum == 0 and bout.position == 1
@@ -81,10 +81,10 @@ def test_denshamichi_interruption_creates_okuritaoshi_and_flips_position():
     assert instance.card == card
     remove_temporary(bout, Side.A, instance, disrupted=True)
     assert bout.position == -1
-    assert any(c.name == "Okuritaoshi" for c in bout.fighter_b.kimarite_zone)
+    assert any(c.name == "Okuridashi" for c in bout.fighter_b.kimarite_zone)
 
 
-def test_spin_away_interruption_creates_okuridashi():
+def test_spin_away_interruption_creates_okuritaoshi():
     bout = state()
     effect(bout, "Spin Away")
     assert bout.momentum == 1
@@ -92,7 +92,7 @@ def test_spin_away_interruption_creates_okuridashi():
     instance = bout.fighter_a.temporary_zone[0]
     remove_temporary(bout, Side.A, instance, disrupted=True)
     assert bout.side_by_side_owner is None
-    assert any(c.name == "Okuridashi" for c in bout.fighter_b.kimarite_zone)
+    assert any(c.name == "Okuritaoshi" for c in bout.fighter_b.kimarite_zone)
 
 
 def test_butsukari_checks_are_independent_and_mills_one():
@@ -100,7 +100,7 @@ def test_butsukari_checks_are_independent_and_mills_one():
     bout.momentum = 1
     bout.fighter_a.draw_pile = [card_by_name("Oshi")]
     effect(bout, "Butsukari")
-    assert bout.fighter_b.power == 5
+    assert bout.fighter_b.power == 4
     assert bout.fighter_b.unstable
     assert len(bout.fighter_a.discard_pile) == 1
     assert not bout.fighter_a.draw_pile
@@ -255,7 +255,7 @@ def test_kirikaeshi_requires_two_momentum_and_stability():
 
 def test_tsukiotoshi_requires_unstable_opponent():
     bout = state(power_a=3, power_b=8)
-    bout.momentum = 1
+    bout.momentum = 2
     card = card_by_name("Tsukiotoshi")
     assert not kimarite_is_satisfied(bout, Side.A, card)
     bout.fighter_b.unstable = True
@@ -345,3 +345,64 @@ def test_get_underneath_is_immediate_not_temporary():
     assert bout.position == 1
     assert not bout.fighter_a.temporary_zone
 
+
+def test_nekodamashi_disruption_has_no_momentum_penalty():
+    bout = state()
+    bout.momentum = 2
+    effect(bout, "Nekodamashi")
+    instance = bout.fighter_a.temporary_zone[0]
+    remove_temporary(bout, Side.A, instance, disrupted=True)
+    assert bout.momentum == 2
+    assert not bout.fighter_a.temporary_zone
+
+
+@pytest.mark.parametrize("owner", [Side.A, Side.B])
+@pytest.mark.parametrize("relative_before", [-4, -3, -2, -1, 0, 1, 2, 3, 4])
+def test_denshamichi_disruption_always_favors_opponent_with_same_distance(
+    owner, relative_before
+):
+    """Reversal converts any owner's Position lead into a matching deficit."""
+    bout = state()
+    instance = add_temporary(bout, owner, card_by_name("Denshamichi"), phase="exchange")
+    bout.position = bout.sign(owner) * relative_before
+    prior_momentum = bout.momentum
+
+    remove_temporary(bout, owner, instance, disrupted=True)
+
+    assert bout.position * bout.sign(owner) == -abs(relative_before)
+    assert bout.position * bout.sign(bout.opponent_side(owner)) == abs(relative_before)
+    assert bout.momentum == prior_momentum
+    assert any(c.name == "Okuridashi" for c in bout.opponent(owner).kimarite_zone)
+    assert not any(c.name == "Okuridashi" for c in bout.fighter(owner).kimarite_zone)
+
+
+@pytest.mark.parametrize("owner", [Side.A, Side.B])
+def test_denshamichi_without_disruption_preserves_position_and_gives_no_finisher(owner):
+    bout = state()
+    instance = add_temporary(bout, owner, card_by_name("Denshamichi"), phase="exchange")
+    bout.position = bout.sign(owner) * 3
+    remove_temporary(bout, owner, instance, disrupted=False)
+    assert bout.position * bout.sign(owner) == 3
+    assert not any(c.name == "Okuridashi" for c in bout.opponent(owner).kimarite_zone)
+
+
+def test_denshamichi_reversal_grants_position_finisher_condition():
+    """At +3 Position for the owner, disruption gives opponent +3 Position."""
+    bout = state()
+    bout.position = 3
+    bout.momentum = -1
+    instance = add_temporary(bout, Side.A, card_by_name("Denshamichi"), phase="exchange")
+    remove_temporary(bout, Side.A, instance, disrupted=True)
+    assert bout.position == -3
+    assert bout.momentum == -1
+    okuridashi = next(c for c in bout.fighter_b.kimarite_zone if c.name == "Okuridashi")
+    assert kimarite_is_satisfied(bout, Side.B, okuridashi)
+
+
+def test_spin_away_disruption_does_not_flip_position():
+    bout = state()
+    instance = add_temporary(bout, Side.A, card_by_name("Spin Away"), phase="exchange")
+    bout.position = 2
+    remove_temporary(bout, Side.A, instance, disrupted=True)
+    assert bout.position == 2
+    assert any(c.name == "Okuritaoshi" for c in bout.fighter_b.kimarite_zone)

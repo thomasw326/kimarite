@@ -10,7 +10,7 @@
         "momentum_min": 1
       },
       "exchange": null,
-      "generated_by": "Spin Away removal",
+      "generated_by": "Denshamichi removal",
       "normal_play": false
     },
     "Okuritaoshi": {
@@ -19,7 +19,7 @@
         "momentum_min": 1
       },
       "exchange": null,
-      "generated_by": "Denshamichi removal",
+      "generated_by": "Spin Away removal",
       "normal_play": false
     }
   },
@@ -110,7 +110,7 @@
         "start_sidesteplike_side_by_side"
       ],
       "disrupted": [
-        "grant_opponent_okuridashi_to_zone"
+        "grant_opponent_okuritaoshi_to_zone"
       ]
     },
     "Denshamichi": {
@@ -128,7 +128,7 @@
         "gain_push:1"
       ],
       "disrupted": [
-        "grant_opponent_okuritaoshi_to_zone",
+        "grant_opponent_okuridashi_to_zone",
         "position=-abs(position)"
       ]
     },

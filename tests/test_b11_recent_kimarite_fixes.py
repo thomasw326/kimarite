@@ -31,11 +31,11 @@ def test_hatakikomi_requires_opponent_unstable():
     assert "Unstable" in card_info(card_by_name("Hatakikomi"))["description"]
 
 
-def test_utchari_accepts_minus_three_and_minus_four_only_with_gain():
+def test_utchari_accepts_only_minus_four_with_gain():
     for position in (-4, -3, -2):
         for gained in (False, True):
             state = _state(position=position, gained=gained)
-            expected = position <= -3 and gained
+            expected = position <= -4 and gained
             assert kimarite_is_satisfied(state, Side.A, card_by_name("Utchari")) is expected
             assert _matches_display(state, "Utchari") is expected
 
