@@ -73,10 +73,7 @@ function render(state){game=state}
 const document={querySelector(){return {scrollIntoView(){}}}};
 """
     r = subprocess.run(
-        [exe, "-e", prep + helpers + "
-(async()=>{
-" + script + "
-})().catch(e=>{console.error(e);process.exit(1)});",
+        [exe, "-e", prep + helpers + "\n(async()=>{\n" + script + "\n})().catch(e=>{console.error(e);process.exit(1)});",
          json.dumps(m)],
         capture_output=True, text=True, check=False, timeout=15,
     )
