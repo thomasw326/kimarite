@@ -40,19 +40,21 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     # Without this, the roster JSON order groups Kimarite near the draw top.
     random.Random(seed * 2).shuffle(unallocated)
     records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
-    human_record = records[pending.human]
     ai = _fighter(pending.opponent, records[pending.opponent], seed=seed * 2 + 1, ranking=2)
-    style = STYLES[STYLE_PROXIES.get(pending.human, pending.human)]
-    order = list(dict.fromkeys([style.primary, style.secondary]))
-    order.extend(x.value for x in (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT) if x.value not in order)
-    # B11 human has three base points: primary 2, secondary 1, tertiary 0.
-    # AI retains its six-point roster stats to offset its two-card Tachiai.
-    stats = {"power": 0, "technique": 0, "spirit": 0}
-    stats[order[0].lower()] = 2
-    stats[order[1].lower()] = 1
+    # Player-created wrestlers use their chosen 2/1/0 allocation, without
+    # consulting any roster style or prescribing a fighter archetype.
     if pending.created_stats is not None:
         stats = dict(pending.created_stats)
         order = [key.capitalize() for key in sorted(stats, key=lambda key: (-stats[key], key))]
+    else:
+        # Retain historical B11 preset-wrestler behavior for practice tests.
+        style = STYLES[STYLE_PROXIES.get(pending.human, pending.human)]
+        order = list(dict.fromkeys([style.primary, style.secondary]))
+        order.extend(x.value for x in (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT) if x.value not in order)
+        stats = {"power": 0, "technique": 0, "spirit": 0}
+        stats[order[0].lower()] = 2
+        stats[order[1].lower()] = 1
+    # The AI retains its existing six-point roster stats and hidden Tachiai.
     blank = card_by_name("Oshi")  # unused classic-role placeholders; never zoned
     human = Wrestler(
         pending.human, stats["power"], stats["technique"], stats["spirit"],
