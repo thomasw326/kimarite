@@ -40,6 +40,29 @@ function displayCardName(name){
  return english?english+' ('+name+')':name;
 }
 const $=id=>document.getElementById(id);let token=null,game=null,picked=new Set(),pendingPlay=null,sessionSetup=null,actionJournal=[];
+function setGameLocation(location){
+ // Location is the current gameplay phase, not free navigation from an active bout.
+ if(location!=='heya'&&location!=='dohyo')throw new Error('Unknown game location.');
+ $('heya-view').hidden=location!=='heya';
+ $('dohyo-view').hidden=location!=='dohyo';
+ document.body.dataset.phase=location;
+ $('phase-heading').textContent=location==='heya'?'Heya · The Stable':'Dohyō · The Ring';
+ $('phase-subtitle').textContent=location==='heya'
+  ?'Plan, draft, and prepare your wrestler for the next bout.'
+  :'Commit your Tachiai and fight on the clay.';
+ try{sessionStorage.setItem('kimarite_ui_phase',location)}catch(e){}
+ window.scrollTo(0,0);
+}
+function returnedToHeyaAfterBout(g){
+ // Preserve a completed bout's return-to-Heya choice across page reloads.
+ if(!g.finished||sessionStorage.getItem('kimarite_ui_phase')!=='heya')return false;
+ try{
+  const m=management||JSON.parse(sessionStorage.getItem('kimarite_management')||'null');
+  return !!(m&&Array.isArray(m.results)&&sessionSetup
+   &&sessionSetup.tournament_bout===m.round
+   &&m.results.length===m.round+1);
+ }catch(e){return false}
+}
 async function api(path,body){const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const v=await r.json();if(!r.ok){const e=new Error(v.message||v.error||'Request failed');e.data=v;throw e}return v}
 function rememberSession(){try{if(token)sessionStorage.setItem('kimarite_session',token);if(sessionSetup)sessionStorage.setItem('kimarite_setup',JSON.stringify(sessionSetup));sessionStorage.setItem('kimarite_actions',JSON.stringify(actionJournal))}catch(e){}}
 async function recoverSession(){if(!sessionSetup)throw new Error('This bout expired and has no recovery data. Please start a new bout.');const restored=await api('/api/session',sessionSetup);let state=restored.state;for(const command of actionJournal){const next=await api('/api/session/'+restored.token+'/action',command);state=next.state}token=restored.token;rememberSession();return state}
@@ -453,6 +476,8 @@ function renderBoutHud(g){
  }
 }
 function renderPendingTachiai(g){
+ setGameLocation('dohyo');
+ $('return-heya').hidden=true;
  renderBoutHud(g);
  game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();
  $('round').textContent='CHOOSE TACHIAI';$('tracks').replaceChildren();
@@ -496,22 +521,28 @@ function showBoutResult(g){
  requestAnimationFrame(()=>dialog.classList.add('result-revealed'));
 }
 $('result-review').onclick=()=>{$('bout-result').close();$('history').scrollIntoView({behavior:'smooth',block:'start'})};
-$('result-next').onclick=()=>{
- $('bout-result').close();
- if(management&&completedBlock(management)&&unresolvedRewards(management).length){
-  openBlockRewards();return;
+function returnToHeya(){
+ if(!game?.finished)return; // No retreat from a live bout.
+ if($('bout-result').open)$('bout-result').close();
+ $('return-heya').hidden=true;
+ setGameLocation('heya');
+ if(management){
+  managementStatus();
+  if(completedBlock(management)&&unresolvedRewards(management).length){
+   openBlockRewards();return;
+  }
+  if(management?.results.length===15){showTournamentFinal();return}
+  $('management-notice').textContent='Bout recorded. Review your plan in the Heya before the next match.';
  }
- if(management?.results.length===15){showTournamentFinal();return}
- const next=$('management-next');
- if(management&&next&&!next.hidden){next.click();return}
- $('start').scrollIntoView({behavior:'smooth',block:'start'});
-};
-function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();
+}
+$('result-next').onclick=returnToHeya;
+$('return-heya').onclick=returnToHeya;
+function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();
  for(const [title,s,own] of [['YOUR RIKISHI',g.human,true],['OPPONENT',g.opponent,false]]){const box=node('div','rikishi-info');box.append(node('div','eyebrow',title),node('h2','',s.name),node('p','', 'Power '+s.power+'  ·  Grip '+s.grip.join('/')+'  ·  '+(own?'Plays '+s.plays_remaining:'Hand '+s.hand_count)));const zones=node('p','zones');zones.append(node('b','','Kimarite: '),document.createTextNode(names(s.kimarite)),node('br'),node('b','','Temporary: '),document.createTextNode(names(s.temporary)));box.append(zones);const discard=btn('Discard pile: '+s.discard_count+' · View cards',()=>showDiscard(s,own?'Your rikishi':'Opponent'),'discard-button');box.append(discard);for(const zoneName of ['kimarite','temporary']){const zone=node('div','zone-list');zone.append(node('div','eyebrow',zoneName.toUpperCase()));for(const c of s[zoneName]){const item=node('div','zone-entry');item.append(btn(displayCardName(c.name)+' · Inspect',()=>inspect({...c,description:zoneEffect(c,zoneName),zone_only:true,timing:zoneName==='kimarite'?'Winning condition':'Active Temporary effect'}),'zone-card'));item.append(node('p','temporary-detail',zoneEffect(c,zoneName)));zone.append(item)}box.append(zone)}$('score').append(box)}
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();if(g.selection){$('choices').append(node('h2','','Choose '+g.selection.keep+' cards to keep'));const strip=node('div','cards');g.selection.options.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}confirm.disabled=picked.size!==g.selection.keep});b.firstChild.textContent=(i+1)+'. '+displayCardName(c.name);const info=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');info.type='button';const wrap=node('div','choice-card-wrap');wrap.append(b,info);strip.append(wrap)});$('choices').append(strip);const confirm=btn('Keep selected cards',()=>act({type:'choose_cards',indices:[...picked]}),'confirm');confirm.disabled=g.selection.keep!==0;$('choices').append(confirm)}
  $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));g.human.hand.forEach((c,i)=>$('hand').append(card(c,()=>inspect(c,legal.has(i)?()=>play(i):null),true)));const history=$('history');history.replaceChildren();const events=g.events||[];if(!events.length)history.append(node('p','','No actions recorded yet.'));for(const event of events.slice().reverse())history.append(node('p',event.includes(' plays ')?'history-line':'history-event',event));$('end').disabled=!g.can_end_turn;$('notice').textContent=g.finished?('Winner: '+(g.winner==='A'?g.human.name:g.winner==='B'?g.opponent.name:'Undecided')+' · '+(g.win_method||g.stopped_reason||'')):'';
- if(g.finished)showBoutResult(g);
+ if(g.finished&&!alreadyInHeya)showBoutResult(g);
 }
 async function play(hand_index){pendingPlay={type:'play_card',hand_index,choices:{}};await act(pendingPlay)}
 async function act(command){try{let r;try{r=await api('/api/session/'+token+'/action',command)}catch(e){if(e.data&&e.data.code==='session_expired'){await recoverSession();r=await api('/api/session/'+token+'/action',command)}else throw e}actionJournal.push(JSON.parse(JSON.stringify(command)));render(r.state)}catch(e){if(e.data&&e.data.choice_required){choicePrompt(e.data);return}if(e.data&&e.data.state){render(e.data.state);$('notice').textContent=e.message+(e.data.state.selection?' — Card selection is still pending above.':'');return}$('notice').textContent=e.message}}
