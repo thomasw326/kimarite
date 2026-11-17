@@ -34,9 +34,12 @@ def new_basho(roster: dict) -> dict:
                      "rank": w["rank"], "wins": 0, "losses": 0, "played": []})
     rows.append({"id": PLAYER, "name": roster["player"]["name"],
                  "style": "Player-created", "format_id": None,
-                 "format_description": None, "rank": PLAYER_RANK,
+                 "format_description": None, "rank": roster["player"]["rank"],
                  "wins": 0, "losses": 0, "played": []})
-    if [r["rank"] for r in rows] != list(range(1, WRESTLERS + 1)):
+    # The player enters the FIRST basho at #42, but later starts exactly at
+    # the rank earned at the previous boundary. Keep the player record last
+    # internally for existing ledger clients; sort only for banzuke display.
+    if sorted(r["rank"] for r in rows) != list(range(1, WRESTLERS + 1)):
         raise ValueError("Banzuke must have every rank from 1 to 42 exactly once")
     return {"schema": "b12-basho-ledger-v1", "seed": roster["seed"],
             "day": 0, "wrestlers": rows, "player_id": PLAYER,
