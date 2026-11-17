@@ -1,6 +1,6 @@
 # Release UI direction: Heya and Dohyō are separate player phases
 
-Status: **approved product direction**, not implemented UI. Recorded 16 November 2026.
+Status: **approved product direction; first two-location browser shell implemented on `main`**, with broader UI polish and career integration outstanding. Initially recorded 16 November 2026.
 Source: user's release UX discussion.
 
 ## Naming and meaning
@@ -57,7 +57,9 @@ Between-bout returns should be easy to pass through when the player has no new d
 
 ## Current gap
 
-As of this specification, `web/index.html` contains the "management" panel and the combat "arena" panel in one continuous page, with the optional preset-wrestler practice controls in a collapsible section. The separate phase shells/navigation, transition handling, aesthetic direction and six-tournament year UI **have not been implemented**. Keep the present tested battle engine, drafting logic, and AI intact while refactoring the player-facing UI.
+**Implemented in the first browser pass:** `web/index.html` now has separate `#heya-view` and `#dohyo-view` shells; CSS gives them different visual identities and keeps inactive controls hidden. `web/client.js` switches into the Dohyō for Tachiai/Exchange, only allows return after a finished bout, and restores the Heya location for already-returned completed bouts. The old automatic next-bout action was replaced with an explicit return to the Heya, where subsequent management decisions are made. Phase-specific tests cover location switching and saved-phase behavior.
+
+**Still outstanding:** detailed visual/UX polish, the dynamic/moving dohyo, removing the legacy preset-wrestler requirement from the public creation flow, full six-tournament career tracking and year-end summary, and manual cross-device end-to-end QA. The underlying battle engine, draft selection and AI were intentionally not changed.
 
 Project roadmap:
 https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit
