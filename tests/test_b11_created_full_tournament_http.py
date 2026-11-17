@@ -16,6 +16,7 @@ from urllib.request import Request, urlopen
 import pytest
 
 from kimarite import b10_web
+from kimarite.b10_human_session import roster
 from kimarite.b11_player_draft import STARTERS
 
 
@@ -100,12 +101,7 @@ def finish_bout(post, token, state, *, bout):
 def test_created_wrestler_fifteen_bout_http_tournament(live_api):
     post = live_api
     starting, picks = draft_28(post, seed=20261117)
-    opponents = [
-        "The Technician", "Pressure Fighter", "Mountain", "Speed Demon",
-        "Heavy Hitter", "Mawashi Specialist", "The Arsenal", "The Specialist",
-        "Opportunist", "Power Grappler", "Disruptor", "Dancer", "Charger",
-        "Ring-Edge Defender", "Inside Fighter",
-    ]
+    opponents = list(roster())[:15]
     assert len(opponents) == len(set(opponents)) == 15
     record = []
     physical_cards_used = []
