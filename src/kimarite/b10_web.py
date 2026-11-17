@@ -13,6 +13,7 @@ import json
 import secrets
 import time
 from threading import RLock
+from collections import deque
 from urllib.parse import urlsplit
 
 from .b10_human_session import dispatch, new_b10_session, public_snapshot, roster, opening_options, management_deal
@@ -27,6 +28,38 @@ MAX_SESSIONS = 100
 # Inactivity, rather than a hard bout duration: the browser journal permits
 # recovery if the service restarts or a long-idle session expires.
 SESSION_IDLE_SECONDS = 60 * 60
+
+# Preview-only throttling. The peer address comes from the socket, never a
+# client-controlled X-Forwarded-For header.
+RATE_WINDOW_SECONDS = 60
+MAX_POSTS_PER_CLIENT = 180
+MAX_BOUT_STARTS_PER_CLIENT = 24
+MAX_TRACKED_CLIENTS = 2048
+_rate_history: dict[tuple[str, str], deque[float]] = {}
+
+
+def _allow_post(client: str, *, starting_bout: bool, now: float | None = None) -> bool:
+    """Sliding window limiter; caller must hold _lock."""
+    if now is None:
+        now = time.monotonic()
+    for key, history in list(_rate_history.items()):
+        while history and now - history[0] >= RATE_WINDOW_SECONDS:
+            history.popleft()
+        if not history:
+            del _rate_history[key]
+    rules = [(client, "post", MAX_POSTS_PER_CLIENT)]
+    if starting_bout:
+        rules.append((client, "session", MAX_BOUT_STARTS_PER_CLIENT))
+    if any(len(_rate_history.get((ip, kind), ())) >= limit for ip, kind, limit in rules):
+        return False
+    for ip, kind, _ in rules:
+        _rate_history.setdefault((ip, kind), deque()).append(now)
+    # Bounded memory even with many distinct socket peers.
+    if len(_rate_history) > MAX_TRACKED_CLIENTS * 2:
+        oldest = sorted(_rate_history, key=lambda k: _rate_history[k][-1])
+        for key in oldest[:len(_rate_history) - MAX_TRACKED_CLIENTS * 2]:
+            del _rate_history[key]
+    return True
 
 
 def _prune_sessions(now: float | None = None) -> None:
@@ -186,6 +219,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Cache-Control", "no-store")
+        if code == 429:
+            self.send_header("Retry-After", str(RATE_WINDOW_SECONDS))
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
@@ -243,6 +278,15 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlsplit(self.path).path
+        # Protect costly endpoints before reading the body, atomically with
+        # other workers through the session lock.
+        with _lock:
+            allowed = _allow_post(self.client_address[0], starting_bout=path == "/api/session")
+        if not allowed:
+            return self.reply(429, {
+                "error": "Too many requests from this connection. Retry shortly.",
+                "code": "rate_limited",
+            })
         try:
             data = self.body()
             with _lock:
