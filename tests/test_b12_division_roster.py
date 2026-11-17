@@ -19,8 +19,38 @@ def test_source_has_60_distinct_formats_and_existing_fictional_names():
         s: 4 for s in {f["style_proxy"] for f in formats}
     })
     assert len({f["style_proxy"] for f in formats}) == 15
-    assert len(load_shikona()) == 69
-    assert len(set(load_shikona())) == 69
+    assert len(load_shikona()) >= 250
+    assert len({name.casefold() for name in load_shikona()}) == len(load_shikona())
+
+
+def test_250_name_pool_keeps_all_69_original_fictional_shikona():
+    names = load_shikona()
+    assert len(names) >= 250
+    # The original fictional ring names remain intact, in the established order.
+    original = (
+        "Gozan Kagehayate Fukamori Shizukayama Nagakumo Tobikawa Omine Isami Kaname Masuda "
+        "Arakuma Kururi Sumida Tetsukaze Hayashiro Hayategiri Hazushi Kogane Dokkan Takamine "
+        "Sano Shimekaze Nagate Nagatsuki Iwase Kawashi Koyama Takakumo Ganjo Otsuka "
+        "Ueda Nodobashi Futatsude Kumogake Kose Nagekumo Arashio Fudokaze Tenryo Tobihaya "
+        "Kamei Ogata Moguri Sugita Kataharai Hanetori Damashi Ukematsu Odaru Morita "
+        "Hatahiki Donkame Kannukiyama Bakudan Mochiage Uramichi Atamakaze Haraiyama Nemuriishi Gaburimaru "
+        "Banryu Dekoboko Wakagane Hirokuma Tokkan Hitohiki Yukiguma Daigan Saeki "
+    )
+    assert names[:69] == original.split()
+    assert len(names[69:]) >= 181
+    assert len({name.casefold() for name in names}) == len(names)
+
+
+def test_seeded_roster_draws_from_new_names_without_repeating_formats():
+    new_names = set(load_shikona()[69:])
+    for seed in (2, 3, 211):
+        roster = make_roster(seed, "My Rikishi")
+        selected = {w["name"] for w in roster["wrestlers"]}
+        assert len(selected) == 60
+        assert selected & new_names
+        assert {w["format_id"] for w in roster["wrestlers"]} == {
+            fmt["id"] for fmt in load_formats()
+        }
 
 
 @pytest.mark.parametrize("seed", [0, 1, 2, 17, 23, 20261117, 2**45])
