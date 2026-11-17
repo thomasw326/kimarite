@@ -410,7 +410,134 @@ function b11TachiaiPreview(m,group){
  box.append(node('small','','Before reveal-chain bonuses. AI starts with six base points plus two hidden opening cards; revealed only after commitment.'));
  return box;
 }
-function managementBoard(){if(!management)return;const chosen=management.groups.flat().filter(x=>x!==null);const cards=$('management-cards');cards.replaceChildren();for(const c of management.cards){const selected=chosen.includes(c.deal_index);const wrapper=node('div','management-card');wrapper.append(card(c,()=>inspect(c)));wrapper.append(node('small','',selected?'Assigned to a bout':'Available'));cards.append(wrapper)}const groups=$('management-groups');groups.replaceChildren();for(let i=0;i<3;i++){const box=node('div','management-group');box.append(node('h3','','Round '+(Math.floor(management.round/3)+1)+' · Bout '+(i+1)+' vs '+management.opponents[Math.floor(management.round/3)*3+i]));for(let j=0;j<3;j++){const classic=management.opening_mode==='classic';const type=classic?(j===0?'Kimarite':j===1?'Prepared Tachiai':'First draw'):('Opening card '+(j+1));const select=node('select','');const blank=node('option','',type+' — choose');blank.value='';select.append(blank);for(const c of management.cards){if(classic&&(j===0?!c.is_kimarite:c.is_kimarite))continue;if(chosen.includes(c.deal_index)&&management.groups[i][j]!==c.deal_index)continue;const o=node('option','',displayCardName(c.name)+' · '+(c.deal_index+1));o.value=c.deal_index;select.append(o)}select.value=management.groups[i][j]===null?'':String(management.groups[i][j]);select.onchange=()=>{management.groups[i][j]=select.value===''?null:Number(select.value);managementSave();managementBoard()};box.append(node('label','',type),select)}if(management.opening_mode!=='classic')box.append(b11TachiaiPreview(management,i));groups.append(box)}$('management-start').disabled=chosen.length!==9}
+// Every three-bout block deals nine physical cards. Once a bout starts its
+// allocation is committed; only future bouts may exchange their cards.
+let launchingTournamentBout=null;
+function currentBlockStart(m){return Math.floor(m.round/3)*3}
+function allocationLockState(m,group){
+ const bout=currentBlockStart(m)+group;
+ if(m.results.length>bout)return 'completed';
+ if(m.locked_bouts?.[bout])return 'started';
+ // Recover old saved live bouts that predate the explicit lock field.
+ if(m===management&&token&&activeTournamentBout()===bout)return 'started';
+ return null;
+}
+function syncBoutLocks(m){
+ if(!m.locked_bouts)m.locked_bouts={};
+ let changed=false;
+ for(let group=0;group<3;group++){
+  const bout=currentBlockStart(m)+group,record=m.results[bout];
+  if(record){
+   const original=(record.assigned_cards||[]).map(c=>c.deal_index);
+   const valid=original.length===3&&new Set(original).size===3&&original.every(id=>m.cards.some(c=>c.deal_index===id));
+   if(valid&&JSON.stringify(m.locked_bouts[bout])!==JSON.stringify(original)){
+    m.locked_bouts[bout]=[...original];changed=true;
+   }else if(!valid&&!m.locked_bouts[bout]){
+    m.locked_bouts[bout]=[...m.groups[group]];changed=true;
+   }
+  }
+  const saved=m.locked_bouts[bout];
+  if(Array.isArray(saved)&&saved.length===3&&saved.every(id=>m.cards.some(c=>c.deal_index===id))
+     &&JSON.stringify(saved)!==JSON.stringify(m.groups[group])){
+   m.groups[group]=[...saved];changed=true;
+  }
+ }
+ // Older saves may have already reassigned a completed bout's card. Restore
+ // its recorded opening and free any collision in future, editable slots.
+ const reserved=new Set();
+ for(let group=0;group<3;group++)if(allocationLockState(m,group))
+  for(const id of m.groups[group])if(id!==null)reserved.add(id);
+ for(let group=0;group<3;group++)if(!allocationLockState(m,group))
+  for(let slot=0;slot<3;slot++)if(reserved.has(m.groups[group][slot])){
+   m.groups[group][slot]=null;changed=true;
+  }
+ if(changed&&m===management)managementSave();
+}
+function slotAcceptsCard(m,slot,id){
+ if(id===null||m.opening_mode!=='classic')return true;
+ const card=m.cards.find(c=>c.deal_index===id);
+ return !!card&&(slot===0?card.is_kimarite:!card.is_kimarite);
+}
+function allBoutCardsAssigned(m){
+ if(!Array.isArray(m.groups)||m.groups.length!==3)return false;
+ const slots=m.groups.flat();
+ return slots.length===9&&slots.every((id,n)=>Number.isInteger(id)
+  &&m.cards.some(c=>c.deal_index===id)&&slotAcceptsCard(m,n%3,id))
+  &&new Set(slots).size===9;
+}
+function changeBoutAssignment(m,group,slot,id){
+ if(!m.groups[group]||slot<0||slot>2||allocationLockState(m,group)||launchingTournamentBout!==null)return false;
+ if(id!==null&&(!Number.isInteger(id)||!m.cards.some(c=>c.deal_index===id)||!slotAcceptsCard(m,slot,id)))return false;
+ const previous=m.groups[group][slot];
+ if(previous===id)return true;
+ if(id!==null)for(let i=0;i<3;i++)for(let j=0;j<3;j++){
+  if(i===group&&j===slot)continue;
+  if(m.groups[i][j]!==id)continue;
+  if(allocationLockState(m,i)||!slotAcceptsCard(m,j,previous))return false;
+  m.groups[i][j]=previous; // Direct swap among upcoming bouts.
+ }
+ m.groups[group][slot]=id;
+ return true;
+}
+function managementBoard(){
+ if(!management)return;
+ const m=management;
+ syncBoutLocks(m);
+ const chosen=m.groups.flat().filter(id=>id!==null),lockedIDs=new Set();
+ for(let group=0;group<3;group++)if(allocationLockState(m,group))
+  for(const id of m.groups[group])if(id!==null)lockedIDs.add(id);
+ const cards=$('management-cards');cards.replaceChildren();
+ for(const c of m.cards){
+  const wrapper=node('div','management-card');
+  wrapper.append(card(c,()=>inspect(c)));
+  wrapper.append(node('small','',lockedIDs.has(c.deal_index)?'Locked to completed / started bout'
+   :chosen.includes(c.deal_index)?'Assigned to an upcoming bout':'Available'));
+  cards.append(wrapper);
+ }
+ const groups=$('management-groups');groups.replaceChildren();
+ for(let group=0;group<3;group++){
+  const locked=allocationLockState(m,group);
+  const bout=currentBlockStart(m)+group;
+  const box=node('div','management-group'+(locked?' management-group-locked':''));
+  box.append(node('h3','','Round '+(Math.floor(m.round/3)+1)+' · Bout '+(group+1)
+   +' vs '+m.opponents[bout]+(locked?' · '+(locked==='completed'?'COMPLETED':'STARTED')+' — LOCKED':' · editable')));
+  if(locked)box.append(node('p','assignment-locked-note',locked==='completed'
+   ?'Bout completed: its three original cards cannot be changed.'
+   :'Bout already started: its three original cards are committed.'));
+  for(let slot=0;slot<3;slot++){
+   const classic=m.opening_mode==='classic';
+   const type=classic?(slot===0?'Kimarite':slot===1?'Prepared Tachiai':'First draw'):('Opening card '+(slot+1));
+   const select=node('select','');select.disabled=!!locked||launchingTournamentBout!==null;
+   const blank=node('option','',type+' — choose');blank.value='';select.append(blank);
+   for(const c of m.cards){
+    if(!slotAcceptsCard(m,slot,c.deal_index))continue;
+    const other=m.groups.findIndex(row=>row.includes(c.deal_index));
+    const otherSlot=other<0?-1:m.groups[other].indexOf(c.deal_index);
+    if(other>=0&&(other!==group||otherSlot!==slot)){
+     if(allocationLockState(m,other)||!slotAcceptsCard(m,otherSlot,m.groups[group][slot]))continue;
+    }
+    const text=displayCardName(c.name)+' · '+(c.deal_index+1)
+     +(other>=0&&(other!==group||otherSlot!==slot)?' · swap with Bout '+(other+1):'');
+    const option=node('option','',text);option.value=c.deal_index;select.append(option);
+   }
+   select.value=m.groups[group][slot]===null?'':String(m.groups[group][slot]);
+   select.onchange=()=>{
+    const next=select.value===''?null:Number(select.value);
+    if(changeBoutAssignment(m,group,slot,next))managementSave();
+    else $('management-notice').textContent='Cannot change a card committed to a started or completed bout.';
+    managementBoard();
+   };
+   box.append(node('label','',type),select);
+  }
+  if(m.opening_mode!=='classic')box.append(b11TachiaiPreview(m,group));
+  groups.append(box);
+ }
+ const atStart=m.round%3===0&&m.results.length===m.round
+  &&!allocationLockState(m,0)&&launchingTournamentBout===null;
+ $('management-start').hidden=!atStart;
+ $('management-start').disabled=!atStart||!allBoutCardsAssigned(m);
+ $('management-start').textContent='Start Bout '+(m.round+1)+' · lock its three cards';
+}
 async function managementRound(){const m=management;if(!m)return;const i=m.round;const group=i%3;const take=k=>m.cards.find(c=>c.deal_index===m.groups[group][k]).name;if(m.results.length!==i)throw new Error('Tournament is out of sync: '+m.results.length+' completed, expected '+i+'. Cannot advance safely.');const request={human:m.human,opponent:m.opponents[i],seed:m.seed+i+1};if(m.opening_mode==='classic')request.opening={kimarite:take(0),prepared:take(1),top:take(2)};else {request.opening_mode='b11_live';request.opening_cards=[take(0),take(1),take(2)];if(m.created_stats)request.created_stats=m.created_stats;if(m.draft_picks){request.starting_cards=m.starting_cards;request.draft_picks=m.draft_picks;request.draft_seed=m.draft_seed;request.duplicated_indices=m.duplicated_indices||[]}}const r=await api('/api/session',request);sessionSetup={...request,tournament_bout:i};actionJournal=[];token=r.token;game=null;render(r.state);$('seed-used').textContent='Bout seed: '+request.seed;$('management-notice').textContent='Bout '+(i+1)+': '+request.human+' vs '+request.opponent;managementSave();document.querySelector('.arena').scrollIntoView({behavior:'smooth'})}
 function earnedNextStartingCards(m){
  // Copy the physical originals selected as duplication rewards, in earned order.
