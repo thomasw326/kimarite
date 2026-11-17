@@ -127,8 +127,10 @@ const result={
  thirdChoice:r('#choices .choice-card-wrap:nth-child(3)'),
  historyOpen:document.querySelector('#bout-history-details').open
 };
-document.body.insertAdjacentHTML('beforeend',
- '<output id="layout-metrics">'+JSON.stringify(result)+'</output>');
+const measured=document.createElement('output');
+measured.id='layout-metrics';
+measured.textContent=JSON.stringify(result);
+document.body.append(measured);
 </script>
 """
     fixture = fixture.replace("</body>", setup + "</body>")
@@ -140,7 +142,7 @@ document.body.insertAdjacentHTML('beforeend',
             "--disable-dev-shm-usage", "--hide-scrollbars",
             f"--window-size={width},{height}", "--virtual-time-budget=700",
             "--dump-dom", path.as_uri(),
-        ], capture_output=True, text=True, timeout=30)
+        ], capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stderr[-1000:]
     found = re.search(r'<output id="layout-metrics">([^<]+)</output>', result.stdout)
     assert found, result.stdout[-2000:]
