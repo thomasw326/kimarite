@@ -389,7 +389,7 @@ $('management-deal').onclick=async()=>{
   const draftedName=$('wrestler-name').value.trim();
   const continuing=standard&&management?.opening_mode==='b11_live'&&management.results.length===15;
   const human=standard?(continuing?management.human:draftedName):$('management-deck').value;
-  if(standard&&(!human||human.length>32||/[\\x00-\\x1F\\x7F]/.test(human))){
+  if(standard&&(!human||human.length>32||Array.from(human).some(ch=>ch.codePointAt(0)<32||ch.codePointAt(0)===127))){
    throw new Error('Enter a wrestler name (1–32 visible characters).');
   }
   const seed=Math.floor(Math.random()*2147483647);
