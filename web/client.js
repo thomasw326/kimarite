@@ -396,6 +396,11 @@ function b11PreviewBase(name){
  const base={power:0,technique:0,spirit:0};base[order[0]]=2;base[order[1]]=1;return base;
 }
 function b11PreviewTotals(cards){return ['power','technique','spirit'].map(k=>cards.reduce((n,c)=>n+Number(c[k]||0),0))}
+function b11CommittedTachiaiTotals(cards,indices,base){
+ const committed=cards.filter((_,i)=>indices.has(i));
+ const orbs=b11PreviewTotals(committed);
+ return ['power','technique','spirit'].map((k,i)=>Number(base[k]||0)+1+orbs[i]);
+}
 function b11TachiaiPreview(m,group){
  const box=node('div','tachiai-preview');
  const slots=m.groups[group];
@@ -793,8 +798,22 @@ function renderPendingTachiai(g){
  $('opening').replaceChildren(node('p','','Your opponent’s Tachiai cards remain hidden until you commit.'));
  $('choices').replaceChildren(node('h2','','Commit 0–3 cards to Tachiai'),node('p','','Committed cards contribute orbs and Tachiai effects; cards you keep will start in your Exchange hand.'));
  const strip=node('div','cards');
- g.tachiai_choice.cards.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}summary.textContent=picked.size+' committed · '+(3-picked.size)+' retained'});const inspectButton=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');const wrap=node('div','choice-card-wrap');wrap.append(b,inspectButton);strip.append(wrap)});
- $('choices').append(strip);const summary=node('p','zones','0 committed · 3 retained');$('choices').append(summary,btn('Confirm Tachiai commitment',()=>act({type:'commit_tachiai',indices:[...picked].sort()}),'confirm'));
+ const summary=node('p','zones','');
+ const preview=node('div','tachiai-preview');
+ const base=sessionSetup?.created_stats||b11PreviewBase(g.human.name);
+ const refreshPreview=()=>{
+  summary.textContent=picked.size+' committed · '+(3-picked.size)+' retained';
+  const totals=b11CommittedTachiaiTotals(g.tachiai_choice.cards,picked,base);
+  preview.replaceChildren(
+   node('strong','','Your projected Tachiai · '+picked.size+' committed'),
+   node('p','','Power '+totals[0]+' · Technique '+totals[1]+' · Spirit '+totals[2]),
+   node('small','','Each total = base + 1 + committed card orbs. Power helps opening strength/defense; Technique influences Exchange priority and card access; Spirit can grant opening Push/Momentum. Opponent totals stay hidden until you confirm.')
+  );
+ };
+ g.tachiai_choice.cards.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}refreshPreview()});const inspectButton=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');const wrap=node('div','choice-card-wrap');wrap.append(b,inspectButton);strip.append(wrap)});
+ $('choices').append(strip);
+ $('choices').append(summary,preview,btn('Confirm Tachiai commitment',()=>act({type:'commit_tachiai',indices:[...picked].sort()}),'confirm'));
+ refreshPreview();
  $('hand').replaceChildren();$('history').replaceChildren();$('end').disabled=true;$('end').classList.remove('end-turn-no-plays','end-turn-win');$('end').textContent='End turn';$('notice').textContent='';
 }
 let lastPresentedResult=null;
