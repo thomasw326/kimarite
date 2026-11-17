@@ -58,20 +58,16 @@ def move_player_to(roster, rank):
     return copy
 
 
-@pytest.mark.parametrize("target,win_count", [(1, 10), (2, 9), (3, 8),
-                                               (4, 8), (5, 8)])
-def test_elite_five_are_protected_and_shift_down_for_exact_player_slot(target, win_count):
+@pytest.mark.parametrize("initial_rank,win_count,target", [
+    (7, 11, 1), (8, 9, 2), (9, 9, 3), (10, 9, 4), (7, 8, 5),
+])
+def test_elite_five_are_protected_and_shift_down_for_exact_player_slot(initial_rank, win_count, target):
     base = make_roster(88, "Player")
-    # Start immediately above the intended player target so a narrow net-win
-    # adjustment puts the player exactly at target.
-    initial = move_player_to(base, 7 if target >= 3 else 5)
-    # The initial rank and win total can be adjusted to the exact desired
-    # target using the approved 2*(W-L) formula.
-    initial_rank = initial["player"]["rank"]
+    initial = move_player_to(base, initial_rank)
     league = complete_basho(initial, player_wins=win_count)
     projected = max(1, min(42, project_rank(initial_rank, win_count, 15-win_count)))
     updated, report = end_of_basho(initial, league)
-    assert updated["player"]["rank"] == projected
+    assert updated["player"]["rank"] == projected == target
     elites = [w["wrestler_id"] for w in sorted(
         (x for x in initial["wrestlers"] if x["division"] == "top"), key=lambda x: x["rank"]
     )[:5]]
@@ -79,7 +75,8 @@ def test_elite_five_are_protected_and_shift_down_for_exact_player_slot(target, w
     elites_now = [next(w["rank"] for w in updated["wrestlers"] if w["wrestler_id"] == wid)
                   for wid in elites]
     assert elites_now == sorted(elites_now)
-    assert elites_now == [n for n in range(1, 7) if n != projected][:5] if projected <= 5 else [1,2,3,4,5]
+    expected_elite_slots = [n for n in range(1, 7) if n != projected][:5]
+    assert elites_now == expected_elite_slots
     assert len({w["rank"] for w in updated["wrestlers"] if w["division"] == "top"} |
                {updated["player"]["rank"]}) == 42
 
