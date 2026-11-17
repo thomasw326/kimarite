@@ -1,6 +1,8 @@
-"""Minimal single-user localhost HTTP service for the B10 graphical bout UI.
+"""Single-origin HTTP interface for the browser game and its Python rules engine.
 
-Sessions exist only in this process. Bind to loopback, not a public interface.
+Live bout sessions are process-local and expire after inactivity. A separate
+browser-local command journal can replay an expired bout; this is still a
+prototype server, not production multi-tenant infrastructure.
 """
 from __future__ import annotations
 
@@ -9,6 +11,7 @@ from pathlib import Path
 import os
 import json
 import secrets
+import time
 from threading import RLock
 from urllib.parse import urlsplit
 
@@ -18,7 +21,32 @@ from .b11_pending_session import PendingB11Session
 
 STATIC = Path(__file__).resolve().parents[2] / "web"
 _sessions = {}
+_session_activity: dict[str, float] = {}
 _lock = RLock()
+MAX_SESSIONS = 100
+# Inactivity, rather than a hard bout duration: the browser journal permits
+# recovery if the service restarts or a long-idle session expires.
+SESSION_IDLE_SECONDS = 60 * 60
+
+
+def _prune_sessions(now: float | None = None) -> None:
+    """Expire idle sessions and remove stale metadata; caller holds _lock."""
+    if now is None:
+        now = time.monotonic()
+    for token, touched in list(_session_activity.items()):
+        if token not in _sessions or now - touched > SESSION_IDLE_SECONDS:
+            _sessions.pop(token, None)
+            _session_activity.pop(token, None)
+    # Legacy test fixtures sometimes insert directly into _sessions.
+    for token in _sessions:
+        _session_activity.setdefault(token, now)
+
+
+def _touch_session(token: str, now: float | None = None) -> None:
+    """A valid session request prolongs its inactivity window."""
+    if token in _sessions:
+        _session_activity[token] = time.monotonic() if now is None else now
+
 
 
 
@@ -153,8 +181,11 @@ class Handler(BaseHTTPRequestHandler):
         if path.startswith("/api/session/"):
             token = path.removeprefix("/api/session/")
             with _lock:
+                _prune_sessions()
                 session = _sessions.get(token)
-                return self.reply(200 if session else 404, (session.snapshot() if isinstance(session, PendingB11Session) else public_snapshot(session)) if session else {"error": "This bout expired because the game server restarted. Start a new bout.", "code":"session_expired"})
+                if session is not None:
+                    _touch_session(token)
+                return self.reply(200 if session else 404, (session.snapshot() if isinstance(session, PendingB11Session) else public_snapshot(session)) if session else {"error": "Bout session expired or the server restarted. Your browser can attempt recovery.", "code":"session_expired"})
         if path in ("/", "/index.html", "/client.js", "/style.css"):
             data = (STATIC / ("client.js" if path == "/client.js" else "style.css" if path == "/style.css" else "index.html")).read_bytes()
             self.send_response(200)
@@ -185,8 +216,9 @@ class Handler(BaseHTTPRequestHandler):
                     return self.reply(200, {"cards": deal_block(deck, int(data["seed"]), ids),
                                             "deck_size": len(deck)})
                 if path == "/api/session":
-                    if len(_sessions) >= 100:
-                        return self.reply(503, {"error": "Session capacity reached"})
+                    _prune_sessions()
+                    if len(_sessions) >= MAX_SESSIONS:
+                        return self.reply(503, {"error": "Session capacity reached; retry later."})
                     if data.get("opening_mode") in {"b11_preview", "b11_live"}:
                         drafted = None
                         if "draft_picks" in data:
@@ -199,12 +231,15 @@ class Handler(BaseHTTPRequestHandler):
                         session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
                     token = secrets.token_urlsafe(24)
                     _sessions[token] = session
+                    _touch_session(token)
                     return self.reply(201, {"token": token, "state":session.snapshot() if isinstance(session, PendingB11Session) else public_snapshot(session)})
                 if path.startswith("/api/session/") and path.endswith("/action"):
                     token = path[len("/api/session/"):-len("/action")]
+                    _prune_sessions()
                     session = _sessions.get(token)
                     if not session:
-                        return self.reply(404, {"error": "Bout expired on server restart.", "code": "session_expired"})
+                        return self.reply(404, {"error": "Bout expired or the server restarted; recover from your browser's saved actions.", "code": "session_expired"})
+                    _touch_session(token)
                     if isinstance(session, PendingB11Session):
                         if data.get("type") == "commit_tachiai":
                             if not session.phase.pending:
