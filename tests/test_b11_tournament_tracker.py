@@ -32,7 +32,7 @@ def test_pending_tachiai_clears_previous_bout_continue_button():
     assert "$('management-next').hidden=!" in source
 
 
-def test_optional_individual_bout_and_decorative_ring_collapsed_by_default():
+def test_optional_individual_bout_collapsed_and_live_dohyo_open_by_default():
     from html.parser import HTMLParser
 
     html = (CLIENT.parent / "index.html").read_text()
@@ -52,7 +52,7 @@ def test_optional_individual_bout_and_decorative_ring_collapsed_by_default():
 
     parsed = Check()
     parsed.feed(html)
-    assert parsed.details == {"single-bout-details": False, "dohyo-details": False}
+    assert parsed.details == {"single-bout-details": False, "dohyo-details": True}
     assert {"human", "opponent", "start", "management-deal", "management-board", "round", "tracks"} <= parsed.ids
     assert ".setup-fields{display:grid" in css
     assert '<div id="tracks" class="tracks"></div></section>' in html
