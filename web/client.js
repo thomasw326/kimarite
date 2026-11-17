@@ -245,6 +245,7 @@ function showYearStatus(m){
  const lossCount=h.reduce((n,t)=>n+t.losses,0)+current.filter(r=>!r.won).length;
  if(m?.opening_mode==='classic'){
   $('year-record').textContent='Legacy practice tournament · no yearly progression';
+  $('year-history').textContent='';
   return;
  }
  const number=Math.min(6,h.length+1);
@@ -252,6 +253,11 @@ function showYearStatus(m){
  $('year-record').textContent='Tournament '+number+' of 6 · Year record '+winCount+'–'+lossCount+
   ' · '+completed+' tournament'+(completed===1?'':'s')+' completed'+
   (completed===6?' · Year complete':'');
+ const summaries=[...h];
+ if(current.length===15)summaries.push(tournamentSummary(m));
+ $('year-history').textContent=summaries.length?
+  summaries.map(t=>'Tournament '+t.tournament+': '+t.wins+'–'+t.losses).join(' · '):
+  'Your tournament results will appear here.';
 }
 function tournamentFinalText(m){
  const wins=m.results.filter(r=>r.won).length;
@@ -284,7 +290,12 @@ function showTournamentFinal(){
   const totalWins=history.reduce((n,t)=>n+t.wins,0);
   $('tournament-year-record').textContent='Year record: '+totalWins+'–'+(history.length*15-totalWins)+
    ' after '+history.length+' of 6 tournaments'+(history.length===6?' · Year complete!':'');
- }else $('tournament-year-record').textContent='Classic practice tournament';
+  $('tournament-year-history').textContent=history.map(t=>
+   'Tournament '+t.tournament+': '+t.wins+'–'+t.losses).join(' · ');
+ }else {
+  $('tournament-year-record').textContent='Classic practice tournament';
+  $('tournament-year-history').textContent='';
+ }
  const records=$('tournament-card-records');records.replaceChildren();
  const stats=calculateCardRecords(m);m.card_records=stats;managementSave();
  const names=[['most_played_card','Most played card'],['most_played_kimarite','Most played Kimarite'],['most_winning_card','Most winning card'],['most_winning_kimarite','Most winning Kimarite']];
