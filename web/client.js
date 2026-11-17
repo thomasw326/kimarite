@@ -291,6 +291,9 @@ function creationChoices(){
 }
 for(const id of ['create-food','create-training'])$(id).addEventListener('change',creationChoices);
 $('create-final').addEventListener('change',creationChoices);
+$('management-opening-mode').addEventListener('change',()=>{
+ $('b11-creation').hidden=$('management-opening-mode').value!=='b11_live';
+});
 creationChoices();
 const B11_BASE_STYLES={
  'Heavy Hitter':'power,spirit','Bulldozer':'power,spirit','Charger':'spirit,power','Pressure Fighter':'spirit,power',
@@ -381,9 +384,17 @@ async function finishDraft(){
 }
 $('management-deal').onclick=async()=>{
  try{
-  const human=$('management-deck').value,seed=Math.floor(Math.random()*2147483647);
-  if($('management-opening-mode').value==='b11_live'){
-   const previous=management?.results?.length===15&&management.human===human?management:null;
+  const standard=$('management-opening-mode').value==='b11_live';
+  // Human-created wrestler names do not come from the developer test roster.
+  const draftedName=$('wrestler-name').value.trim();
+  const continuing=standard&&management?.opening_mode==='b11_live'&&management.results.length===15;
+  const human=standard?(continuing?management.human:draftedName):$('management-deck').value;
+  if(standard&&(!human||human.length>32||/[\\x00-\\x1F\\x7F]/.test(human))){
+   throw new Error('Enter a wrestler name (1–32 visible characters).');
+  }
+  const seed=Math.floor(Math.random()*2147483647);
+  if(standard){
+   const previous=continuing?management:null;
    const starting=previous?(previous.next_starting_cards??earnedNextStartingCards(previous)):B11_STARTER_SUITE;
    const created=previous?.created_stats||creationChoices();
    // Preserve the finished tournament until the new draft can be initialized.
@@ -577,4 +588,4 @@ $('continue-playing').onclick=()=>$('end-confirm').close();
 $('confirm-end-turn').onclick=()=>{$('end-confirm').close();if(game&&game.can_end_turn)act({type:'end_turn'})};
 async function resume(){try{const saved=sessionStorage.getItem('kimarite_session');if(!saved)return;sessionSetup=JSON.parse(sessionStorage.getItem('kimarite_setup')||'null');actionJournal=JSON.parse(sessionStorage.getItem('kimarite_actions')||'[]');token=saved;if(sessionSetup&&Number.isSafeInteger(sessionSetup.seed))$('seed-used').textContent='Bout seed: '+sessionSetup.seed;let state;try{state=await api('/api/session/'+saved)}catch(e){if(e.data&&e.data.code==='session_expired'){state=await recoverSession()}else throw e}render(state)}catch(e){$('notice').textContent='Unable to restore the previous bout: '+e.message}}
 resume();
-api('/api/roster').then(r=>{for(const name of r.roster){const o=node('option','',name);o.value=name;$('management-deck').append(o)}for(const id of ['human','opponent']){const random=node('option','','Random Wrestler');random.value='__random__';$(id).append(random);for(const name of r.roster){const o=node('option','',name);o.value=name;$(id).append(o)}}$('human').value='Arm Controller';$('opponent').value='The Technician';loadOpening();try{const saved=JSON.parse(sessionStorage.getItem('kimarite_management')||'null');if(saved&&Array.isArray(saved.cards)&&saved.groups){management=saved;$('management-opening-mode').value=saved.opening_mode||'classic';$('management-opening-mode').disabled=true;$('b11-creation').hidden=true;$('management-deck').value=saved.human;$('management-board').hidden=false;managementBoard();managementStatus()}else{const pending=JSON.parse(sessionStorage.getItem('kimarite_active_draft')||'null');if(pending){activeDraft=pending;$('management-deck').value=pending.human;offerDraft().catch(e=>$('management-notice').textContent=e.message)}}}catch(e){} }).catch(e=>$('notice').textContent=e.message);
+api('/api/roster').then(r=>{for(const name of r.roster){const o=node('option','',name);o.value=name;$('management-deck').append(o)}for(const id of ['human','opponent']){const random=node('option','','Random Wrestler');random.value='__random__';$(id).append(random);for(const name of r.roster){const o=node('option','',name);o.value=name;$(id).append(o)}}$('human').value='Arm Controller';$('opponent').value='The Technician';loadOpening();try{const saved=JSON.parse(sessionStorage.getItem('kimarite_management')||'null');if(saved&&Array.isArray(saved.cards)&&saved.groups){management=saved;$('management-opening-mode').value=saved.opening_mode||'classic';$('management-opening-mode').disabled=true;$('b11-creation').hidden=true;$('management-deck').value=saved.human;$('wrestler-name').value=saved.human;$('management-board').hidden=false;managementBoard();managementStatus()}else{const pending=JSON.parse(sessionStorage.getItem('kimarite_active_draft')||'null');if(pending){activeDraft=pending;$('management-deck').value=pending.human;$('wrestler-name').value=pending.human;offerDraft().catch(e=>$('management-notice').textContent=e.message)}}}catch(e){} }).catch(e=>$('notice').textContent=e.message);
