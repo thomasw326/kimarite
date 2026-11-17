@@ -702,7 +702,26 @@ function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return
 }
 async function play(hand_index){pendingPlay={type:'play_card',hand_index,choices:{}};await act(pendingPlay)}
 async function act(command){try{let r;try{r=await api('/api/session/'+token+'/action',command)}catch(e){if(e.data&&e.data.code==='session_expired'){await recoverSession();r=await api('/api/session/'+token+'/action',command)}else throw e}actionJournal.push(JSON.parse(JSON.stringify(command)));render(r.state)}catch(e){if(e.data&&e.data.choice_required){choicePrompt(e.data);return}if(e.data&&e.data.state){render(e.data.state);$('notice').textContent=e.message+(e.data.state.selection?' — Card selection is still pending above.':'');return}$('notice').textContent=e.message}}
-function choicePrompt(detail){$('choices').replaceChildren();$('choices').append(node('h2','','Choose for '+displayCardName(detail.card||'card')));$('choices').append(node('p','',detail.choice_title||detail.choice_name||detail.message));const strip=node('div','cards');for(const option of detail.options||[]){const value=option.value;const wrap=node('div','choice-card-wrap');wrap.append(btn(option.card?displayCardName(option.card.name):String(option.label),()=>{if(!pendingPlay)return;pendingPlay.choices[detail.choice_name]=value;act(pendingPlay)},'card'));if(option.card)wrap.append(btn('Inspect '+displayCardName(option.card.name),()=>inspect(option.card),'choice-inspect'));strip.append(wrap)}$('choices').append(strip);$('choices').scrollIntoView({behavior:'smooth',block:'center'})}
+function choicePrompt(detail){
+ const panel=$('choices');panel.replaceChildren();
+ const source=displayCardName(detail.card||'card');
+ panel.append(node('h2','',source+' — '+(detail.choice_title||'Choose an option')));
+ if(detail.choice_help)panel.append(node('p','choice-help',detail.choice_help));
+ const strip=node('div','cards');
+ for(const option of detail.options||[]){
+  const value=option.value;
+  const wrap=node('div','choice-card-wrap');
+  const text=option.card?displayCardName(option.card.name):String(option.label);
+  const choose=btn('',()=>{if(!pendingPlay)return;pendingPlay.choices[detail.choice_name]=value;act(pendingPlay)},'card choice-action-button');
+  if(detail.choice_verb&&detail.choice_verb!=='Choose')choose.append(node('strong','choice-action-verb',detail.choice_verb));
+  choose.append(node('span','choice-action-target',text));
+  choose.setAttribute('aria-label',(detail.choice_verb&&detail.choice_verb!=='Choose'?detail.choice_verb+': ':'')+text);
+  wrap.append(choose);
+  if(option.card)wrap.append(btn('Inspect '+displayCardName(option.card.name),()=>inspect(option.card),'choice-inspect'));
+  strip.append(wrap);
+ }
+ panel.append(strip);panel.scrollIntoView({behavior:'smooth',block:'center'});
+}
 async function loadOpening(){try{const d=await api('/api/opening/'+encodeURIComponent($('human').value));for(const [select,cards] of [['pick-kimarite',d.kimarite],['pick-prepared',d.ordinary],['pick-top',d.ordinary]]){$(select).replaceChildren();for(const c of cards){const o=node('option','',displayCardName(c.name));o.value=c.name;$(select).append(o)}}if(d.ordinary.length>1)$('pick-top').selectedIndex=1;const all=[...d.kimarite,...d.ordinary];for(let i=0;i<3;i++){const select=$('b11-card-'+i);select.replaceChildren();for(const c of all){const o=node('option','',displayCardName(c.name));o.value=c.name;select.append(o)}select.selectedIndex=i%all.length}}catch(e){$('notice').textContent=e.message}}
 $('human').addEventListener('change',()=>{const random=$('human').value==='__random__';if(random){$('opening-mode').value='auto';$('opening-picks').hidden=true;$('b11-picks').hidden=true;$('opening-mode').querySelector('option[value="choose"]').disabled=true}else{$('opening-mode').querySelector('option[value="choose"]').disabled=false;$('b11-picks').hidden=$('opening-mode').value!=='b11_live';loadOpening()}});
 $('opening-mode').addEventListener('change',()=>{$('opening-picks').hidden=$('opening-mode').value!=='choose'||$('human').value==='__random__';$('b11-picks').hidden=$('opening-mode').value!=='b11_live'||$('human').value==='__random__'});
