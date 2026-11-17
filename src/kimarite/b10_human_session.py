@@ -14,6 +14,7 @@ from .catalog import card_by_name
 from .b10_card_info import card_info, GLOSSARY
 
 from .human_bout import HumanBout
+from .kimarite import satisfied_kimarite
 from .models import BoutState, FighterState, Side, Stat, Wrestler, GripState
 from .rules import grip_benefits_suppressed
 from .style_ai_v5 import play_style_turn
@@ -166,6 +167,10 @@ def public_snapshot(session: HumanBout) -> dict:
         result = asdict(card)
         return card_info(card)
     legal_indices = {x.hand_index for x in session.actions()}
+    can_end_turn = session.awaiting_human and not session.finished and session.pending_selection is None
+    # Use the exact engine predicates that end_exchange_turn will invoke.
+    # Expose only our own ready Zone cards, never any hidden opposing cards.
+    ready_kimarite = [c.name for c in satisfied_kimarite(session.state, session.human_side)] if can_end_turn else []
     def reason(index, card):
         if index in legal_indices:
             return None
@@ -230,6 +235,7 @@ def public_snapshot(session: HumanBout) -> dict:
             "discard":[shown_card(c) for c in own.discard_pile],
             "plays_remaining":view.plays_remaining,
             "kimarite":[shown_card(c) for c in own.kimarite_zone],
+            "ready_kimarite":ready_kimarite,
             "temporary":[shown_card(t.card) for t in own.temporary_zone],
         },
         "opponent": {
@@ -245,7 +251,7 @@ def public_snapshot(session: HumanBout) -> dict:
             "keep":session.pending_selection.keep
         } if session.pending_selection else None,
         "legal_plays":[{"hand_index":x.hand_index,"card":asdict(x.card)} for x in session.actions()],
-        "can_end_turn":session.awaiting_human and not session.finished and session.pending_selection is None,
+        "can_end_turn":can_end_turn,
     }
 
 
