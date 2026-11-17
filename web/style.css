@@ -134,3 +134,19 @@ body[data-phase="heya"] .bout-hud{display:none!important}
 #new-wrestler[hidden]{display:none!important}
 #new-wrestler-confirm p{line-height:1.5;color:#ebd9bd}
 #cancel-new-wrestler{background:transparent;color:#f5e9d6;border:1px solid #c7a67a}
+
+/* First-visit guide: equally available from the Heya and Dohyō. */
+.game-guide-trigger{display:inline-flex;margin-top:8px;min-height:44px;background:transparent;border:1px solid #cbb487;color:#f7e9cf;font-size:14px;padding:10px 16px}
+.game-guide-dialog{width:min(94vw,690px);max-height:90dvh;overflow:auto;background:#253630;color:#f8f0df;border:1px solid #caad76;padding:clamp(18px,3vw,30px)}
+.game-guide-dialog h2{font-size:clamp(22px,4vw,30px);margin:6px 0 12px}
+.game-guide-dialog p,.game-guide-steps,.game-guide-terms{line-height:1.6}
+.game-guide-steps{padding-left:24px;display:grid;gap:13px;margin:20px 0}
+.game-guide-steps li{padding-left:3px}
+.guide-terms{border:1px solid #799085;border-radius:10px;padding:8px 15px}
+.guide-terms summary{font-size:15px}
+.guide-terms dl{display:grid;grid-template-columns:minmax(90px,auto) 1fr;column-gap:12px;row-gap:10px}
+.guide-terms dt{font-weight:800;color:#f4d49a}
+.guide-terms dd{margin:0}
+.guide-actions{position:sticky;bottom:-1px;background:#253630;padding-top:14px;margin-top:14px}
+.guide-actions button{width:100%}
+@media(max-width:560px){.game-guide-trigger{width:100%;justify-content:center}.guide-terms dl{grid-template-columns:1fr;row-gap:2px}.guide-terms dd{margin-bottom:12px}}
