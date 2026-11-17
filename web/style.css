@@ -95,3 +95,21 @@ body[data-phase="heya"] .bout-hud{display:none!important}
 .dohyo-view .arena{border-color:#b69b70;background:#243337}
 .dohyo-view .play{border-color:#d8b276}
 @media(max-width:620px){.phase-masthead{padding:18px 16px}.phase-masthead #return-heya{width:100%}}
+
+/* Live Position ring: shared track is viewed from the human side, -4 to +4.
+   At 4 the wrestler is ON the tawara; the fifth Push crosses the boundary. */
+#dohyo-details{padding:8px 4px}
+#dohyo-ring{--ring-shift:0%;transition:box-shadow .24s ease}
+#dohyo-ring .rikishi{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:clamp(26px,5vw,36px);line-height:1;transition:left .3s ease;z-index:2}
+#dohyo-ring .rikishi.left{left:calc(40% + var(--ring-shift));right:auto;color:#203738;text-shadow:0 0 2px #fff,1px 2px #f1dfbd}
+#dohyo-ring .rikishi.right{left:calc(60% + var(--ring-shift));right:auto;color:#fbf4e6;text-shadow:0 0 2px #203738,1px 2px #203738}
+#dohyo-ring.dohyo-edge{box-shadow:0 0 0 5px #ee9a71,0 0 24px #bc5c4b66,inset 0 0 0 2px #d0ba93}
+.ring-key{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:7px auto;color:#f4ead7;font-size:13px;font-weight:650}
+.ring-key span{display:inline-flex;align-items:center;gap:6px}
+.ring-key i{display:inline-block;width:13px;height:13px;border-radius:50%;border:2px solid #e2ceaa}
+.ring-key-own{background:#203738}
+.ring-key-foe{background:#f7eee0}
+.ring-position-label{margin:10px 0 5px;font-weight:750;line-height:1.4}
+.ring-edge-warning{font-weight:800;color:#ffd3a8;border:1px solid #c67855;background:#60362e;padding:9px;border-radius:8px;margin:8px auto;max-width:360px}
+.ring-edge-warning[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){#dohyo-ring .rikishi{transition:none}}
