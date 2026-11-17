@@ -28,8 +28,15 @@ class PendingB11Session:
 
     @classmethod
     def start(cls, human: str, opponent: str, names: list[str], *, seed: int = 20261021, created_stats: dict[str, int] | None = None, drafted_deck: list[str] | None = None) -> "PendingB11Session":
-        if human not in roster() or opponent not in roster():
-            raise ValueError("Both wrestlers must be in the approved B10 roster.")
+        if (not isinstance(human, str) or not 1 <= len(human) <= 32
+                or human != human.strip() or any(ord(char) < 32 for char in human)):
+            raise ValueError("Created wrestler name must be 1–32 visible characters.")
+        if opponent not in roster():
+            raise ValueError("Opponent must belong to the available AI roster.")
+        # Legacy preset bouts still work, but player-created wrestlers are
+        # defined by a real drafted deck and chosen stats, not a roster entry.
+        if human not in roster() and (drafted_deck is None or created_stats is None):
+            raise ValueError("A created wrestler requires a drafted deck and chosen stats.")
         if not isinstance(names, list):
             raise ValueError("B11 opening requires three selected card names.")
         if created_stats is not None:
