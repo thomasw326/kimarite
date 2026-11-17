@@ -126,3 +126,59 @@ def validate_roster(roster: dict) -> None:
         raise ValueError("Created player must enter at rank 42")
     if roster["reserve_queue"] != [w["wrestler_id"] for w in reserves]:
         raise ValueError("Reserve queue must contain the original 19 hidden wrestlers in order")
+
+
+
+def validate_world(roster: dict) -> None:
+    """Validate an initial or promoted/relegated 60-format campaign roster.
+
+    Unlike validate_roster(), this accepts the player's changing exact rank,
+    top-five player displacement, promoted reserve identities and archived AIs.
+    """
+    from collections import Counter
+    rows = roster["wrestlers"]
+    formats = load_formats()
+    source = {f["id"]: f for f in formats}
+    ids = [w["wrestler_id"] for w in rows]
+    if len(rows) != AI_COUNT or len(set(ids)) != AI_COUNT:
+        raise ValueError("Campaign must retain 60 distinct AI identities")
+    if len({w["format_id"] for w in rows}) != AI_COUNT or {w["format_id"] for w in rows} != set(source):
+        raise ValueError("Campaign must retain every unique 60-format ID")
+    names = [w["name"].casefold() for w in rows]
+    if len(set(names)) != AI_COUNT or roster["player"]["name"].casefold() in names:
+        raise ValueError("Wrestler display names must be unique including the player")
+    if Counter(w["ai_style"] for w in rows) != Counter({style: 4 for style in STYLES}):
+        raise ValueError("Campaign AI styles must retain their four source formats")
+    for w in rows:
+        fmt = source[w["format_id"]]
+        if w["ai_style"] != fmt["style_proxy"] or w["format_description"] != fmt["identity"]:
+            raise ValueError("Campaign AI style/format changed")
+    active = [w for w in rows if w["division"] == "top"]
+    reserve = [w for w in rows if w["division"] == "reserve"]
+    archived = [w for w in rows if w["division"] == "archived"]
+    if len(active) != ACTIVE_AI:
+        raise ValueError("Every basho needs 41 ranked AI wrestlers")
+    if len(active) + len(reserve) + len(archived) != AI_COUNT:
+        raise ValueError("Invalid AI division status")
+    p_rank = roster["player"]["rank"]
+    if type(p_rank) is not int or not 1 <= p_rank <= PLAYER_RANK:
+        raise ValueError("Player rank must be 1 through 42")
+    ranks = [w["rank"] for w in active] + [p_rank]
+    if sorted(ranks) != list(range(1, PLAYER_RANK + 1)):
+        raise ValueError("Exactly one occupant per banzuke rank 1–42")
+    if any(w["rank"] is not None for w in reserve + archived):
+        raise ValueError("Reserves and archived AI cannot carry current banzuke ranks")
+    queued = roster.get("reserve_queue", [])
+    if len(queued) != len(set(queued)) or set(queued) != {w["wrestler_id"] for w in reserve}:
+        raise ValueError("Reserve queue must include exactly the unseen available reserves")
+    historical = roster.get("archived_wrestlers", [])
+    if len(historical) != len(set(historical)) or set(historical) != {w["wrestler_id"] for w in archived}:
+        raise ValueError("Archived wrestlers must remain permanently outside the reserve queue")
+    elites = roster.get("protected_elites", [
+        w["wrestler_id"] for w in sorted(active, key=lambda x: x["rank"])[:5]
+    ])
+    if len(elites) != 5 or len(set(elites)) != 5 or not set(elites) <= {w["wrestler_id"] for w in active}:
+        raise ValueError("The five original protected elites must remain active")
+    count = roster.get("completed_basho", 0)
+    if type(count) is not int or not 0 <= count <= BASHO_COUNT-1:
+        raise ValueError("Campaign transition count must be 0 through 5")
