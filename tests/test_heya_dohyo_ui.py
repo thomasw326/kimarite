@@ -135,7 +135,7 @@ console.log(JSON.stringify({completed,active,different}));
 
 
 def test_live_tachiai_always_enters_dohyo_and_keeps_opponent_hidden():
-    assert "function renderPendingTachiai(g){\n setGameLocation('dohyo');" in JS
+    assert "function renderPendingTachiai(g){\n updateDohyoPosition(g);\n setGameLocation('dohyo');" in JS
     assert "Your opponent’s Tachiai cards remain hidden until you commit." in JS
     assert "if(g.finished&&!alreadyInHeya)showBoutResult(g);" in JS
     assert "$('result-next').onclick=returnToHeya;" in JS
