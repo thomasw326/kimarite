@@ -129,3 +129,8 @@ body[data-phase="heya"] .bout-hud{display:none!important}
 
 .year-history{color:#dccfb1;font-size:.9rem;line-height:1.5;margin:0 0 14px;overflow-wrap:anywhere}
 #tournament-final .year-history{text-align:center;padding:0 10px}
+
+#new-wrestler{background:#dbc7a0;color:#25332e;border:1px solid #e7d8b4}
+#new-wrestler[hidden]{display:none!important}
+#new-wrestler-confirm p{line-height:1.5;color:#ebd9bd}
+#cancel-new-wrestler{background:transparent;color:#f5e9d6;border:1px solid #c7a67a}
