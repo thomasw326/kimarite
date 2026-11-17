@@ -126,3 +126,6 @@ body[data-phase="heya"] .bout-hud{display:none!important}
 /* Compact year-to-date scorecard, carried with the drafted wrestler. */
 .year-record{border:1px solid #bba276;background:#21342f;color:#f6dfb3;border-radius:12px;padding:13px 16px;margin:12px 0;font-size:1rem;font-weight:800;line-height:1.5}
 #tournament-final .year-record{background:#314139;text-align:center}
+
+.year-history{color:#dccfb1;font-size:.9rem;line-height:1.5;margin:0 0 14px;overflow-wrap:anywhere}
+#tournament-final .year-history{text-align:center;padding:0 10px}
