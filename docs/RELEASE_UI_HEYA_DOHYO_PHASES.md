@@ -61,7 +61,9 @@ Between-bout returns should be easy to pass through when the player has no new d
 
 **Also implemented in the ring UI:** The `#dohyo-ring` wrestler markers now shift with the authoritative shared Position value (−4 through +4). Their movement and an explicit edge-danger highlight are visible during live combat; ±4 stays within the ring, while a further Push causes ring-out according to the unchanged rules. Pending Tachiai still hides the opposing opening/Position until it is committed. Regression coverage checks all Position extremes, hidden-opening state and accessibility labels.
 
-**Still outstanding:** detailed visual/UX polish, removing the legacy preset-wrestler requirement from the public creation flow, full six-tournament career tracking and year-end summary, and manual cross-device end-to-end QA. The underlying battle engine, draft selection and AI were intentionally not changed.
+**Created-wrestler integration:** The default Heya setup now contains a separate wrestler-name input and basic stat allocation; the drafted identity flows through the backend B11 opening and live Human-vs-AI engine without selecting one of the legacy wrestler templates. The existing B9 wrestler/classic controls have been moved under closed developer practice options. AI opponents continue to use approved roster-based style proxies. Saved tournament/draft state retains the chosen human name.
+
+**Still outstanding:** detailed visual/UX polish, full six-tournament career tracking and year-end summary, and manual cross-device end-to-end QA. The underlying battle engine, draft selection and AI were intentionally not changed.
 
 Project roadmap:
 https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit
