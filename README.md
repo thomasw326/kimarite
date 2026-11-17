@@ -2,17 +2,15 @@
 
 Kimarite is a sumo-inspired tactical card game with a deterministic rules engine, automated balance simulations, and a browser-based **Human vs AI practice bout**.
 
-## Current approved build: B12 (locked B11 engine)
+## Current playable baseline: B12 second pass (promoted 16 November 2026)
 
-**B12 is a release lock and naming milestone, not a gameplay redesign.** The locked engine snapshot is [`release/b12-locked`](https://github.com/thomasw326/kimarite/tree/release/b12-locked), anchored to commit `414f09ac696fbbaa6560626c823742f1b822c544`. It retains the approved B11 browser, Tachiai, Exchange, Shitate and AI rules. B12 does not approve or finalize the provisional 69 wrestler decks; the live playtest roster remains separate. See [B12 release lock](docs/B12_RELEASE_LOCK.md).
+The current `main` contains the **latest tested B12 second-pass gameplay tree**, promoted from `experiment/b12-shikiri-exchange-plus-play-v1` in commit [`8678e487`](https://github.com/thomasw326/kimarite/commit/8678e487cddf40e40915fed073495db40bd8952c). The source [35,400-bout comparison run](https://github.com/thomasw326/kimarite/actions/runs/42322655349) completed successfully. Subsequent documentation and mainline validation commits do not intentionally alter the tested game mechanics.
 
-**`main` is the authoritative approved game build.** New work must branch from the most recently approved B11 mainline, not from an older V5, B9 or B10 experiment. Once the designer approves a mechanic or a build as current, the next release retains it unless an explicit later decision supersedes it.
+This B12 implementation retains the B11 browser, player-controlled Tachiai, Exchange and State-3 AI, then includes later approved B12 card changes. The older [`release/b12-locked`](https://github.com/thomasw326/kimarite/tree/release/b12-locked) at `414f09ac` is a preserved historical checkpoint, **not** the latest playable balance build. The 69-wrestler records and 60-framework simulation decks are developmental data; the current Human vs AI browser roster is the separate 26-wrestler selection. The browser draft supports 28 originals plus up to 12 duplicates.
 
-B11 brings together the live browser-based Human vs AI interface, player-controlled Tachiai, current Kimarite rules, the 69-wrestler data and validation, and the 28-card draft with up to 12 duplicates. See `docs/BUILD_MAINLINE_POLICY.md` for the update procedure and release checks. The Shitatedashinage and Shitatehineri finishers use the separate B11 card pool so the historical 61-card V5.1 manifest remains reproducible.
+**The latest designer-approved, successfully tested playable build is the authority.** If a newer complete branch becomes the approved version, promote its exact working tree to `main` after preserving the old snapshot; do not reconcile backwards against stale `main` rules. See [build governance](docs/BUILD_MAINLINE_POLICY.md) and the [itch.io release roadmap](https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit). The roadmap's BUILD AUDIT tracks current release gaps.
 
-Historical branches (`experiment/*`, `feature/b10-*`, `release/b11-playtest`, and old B11 patch branches) are reference snapshots only. They are **not** substitutes for the current approved build. To avoid accidental reversions, open future work from `main`, run current B11 tests, and merge the approved change into `main` after tests pass. Never silently restore older card balance or AI behavior.
-
-The following B10 practice-bout and tournament notes document the original interface lineage. Newer B11 screens and workflows may supersede specific B10 setup details.
+The B10 practice-bout and tournament notes below document earlier interface lineage. The B11 player-controlled opening and draft modes supersede some B10 setup details.
 
 ## Play Human vs AI (browser practice bout)
 
@@ -84,4 +82,4 @@ These commands are **not** equivalent to playing the B10 browser baseline and sh
 
 ## Next UI milestone
 
-Finish responsive multi-choice/discard-picker layout, make the ring reflect **Position** and **Momentum separately** (including overflow boundary), complete mobile regression playtesting, and prepare a Human vs AI release candidate **without changing B10 balance**.
+Finish responsive multi-choice/discard-picker layout, make the ring reflect **Position** and **Momentum separately** (including overflow boundary), complete mobile regression playtesting, and prepare a Human vs AI release candidate **without silently changing approved B12 mechanics**.
