@@ -144,3 +144,117 @@ def test_created_wrestler_fifteen_bout_http_tournament(live_api):
     assert len({r[0] for r in record}) == 15
     assert len(physical_cards_used) == 5
     assert all(winner in ("A", "B") for _, winner, _, _ in record)
+
+
+def test_created_wrestler_six_tournament_http_year(live_api):
+    """Exercise 90 real HTTP bouts with a fresh 28-card draft each tournament.
+
+    This deliberately stays at the API layer. The browser's save/resume,
+    reward-click UI, and manual device flows still require separate testing.
+    Results, rather than assumed wins, determine which assigned ORIGINAL
+    cards can be carried into the following tournament as earned duplicates.
+    """
+    post = live_api
+    opponents = list(roster())[:15]
+    assert len(opponents) == len(set(opponents)) == 15
+
+    inherited = list(STARTERS)
+    history = []
+    completed_bouts = 0
+    for tournament in range(1, 7):
+        starting = list(inherited)
+        draft_seed = 20261117 + tournament
+        picks = []
+        while len(starting) + len(picks) < 28:
+            offers = post("/api/b11/draft/offer", {
+                "starting_cards": starting,
+                "picks": picks,
+                "seed": draft_seed,
+            })["choices"]
+            assert len(offers) == 3, tournament
+            assert all(c["name"] not in starting + picks for c in offers)
+            picks.append(offers[0]["name"])
+        originals = starting + picks
+        assert len(originals) == 28
+        assert len(starting) <= 12
+        duplicate_indices = []
+        results = []
+
+        for block in range(5):
+            dealt = post("/api/b11/draft/deal", {
+                "starting_cards": starting,
+                "picks": picks,
+                "draft_seed": draft_seed,
+                "duplicated_indices": duplicate_indices,
+                "seed": 310000 + tournament * 100 + block,
+            })
+            assert dealt["deck_size"] == 28 + len(duplicate_indices)
+            cards = dealt["cards"]
+            assert len(cards) == len({c["instance_id"] for c in cards}) == 9
+
+            # A complete block assigns all nine physical cards across three
+            # bouts. A physical card may not serve two openings in the block.
+            block_ids = set()
+            for group in range(3):
+                bout_index = block * 3 + group
+                opening = cards[group * 3: group * 3 + 3]
+                assigned_ids = {c["instance_id"] for c in opening}
+                assert len(assigned_ids) == 3
+                assert block_ids.isdisjoint(assigned_ids)
+                block_ids.update(assigned_ids)
+
+                started = post("/api/session", {
+                    "human": "Six Tournament Test Rikishi",
+                    "opponent": opponents[bout_index],
+                    "seed": 610000 + tournament * 100 + bout_index,
+                    "opening_mode": "b11_live",
+                    "opening_cards": [c["name"] for c in opening],
+                    "starting_cards": starting,
+                    "draft_picks": picks,
+                    "draft_seed": draft_seed,
+                    "duplicated_indices": duplicate_indices,
+                    "created_stats": {"power": 2, "technique": 1, "spirit": 0},
+                })
+                assert started["state"]["phase"] == "choose_tachiai"
+                assert started["state"]["opening"] is None
+                token = started["token"]
+                committed = post(f"/api/session/{token}/action", {
+                    "type": "commit_tachiai",
+                    "indices": [0],
+                })["state"]
+                assert committed["opening"]["human"]["base_stats"] == [2, 1, 0]
+                outcome, _ = finish_bout(
+                    post, token, committed,
+                    bout=f"T{tournament} B{bout_index + 1}",
+                )
+                assert outcome["winner"] in ("A", "B")
+                results.append(outcome["winner"])
+                completed_bouts += 1
+
+                # The browser offers a duplicate after a winning bout, up to
+                # 12 per tournament, only among that bout's assigned originals
+                # that have not already been duplicated. Use the first legal
+                # option to make the API continuation reproducible.
+                if outcome["winner"] == "A" and len(duplicate_indices) < 12:
+                    eligible = [
+                        int(c["instance_id"].split(":")[1])
+                        for c in opening
+                        if c["instance_id"].startswith("original:")
+                        and int(c["instance_id"].split(":")[1]) not in duplicate_indices
+                    ]
+                    if eligible:
+                        duplicate_indices.append(eligible[0])
+            assert len(block_ids) == 9
+
+        assert len(results) == 15
+        assert len(duplicate_indices) <= 12
+        assert len(set(duplicate_indices)) == len(duplicate_indices)
+        wins = results.count("A")
+        history.append({"tournament": tournament, "wins": wins, "losses": 15 - wins})
+        inherited = [originals[i] for i in duplicate_indices]
+        assert len(inherited) == len(duplicate_indices)
+
+    assert completed_bouts == 90
+    assert [t["tournament"] for t in history] == [1, 2, 3, 4, 5, 6]
+    assert sum(t["wins"] + t["losses"] for t in history) == 90
+    assert sum(t["wins"] for t in history) + sum(t["losses"] for t in history) == 90
