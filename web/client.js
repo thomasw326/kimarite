@@ -301,6 +301,19 @@ function b11TachiaiPreview(m,group){
 }
 function managementBoard(){if(!management)return;const chosen=management.groups.flat().filter(x=>x!==null);const cards=$('management-cards');cards.replaceChildren();for(const c of management.cards){const selected=chosen.includes(c.deal_index);const wrapper=node('div','management-card');wrapper.append(card(c,()=>inspect(c)));wrapper.append(node('small','',selected?'Assigned to a bout':'Available'));cards.append(wrapper)}const groups=$('management-groups');groups.replaceChildren();for(let i=0;i<3;i++){const box=node('div','management-group');box.append(node('h3','','Round '+(Math.floor(management.round/3)+1)+' · Bout '+(i+1)+' vs '+management.opponents[Math.floor(management.round/3)*3+i]));for(let j=0;j<3;j++){const classic=management.opening_mode==='classic';const type=classic?(j===0?'Kimarite':j===1?'Prepared Tachiai':'First draw'):('Opening card '+(j+1));const select=node('select','');const blank=node('option','',type+' — choose');blank.value='';select.append(blank);for(const c of management.cards){if(classic&&(j===0?!c.is_kimarite:c.is_kimarite))continue;if(chosen.includes(c.deal_index)&&management.groups[i][j]!==c.deal_index)continue;const o=node('option','',displayCardName(c.name)+' · '+(c.deal_index+1));o.value=c.deal_index;select.append(o)}select.value=management.groups[i][j]===null?'':String(management.groups[i][j]);select.onchange=()=>{management.groups[i][j]=select.value===''?null:Number(select.value);managementSave();managementBoard()};box.append(node('label','',type),select)}if(management.opening_mode!=='classic')box.append(b11TachiaiPreview(management,i));groups.append(box)}$('management-start').disabled=chosen.length!==9}
 async function managementRound(){const m=management;if(!m)return;const i=m.round;const group=i%3;const take=k=>m.cards.find(c=>c.deal_index===m.groups[group][k]).name;if(m.results.length!==i)throw new Error('Tournament is out of sync: '+m.results.length+' completed, expected '+i+'. Cannot advance safely.');const request={human:m.human,opponent:m.opponents[i],seed:m.seed+i+1};if(m.opening_mode==='classic')request.opening={kimarite:take(0),prepared:take(1),top:take(2)};else {request.opening_mode='b11_live';request.opening_cards=[take(0),take(1),take(2)];if(m.created_stats)request.created_stats=m.created_stats;if(m.draft_picks){request.starting_cards=m.starting_cards;request.draft_picks=m.draft_picks;request.draft_seed=m.draft_seed;request.duplicated_indices=m.duplicated_indices||[]}}const r=await api('/api/session',request);sessionSetup={...request,tournament_bout:i};actionJournal=[];token=r.token;game=null;render(r.state);$('seed-used').textContent='Bout seed: '+request.seed;$('management-notice').textContent='Bout '+(i+1)+': '+request.human+' vs '+request.opponent;managementSave();document.querySelector('.arena').scrollIntoView({behavior:'smooth'})}
+function earnedNextStartingCards(m){
+ // Copy the physical originals selected as duplication rewards, in earned order.
+ // All other cards leave the deck when the next tournament draft begins.
+ const originals=[...m.starting_cards,...m.draft_picks];
+ const indices=m.duplicated_indices||[];
+ if(originals.length!==28||indices.length>12||new Set(indices).size!==indices.length){
+  throw new Error('Unable to recover earned cards for the next tournament.');
+ }
+ return indices.map(i=>{
+  if(!Number.isInteger(i)||i<0||i>=28)throw new Error('Invalid earned card index.');
+  return originals[i];
+ });
+}
 const B11_STARTER_SUITE=['Yorikiri','Oshidashi','Oshi','Tsuki','Gain Left Grip','Gain Right Grip','Give Ground','Sonkyo'];
 let activeDraft=null;
 function saveDraft(){try{if(activeDraft)sessionStorage.setItem('kimarite_active_draft',JSON.stringify(activeDraft));else sessionStorage.removeItem('kimarite_active_draft')}catch(e){}}
@@ -347,15 +360,15 @@ $('management-deal').onclick=async()=>{
   const human=$('management-deck').value,seed=Math.floor(Math.random()*2147483647);
   if($('management-opening-mode').value==='b11_live'){
    const previous=management?.results?.length===15&&management.human===human?management:null;
-   const starting=previous?.next_starting_cards||B11_STARTER_SUITE;
+   const starting=previous?(previous.next_starting_cards??earnedNextStartingCards(previous)):B11_STARTER_SUITE;
    const created=previous?.created_stats||creationChoices();
-   management=null;managementSave();
-   activeDraft={human,seed,created_stats:created,starting_cards:[...starting],picks:[],
-     kimarite_names:[]};
-   // Kimarite names are loaded from the same authoritative card catalogue.
+   // Preserve the finished tournament until the new draft can be initialized.
    const names=await api('/api/b11/draft/catalogue',{});
-   activeDraft.kimarite_names=names.kimarite_names;
-   saveDraft();await offerDraft();return;
+   activeDraft={human,seed,created_stats:created,starting_cards:[...starting],picks:[],
+     kimarite_names:names.kimarite_names};
+   saveDraft();
+   management=null;managementSave();
+   await offerDraft();return;
   }
   const d=await api('/api/management/deal/'+encodeURIComponent(human)+'?seed='+seed);
   const roster=[...$('opponent').options].map(o=>o.value).filter(v=>v&&v!=='__random__'&&v!==human);
@@ -368,10 +381,14 @@ $('management-deal').onclick=async()=>{
  }catch(e){$('management-notice').textContent=e.message}
 };
 $('management-new').onclick=()=>{
- if(!management||management.results.length!==15)return;
- if($('tournament-final').open)$('tournament-final').close();
- $('management-deal').hidden=false;
- $('management-deal').click();
+ if(!management||management.results.length!==15||!completedRewards(management))return;
+ try{
+  management.next_starting_cards=earnedNextStartingCards(management);
+  managementSave();
+  if($('tournament-final').open)$('tournament-final').close();
+  $('management-deal').hidden=false;
+  $('management-deal').click();
+ }catch(e){$('management-notice').textContent=e.message}
 };
 $('management-start').onclick=()=>managementRound().catch(e=>$('management-notice').textContent=e.message);
 $('management-next').onclick=async()=>{
