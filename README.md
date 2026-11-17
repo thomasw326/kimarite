@@ -10,6 +10,14 @@ This B12 implementation retains the B11 browser, player-controlled Tachiai, Exch
 
 **The latest designer-approved, successfully tested playable build is the authority.** If a newer complete branch becomes the approved version, promote its exact working tree to `main` after preserving the old snapshot; do not reconcile backwards against stale `main` rules. See [build governance](docs/BUILD_MAINLINE_POLICY.md) and the [itch.io release roadmap](https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit). The roadmap's BUILD AUDIT tracks current release gaps.
 
+## Planned initial player campaign (not yet implemented end-to-end)
+
+A player creates **one wrestler**, makes a **simple initial Power / Technique / Spirit allocation**, and drafts their starting card deck. The intended short career is **up to six tournaments**, representing a full sumo year, with **15 bouts per tournament** (at most 90 bouts). The 60 B12 wrestler frameworks are four AI/test configurations for each of 15 personalities, not player creation templates. The older 69 real-wrestler profiles were a brainstorming exercise.
+
+Existing implementation: the B11 draft offers an eight-card starter suite plus 20 one-from-three picks to reach 28 cards, requires 3–8 Kimarite, and allows up to 12 unique-original card duplications as tournament rewards. The stat creator currently assigns 2 / 1 / 0 among Power, Technique and Spirit. **These specific draft and stat parameters are subject to designer confirmation.** The legacy browser presently supports one 15-bout tournament at a time; its "Draft for next tournament" action does **not** establish a persistent six-tournament wrestler career. Deck and stat advancement between tournaments and any rules for stopping before six are not yet specified.
+
+See the [release roadmap](https://docs.google.com/spreadsheets/d/1YCAG7skE06kPsjadfWr_L7CYDCK_G2HJ68GcvadZcLk/edit) for work items. Avoid interpreting the existing single-tournament prototype as the final campaign design.
+
 The B10 practice-bout and tournament notes below document the **legacy preset-wrestler practice interface**, not the intended release player creation flow. B11 player-controlled Tachiai and draft modes provide the foundation for the draft-first player experience.
 
 ## Play Human vs AI (browser practice bout)
