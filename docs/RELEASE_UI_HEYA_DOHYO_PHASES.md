@@ -65,6 +65,8 @@ Between-bout returns should be easy to pass through when the player has no new d
 
 **Year and local save implementation:** Each tournament now carries prior tournament summaries and the same created wrestler identity/stats into its next 28-card draft. The Heya and tournament results display cumulative year scores and individual tournament scores, and the sixth tournament ends the year (90 bouts maximum). The browser retains management, draft and bout recovery state in local browser storage as well as session storage, and clears obsolete finished bout state when starting a new draft/block. This is a local single-player save, not a cloud account or public multiuser persistence.
 
+**Year-end replay:** After completing the sixth tournament, Heya offers **Start a new wrestler**. The player is warned that this replaces their locally stored year and must explicitly confirm. Results can be copied before starting fresh. No seventh tournament is allowed in the same year.
+
 **Still outstanding:** detailed visual/UX polish, explicit design for ending a year early, verified manual end-to-end/cross-device save/resume QA, and public hosting hardening. The underlying battle engine, draft selection and AI were intentionally not changed.
 
 Project roadmap:
