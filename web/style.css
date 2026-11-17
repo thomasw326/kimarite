@@ -228,3 +228,34 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
  .bout-decisions #choices .choice-card-wrap{flex-basis:150px}
  .bout-decisions #hand .card{flex-basis:150px}
 }
+
+/* Combat decision cues: not an alternative to the engine's win check. */
+#end.end-turn-no-plays:not(:disabled){
+ outline:3px solid #ffd181;
+ outline-offset:3px;
+ box-shadow:0 0 0 6px #ffd18125;
+}
+#end.end-turn-win:not(:disabled){
+ border:3px solid #fff1b8;
+ outline:3px solid #8de8b2;
+ outline-offset:3px;
+ background:#72d6a2;
+ color:#142b29;
+ box-shadow:0 0 0 6px #8de8b230;
+}
+#score .zone-card.kimarite-ready{
+ border:3px solid #a3edbb;
+ outline:2px solid #f8d591;
+ outline-offset:1px;
+ background:#d1f2d9;
+ color:#16352a;
+ font-weight:850;
+}
+#score .kimarite-ready-cue{
+ display:block;
+ color:#adefc0;
+ font-size:12px;
+ font-weight:850;
+ line-height:1.35;
+ margin:3px 0 5px;
+}
