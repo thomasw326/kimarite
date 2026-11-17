@@ -359,7 +359,7 @@ $('tournament-final-copy').onclick=async()=>{
  try{await navigator.clipboard.writeText(summary);$('tournament-final-copy').textContent='Copied!'}
  catch(e){$('tournament-final-copy').textContent='Copy unavailable'}
 };
-function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;if(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({...c})),duplication_resolved:false});updateTournamentLeaders(m);managementSave()}const wins=m.results.filter(r=>r.won).length;showYearStatus(m);progress.replaceChildren(node('h3','','Tournament '+(yearHistory(m).length+1)+' of 6 · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve victories / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result');row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',displayCardName(r.finish||'Finisher unavailable')));if(r.duplicated_card)row.append(node('small','','Duplicated: '+displayCardName(r.duplicated_card)));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15||!completedRewards(m);$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5;$('new-wrestler').hidden=m.opening_mode!=='b11_live'||m.results.length!==15||!completedRewards(m)||yearHistory(m).length<5;if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
+function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;if(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({...c})),duplication_resolved:false});updateTournamentLeaders(m);managementSave();managementBoard()}const wins=m.results.filter(r=>r.won).length;showYearStatus(m);progress.replaceChildren(node('h3','','Tournament '+(yearHistory(m).length+1)+' of 6 · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve victories / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result');row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',displayCardName(r.finish||'Finisher unavailable')));if(r.duplicated_card)row.append(node('small','','Duplicated: '+displayCardName(r.duplicated_card)));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15||!completedRewards(m);$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5;$('new-wrestler').hidden=m.opening_mode!=='b11_live'||m.results.length!==15||!completedRewards(m)||yearHistory(m).length<5;if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
 const CREATED_STAT_NAMES={power:'Power',technique:'Technique',spirit:'Spirit'};
 function creationChoices(){
  const food=$('create-food').value,training=$('create-training').value;
@@ -538,7 +538,40 @@ function managementBoard(){
  $('management-start').disabled=!atStart||!allBoutCardsAssigned(m);
  $('management-start').textContent='Start Bout '+(m.round+1)+' · lock its three cards';
 }
-async function managementRound(){const m=management;if(!m)return;const i=m.round;const group=i%3;const take=k=>m.cards.find(c=>c.deal_index===m.groups[group][k]).name;if(m.results.length!==i)throw new Error('Tournament is out of sync: '+m.results.length+' completed, expected '+i+'. Cannot advance safely.');const request={human:m.human,opponent:m.opponents[i],seed:m.seed+i+1};if(m.opening_mode==='classic')request.opening={kimarite:take(0),prepared:take(1),top:take(2)};else {request.opening_mode='b11_live';request.opening_cards=[take(0),take(1),take(2)];if(m.created_stats)request.created_stats=m.created_stats;if(m.draft_picks){request.starting_cards=m.starting_cards;request.draft_picks=m.draft_picks;request.draft_seed=m.draft_seed;request.duplicated_indices=m.duplicated_indices||[]}}const r=await api('/api/session',request);sessionSetup={...request,tournament_bout:i};actionJournal=[];token=r.token;game=null;render(r.state);$('seed-used').textContent='Bout seed: '+request.seed;$('management-notice').textContent='Bout '+(i+1)+': '+request.human+' vs '+request.opponent;managementSave();document.querySelector('.arena').scrollIntoView({behavior:'smooth'})}
+async function managementRound(){
+ const m=management;if(!m)return;
+ const i=m.round,group=i%3;
+ if(launchingTournamentBout!==null)throw new Error('A bout is already being started.');
+ syncBoutLocks(m);
+ if(m.results.length!==i)throw new Error('Tournament is out of sync: '+m.results.length+' completed, expected '+i+'. Cannot advance safely.');
+ if(allocationLockState(m,group))throw new Error('This bout has already started. Its cards are locked.');
+ if(!allBoutCardsAssigned(m))throw new Error('Assign all nine distinct cards across the three upcoming bouts first.');
+ const committed=[...m.groups[group]];
+ const take=k=>m.cards.find(c=>c.deal_index===committed[k]).name;
+ const request={human:m.human,opponent:m.opponents[i],seed:m.seed+i+1};
+ if(m.opening_mode==='classic')request.opening={kimarite:take(0),prepared:take(1),top:take(2)};
+ else {
+  request.opening_mode='b11_live';request.opening_cards=[take(0),take(1),take(2)];
+  if(m.created_stats)request.created_stats=m.created_stats;
+  if(m.draft_picks){request.starting_cards=m.starting_cards;request.draft_picks=m.draft_picks;request.draft_seed=m.draft_seed;request.duplicated_indices=m.duplicated_indices||[]}
+ }
+ launchingTournamentBout=i;
+ $('management-start').disabled=true;
+ try{
+  const r=await api('/api/session',request);
+  // Lock after the server accepts the bout, before a result can be recorded.
+  m.locked_bouts??={};m.locked_bouts[i]=committed;
+  managementSave();managementBoard();
+  sessionSetup={...request,tournament_bout:i};actionJournal=[];token=r.token;game=null;
+  render(r.state);
+  $('seed-used').textContent='Bout seed: '+request.seed;
+  $('management-notice').textContent='Bout '+(i+1)+': '+request.human+' vs '+request.opponent;
+  managementSave();document.querySelector('.arena').scrollIntoView({behavior:'smooth'});
+ }finally{
+  launchingTournamentBout=null;
+  if(management===m)managementBoard();
+ }
+}
 function earnedNextStartingCards(m){
  // Copy the physical originals selected as duplication rewards, in earned order.
  // All other cards leave the deck when the next tournament draft begins.
@@ -675,6 +708,7 @@ $('management-next').onclick=async()=>{
  if(m.round%3===2&&m.draft_picks){
   if(openBlockRewards())return;
  }
+ if(!allBoutCardsAssigned(m)){$('management-notice').textContent='Complete the nine card assignments before the next bout. Finished bout cards are locked.';return;}
  if(m.round>=14){
   if(completedRewards(m))showTournamentFinal();
   return;
