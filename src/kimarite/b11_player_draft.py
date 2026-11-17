@@ -1,7 +1,7 @@
 """B11 player draft: dynamic starting deck, three-option offers, and Kimarite cap.
 
-A starting suite may already include inherited cards. Draft to 28, requiring
-at least three and at most eight distinct Kimarite. Existing owned cards are
+A starting suite may be empty or contain inherited cards. Draft to 28,
+requiring at least three and at most eight distinct Kimarite. Existing owned cards are
 never offered again. Generated-only finishing moves are not draftable.
 """
 from __future__ import annotations
@@ -26,11 +26,11 @@ AVAILABLE = {
 
 
 def validate_starting_cards(starting: list[str]) -> None:
-    if not isinstance(starting, list) or not 3 <= len(starting) <= TARGET_SIZE:
-        raise ValueError("Starting deck must contain 3–28 cards.")
+    if not isinstance(starting, list) or len(starting) > TARGET_SIZE:
+        raise ValueError("Starting deck must contain 0–28 cards.")
     if any(not isinstance(name, str) or name not in AVAILABLE for name in starting):
         raise ValueError("Starting deck contains an unavailable card.")
-    if max(Counter(starting).values()) > 2:
+    if any(count > 2 for count in Counter(starting).values()):
         raise ValueError("Inherited starting cards may contain at most two copies per card.")
     if sum(AVAILABLE[name].is_kimarite for name in starting) > MAX_KIMARITE:
         raise ValueError("Starting deck exceeds eight Kimarite.")
