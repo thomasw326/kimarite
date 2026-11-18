@@ -300,14 +300,26 @@ class Handler(BaseHTTPRequestHandler):
             if path.startswith("/api/b12/campaign/"):
                 from .b12_campaign_web import campaign_request
                 session = None
+                resolve_lock = None
                 if path == "/api/b12/campaign/resolve":
+                    from threading import Lock
                     with _lock:
                         _prune_sessions()
                         session = _sessions.get(data.get("token"))
                         if session is not None:
                             _touch_session(data["token"])
+                            if not hasattr(session, "b12_resolve_lock"):
+                                session.b12_resolve_lock = Lock()
+                            resolve_lock = session.b12_resolve_lock
                 try:
-                    return self.reply(200, campaign_request(path, data, session=session))
+                    if resolve_lock is not None:
+                        # Only one resolution per player-bout token; different
+                        # browser sessions are free to play in parallel.
+                        with resolve_lock:
+                            result = campaign_request(path, data, session=session)
+                    else:
+                        result = campaign_request(path, data, session=session)
+                    return self.reply(200, result)
                 except (KeyError, ValueError, TypeError, RuntimeError) as exc:
                     return self.reply(409, {"error": str(exc), "code": "campaign_conflict"})
             with _lock:
