@@ -329,3 +329,18 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
  font-weight:750;
  line-height:1.4;
 }
+
+/* Compact live top-division standings. The collapsed heading gives the
+   player's current record without taking space from nine-card allocation. */
+.b12-banzuke{margin:12px 0 16px;border:1px solid #758b85;border-radius:8px;padding:10px;background:#142d2e}
+.b12-banzuke summary{cursor:pointer;font-weight:750;color:#f0e1be;line-height:1.6}
+.b12-banzuke-entries{margin-top:10px;max-height:320px;overflow-y:auto;border-top:1px solid #54665f}
+.banzuke-entry{display:grid;grid-template-columns:40px minmax(110px,2fr) minmax(80px,1fr) 58px;gap:8px;padding:7px 8px;align-items:center;border-bottom:1px solid #52635f;font-size:13px}
+.banzuke-entry:nth-child(odd){background:rgba(255,255,255,.04)}
+.banzuke-entry.banzuke-player{background:#5c4d24;color:#fff0c1;position:sticky;top:0;z-index:1}
+.banzuke-entry span{overflow-wrap:anywhere}
+.banzuke-entry small{color:#dfdbc5;font-size:12px}
+.banzuke-entry b{text-align:right;font-variant-numeric:tabular-nums}
+.opponent-deck-details{margin:6px 0 9px;color:#e8dfc4;font-size:12px}
+.opponent-deck-details summary{cursor:pointer}
+@media(max-width:490px){.banzuke-entry{grid-template-columns:32px minmax(95px,1.5fr) minmax(70px,1fr) 44px;gap:4px;padding:7px 3px;font-size:12px}}
