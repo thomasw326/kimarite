@@ -90,19 +90,13 @@ def tuned_base_cards(framework: dict, difficulty: int) -> list[str]:
     candidates_to_add.sort(
         key=lambda name: (affinity(style, name), name), reverse=better
     )
-    for old, new in zip(candidates_to_replace, candidates_to_add):
-        if abs(difficulty) == 0:
-            break
+    swaps = min(MAX_CARD_SWAPS, (abs(difficulty) + 1) // 2)
+    for old, new in zip(candidates_to_replace[:swaps], candidates_to_add[:swaps]):
         # No sideways or harmful edits masquerading as increased difficulty.
         delta = affinity(style, new) - affinity(style, old)
-        if (delta <= 0 if better else delta >= 0):
+        if (better and delta <= 0) or (not better and delta >= 0):
             break
         cards[cards.index(old)] = new
-        difficulty += -2 if better else 2
-        # One swap per two levels (rounding up); at most five replacements.
-        # Marked by crossing zero, keeping the adjustment bounded.
-        if difficulty <= 0 if better else difficulty >= 0:
-            break
     if len(cards) != 28 or len(set(cards)) != 28 or not protected <= set(cards):
         raise ValueError("Difficulty tuning must retain the 28+12 deck design")
     return cards
