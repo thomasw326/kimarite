@@ -376,3 +376,8 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 .banzuke-entry small{overflow-wrap:anywhere}
 
 .tachiai-card-rules{margin:4px 0;font-size:.875rem;line-height:1.4;overflow-wrap:anywhere}
+
+.banzuke-movement-body{max-height:380px;overflow:auto}
+.banzuke-movement-table{width:100%;border-collapse:collapse;font-size:.875rem}
+.banzuke-movement-table th,.banzuke-movement-table td{padding:6px;text-align:left;border-bottom:1px solid #52635f;overflow-wrap:anywhere}
+.banzuke-movement-table small{display:block}
