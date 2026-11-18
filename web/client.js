@@ -54,15 +54,22 @@ function setGameLocation(location){
  gameSaveSet('kimarite_ui_phase',location);
  if(changed)window.scrollTo(0,0);
 }
+// This scenario is deployed from the dedicated rematch playtest branch.
+const rematchScenario=new URLSearchParams(window.location.search).get('rematch');
+const playtestSavePrefix=['loss','win'].includes(rematchScenario)?'playtest_rematch_'+rematchScenario+'_':'';
+
 function gameSaveGet(key){
+ key=playtestSavePrefix+key;
  try{const current=sessionStorage.getItem(key);if(current!==null)return current}catch(e){}
  try{return localStorage.getItem(key)}catch(e){return null}
 }
 function gameSaveSet(key,value){
+ key=playtestSavePrefix+key;
  try{sessionStorage.setItem(key,value)}catch(e){}
  try{localStorage.setItem(key,value)}catch(e){}
 }
 function gameSaveRemove(key){
+ key=playtestSavePrefix+key;
  try{sessionStorage.removeItem(key)}catch(e){}
  try{localStorage.removeItem(key)}catch(e){}
 }
@@ -126,7 +133,9 @@ $('reset-confirm').onclick=()=>{
  clearSavedProgress();
  // Reload the entire app, not merely the Heya panel, to clear in-memory bout
  // tokens, selected cards, the session journal and the old scheduled AI world.
- window.location.replace(window.location.pathname+'?fresh=1');
+ const params=new URLSearchParams(window.location.search);
+ params.set('fresh','1');
+ window.location.replace(window.location.pathname+'?'+params);
 };
 function rememberSession(){if(token)gameSaveSet('kimarite_session',token);if(sessionSetup)gameSaveSet('kimarite_setup',JSON.stringify(sessionSetup));gameSaveSet('kimarite_actions',JSON.stringify(actionJournal))}
 async function recoverSession(){if(!sessionSetup)throw new Error('This bout expired and has no recovery data. Please start a new bout.');const restored=await api('/api/session',sessionSetup);let state=restored.state;for(const command of actionJournal){const next=await api('/api/session/'+restored.token+'/action',command);state=next.state}token=restored.token;rememberSession();return state}
@@ -1232,4 +1241,41 @@ $('confirm-end-turn').onclick=()=>{$('end-confirm').close();if(game&&game.can_en
 async function resume(){try{if(JSON.parse(gameSaveGet('kimarite_active_draft')||'null')){setGameLocation('heya');return}const saved=gameSaveGet('kimarite_session');if(!saved)return;sessionSetup=JSON.parse(gameSaveGet('kimarite_setup')||'null');actionJournal=JSON.parse(gameSaveGet('kimarite_actions')||'[]');token=saved;if(sessionSetup&&Number.isSafeInteger(sessionSetup.seed))$('seed-used').textContent='Bout seed: '+sessionSetup.seed;let state;try{state=await api('/api/session/'+saved)}catch(e){if(e.data&&e.data.code==='session_expired'){state=await recoverSession()}else throw e}render(state)}catch(e){$('notice').textContent='Unable to restore the previous bout: '+e.message}}
 resume();
 api('/api/roster').then(r=>{for(const name of r.roster){const o=node('option','',name);o.value=name;$('management-deck').append(o)}for(const id of ['human','opponent']){const random=node('option','','Random Wrestler');random.value='__random__';$(id).append(random);for(const name of r.roster){const o=node('option','',name);o.value=name;$(id).append(o)}}$('human').value='Arm Controller';$('opponent').value='The Technician';loadOpening();try{const saved=JSON.parse(gameSaveGet('kimarite_management')||'null');if(saved&&Array.isArray(saved.cards)&&saved.groups){management=saved;$('management-opening-mode').value=saved.opening_mode||'classic';$('management-opening-mode').disabled=true;$('b11-creation').hidden=true;$('management-deck').value=saved.human;$('wrestler-name').value=saved.human;$('management-board').hidden=false;managementBoard();managementStatus()}else{const pending=JSON.parse(gameSaveGet('kimarite_active_draft')||'null');if(pending){activeDraft=pending;$('management-deck').value=pending.human;$('wrestler-name').value=pending.human;offerDraft().catch(e=>$('management-notice').textContent=e.message)}}}catch(e){} }).catch(e=>$('notice').textContent=e.message);
+async function startRematchPlaytest(){
+ const human='Playtest Rikishi',seed=117;
+ const starting_cards=[...B11_STARTER_SUITE],picks=[];
+ $('management-deal').disabled=true;
+ $('management-notice').textContent='Preparing the seeded rematch…';
+ try{
+  const catalogue=await api('/api/b11/draft/catalogue',{});
+  while(starting_cards.length+picks.length<28){
+   const offer=await api('/api/b11/draft/offer',{starting_cards,picks,seed});
+   picks.push(offer.choices[0].name);
+  }
+  activeDraft={human,seed,starting_cards,picks,kimarite_names:catalogue.kimarite_names,
+   created_stats:{power:2,technique:1,spirit:0}};
+  await finishDraft();
+  const m=management;
+  const won=rematchScenario==='win';
+  m.tournament_history=[{tournament:1,wins:won?1:0,losses:won?0:1,results:[{opponent_id:m.b12_opponent_ids[0],
+   opponent:m.opponents[0],won}]}];
+  m.groups=m.groups.map((group,index)=>m.cards.slice(index*3,index*3+3).map(card=>card.deal_index));
+  $('wrestler-name').value=human;
+  $('management-opening-mode').disabled=true;
+  $('b11-creation').hidden=true;
+  managementSave();
+  managementBoard();
+  managementStatus();
+  $('management-notice').textContent='Seeded playtest · your last bout against '+m.opponents[0]+
+   (won?' was a win.':' was a loss.')+' Your cards are assigned. Start the next bout to test the Tachiai.';
+ }catch(e){
+  $('management-notice').textContent='Could not set up the rematch playtest: '+e.message;
+ }finally{
+  $('management-deal').disabled=false;
+ }
+}
+if(playtestSavePrefix){
+ gameSaveSet('kimarite_guide_seen','1');
+ if(!gameSaveGet('kimarite_management'))startRematchPlaytest();
+}
 installGameGuide();
