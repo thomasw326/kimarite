@@ -67,7 +67,12 @@ def test_player_does_not_advance_a_b12_day_without_all_twenty_simulated_bouts():
     returned = JS.split("async function returnToHeya(){", 1)[1].split(
         "$('result-next').onclick=returnToHeya", 1
     )[0]
-    assert returned.index("await commitB12PlayerResult(management)") < returned.index("setGameLocation('heya')")
+    assert returned.index("await startB12MatchdayPrefetch(game)") < returned.index("setGameLocation('heya')")
+    assert "if(!game?.finished||resolvingB12Matchday)return;" in returned
+    assert "startB12MatchdayPrefetch(g)" in JS
+    assert "matchdayPrefetch&&matchdayPrefetchKey===key" in JS
+    assert "setB12MatchdayStatus('ready'" in JS
+    assert "heya-standings-ready" in CSS
 
 
 def test_tournament_boundary_and_round_repair_have_real_canonical_state():
