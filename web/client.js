@@ -1023,6 +1023,7 @@ async function returnToHeya(){
  setGameLocation('heya');
  if(management){
   managementStatus();
+  if(isB12Campaign(management))managementBoard();
   if(completedBlock(management)&&unresolvedRewards(management).length){
    openBlockRewards();return;
   }
