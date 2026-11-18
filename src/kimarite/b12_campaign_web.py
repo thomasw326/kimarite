@@ -54,23 +54,6 @@ def _preview(roster: dict, league: dict) -> dict:
             "banzuke": banzuke(league)}
 
 
-def _lost_last_meeting(foe: dict, league: dict, history: list) -> bool:
-    """Current ledger first, then prior basho in reverse chronological order."""
-    opponent_id = foe["id"]
-    for day in reversed(league["results"]):
-        for bout in day:
-            if {bout["a"], bout["b"]} == {PLAYER, opponent_id}:
-                return bout["winner"] == opponent_id
-    for basho in reversed(history):
-        for bout in reversed(basho["results"]):
-            saved_id = bout.get("opponent_id")
-            # Older saves kept only display names, which are unique and
-            # stable within their seeded world.
-            if saved_id == opponent_id or (saved_id is None and bout["opponent"] == foe["name"]):
-                return bout["won"] is False
-    return False
-
-
 def campaign_request(path: str, request: dict, *, session=None) -> dict:
     """Handle a single POST; no room for random or probability-only winners."""
     if path == "/api/b12/campaign/new":
@@ -98,8 +81,7 @@ def campaign_request(path: str, request: dict, *, session=None) -> dict:
             "id", "name", "style", "rank", "format_id", "wins", "losses",
         )}
         return {**_preview(roster, league),
-                "opponent": details,
-                "rematch_tachiai": _lost_last_meeting(foe, league, request.get("tournament_history", []))}
+                "opponent": details}
 
     if path == "/api/b12/campaign/advance":
         updated, changes = end_of_basho(roster, league)
