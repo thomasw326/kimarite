@@ -746,6 +746,13 @@ function changeBoutAssignment(m,group,slot,id){
  m.groups[group][slot]=id;
  return true;
 }
+// Match the opening rules in tachiai_effects.py, including effects triggered by a loss.
+const tachiaiEffectCards=new Set([
+ 'Chiri-chozu','Explosive Step — Fumikomi','Get Underneath','Gain Left Grip',
+ 'Gain Right Grip','Give Ground','Harite','Headlong Charge','Henka','Hold Position',
+ 'Immovable','Kubinage','Nekodamashi','Nodowa','Oshi','Power Water','Salt Throw',
+ 'Shikiri','Shove','Sidestep','Sonkyo','Stare Down','Tsuki','Tsuppari',
+]);
 function managementBoard(){
  if(!management)return;
  const m=management;
@@ -760,8 +767,10 @@ function managementBoard(){
   for(const id of m.groups[group])if(id!==null)lockedIDs.add(id);
  const cards=$('management-cards');cards.replaceChildren();
  for(const c of m.cards){
-  const wrapper=node('div','management-card');
+  const hasTachiaiEffect=tachiaiEffectCards.has(c.name);
+  const wrapper=node('div','management-card'+(hasTachiaiEffect?' management-card-tachiai':''));
   wrapper.append(card(c,()=>inspect(c)));
+  if(hasTachiaiEffect)wrapper.append(node('small','tachiai-effect-label','Tachiai effect'));
   wrapper.append(node('small','',lockedIDs.has(c.deal_index)?'Locked to completed / started bout'
    :chosen.includes(c.deal_index)?'Assigned to an upcoming bout':'Available'));
   cards.append(wrapper);
@@ -803,6 +812,7 @@ function managementBoard(){
      if(allocationLockState(m,other)||!slotAcceptsCard(m,otherSlot,m.groups[group][slot]))continue;
     }
     const text=displayCardName(c.name)+' · '+(c.deal_index+1)
+     +(tachiaiEffectCards.has(c.name)?' · Tachiai effect':'')
      +(other>=0&&(other!==group||otherSlot!==slot)?' · swap with Bout '+(other+1):'');
     const option=node('option','',text);option.value=c.deal_index;select.append(option);
    }

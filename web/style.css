@@ -381,3 +381,6 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 .banzuke-movement-table{width:100%;border-collapse:collapse;font-size:.875rem}
 .banzuke-movement-table th,.banzuke-movement-table td{padding:6px;text-align:left;border-bottom:1px solid #52635f;overflow-wrap:anywhere}
 .banzuke-movement-table small{display:block}
+
+.management-card-tachiai{border-color:#ffd184;background:#2e281e}
+.management-card .tachiai-effect-label{color:#ffdb9e;font-weight:800}
