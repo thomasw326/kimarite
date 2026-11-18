@@ -131,7 +131,7 @@ def test_non_side_by_side_snapshot_never_leaks_hidden_information():
 def test_ui_contains_explicit_saved_and_projected_positions_and_no_undefined_stats():
     assert 'id="side-by-side-status"' in HTML
     assert 'id="result-standings-status"' in HTML
-    assert "side_by_side: side_by_side_snapshot(session)" in (
+    assert '"side_by_side": side_by_side_snapshot(session)' in (
         Path(__file__).resolve().parents[1] / "src/kimarite/b10_human_session.py"
     ).read_text(encoding="utf-8")
     assert "Position NOW" in JS
