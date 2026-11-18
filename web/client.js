@@ -955,8 +955,68 @@ function showBoutResult(g){
  requestAnimationFrame(()=>dialog.classList.add('result-revealed'));
 }
 $('result-review').onclick=()=>{$('bout-result').close();$('bout-history-details').open=true;$('bout-history-details').scrollIntoView({behavior:'smooth',block:'start'})};
-function returnToHeya(){
- if(!game?.finished)return; // No retreat from a live bout.
+let resolvingB12Matchday=false;
+async function commitB12PlayerResult(m){
+ const i=m.round;
+ if(!isB12Campaign(m)||!game?.finished||activeTournamentBout()!==i)
+  throw new Error('The finished player bout is not part of this ranked matchday.');
+ if(m.results.length===i+1)return; // Saved result is authoritative after refresh.
+ if(m.results.length!==i||m.division_league.day!==i)
+  throw new Error('Matchday results are out of sync. No standings were changed.');
+ const opponent=b12Opponent(m,i);
+ if(!opponent||!m.division_league.pending_matches?.length)
+  throw new Error('The B12 opponent or frozen matchday is missing.');
+ const request={roster:m.division_roster,league:m.division_league,token};
+ let resolved;
+ try{
+  resolved=await api('/api/b12/campaign/resolve',request);
+ }catch(error){
+  // A Render restart/idle expiry may discard only the live bout token.
+  // Recreate it from the already saved player-action journal, then retry.
+  if(/restored|finished player bout|expired|session/i.test(error.message)){
+   const recovered=await recoverSession();
+   if(!recovered.finished)throw new Error('Recovered bout is not finished yet.');
+   request.token=token;
+   resolved=await api('/api/b12/campaign/resolve',request);
+  }else throw error;
+ }
+ const expectedWinner=game.winner==='A'?'player':opponent.id;
+ if(resolved.league?.day!==i+1||resolved.ai_matches!==20||
+    resolved.player_winner!==expectedWinner)
+  throw new Error('Real AI matchday was not completed correctly.');
+ // Update all 42 standings and the player bout record in a single save.
+ // No synthetic AI wins or repeated AI simulations on subsequent Heya views.
+ const record={human:m.human,opponent:m.opponents[i],opponent_style:opponent.style,
+  opponent_name:opponent.name,opponent_rank:opponent.rank,opponent_id:opponent.id,
+  won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',
+  seed:sessionSetup?.seed??null,
+  human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),
+    ...(game.human_card_plays||[])],
+  assigned_cards:(m.groups[i%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k))
+   .filter(Boolean).map(c=>({...c})),
+  duplication_resolved:false};
+ m.division_league=resolved.league;
+ m.results.push(record);
+ updateTournamentLeaders(m);managementSave();
+}
+async function returnToHeya(){
+ if(!game?.finished||resolvingB12Matchday)return; // No retreat from a live bout.
+ resolvingB12Matchday=true;
+ try{
+  if(isB12Campaign(management)&&activeTournamentBout()===management.round&&
+     management.results.length===management.round){
+   $('result-next').disabled=true;$('return-heya').disabled=true;
+   $('notice').textContent='Simulating the other 20 matches and updating the banzuke…';
+   await commitB12PlayerResult(management);
+  }
+ }catch(error){
+  $('notice').textContent='Could not complete the matchday: '+error.message+' — Retry Return to Heya.';
+  $('management-notice').textContent=$('notice').textContent;
+  return;
+ }finally{
+  resolvingB12Matchday=false;
+  $('result-next').disabled=false;$('return-heya').disabled=false;
+ }
  if($('bout-result').open)$('bout-result').close();
  $('return-heya').hidden=true;
  setGameLocation('heya');
