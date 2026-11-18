@@ -555,6 +555,7 @@ function managementBoard(){
  if(!management)return;
  const m=management;
  syncBoutLocks(m);
+ showB12Banzuke(m);
  const chosen=m.groups.flat().filter(id=>id!==null),lockedIDs=new Set();
  for(let group=0;group<3;group++)if(allocationLockState(m,group))
   for(const id of m.groups[group])if(id!==null)lockedIDs.add(id);
