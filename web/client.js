@@ -645,10 +645,10 @@ function showBanzukeMovement(m){
   const movement=!old?'Promoted':!next?'Relegated':delta>0?'Up '+delta:delta<0?'Down '+(-delta):'Unchanged';
   const name=node('th','',wrestler.name+(wrestler.id==='player'?' · YOU':''));
   name.scope='row';
-  const oldRank=node('td','',old?'#'+old.rank:'Reserve');
+  const oldRank=node('td','',old?banzukeRankLabel(old.rank):'Reserve');
   if(Number.isInteger(old?.wins)&&Number.isInteger(old?.losses))
    oldRank.append(node('small','',old.wins+'–'+old.losses));
-  row.append(name,oldRank,node('td','',next?'#'+next.rank:'Out of division'),
+  row.append(name,oldRank,node('td','',next?banzukeRankLabel(next.rank):'Out of division'),
    node('td',!old||delta>0?'result-win':!next||delta<0?'result-loss':'',movement));
   tbody.append(row);
  }
