@@ -1,20 +1,15 @@
-"""Construct a B11 human/AI bout after the irreversible opening commitment.
-
-Classic _fighter and session setup are not modified. This function is an
-engine-only handoff; the browser API stays preview-only until a complete,
-transactional start-turn and public-state integration is verified.
-"""
+"""Construct a live B11 bout after the opening decisions are locked."""
 from __future__ import annotations
 
 import json
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .b10_human_session import ROSTER_PATH, STYLE_PROXIES, _fighter
 from .b11_pending_session import PendingB11Session
 from .b11_player_tachiai import compare_player_tachiai
 from .catalog import card_by_name
-from .models import BoutState, FighterState, Side, Stat, Wrestler
+from .models import BoutState, Card, FighterState, Side, Stat, Wrestler
 from .styles_v5 import STYLES
 from .tachiai import first_exchange_side
 from .tachiai_effects import resolve_prepared_tachiai
@@ -27,7 +22,24 @@ class ResolvedB11Opening:
     comparison: object
 
 
-def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 20261021) -> ResolvedB11Opening:
+def build_b12_opponent(pending: PendingB11Session, seed: int) -> FighterState:
+    from .b12_ai_day import build_ai_fighter
+    from .b12_division_roster import load_formats
+
+    opponent = pending.opponent_ai
+    framework = next(f for f in load_formats() if f["id"] == opponent["format_id"])
+    return build_ai_fighter(opponent, framework, seed * 2 + 1, opponent["wins"])
+
+
+def rematch_tachiai_cards(ai: FighterState) -> tuple[Card, Card, Card]:
+    wrestler = ai.wrestler
+    return (wrestler.starting_kimarite, wrestler.prepared_tachiai_card,
+            wrestler.top_of_deck_card)
+
+
+def build_resolved_b11_opening(
+    pending: PendingB11Session, *, seed: int = 20261021, rematch_index: int | None = None,
+) -> ResolvedB11Opening:
     """Resolve a chosen human opening, retaining its uncommitted cards in hand."""
     if pending.phase.pending:
         raise ValueError("Commit the opening before resolution.")
@@ -43,11 +55,15 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     if pending.opponent_ai is None:
         ai = _fighter(pending.opponent, records[pending.opponent], seed=seed * 2 + 1, ranking=2)
     else:
-        from .b12_ai_day import build_ai_fighter
-        from .b12_division_roster import load_formats
-        f = next(f for f in load_formats() if f["id"] == pending.opponent_ai["format_id"])
-        ai = build_ai_fighter(pending.opponent_ai, f, seed * 2 + 1,
-                              pending.opponent_ai["wins"])
+        ai = build_b12_opponent(pending, seed)
+    if rematch_index is not None:
+        selected = rematch_tachiai_cards(ai)[rematch_index]
+        if selected is not ai.draw_pile[0]:
+            # Keep the original Kimarite and prepared effect in their normal
+            # zones. The extra physical copy lives only in this bout.
+            selected = replace(selected)
+            ai.draw_pile.insert(0, selected)
+            ai.wrestler = replace(ai.wrestler, top_of_deck_card=selected)
     # Player-created wrestlers use their chosen 2/1/0 allocation, without
     # consulting any roster style or prescribing a fighter archetype.
     if pending.created_stats is not None:
@@ -87,11 +103,13 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     return ResolvedB11Opening(state, comparison)
 
 
-def start_b11_human_bout(pending: PendingB11Session, *, max_turns: int = 100):
+def start_b11_human_bout(
+    pending: PendingB11Session, *, max_turns: int = 100, rematch_index: int | None = None,
+):
     """Turn a committed opening into the existing interactive HumanBout."""
     from .human_bout import HumanBout
     from .style_ai_v5 import play_style_turn
-    result = build_resolved_b11_opening(pending, seed=pending.seed)
+    result = build_resolved_b11_opening(pending, seed=pending.seed, rematch_index=rematch_index)
     def opponent_turn(state, side, comparison):
         return play_style_turn(
             state, side, comparison,
@@ -105,6 +123,9 @@ def start_b11_human_bout(pending: PendingB11Session, *, max_turns: int = 100):
         "committed": pending.phase.decision.committed,
         "retained": pending.phase.decision.retained,
     }
+    if rematch_index is not None:
+        session.rematch_index = rematch_index
+        session.tachiai_commitment = pending.phase.decision.indices
     session.annotate_turns = True
     session.advance()
     return session

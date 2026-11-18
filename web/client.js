@@ -318,7 +318,7 @@ function tournamentSummary(m){
  }
  const results=m.results.map(r=>({
   won:!!r.won,opponent:r.opponent_name||r.opponent,finish:r.finish,
-  turns:r.turns,duplicated_card:r.duplicated_card||null
+  turns:r.turns,opponent_id:r.opponent_id,duplicated_card:r.duplicated_card||null
  }));
  const wins=results.filter(r=>r.won).length;
  return {tournament:yearHistory(m).length+1,wins,losses:15-wins,results};
@@ -692,13 +692,15 @@ async function managementRound(){
  if(isB12Campaign(m)){
   if(m.division_league.day!==i||m.b12_opponent_ids?.[i]===undefined)
    throw new Error('The live banzuke is not synchronized with the upcoming bout.');
-  const paired=await api('/api/b12/campaign/pair',{roster:m.division_roster,league:m.division_league});
+  const paired=await api('/api/b12/campaign/pair',{roster:m.division_roster,league:m.division_league,
+   tournament_history:yearHistory(m)});
   if(paired.opponent.id!==m.b12_opponent_ids[i]||paired.opponent.name!==request.opponent)
    throw new Error('Scheduled B12 opponent changed after card allocation.');
   m.division_league=paired.league;
   managementSave(); // Persist frozen 21-pair day before the player enters the ring.
   request.b12_opponent_ai=paired.opponent;
   request.b12_player_rank=m.division_roster.player.rank;
+  request.b12_rematch_tachiai=paired.rematch_tachiai;
   request.b12_campaign={seed:m.division_roster.seed,basho:m.division_roster.completed_basho||0,
    day:i,opponent_id:paired.opponent.id};
  }
@@ -978,9 +980,40 @@ function renderPendingTachiai(g){
  };
  g.tachiai_choice.cards.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}refreshPreview()});const inspectButton=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');const wrap=node('div','choice-card-wrap');wrap.append(b,inspectButton);strip.append(wrap)});
  $('choices').append(strip);
- $('choices').append(summary,preview,btn('Confirm Tachiai commitment',()=>act({type:'commit_tachiai',indices:[...picked].sort()}),'confirm'));
+ $('choices').append(summary,preview,btn('Confirm Tachiai commitment',()=>submitOpeningDecision({type:'commit_tachiai',indices:[...picked].sort()}),'confirm'));
  refreshPreview();
  $('hand').replaceChildren();$('history').replaceChildren();$('end').disabled=true;$('end').classList.remove('end-turn-no-plays','end-turn-win');$('end').textContent='End turn';$('notice').textContent='';
+}
+let submittingOpeningDecision=false;
+async function submitOpeningDecision(command){
+ if(submittingOpeningDecision)return;
+ submittingOpeningDecision=true;
+ try{await act(command)}finally{submittingOpeningDecision=false}
+}
+function renderRematchTachiai(g){
+ updateDohyoPosition(g);
+ setGameLocation('dohyo');
+ $('return-heya').hidden=true;
+ renderBoutHud(g);
+ game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();
+ $('round').textContent='REMATCH TACHIAI';$('tracks').replaceChildren();
+ $('score').replaceChildren(node('h2','','Your opening: '+g.human.name+' vs '+g.opponent.name));
+ $('opening').replaceChildren(node('p','','Your Tachiai commitment is locked.'));
+ const strip=node('div','cards');
+ g.rematch_tachiai.cards.forEach((c,index)=>{
+  const wrap=node('div','choice-card-wrap');
+  wrap.append(
+   card(c,()=>inspect(c)),
+   btn('Put '+displayCardName(c.name)+' on top',()=>submitOpeningDecision({type:'choose_rematch_top',index}),'confirm')
+  );
+  strip.append(wrap);
+ });
+ $('choices').replaceChildren(
+  node('h2','','Choose one opponent Tachiai card'),
+  node('p','','You lost your last bout against '+g.opponent.name+'. Choose which of these three cards starts on top of their draw pile.'),
+  strip
+ );
+ $('hand').replaceChildren();$('history').replaceChildren();$('end').disabled=true;$('notice').textContent='';
 }
 let lastPresentedResult=null;
 function showBoutResult(g){
@@ -1148,7 +1181,15 @@ function kimariteTurnCues(g){
   winReady:readyNames.length>0,
  };
 }
-function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();const turnCues=kimariteTurnCues(g);const readyNames=new Set(turnCues.readyNames);
+function restoreRematchJournal(g){
+ if(!Array.isArray(g.tachiai_commitment))return;
+ // A reload may fetch an accepted decision whose POST response was lost.
+ if(!actionJournal.some(c=>c.type==='commit_tachiai'))
+  actionJournal.unshift({type:'commit_tachiai',indices:g.tachiai_commitment});
+ if(Number.isInteger(g.rematch_tachiai_index)&&!actionJournal.some(c=>c.type==='choose_rematch_top'))
+  actionJournal.splice(1,0,{type:'choose_rematch_top',index:g.rematch_tachiai_index});
+}
+function render(g){restoreRematchJournal(g);if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}if(g.phase==='choose_rematch_top'){renderRematchTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();const turnCues=kimariteTurnCues(g);const readyNames=new Set(turnCues.readyNames);
  for(const [title,s,own] of [['YOUR RIKISHI',g.human,true],['OPPONENT',g.opponent,false]]){const box=node('div','rikishi-info');box.append(node('div','eyebrow',title),node('h2','',s.name),node('p','', 'Power '+s.power+'  ·  Grip '+s.grip.join('/')+'  ·  '+(own?'Plays '+s.plays_remaining:'Hand '+s.hand_count)));const zones=node('p','zones');zones.append(node('b','','Kimarite: '),document.createTextNode(names(s.kimarite)),node('br'),node('b','','Temporary: '),document.createTextNode(names(s.temporary)));box.append(zones);const discard=btn('Discard pile: '+s.discard_count+' · View cards',()=>showDiscard(s,own?'Your rikishi':'Opponent'),'discard-button');box.append(discard);for(const zoneName of ['kimarite','temporary']){const zone=node('div','zone-list');zone.append(node('div','eyebrow',zoneName.toUpperCase()));for(const c of s[zoneName]){const item=node('div','zone-entry');const ready=own&&zoneName==='kimarite'&&readyNames.has(c.name);item.append(btn(displayCardName(c.name)+(ready?' · READY TO WIN':' · Inspect'),()=>inspect({...c,description:zoneEffect(c,zoneName),zone_only:true,timing:zoneName==='kimarite'?'Winning condition':'Active Temporary effect'}),'zone-card'+(ready?' kimarite-ready':'')));if(ready)item.append(node('span','kimarite-ready-cue','End turn to win'));item.append(node('p','temporary-detail',zoneEffect(c,zoneName)));zone.append(item)}box.append(zone)}$('score').append(box)}
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();if(g.selection){$('choices').append(node('h2','','Choose '+g.selection.keep+' cards to keep'));const strip=node('div','cards');g.selection.options.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}confirm.disabled=picked.size!==g.selection.keep});b.firstChild.textContent=(i+1)+'. '+displayCardName(c.name);const info=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');info.type='button';const wrap=node('div','choice-card-wrap');wrap.append(b,info);strip.append(wrap)});$('choices').append(strip);const confirm=btn('Keep selected cards',()=>act({type:'choose_cards',indices:[...picked]}),'confirm');confirm.disabled=g.selection.keep!==0;$('choices').append(confirm)}

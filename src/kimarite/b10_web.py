@@ -356,6 +356,10 @@ class Handler(BaseHTTPRequestHandler):
                             if not isinstance(meta, dict) or any(type(meta.get(k)) is not int for k in ("seed", "basho", "day")) or not isinstance(meta.get("opponent_id"), str) or meta["opponent_id"] != session.opponent_ai["id"]:
                                 raise ValueError("B12 world match identity is malformed")
                             session.b12_campaign = meta
+                        rematch = data.get("b12_rematch_tachiai", False)
+                        if type(rematch) is not bool or (rematch and not hasattr(session, "b12_campaign")):
+                            raise ValueError("Rematch Tachiai requires a B12 campaign bout.")
+                        session.rematch_tachiai = rematch
                     else:
                         session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
                     token = secrets.token_urlsafe(24)
@@ -370,19 +374,38 @@ class Handler(BaseHTTPRequestHandler):
                         return self.reply(404, {"error": "Bout expired or the server restarted; recover from your browser's saved actions.", "code": "session_expired"})
                     _touch_session(token)
                     if isinstance(session, PendingB11Session):
-                        if data.get("type") == "commit_tachiai":
+                        action = data.get("type")
+                        rematch_index = None
+                        if action == "commit_tachiai":
                             if not session.phase.pending:
+                                if session.rematch_cards and data.get("indices") == list(session.phase.decision.indices):
+                                    return self.reply(200, {"state": session.snapshot()})
                                 return self.reply(409, {"error": "Tachiai is already committed.", "code": "tachiai_already_committed", "state": session.snapshot()})
                             committed_snapshot = session.confirm(data["indices"])
-                            if getattr(session, "live_enabled", False):
-                                from .b11_live_opening import start_b11_human_bout
-                                live = start_b11_human_bout(session)
-                                if hasattr(session, "b12_campaign"):
-                                    live.b12_campaign = session.b12_campaign
-                                _sessions[token] = live
-                                return self.reply(200, {"state": public_snapshot(live)})
-                            return self.reply(200, {"state": committed_snapshot})
-                        return self.reply(409, {"error": "B11 live resolution is not yet enabled.", "code": "b11_preview_only", "state": session.snapshot()})
+                            if session.rematch_tachiai:
+                                from .b11_live_opening import build_b12_opponent, rematch_tachiai_cards
+                                ai = build_b12_opponent(session, session.seed)
+                                session.rematch_cards = rematch_tachiai_cards(ai)
+                                return self.reply(200, {"state": session.snapshot()})
+                            if not session.live_enabled:
+                                return self.reply(200, {"state": committed_snapshot})
+                        elif action == "choose_rematch_top" and session.rematch_cards:
+                            rematch_index = data.get("index")
+                            if type(rematch_index) is not int or not 0 <= rematch_index < len(session.rematch_cards):
+                                raise ValueError("Choose one of the three opponent Tachiai cards.")
+                        else:
+                            return self.reply(409, {"error": "Finish the pending Tachiai decision first.", "code": "b11_preview_only", "state": session.snapshot()})
+                        from .b11_live_opening import start_b11_human_bout
+                        live = start_b11_human_bout(session, rematch_index=rematch_index)
+                        if hasattr(session, "b12_campaign"):
+                            live.b12_campaign = session.b12_campaign
+                        _sessions[token] = live
+                        return self.reply(200, {"state": public_snapshot(live)})
+                    if data.get("type") == "choose_rematch_top":
+                        index = getattr(session, "rematch_index", None)
+                        if index is not None and type(data.get("index")) is int and data["index"] == index:
+                            return self.reply(200, {"state": public_snapshot(session)})
+                        return self.reply(409, {"error": "No rematch top-card choice is pending.", "state": public_snapshot(session)})
                     try:
                         snapshot = dispatch(session, data)
                         return self.reply(200, {"state":snapshot})

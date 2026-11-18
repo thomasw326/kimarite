@@ -1,9 +1,4 @@
-"""B11 pending opening preview, deliberately separate from Classic live sessions.
-
-The decision endpoint is intentionally not enabled until multi-card Tachiai
-resolution is complete. No AI state, opposing opening or private seed is
-created/serialized during this pre-commit phase.
-"""
+"""Pending player Tachiai and the optional post-commit B12 rematch choice."""
 from __future__ import annotations
 
 import json
@@ -15,6 +10,7 @@ from .b11_player_opening import PlayerOpening
 from .b11_tachiai_phase import PendingPlayerTachiai
 from .b11_tachiai_public import pending_tachiai_snapshot
 from .catalog import card_by_name
+from .models import Card
 
 
 @dataclass
@@ -27,6 +23,7 @@ class PendingB11Session:
     drafted_deck: list[str] | None = None
     opponent_ai: dict | None = None
     player_rank: int = 1
+    rematch_cards: tuple[Card, ...] = ()
 
     @classmethod
     def start(cls, human: str, opponent: str, names: list[str], *, seed: int = 20261021, created_stats: dict[str, int] | None = None, drafted_deck: list[str] | None = None, opponent_ai: dict | None = None, player_rank: int = 1) -> "PendingB11Session":
@@ -73,7 +70,7 @@ class PendingB11Session:
         return cls(human, opponent, PendingPlayerTachiai(opening), seed=seed, created_stats=created_stats, drafted_deck=drafted_deck, opponent_ai=opponent_ai, player_rank=player_rank)
 
     def confirm(self, indices: list[int]) -> dict[str, Any]:
-        """Record a one-time human decision; actual resolution remains gated."""
+        """Record the one-time human commitment."""
         if not isinstance(indices, list):
             raise ValueError("Commitment must be a list of slot indices.")
         self.phase.choose(indices)
@@ -97,6 +94,20 @@ class PendingB11Session:
             return pending_tachiai_snapshot(self.phase, self.human, self.opponent)
         decision = self.phase.decision
         from .b10_card_info import card_info
+        if self.rematch_cards:
+            return {
+                "phase": "choose_rematch_top",
+                "finished": False,
+                "human": {"name": self.human},
+                "opponent": {"name": self.opponent},
+                "tachiai_commitment": list(decision.indices),
+                "rematch_tachiai": {"cards": [card_info(c) for c in self.rematch_cards]},
+                "events": [],
+                "opening": None,
+                "selection": None,
+                "legal_plays": [],
+                "can_end_turn": False,
+            }
         return {
             "phase": "tachiai_resolution_pending",
             "finished": False,
