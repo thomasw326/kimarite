@@ -515,6 +515,17 @@ function b12Opponent(m,bout){
  const id=m?.b12_opponent_ids?.[bout];
  return id?m.division_league?.wrestlers?.find(w=>w.id===id):null;
 }
+function banzukeTitle(rank){
+ if(!Number.isInteger(rank)||rank<1||rank>42)return '';
+ const titles=['East Yokozuna','West Yokozuna','East Ozeki','West Ozeki','East Ozeki 2',
+  'East Sekiwake','West Sekiwake','East Komusubi','West Komusubi'];
+ if(rank<=titles.length)return titles[rank-1];
+ const index=rank-titles.length-1;
+ return (index%2===0?'East':'West')+' Maegashira '+(Math.floor(index/2)+1);
+}
+function banzukeRankLabel(rank){
+ return '#'+rank+' · '+banzukeTitle(rank);
+}
 function b12OpponentLabel(m,bout){
  const foe=b12Opponent(m,bout);
  return foe?foe.name+' · #'+foe.rank+' · '+foe.style+' · '+foe.wins+'–'+foe.losses:
@@ -570,10 +581,10 @@ function showBanzukeMovement(m){
   const movement=!old?'Promoted':!next?'Relegated':delta>0?'Up '+delta:delta<0?'Down '+(-delta):'Unchanged';
   const name=node('th','',wrestler.name+(wrestler.id==='player'?' · YOU':''));
   name.scope='row';
-  const oldRank=node('td','',old?'#'+old.rank:'Reserve');
+  const oldRank=node('td','',old?banzukeRankLabel(old.rank):'Reserve');
   if(Number.isInteger(old?.wins)&&Number.isInteger(old?.losses))
    oldRank.append(node('small','',old.wins+'–'+old.losses));
-  row.append(name,oldRank,node('td','',next?'#'+next.rank:'Out of division'),
+  row.append(name,oldRank,node('td','',next?banzukeRankLabel(next.rank):'Out of division'),
    node('td',!old||delta>0?'result-win':!next||delta<0?'result-loss':'',movement));
   tbody.append(row);
  }
