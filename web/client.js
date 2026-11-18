@@ -1,7 +1,6 @@
-// English-first card labels; original names remain untouched in saves/rules.
-// Exact approved English descriptions are taken from Google Sheets:
-// 'Kimarite Card Library' -> 'Kimarite Library'!B:C and 'Other Cards'!A,I:J.
-// Cards not explicitly sourced in those tabs remain Japanese-only.
+// Bilingual card labels preserve the original language first in the UI.
+// Preserve established Card Library labels. Use concise English glosses
+// for the other Japanese names in the live catalogue.
 const CARD_ENGLISH_NAMES=Object.freeze({
  'Oshi':"Push",
  'Tsuki':"Thrust",
@@ -32,12 +31,50 @@ const CARD_ENGLISH_NAMES=Object.freeze({
  'Kirikaeshi':"Reversal Leg Trip",
  'Okuritaoshi':"Rear Push Down",
  'Tottari':"Arm Bar Throw",
- 'Utchari':"Edge Pivot Throw"
+ 'Utchari':"Edge Pivot Throw",
+ 'Uwate':"Outside Grip",
+ 'Shitate':"Inside Grip",
+ 'Sonkyo':"Defensive Crouch",
+ 'Gaburi':"Belly Drive",
+ 'Ottsuke':"Arm Clamp",
+ 'Use the Tawara':"Ring Bales",
+ 'Kannuki':"Double Arm Clamp",
+ 'Morozashi':"Double Inside Grip",
+ 'Morotezuki':"Two-Handed Thrust",
+ 'Kachiage':"Rising Forearm Strike",
+ 'Nekodamashi':"Clap Feint",
+ 'Maesabaki':"Fight for Inside Position",
+ 'Deashi':"Quick First Step",
+ 'Butsukari':"Charging Drill",
+ 'Denshamichi':"Straight-Line Drive",
+ 'Ankogata':"Heavyset Build",
+ 'Tsuriotoshi':"Lift and Drop",
+ 'Shitatedashinage':"Pulling Underarm Throw",
+ 'Shitatehineri':"Twisting Underarm Throw",
+ 'Renzoku':"Chain Attacks",
+ 'Meguri':"Cycle",
+ 'Nokotta!':"Still In!",
+ 'Hakkeyoi!':"Get Moving!",
+ 'Hazuoshi':"Underarm Push",
+ 'Inashi':"Redirect the Charge",
+ 'Chiri-chozu':"Purification Ritual",
+ 'Shikiri':"Pre-Bout Face-Off",
+ 'Kubinage':"Headlock Throw",
+ 'Kimedashi':"Arm-Lock Force Out",
+ 'Kimetaoshi':"Arm-Lock Force Down"
+});
+const CARD_DISPLAY_TITLES=Object.freeze({
+ 'Driving Force — Power Payoff':'Driving Force',
+ 'Crushing Pressure — Power Crusher':'Crushing Pressure',
+ 'Explosive Step — Fumikomi':'Explosive Step (Fumikomi)',
+ 'Power Water':'Power Water (力水)',
+ 'Salt Throw':'Salt Throw (塩まき)',
+ 'Shiko Stomp':'Shiko Stomp (四股)'
 });
 function displayCardName(name){
  if(typeof name!=='string')return name||'';
  const english=CARD_ENGLISH_NAMES[name];
- return english?english+' ('+name+')':name;
+ return CARD_DISPLAY_TITLES[name]??(english?name+' ('+english+')':name);
 }
 const $=id=>document.getElementById(id);let token=null,game=null,picked=new Set(),pendingPlay=null,sessionSetup=null,actionJournal=[];
 function setGameLocation(location){
