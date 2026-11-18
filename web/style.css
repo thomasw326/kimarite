@@ -374,3 +374,5 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 
 .banzuke-rank{display:grid;gap:2px}
 .banzuke-entry small{overflow-wrap:anywhere}
+
+.tachiai-card-rules{margin:4px 0;font-size:.875rem;line-height:1.4;overflow-wrap:anywhere}

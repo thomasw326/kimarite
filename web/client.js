@@ -1060,10 +1060,10 @@ function renderPendingTachiai(g){
   preview.replaceChildren(
    node('strong','','Your projected Tachiai · '+picked.size+' committed'),
    node('p','','Power '+totals[0]+' · Technique '+totals[1]+' · Spirit '+totals[2]),
-   node('small','','Each total = base + 1 + committed card orbs. Power helps opening strength/defense; Technique influences Exchange priority and card access; Spirit can grant opening Push/Momentum. Opponent totals stay hidden until you confirm.')
+   node('small','','Each total = base + 1 + printed orbs from committed cards, before Tachiai effects. Power helps opening strength/defense; Technique influences Exchange priority and card access; Spirit can grant opening Push/Momentum. Opponent totals stay hidden until you confirm.')
   );
  };
- g.tachiai_choice.cards.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}refreshPreview()});const inspectButton=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');const wrap=node('div','choice-card-wrap');wrap.append(b,inspectButton);strip.append(wrap)});
+ g.tachiai_choice.cards.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}refreshPreview()});const inspectButton=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');const wrap=node('div','choice-card-wrap');wrap.append(b,node('p','tachiai-card-rules',c.description||'Rules text unavailable.'),inspectButton);strip.append(wrap)});
  $('choices').append(strip);
  $('choices').append(summary,preview,btn('Confirm Tachiai commitment',()=>act({type:'commit_tachiai',indices:[...picked].sort()}),'confirm'));
  refreshPreview();
