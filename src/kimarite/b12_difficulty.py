@@ -108,4 +108,7 @@ def tuned_stats(profile, difficulty: int) -> tuple[int, int, int]:
     priorities = [Stat(profile.primary), Stat(profile.secondary)]
     priorities += [stat for stat in (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT)
                    if stat not in priorities]
-    return boosted_stats(profile.stats, tuple(priorities[:3]), difficulty, enabled=True)
+    # Clamp here rather than relying on the optional legacy helper: negative
+    # ranks must soften deck composition, NEVER subtract baseline stats.
+    return boosted_stats(profile.stats, tuple(priorities[:3]), max(0, difficulty),
+                         enabled=True)
