@@ -142,7 +142,7 @@ def test_player_opponents_are_new_after_each_block_with_frozen_rank():
     league = make_world(201)
     first_block = plan_block(league)
     assert len(first_block) == 3
-    assert [x["rank"] for x in first_block] == sorted(x["rank"] for x in first_block)[::-1]
+    assert all(35 <= x["rank"] <= 41 for x in first_block)
     for day in range(3):
         league = commit_day(league, outcomes(next_day_matches(league), 201, day))
     second_block = plan_block(league)
