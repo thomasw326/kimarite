@@ -1103,10 +1103,22 @@ function openHeyaInterview(m){
   :'What are you looking forward to in the next round, and how do you want to approach it?';
  const answers=$('heya-interview-answers');
  answers.replaceChildren();
+ const roundCards=[...m.cards,...m.results.slice(-3).flatMap(r=>r.assigned_cards||[])];
  entry.options.forEach(({kind,cards=[]},index)=>{
   const [quote,description]=HeyaInterviewRewards[kind];
   const response=node('div','management-card');
-  response.append(node('p','',description+(cards.length?' '+names(cards)+'.':'')));
+  response.append(node('p','',description));
+  if(cards.length){
+   const affected=node('div','interview-affected-cards');
+   for(const candidate of cards){
+    // Some saved interview offers only carry a name and physical copy ID.
+    const details=roundCards.find(c=>c.instance_id===candidate.instance_id&&c.description)
+     ||roundCards.find(c=>c.name===candidate.name&&c.description);
+    const c={...details,...candidate,description:candidate.description||details?.description};
+    affected.append(btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect'));
+   }
+   response.append(affected);
+  }
   const remove=node('select','');
   if(kind==='remove'){
    remove.setAttribute('aria-label','Card to remove');

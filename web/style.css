@@ -385,3 +385,5 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 .tachiai-effect-card{border:1px solid #ffd184;border-radius:10px;background:#2e281e}
 .choice-card-wrap.tachiai-effect-card{padding:8px}
 .tachiai-effect-label{color:#ffdb9e;font-weight:800}
+
+.interview-affected-cards{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
