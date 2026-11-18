@@ -17,6 +17,11 @@ BOUT_BLOCK = 3
 WRESTLERS = 42
 MATCHES_PER_DAY = WRESTLERS // 2
 PLAYER = "player"
+TOP_TIER_MAX_RANK = 8
+RECORD_MATCH_START = 9  # Day 10 (zero-indexed)
+FINAL_DAY = BASHO_DAYS - 1
+# Reserve top-of-banzuke clashes for the senshuraku whenever possible.
+MARQUEE_RANK_PAIRS = ((1, 2), (3, 4))
 
 
 def new_basho(roster: dict) -> dict:
@@ -63,12 +68,35 @@ def _seed_tie(seed: int, day: int, a: str, b: str) -> int:
     return int.from_bytes(hashlib.sha256(raw).digest()[:4], "big")
 
 
+def _marquee_pair(left: dict, right: dict) -> bool:
+    return tuple(sorted((left["rank"], right["rank"]))) in MARQUEE_RANK_PAIRS
+
+
+def _blocked_marquee(day: int, left: dict, right: dict) -> bool:
+    """Keep the top two marquee rivalries intact until senshuraku.
+
+    Older, already-started league saves may contain such an earlier pairing;
+    the caller still honors a previously locked player opponent and never
+    fabricates a rematch. New matches avoid consuming these rivalries early.
+    """
+    return day < FINAL_DAY and _marquee_pair(left, right)
+
+
 def _opponent_score(day: int, left: dict, right: dict, seed: int) -> tuple:
     rank_gap = abs(left["rank"] - right["rank"])
     record_gap = abs(left["wins"] - right["wins"])
     tie = _seed_tie(seed, day, left["id"], right["id"])
-    # R1–R3 (days 1–9) primarily near-rank; R4/R5 record-matched.
-    return (record_gap, rank_gap, tie) if day >= 9 else (rank_gap, record_gap, tie)
+    both_top = left["rank"] <= TOP_TIER_MAX_RANK and right["rank"] <= TOP_TIER_MAX_RANK
+    if day < RECORD_MATCH_START:
+        # Keep top-tier rivalries for later: prefer a nearby non-elite.
+        return (int(both_top), rank_gap, record_gap, tie)
+    if left["rank"] <= TOP_TIER_MAX_RANK:
+        # The top-ranked rikishi now prioritize facing each other. Current
+        # W–L records choose among *available* top-ranked opponents.
+        return (0 if both_top else 1, record_gap, rank_gap, tie)
+    # A rising lower-ranked wrestler is promoted toward opponents with a
+    # similar live record, regardless of their original banzuke position.
+    return (record_gap, rank_gap, tie)
 
 
 def plan_block(league: dict) -> list[dict]:
@@ -96,8 +124,30 @@ def plan_block(league: dict) -> list[dict]:
                   if w["id"] != PLAYER and w["id"] not in player["played"]]
     if len(candidates) < BOUT_BLOCK:
         raise ValueError("Not enough fresh AI opponents")
-    selected = sorted(candidates, key=lambda w:
-                      _opponent_score(day, player, w, league["seed"]))[:BOUT_BLOCK]
+    selectable = [w for w in candidates if not _blocked_marquee(day, player, w)]
+    ordered = sorted(selectable, key=lambda w:
+                     _opponent_score(day, player, w, league["seed"]))
+    if block_start == 12:
+        # The final three-opponent preview must be fixed before allocation.
+        # Place the player's reserved #1/#2 or #3/#4 rival on Day 15, while
+        # leaving the other top-of-banzuke pair free for its own finale.
+        reserved = next((w for w in candidates if _marquee_pair(player, w)
+                         and w["id"] not in player["played"]), None)
+        finalists = {w["id"] for w in league["wrestlers"]
+                     if w["rank"] <= 4}
+        first_two = [w for w in ordered if w is not reserved][:2]
+        if reserved is not None:
+            selected = [*first_two, reserved]
+        else:
+            third = next((w for w in ordered if w not in first_two
+                          and w["id"] not in finalists), None)
+            if third is None:
+                raise ValueError("No non-marquee opponent is available for Day 15")
+            selected = [*first_two, third]
+    else:
+        selected = ordered[:BOUT_BLOCK]
+    if len(selected) != BOUT_BLOCK:
+        raise ValueError("Not enough unique player opponents for this block")
     league["block_player_opponents"] = [w["id"] for w in selected]
     return next_opponents(league)
 
@@ -118,14 +168,26 @@ def next_opponents(league: dict) -> list[dict]:
 
 
 def _match_remaining(pool: list[dict], day: int, seed: int) -> list[list[str]]:
-    """Build 20 disjoint, nonrepeated AI matches using simple backtracking.
+    """Build 20 collision-free AI matches, saving marquee encounters for late.
 
-    With at most 14 prior opponents per wrestler among 40 peers, every
-    unmatched AI has many fresh partners. Search explores nearest-record or
-    nearest-rank partners first. No externally installed graph dependency.
+    The ranking and current records guide an adaptive opponent search, not an
+    advance schedule of invented outcomes. On Day 15, eligible rank #1/#2
+    and #3/#4 contests are locked *before* finding the other 18–20 pairs.
+    Older saved tournaments that already used those rivalries still work.
     """
     ids = {w["id"] for w in pool}
     rows = {w["id"]: w for w in pool}
+    prepaired: list[list[str]] = []
+    if day == FINAL_DAY:
+        by_rank = {w["rank"]: w for w in pool}
+        for rank_a, rank_b in MARQUEE_RANK_PAIRS:
+            if rank_a not in by_rank or rank_b not in by_rank:
+                continue  # One of the rivals is playing the human today.
+            a, b = by_rank[rank_a], by_rank[rank_b]
+            if b["id"] not in a["played"] and a["id"] not in b["played"]:
+                prepaired.append([a["id"], b["id"]])
+                ids -= {a["id"], b["id"]}
+
     def recurse(remaining: frozenset[str]) -> list[list[str]] | None:
         if not remaining:
             return []
@@ -133,7 +195,8 @@ def _match_remaining(pool: list[dict], day: int, seed: int) -> list[list[str]]:
         for a in remaining:
             w = rows[a]
             partners = [b for b in remaining
-                        if b != a and b not in w["played"]]
+                        if b != a and b not in w["played"]
+                        and not _blocked_marquee(day, w, rows[b])]
             if not partners:
                 return None
             feasible[a] = partners
@@ -146,7 +209,9 @@ def _match_remaining(pool: list[dict], day: int, seed: int) -> list[list[str]]:
             if tail is not None:
                 return [[a, b], *tail]
         return None
-    matches = recurse(frozenset(ids))
+
+    tail = recurse(frozenset(ids))
+    matches = None if tail is None else [*prepaired, *tail]
     if matches is None or len(matches) != 20:
         raise ValueError("Cannot construct a nonrepeating 20-pair AI matchday")
     return matches
