@@ -369,3 +369,5 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 #management-rewards[data-result="loss"] #management-reward-progress{color:#ffc2bd}
 .tournament-result.tournament-win{background:#17352d}
 .tournament-result.tournament-loss{background:#432a2c}
+
+.rematch-draw-note{color:#ffd66b}
