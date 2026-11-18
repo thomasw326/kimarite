@@ -194,7 +194,9 @@ function completedBlock(m){
 }
 function unresolvedRewards(m){
  if(!m||m.opening_mode!=='b11_live'||!m.draft_picks||!completedBlock(m))return [];
- return m.results.slice(-3).filter(r=>r.won&&!r.duplication_resolved);
+ return m.results.slice(-3).filter(r=>r.won
+  ?!r.duplication_resolved
+  :r.won===false&&isB12Campaign(m)&&r.opponent_id&&r.assigned_cards?.length===3&&!r.rematch_top_card);
 }
 function availableRewardCards(m,result){
  if((m.duplicated_indices||[]).length>=12)return [];
@@ -271,15 +273,25 @@ function openBlockRewards(){
   return false;
  }
  const r=pending[0],i=m.results.indexOf(r);
- const choices=availableRewardCards(m,r);
+ const choices=r.won?availableRewardCards(m,r):r.assigned_cards;
  if(!choices.length){
   r.duplication_resolved=true;managementSave();return openBlockRewards();
  }
  $('management-board').hidden=true;
  $('management-rewards').hidden=false;
  $('management-next').hidden=true;
- $('management-reward-progress').textContent='Bout '+(i+1)+' victory · Choose one of your three assigned original cards to duplicate ('+
-  (28+(m.duplicated_indices||[]).length)+'/40 cards).';
+ const opponent=r.won?null:b12Opponent(m,i);
+ const rank=opponent?.rank??r.opponent_rank;
+ const rankLabel=rank?(typeof banzukeRankLabel==='function'?banzukeRankLabel(rank):'#'+rank):null;
+ const opponentLabel=[r.opponent_name||r.opponent,opponent?.style??r.opponent_style,rankLabel]
+  .filter(Boolean).join(' · ');
+ const rewards=$('management-rewards');
+ rewards.dataset.result=r.won?'win':'loss';
+ $('management-reward-progress').textContent=r.won
+  ?'Bout '+(i+1)+' · Win. Duplicate one assigned original for your deck ('+
+    (28+(m.duplicated_indices||[]).length)+'/40 cards).'
+  :'Bout '+(i+1)+' · Loss to '+opponentLabel+
+    '. Choose one of your three opening cards to go on top of your deck when you next face this wrestler.';
  const panel=$('management-reward-cards');panel.replaceChildren();
  for(const choice of choices){
   // Older saved bout records only held name and identity. Recover the
@@ -290,15 +302,20 @@ function openBlockRewards(){
   const description=c.description||'Detailed card effect unavailable. Inspect the card for any available rules.';
   wrapper.append(node('p','reward-effect',description));
   wrapper.append(btn('Inspect full card',()=>inspect(c),'reward-inspect'));
-  const select=btn('Duplicate '+displayCardName(c.name),()=>{
+  const label=r.won?'Duplicate ':'Save for rematch: ';
+  const select=btn(label+displayCardName(c.name),()=>{
    if(!management||!unresolvedRewards(management).includes(r))return;
-   const originalIndex=Number(c.instance_id.slice(9));
-   if(!Number.isInteger(originalIndex)||management.duplicated_indices.includes(originalIndex))return;
-   management.duplicated_indices.push(originalIndex);
-   r.duplicated_card=c.name;r.duplication_resolved=true;
+   if(r.won){
+    const originalIndex=Number(c.instance_id.slice(9));
+    if(!Number.isInteger(originalIndex)||management.duplicated_indices.includes(originalIndex))return;
+    management.duplicated_indices.push(originalIndex);
+    r.duplicated_card=c.name;r.duplication_resolved=true;
+   }else{
+    r.rematch_top_card=c.name;
+   }
    managementSave();
    if(!openBlockRewards()){
-    $('management-notice').textContent='Victory rewards resolved. Your deck now has '+(28+management.duplicated_indices.length)+' cards.';
+    $('management-notice').textContent='Round rewards resolved. Your deck now has '+(28+management.duplicated_indices.length)+' cards.';
     managementStatus();
     if(management.results.length===15)showTournamentFinal();
     else $('management-next').hidden=false;
@@ -318,7 +335,8 @@ function tournamentSummary(m){
  }
  const results=m.results.map(r=>({
   won:!!r.won,opponent:r.opponent_name||r.opponent,finish:r.finish,
-  turns:r.turns,duplicated_card:r.duplicated_card||null
+  turns:r.turns,opponent_id:r.opponent_id,duplicated_card:r.duplicated_card||null,
+  rematch_top_card:r.rematch_top_card||null
  }));
  const wins=results.filter(r=>r.won).length;
  return {tournament:yearHistory(m).length+1,wins,losses:15-wins,results};
@@ -412,7 +430,7 @@ $('tournament-final-copy').onclick=async()=>{
  try{await navigator.clipboard.writeText(summary);$('tournament-final-copy').textContent='Copied!'}
  catch(e){$('tournament-final-copy').textContent='Copy unavailable'}
 };
-function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;showB12Banzuke(m);if(!isB12Campaign(m)&&game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({...c})),duplication_resolved:false});updateTournamentLeaders(m);managementSave();managementBoard()}const wins=m.results.filter(r=>r.won).length;showYearStatus(m);progress.replaceChildren(node('h3','','Tournament '+(yearHistory(m).length+1)+' of 6 · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve victories / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result');row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+(r.opponent_rank?' · #'+r.opponent_rank:'')+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',displayCardName(r.finish||'Finisher unavailable')));if(r.duplicated_card)row.append(node('small','','Duplicated: '+displayCardName(r.duplicated_card)));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15||!completedRewards(m);$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5;$('new-wrestler').hidden=m.opening_mode!=='b11_live'||m.results.length!==15||!completedRewards(m)||yearHistory(m).length<5;if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
+function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;showB12Banzuke(m);if(!isB12Campaign(m)&&game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({...c})),duplication_resolved:false});updateTournamentLeaders(m);managementSave();managementBoard()}const wins=m.results.filter(r=>r.won).length;showYearStatus(m);progress.replaceChildren(node('h3','','Tournament '+(yearHistory(m).length+1)+' of 6 · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve round rewards / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result '+(r.won?'tournament-win':'tournament-loss'));row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+(r.opponent_rank?' · #'+r.opponent_rank:'')+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',displayCardName(r.finish||'Finisher unavailable')));if(r.duplicated_card)row.append(node('small','','Duplicated: '+displayCardName(r.duplicated_card)));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15||!completedRewards(m);$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5;$('new-wrestler').hidden=m.opening_mode!=='b11_live'||m.results.length!==15||!completedRewards(m)||yearHistory(m).length<5;if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
 let playerShikonaPool=null;
 async function randomPlayerShikona(){
  const field=$('wrestler-name'),notice=$('random-name-status'),button=$('random-wrestler-name');
@@ -629,6 +647,9 @@ function managementBoard(){
    +' vs '+(isB12Campaign(m)?b12OpponentLabel(m,bout):m.opponents[bout])
    +(locked?' · '+(locked==='completed'?'COMPLETED':'STARTED')+' — LOCKED':' · editable')));
   const opponentInfo=isB12Campaign(m)?b12Opponent(m,bout):null;
+  const rematchCard=opponentInfo&&!locked?savedRematchCard(m,opponentInfo.id):null;
+  if(rematchCard)box.append(node('strong','rematch-draw-note',
+   'Rematch · your first draw: '+displayCardName(rematchCard)));
   if(opponentInfo&&opponentInfo.format_description){
    const detail=node('details','opponent-deck-details');
    detail.append(node('summary','','Testing: opponent deck format'),
@@ -672,6 +693,11 @@ function managementBoard(){
  $('management-start').disabled=!atStart||!allBoutCardsAssigned(m);
  $('management-start').textContent='Start Bout '+(m.round+1)+' · lock its three cards';
 }
+function savedRematchCard(m,opponentId){
+ const results=[...yearHistory(m).flatMap(basho=>basho.results),...m.results];
+ const last=results.findLast(result=>result.opponent_id===opponentId);
+ return last?.won===false?last.rematch_top_card:null;
+}
 async function managementRound(){
  const m=management;if(!m)return;
  const i=m.round,group=i%3;
@@ -698,6 +724,8 @@ async function managementRound(){
   m.division_league=paired.league;
   managementSave(); // Persist frozen 21-pair day before the player enters the ring.
   request.b12_opponent_ai=paired.opponent;
+  const rematchCard=savedRematchCard(m,paired.opponent.id);
+  if(rematchCard)request.b12_rematch_top_card=rematchCard;
   request.b12_player_rank=m.division_roster.player.rank;
   request.b12_campaign={seed:m.division_roster.seed,basho:m.division_roster.completed_basho||0,
    day:i,opponent_id:paired.opponent.id};
@@ -1148,7 +1176,7 @@ function kimariteTurnCues(g){
   winReady:readyNames.length>0,
  };
 }
-function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management)managementStatus();$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();const turnCues=kimariteTurnCues(g);const readyNames=new Set(turnCues.readyNames);
+function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management){managementStatus();if(alreadyInHeya&&unresolvedRewards(management).length)openBlockRewards()}$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();const turnCues=kimariteTurnCues(g);const readyNames=new Set(turnCues.readyNames);
  for(const [title,s,own] of [['YOUR RIKISHI',g.human,true],['OPPONENT',g.opponent,false]]){const box=node('div','rikishi-info');box.append(node('div','eyebrow',title),node('h2','',s.name),node('p','', 'Power '+s.power+'  ·  Grip '+s.grip.join('/')+'  ·  '+(own?'Plays '+s.plays_remaining:'Hand '+s.hand_count)));const zones=node('p','zones');zones.append(node('b','','Kimarite: '),document.createTextNode(names(s.kimarite)),node('br'),node('b','','Temporary: '),document.createTextNode(names(s.temporary)));box.append(zones);const discard=btn('Discard pile: '+s.discard_count+' · View cards',()=>showDiscard(s,own?'Your rikishi':'Opponent'),'discard-button');box.append(discard);for(const zoneName of ['kimarite','temporary']){const zone=node('div','zone-list');zone.append(node('div','eyebrow',zoneName.toUpperCase()));for(const c of s[zoneName]){const item=node('div','zone-entry');const ready=own&&zoneName==='kimarite'&&readyNames.has(c.name);item.append(btn(displayCardName(c.name)+(ready?' · READY TO WIN':' · Inspect'),()=>inspect({...c,description:zoneEffect(c,zoneName),zone_only:true,timing:zoneName==='kimarite'?'Winning condition':'Active Temporary effect'}),'zone-card'+(ready?' kimarite-ready':'')));if(ready)item.append(node('span','kimarite-ready-cue','End turn to win'));item.append(node('p','temporary-detail',zoneEffect(c,zoneName)));zone.append(item)}box.append(zone)}$('score').append(box)}
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();if(g.selection){$('choices').append(node('h2','','Choose '+g.selection.keep+' cards to keep'));const strip=node('div','cards');g.selection.options.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}confirm.disabled=picked.size!==g.selection.keep});b.firstChild.textContent=(i+1)+'. '+displayCardName(c.name);const info=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');info.type='button';const wrap=node('div','choice-card-wrap');wrap.append(b,info);strip.append(wrap)});$('choices').append(strip);const confirm=btn('Keep selected cards',()=>act({type:'choose_cards',indices:[...picked]}),'confirm');confirm.disabled=g.selection.keep!==0;$('choices').append(confirm)}
@@ -1190,5 +1218,5 @@ $('continue-playing').onclick=()=>$('end-confirm').close();
 $('confirm-end-turn').onclick=()=>{$('end-confirm').close();if(game&&game.can_end_turn)act({type:'end_turn'})};
 async function resume(){try{if(JSON.parse(gameSaveGet('kimarite_active_draft')||'null')){setGameLocation('heya');return}const saved=gameSaveGet('kimarite_session');if(!saved)return;sessionSetup=JSON.parse(gameSaveGet('kimarite_setup')||'null');actionJournal=JSON.parse(gameSaveGet('kimarite_actions')||'[]');token=saved;if(sessionSetup&&Number.isSafeInteger(sessionSetup.seed))$('seed-used').textContent='Bout seed: '+sessionSetup.seed;let state;try{state=await api('/api/session/'+saved)}catch(e){if(e.data&&e.data.code==='session_expired'){state=await recoverSession()}else throw e}render(state)}catch(e){$('notice').textContent='Unable to restore the previous bout: '+e.message}}
 resume();
-api('/api/roster').then(r=>{for(const name of r.roster){const o=node('option','',name);o.value=name;$('management-deck').append(o)}for(const id of ['human','opponent']){const random=node('option','','Random Wrestler');random.value='__random__';$(id).append(random);for(const name of r.roster){const o=node('option','',name);o.value=name;$(id).append(o)}}$('human').value='Arm Controller';$('opponent').value='The Technician';loadOpening();try{const saved=JSON.parse(gameSaveGet('kimarite_management')||'null');if(saved&&Array.isArray(saved.cards)&&saved.groups){management=saved;$('management-opening-mode').value=saved.opening_mode||'classic';$('management-opening-mode').disabled=true;$('b11-creation').hidden=true;$('management-deck').value=saved.human;$('wrestler-name').value=saved.human;$('management-board').hidden=false;managementBoard();managementStatus()}else{const pending=JSON.parse(gameSaveGet('kimarite_active_draft')||'null');if(pending){activeDraft=pending;$('management-deck').value=pending.human;$('wrestler-name').value=pending.human;offerDraft().catch(e=>$('management-notice').textContent=e.message)}}}catch(e){} }).catch(e=>$('notice').textContent=e.message);
+api('/api/roster').then(r=>{for(const name of r.roster){const o=node('option','',name);o.value=name;$('management-deck').append(o)}for(const id of ['human','opponent']){const random=node('option','','Random Wrestler');random.value='__random__';$(id).append(random);for(const name of r.roster){const o=node('option','',name);o.value=name;$(id).append(o)}}$('human').value='Arm Controller';$('opponent').value='The Technician';loadOpening();try{const saved=JSON.parse(gameSaveGet('kimarite_management')||'null');if(saved&&Array.isArray(saved.cards)&&saved.groups){management=saved;$('management-opening-mode').value=saved.opening_mode||'classic';$('management-opening-mode').disabled=true;$('b11-creation').hidden=true;$('management-deck').value=saved.human;$('wrestler-name').value=saved.human;$('management-board').hidden=false;managementBoard();managementStatus();if(gameSaveGet('kimarite_ui_phase')==='heya'&&unresolvedRewards(management).length)openBlockRewards()}else{const pending=JSON.parse(gameSaveGet('kimarite_active_draft')||'null');if(pending){activeDraft=pending;$('management-deck').value=pending.human;$('wrestler-name').value=pending.human;offerDraft().catch(e=>$('management-notice').textContent=e.message)}}}catch(e){} }).catch(e=>$('notice').textContent=e.message);
 installGameGuide();

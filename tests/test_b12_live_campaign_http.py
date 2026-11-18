@@ -211,3 +211,52 @@ def test_five_basho_transitions_keep_exact_rank_and_one_way_reserves(client):
         assert sorted(w["rank"] for w in league["wrestlers"]) == list(range(1, 43))
     assert len(all_promoted) <= 15
     assert len(roster["reserve_queue"]) >= 4
+
+
+@pytest.mark.parametrize("card_name,extra", [("Sonkyo", 0), (None, 1)])
+def test_saved_rematch_card_tops_only_player_deck(client, monkeypatch, card_name, extra):
+    from kimarite.human_bout import HumanBout
+
+    campaign = client("/api/b12/campaign/new", {"player_name": "Rematch Rikishi", "seed": 117})
+    paired = client("/api/b12/campaign/pair", {k: campaign[k] for k in ("roster", "league")})
+    foe = paired["opponent"]
+    starting, picks = draft(client, 121)
+    if card_name is None:
+        from kimarite.b11_player_draft import AVAILABLE
+
+        card_name = next(name for name in AVAILABLE if name not in starting + picks)
+    setup = {
+        "human": "Rematch Rikishi", "opponent": foe["name"], "seed": 122,
+        "opening_mode": "b11_live", "opening_cards": starting[:3],
+        "starting_cards": starting, "draft_picks": picks, "draft_seed": 121,
+        "created_stats": {"power": 2, "technique": 1, "spirit": 0},
+        "b12_opponent_ai": foe, "b12_player_rank": 42,
+        "b12_campaign": {"seed": 117, "basho": 1, "day": 0, "opponent_id": foe["id"]},
+    }
+    captured = []
+    advance = HumanBout.advance
+
+    def capture(bout):
+        captured.append(tuple(tuple(c.name for c in fighter.draw_pile)
+                              for fighter in (bout.state.fighter_a, bout.state.fighter_b)))
+        return advance(bout)
+
+    monkeypatch.setattr(HumanBout, "advance", capture)
+
+    def opening(override):
+        session = client("/api/session", {**setup, **override}, expected=201)
+        return client(f"/api/session/{session['token']}/action",
+                      {"type": "commit_tachiai", "indices": []})["state"]
+
+    opening({})
+    baseline, opponent = captured[0]
+    captured.clear()
+    rematch = opening({"b12_rematch_top_card": card_name})
+    own, rematch_opponent = captured[0]
+    assert own[0] == card_name
+    assert len(own) == len(baseline) + extra
+    assert rematch_opponent == opponent
+    assert any(f"Rematch reward: {card_name}" in event for event in rematch["events"])
+    captured.clear()
+    opening({"b12_rematch_top_card": card_name})
+    assert captured[0] == (own, rematch_opponent)

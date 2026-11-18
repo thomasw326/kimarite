@@ -356,6 +356,12 @@ class Handler(BaseHTTPRequestHandler):
                             if not isinstance(meta, dict) or any(type(meta.get(k)) is not int for k in ("seed", "basho", "day")) or not isinstance(meta.get("opponent_id"), str) or meta["opponent_id"] != session.opponent_ai["id"]:
                                 raise ValueError("B12 world match identity is malformed")
                             session.b12_campaign = meta
+                        rematch_card = data.get("b12_rematch_top_card")
+                        if rematch_card is not None:
+                            from .catalog import card_by_name
+                            if not hasattr(session, "b12_campaign") or not isinstance(rematch_card, str):
+                                raise ValueError("A rematch top card requires a B12 campaign bout.")
+                            session.rematch_top_card = card_by_name(rematch_card)
                     else:
                         session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
                     token = secrets.token_urlsafe(24)

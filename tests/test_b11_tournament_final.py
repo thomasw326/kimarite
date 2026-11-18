@@ -31,5 +31,6 @@ def test_duplication_choices_show_full_rules_and_allow_inspection():
     assert "m.cards.find(card=>card.instance_id===choice.instance_id)" in js
     assert "node('p','reward-effect',description)" in js
     assert "btn('Inspect full card',()=>inspect(c),'reward-inspect')" in js
-    assert "btn('Duplicate '+displayCardName(c.name)" in js
+    assert "r.won?'Duplicate ':'Save for rematch: '" in js
+    assert "btn(label+displayCardName(c.name)" in js
     assert "#management-reward-cards .reward-effect" in css

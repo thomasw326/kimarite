@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .b10_human_session import ROSTER_PATH, STYLE_PROXIES, _fighter
 from .b11_pending_session import PendingB11Session
@@ -82,6 +82,14 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     resolve_prepared_tachiai(
         state, comparison, committed_cards={Side.A: prepared.committed},
     )
+    # Apply the saved card after Tachiai effects so it is the first Exchange draw.
+    if pending.rematch_top_card is not None:
+        selected = pending.rematch_top_card
+        existing = next((i for i, card in enumerate(own.draw_pile)
+                         if card.name == selected.name), None)
+        top = replace(selected) if existing is None else own.draw_pile.pop(existing)
+        own.draw_pile.insert(0, top)
+        state.log(f"Rematch reward: {top.name} goes on top of your deck.")
     if state.winner is None:
         state.active_side = first_exchange_side(comparison, human, ai.wrestler)
     return ResolvedB11Opening(state, comparison)
