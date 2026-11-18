@@ -391,3 +391,6 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 
 .stability-badge{display:inline-block;margin-inline-start:6px;padding:1px 6px;border:1px solid #79a99d;border-radius:5px;background:#21443e;color:#dbf6ec;font-size:11px;font-weight:750;vertical-align:middle;white-space:nowrap}
 .stability-unstable{border-color:#f4bc74;background:#593321;color:#ffdfad}
+
+.management-card-assigned>.card{background:#d7d5cf;border-color:#a4a19a}
+.management-group .assignment-option-other-bout{background:#42494a;color:#d7d9d6}

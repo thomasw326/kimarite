@@ -772,11 +772,13 @@ function managementBoard(){
  const cards=$('management-cards');cards.replaceChildren();
  for(const c of m.cards){
   const hasTachiaiEffect=tachiaiEffectCards.has(c.name);
-  const wrapper=node('div','management-card'+(hasTachiaiEffect?' tachiai-effect-card':''));
+  const assigned=chosen.includes(c.deal_index);
+  const wrapper=node('div','management-card'+(hasTachiaiEffect?' tachiai-effect-card':'')
+   +(assigned?' management-card-assigned':''));
   wrapper.append(card(c,()=>inspect(c)));
   if(hasTachiaiEffect)wrapper.append(node('small','tachiai-effect-label','Tachiai effect'));
   wrapper.append(node('small','',lockedIDs.has(c.deal_index)?'Locked to completed / started bout'
-   :chosen.includes(c.deal_index)?'Assigned to an upcoming bout':'Available'));
+   :assigned?'Assigned to an upcoming bout':'Available'));
   cards.append(wrapper);
  }
  const groups=$('management-groups');groups.replaceChildren();
@@ -818,7 +820,8 @@ function managementBoard(){
     const text=displayCardName(c.name)+' · '+(c.deal_index+1)
      +(tachiaiEffectCards.has(c.name)?' · Tachiai effect':'')
      +(other>=0&&(other!==group||otherSlot!==slot)?' · swap with Bout '+(other+1):'');
-    const option=node('option','',text);option.value=c.deal_index;select.append(option);
+    const option=node('option',other>=0&&other!==group?'assignment-option-other-bout':'',text);
+    option.value=c.deal_index;select.append(option);
    }
    select.value=m.groups[group][slot]===null?'':String(m.groups[group][slot]);
    select.onchange=()=>{
