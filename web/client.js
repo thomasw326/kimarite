@@ -768,7 +768,7 @@ function managementBoard(){
  const cards=$('management-cards');cards.replaceChildren();
  for(const c of m.cards){
   const hasTachiaiEffect=tachiaiEffectCards.has(c.name);
-  const wrapper=node('div','management-card'+(hasTachiaiEffect?' management-card-tachiai':''));
+  const wrapper=node('div','management-card'+(hasTachiaiEffect?' tachiai-effect-card':''));
   wrapper.append(card(c,()=>inspect(c)));
   if(hasTachiaiEffect)wrapper.append(node('small','tachiai-effect-label','Tachiai effect'));
   wrapper.append(node('small','',lockedIDs.has(c.deal_index)?'Locked to completed / started bout'
@@ -1261,7 +1261,20 @@ function renderPendingTachiai(g){
    node('small','','Each total = base + 1 + printed orbs from committed cards, before Tachiai effects. Power helps opening strength/defense; Technique influences Exchange priority and card access; Spirit can grant opening Push/Momentum. Opponent totals stay hidden until you confirm.')
   );
  };
- g.tachiai_choice.cards.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}refreshPreview()});const inspectButton=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');const wrap=node('div','choice-card-wrap');wrap.append(b,node('p','tachiai-card-rules',c.description||'Rules text unavailable.'),inspectButton);strip.append(wrap)});
+ g.tachiai_choice.cards.forEach((c,i)=>{
+  const b=card(c,()=>{
+   if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}
+   else{picked.add(i);b.classList.add('selected')}
+   refreshPreview();
+  });
+  const hasTachiaiEffect=tachiaiEffectCards.has(c.name);
+  const wrap=node('div','choice-card-wrap'+(hasTachiaiEffect?' tachiai-effect-card':''));
+  wrap.append(b);
+  if(hasTachiaiEffect)wrap.append(node('small','tachiai-effect-label','Tachiai effect'));
+  wrap.append(node('p','tachiai-card-rules',c.description||'Rules text unavailable.'),
+   btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect'));
+  strip.append(wrap);
+ });
  $('choices').append(strip);
  $('choices').append(summary,preview,btn('Confirm Tachiai commitment',()=>act({type:'commit_tachiai',indices:[...picked].sort()}),'confirm'));
  refreshPreview();
