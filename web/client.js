@@ -321,7 +321,9 @@ function tournamentSummary(m){
   turns:r.turns,duplicated_card:r.duplicated_card||null
  }));
  const wins=results.filter(r=>r.won).length;
- return {tournament:yearHistory(m).length+1,wins,losses:15-wins,results};
+ const standings=m.division_league?.wrestlers.map(({id,name,rank,wins,losses})=>
+  ({id,name,rank,wins,losses}));
+ return {tournament:yearHistory(m).length+1,wins,losses:15-wins,results,standings};
 }
 function showYearStatus(m){
  const h=yearHistory(m);
@@ -513,12 +515,83 @@ function b12Opponent(m,bout){
  const id=m?.b12_opponent_ids?.[bout];
  return id?m.division_league?.wrestlers?.find(w=>w.id===id):null;
 }
+function banzukeTitle(rank){
+ if(!Number.isInteger(rank)||rank<1||rank>42)return '';
+ const titles=['East Yokozuna','West Yokozuna','East Ozeki','West Ozeki','East Ozeki 2',
+  'East Sekiwake','West Sekiwake','East Komusubi','West Komusubi'];
+ if(rank<=titles.length)return titles[rank-1];
+ const index=rank-titles.length-1;
+ return (index%2===0?'East':'West')+' Maegashira '+(Math.floor(index/2)+1);
+}
+function banzukeRankLabel(rank){
+ return '#'+rank+' · '+banzukeTitle(rank);
+}
 function b12OpponentLabel(m,bout){
  const foe=b12Opponent(m,bout);
  return foe?foe.name+' · #'+foe.rank+' · '+foe.style+' · '+foe.wins+'–'+foe.losses:
   (m.opponents[bout]||'Opponent not yet scheduled');
 }
+function showBanzukeMovement(m){
+ const panel=$('banzuke-movement');
+ if(!panel)return;
+ const completed=m?.division_roster?.completed_basho;
+ panel.hidden=!isB12Campaign(m)||!completed;
+ if(panel.hidden)return;
+ const prior=yearHistory(m).at(-1);
+ const current=m.division_league.wrestlers;
+ let before=prior?.standings;
+ // Earlier first-basho saves still have the initial seed-slot IDs and names.
+ // They did not retain the prior AI records.
+ if(!before&&completed===1){
+  const initial=m.division_roster.wrestlers.filter(w=>/^ai-\d{2}$/.test(w.wrestler_id))
+   .map(w=>({id:w.wrestler_id,name:w.name,rank:Number(w.wrestler_id.slice(3))}))
+   .filter(w=>w.rank>=1&&w.rank<=41);
+  const player=current.find(w=>w.id==='player');
+  if(initial.length===41&&player)before=[...initial,{...player,rank:42,wins:prior?.wins,losses:prior?.losses}];
+ }
+ const heading=$('banzuke-movement-heading');
+ const body=$('banzuke-movement-body');
+ heading.textContent='Rank changes · Basho '+completed+' → '+(completed+1);
+ body.replaceChildren();
+ if(!before){
+  body.append(node('p','','This save does not have standings from the previous basho.'));
+  return;
+ }
+ const previousById=new Map(before.map(w=>[w.id,w]));
+ const currentById=new Map(current.map(w=>[w.id,w]));
+ const rows=[...current].sort((a,b)=>a.rank-b.rank)
+  .map(w=>[previousById.get(w.id),w]);
+ rows.push(...before.filter(w=>!currentById.has(w.id)).sort((a,b)=>a.rank-b.rank)
+  .map(w=>[w,null]));
+ const added=rows.filter(([old])=>!old).length;
+ const left=rows.filter(([,next])=>!next).length;
+ heading.textContent+=' · '+added+' promoted, '+left+' relegated';
+ if(!prior?.standings)body.append(node('p','','The original ranks are available for this save. Previous AI win–loss records were not saved.'));
+ const table=node('table','banzuke-movement-table');
+ const header=node('tr');
+ for(const label of ['Wrestler','Prior rank / record','New rank','Movement']){
+  const cell=node('th','',label);cell.scope='col';header.append(cell);
+ }
+ const thead=node('thead');thead.append(header);table.append(thead);
+ const tbody=node('tbody');
+ for(const [old,next] of rows){
+  const wrestler=next||old;
+  const row=node('tr');
+  const delta=old&&next?old.rank-next.rank:0;
+  const movement=!old?'Promoted':!next?'Relegated':delta>0?'Up '+delta:delta<0?'Down '+(-delta):'Unchanged';
+  const name=node('th','',wrestler.name+(wrestler.id==='player'?' · YOU':''));
+  name.scope='row';
+  const oldRank=node('td','',old?banzukeRankLabel(old.rank):'Reserve');
+  if(Number.isInteger(old?.wins)&&Number.isInteger(old?.losses))
+   oldRank.append(node('small','',old.wins+'–'+old.losses));
+  row.append(name,oldRank,node('td','',next?banzukeRankLabel(next.rank):'Out of division'),
+   node('td',!old||delta>0?'result-win':!next||delta<0?'result-loss':'',movement));
+  tbody.append(row);
+ }
+ table.append(tbody);body.append(table);
+}
 function showB12Banzuke(m){
+ showBanzukeMovement(m);
  const panel=$('b12-banzuke');
  if(!panel)return;
  panel.hidden=!isB12Campaign(m);
