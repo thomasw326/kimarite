@@ -40,7 +40,8 @@ def test_three_known_opponents_rank_record_style_and_optional_testing_details():
     assert "b12OpponentLabel(m,bout)" in board
     assert "opponentInfo.format_description" in board
     assert "Testing: opponent deck format" in board
-    assert "if(allocationLockState(m,group))" not in board
+    assert "select.disabled=!!locked||launchingTournamentBout!==null" in board
+    assert "if(locked)box.append(node('p','assignment-locked-note'" in board
     assert "showB12Banzuke(m)" in board
     assert 'id="b12-banzuke"' in HTML
     assert 'id="b12-banzuke-entries"' in HTML
