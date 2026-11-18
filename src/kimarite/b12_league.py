@@ -101,7 +101,7 @@ def _opponent_score(day: int, left: dict, right: dict, seed: int) -> tuple:
     if day < RECORD_MATCH_START:
         both_elite = max(left["rank"], right["rank"]) <= TOP_TIER_MAX_RANK
         return (crosses_joi, both_elite, rank_gap, record_gap, tie)
-    if left_joi:
+    if left_joi or left["id"] != PLAYER:
         return (crosses_joi, record_gap, rank_gap, tie)
     return (record_gap, crosses_joi, rank_gap, tie)
 
