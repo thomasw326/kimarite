@@ -1,4 +1,4 @@
-/* B11 uses audited sheet translations only for visible names, never engine keys. */
+/* English glosses are display labels, never engine keys. */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
@@ -16,7 +16,39 @@ assert.equal(english('Tsukitaoshi'),'Thrust Down (Tsukitaoshi)');
 assert.equal(english('Tsukiotoshi'),'Thrust Down (Tsukiotoshi)');
 assert.equal(english('Nodowa'),'Throat Grab (Nodowa)');
 assert.equal(english('Tsuppari'),'Repeated Thrusts (Tsuppari)');
-assert.equal(english('Tsuriotoshi'),'Tsuriotoshi'); // No approved translation in the audited tabs.
+assert.equal(english('Uwate'),'Outside Grip (Uwate)');
+assert.equal(english('Shitate'),'Inside Grip (Shitate)');
+assert.equal(english('Sonkyo'),'Defensive Crouch (Sonkyo)');
+assert.equal(english('Gaburi'),'Belly Drive (Gaburi)');
+assert.equal(english('Ottsuke'),'Arm Clamp (Ottsuke)');
+assert.equal(english('Use the Tawara'),'Use the Ring Bales (Use the Tawara)');
+assert.equal(english('Kannuki'),'Double Arm Clamp (Kannuki)');
+assert.equal(english('Morozashi'),'Double Inside Grip (Morozashi)');
+assert.equal(english('Morotezuki'),'Two-Handed Thrust (Morotezuki)');
+assert.equal(english('Kachiage'),'Rising Forearm Strike (Kachiage)');
+assert.equal(english('Nekodamashi'),'Clap Feint (Nekodamashi)');
+assert.equal(english('Maesabaki'),'Fight for Inside Position (Maesabaki)');
+assert.equal(english('Deashi'),'Quick First Step (Deashi)');
+assert.equal(english('Butsukari'),'Charging Drill (Butsukari)');
+assert.equal(english('Denshamichi'),'Straight-Line Drive (Denshamichi)');
+assert.equal(english('Ankogata'),'Heavyset Build (Ankogata)');
+assert.equal(english('Tsuriotoshi'),'Lift and Drop (Tsuriotoshi)');
+assert.equal(english('Shitatedashinage'),'Pulling Underarm Throw (Shitatedashinage)');
+assert.equal(english('Shitatehineri'),'Twisting Underarm Throw (Shitatehineri)');
+assert.equal(english('Renzoku'),'Chain Attacks (Renzoku)');
+assert.equal(english('Meguri'),'Cycle (Meguri)');
+assert.equal(english('Nokotta!'),'Still In! (Nokotta!)');
+assert.equal(english('Hakkeyoi!'),'Get Moving! (Hakkeyoi!)');
+assert.equal(english('Hazuoshi'),'Underarm Push (Hazuoshi)');
+assert.equal(english('Inashi'),'Redirect the Charge (Inashi)');
+assert.equal(english('Chiri-chozu'),'Purification Ritual (Chiri-chozu)');
+assert.equal(english('Shikiri'),'Pre-Bout Face-Off (Shikiri)');
+assert.equal(english('Shiko Stomp'),'Leg-Lift Stomp (Shiko Stomp)');
+assert.equal(english('Kubinage'),'Headlock Throw (Kubinage)');
+assert.equal(english('Kimedashi'),'Arm-Lock Force Out (Kimedashi)');
+assert.equal(english('Kimetaoshi'),'Arm-Lock Force Down (Kimetaoshi)');
+assert.equal(english('Salt Throw'),'Salt Throw');
+assert.equal(english('Explosive Step — Fumikomi'),'Explosive Step — Fumikomi');
 assert(source.includes('o.value=c.name'),'native select values remain canonical');
 assert(source.includes('d.picks.push(c.name)'),'draft choices remain canonical');
 assert(source.includes("const b=card(c,()=>{if(picked.has(i))"),'kept-card choices retain original card identity');
