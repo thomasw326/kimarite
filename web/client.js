@@ -355,7 +355,7 @@ function openBlockRewards(){
     const originalIndex=Number(c.instance_id.slice(9));
     if(!Number.isInteger(originalIndex)||management.duplicated_indices.includes(originalIndex))return;
     management.duplicated_indices.push(originalIndex);
-    r.duplicated_card=c.name;r.duplication_resolved=true;
+    r.duplicated_card=c.name;r.duplicated_instance_id='duplicate:'+originalIndex;r.duplication_resolved=true;
    }else{
     r.rematch_top_card=c.name;
    }
@@ -551,7 +551,10 @@ function b11TachiaiPreview(m,group){
  if(slots.some(i=>i===null)){box.textContent='Select three cards to preview their all-committed Tachiai.';return box}
  const cards=slots.map(i=>m.cards.find(c=>c.deal_index===i));
  if(cards.some(c=>!c)){box.textContent='Card selection unavailable.';return box}
- const base=m.created_stats||b11PreviewBase(m.human),orbs=b11PreviewTotals(cards);
+ const base={...(m.created_stats||b11PreviewBase(m.human))};
+ const stat=interviewReward(m,m.round)?.kind;
+ if(['spirit','power','technique'].includes(stat))base[stat]++;
+ const orbs=b11PreviewTotals(cards);
  box.append(node('strong','','All three committed — projected Tachiai'));
  for(const [i,k] of ['power','technique','spirit'].entries()){
   box.append(node('p','',k[0].toUpperCase()+k.slice(1)+': '+(base[k]+1+orbs[i])+' (base '+base[k]+' + cards '+orbs[i]+' + 1)'));
@@ -748,6 +751,10 @@ function managementBoard(){
  const m=management;
  syncBoutLocks(m);
  showB12Banzuke(m);
+ const roundReward=interviewReward(m,m.round);
+ const effects=$('heya-round-effect');
+ effects.hidden=!roundReward||roundReward.kind==='stack';
+ effects.textContent=roundReward?HeyaInterviewRewards[roundReward.kind][1]:'';
  const chosen=m.groups.flat().filter(id=>id!==null),lockedIDs=new Set();
  for(let group=0;group<3;group++)if(allocationLockState(m,group))
   for(const id of m.groups[group])if(id!==null)lockedIDs.add(id);
@@ -771,6 +778,9 @@ function managementBoard(){
   const rematchCard=opponentInfo&&!locked?savedRematchCard(m,opponentInfo.id):null;
   if(rematchCard)box.append(node('strong','rematch-draw-note',
    'Rematch · your first draw: '+displayCardName(rematchCard)));
+  const interview=interviewReward(m,bout);
+  if(!locked&&interview?.kind==='stack'&&interview.cards[group])
+   box.append(node('strong','rematch-draw-note','Interview · '+(rematchCard?'second card: ':'top card: ')+displayCardName(interview.cards[group])));
   if(opponentInfo&&opponentInfo.format_description){
    const detail=node('details','opponent-deck-details');
    detail.append(node('summary','','Testing: opponent deck format'),
@@ -847,6 +857,11 @@ async function managementRound(){
   request.b12_opponent_ai=paired.opponent;
   const rematchCard=savedRematchCard(m,paired.opponent.id);
   if(rematchCard)request.b12_rematch_top_card=rematchCard;
+  request.excluded_ids=interviewExclusions(m,i);
+  const reward=interviewReward(m,i);
+  if(reward?.kind==='stack'&&reward.cards[group])request.b12_interview={kind:'stack',card:reward.cards[group]};
+  else if(['spirit','power','technique','double_dip','stamina'].includes(reward?.kind))
+   request.b12_interview={kind:reward.kind};
   request.b12_player_rank=m.division_roster.player.rank;
   request.b12_campaign={seed:m.division_roster.seed,basho:m.division_roster.completed_basho||0,
    day:i,opponent_id:paired.opponent.id};
@@ -1012,6 +1027,110 @@ $('confirm-new-wrestler').onclick=()=>{
  setGameLocation('heya');
 };
 $('management-start').onclick=()=>managementRound().catch(e=>$('management-notice').textContent=e.message);
+const HeyaInterviewRewards={
+ guarantee:['“I was able to do my sumo today.”','Guarantee these cards in the next nine.'],
+ stack:['“I’ll take it one bout at a time.”','Randomly assign these cards to the next three bouts, one per bout, for the top of your draw pile.'],
+ remove:['“I’ll work hard in training.”','Remove one card from the lost bout for the rest of this basho.'],
+ leave:['“I want to put that bout behind me.”','Set aside all three cards from the lost bout for the next round.'],
+ fresh:['“I need to change things up.”','For the rest of this basho, each deal favors cards absent from the previous nine.'],
+ double_dip:['“I want to build on my Tachiai.”','In each bout next round, commit all three opening cards to get one at random back in your starting Exchange hand.'],
+ stamina:['“I want to finish the tournament strong.”','Exhaustion starts at 10 discarded cards for the next three bouts.'],
+ spirit:['“I’ll give it everything I have.”','+1 Spirit for the next three bouts.'],
+ power:['“I want to keep moving forward.”','+1 Power for the next three bouts.'],
+ technique:['“I want to keep improving.”','+1 Technique for the next three bouts.']
+};
+function interviewReward(m,bout){
+ return m.interviews?.[Math.floor(bout/3)]?.reward;
+}
+function interviewExclusions(m,bout){
+ const round=Math.floor(bout/3);
+ const permanent=Object.entries(m.interviews||{}).filter(([key,entry])=>Number(key)<=round&&entry.reward?.kind==='remove')
+  .flatMap(([,entry])=>entry.reward.ids);
+ const reward=interviewReward(m,bout);
+ return [...new Set([...permanent,...(reward?.kind==='leave'?reward.ids:[])])];
+}
+function interviewOptions(m){
+ const upcoming=Math.floor(m.round/3)+1;
+ const used=new Set(Object.values(m.interviews||{}).map(entry=>entry.reward?.kind));
+ const block=m.results.slice(-3);
+ const wins=block.filter(r=>r.won);
+ const lost=block.find(r=>!r.won)?.assigned_cards||[];
+ const excluded=interviewExclusions(m,m.round);
+ const removed=interviewExclusions(m,m.round+1);
+ const candidates=lost.filter(c=>c.instance_id&&!excluded.includes(c.instance_id));
+ const size=28+(m.duplicated_indices||[]).length-removed.length;
+ const options=[];
+ if(wins.length===3||wins.length===1){
+  const cards=wins.length===3?wins.filter(r=>r.duplicated_card).flatMap(r=>{
+   if(r.duplicated_instance_id)return [{name:r.duplicated_card,instance_id:r.duplicated_instance_id}];
+   const original=r.assigned_cards.find(c=>c.name===r.duplicated_card&&(m.duplicated_indices||[]).includes(Number(c.instance_id?.split(':')[1]))&&c.instance_id?.startsWith('original:'));
+   return original?[{name:original.name,instance_id:original.instance_id.replace('original:','duplicate:')}]:[];
+  }):wins[0].assigned_cards;
+  const eligible=(cards||[]).filter(c=>c.instance_id&&!removed.includes(c.instance_id));
+  if(eligible.length)options.push({kind:'guarantee',cards:eligible},{kind:'stack',cards:eligible});
+ }
+ if(wins.length===2){
+  if(size>28&&wins.some(r=>r.duplicated_card)&&candidates.length)
+   options.push({kind:'remove',cards:candidates});
+  if(size>=31&&candidates.length===3)options.push({kind:'leave',cards:candidates});
+ }
+ if(wins.length===0&&!Object.values(m.interviews||{}).some(entry=>entry.options.some(x=>x.kind==='fresh')))
+  options.push({kind:'fresh'});
+ const general=['spirit','power','technique','double_dip','stamina'];
+ for(let i=0;i<general.length;i++)options.push({kind:general[(upcoming-1+i)%general.length]});
+ return options.filter(x=>!used.has(x.kind)).slice(0,3);
+}
+function openHeyaInterview(m){
+ const upcoming=Math.floor(m.round/3)+1;
+ m.interviews??={};
+ const entry=m.interviews[upcoming]??={options:interviewOptions(m)};
+ if(entry.reward||!entry.options.length)return false;
+ managementSave();
+ const panel=$('heya-interview');
+ const count=m.results.slice(-3).filter(r=>r.won).length;
+ $('heya-interview-question').textContent=count===3?'You won all three bouts this round. What was working for you?'
+  :count===0?'After three tough bouts, what do you want to change going into the next round?'
+  :'What are you looking forward to in the next round, and how do you want to approach it?';
+ const answers=$('heya-interview-answers');
+ answers.replaceChildren();
+ entry.options.forEach(({kind,cards=[]},index)=>{
+  const [quote,description]=HeyaInterviewRewards[kind];
+  const response=node('div','management-card');
+  response.append(node('p','',description+(cards.length?' '+names(cards)+'.':'')));
+  const remove=node('select','');
+  if(kind==='remove'){
+   remove.setAttribute('aria-label','Card to remove');
+   for(const card of cards){
+    const option=node('option','',displayCardName(card.name));
+    option.value=card.instance_id;remove.append(option);
+   }
+   response.append(remove);
+  }
+  response.prepend(btn(index===0?'“I just want to do my style of sumo.”':quote,()=>{
+   if(entry.reward)return;
+   const reward={kind};
+   if(kind==='remove')reward.ids=[remove.value];
+   if(kind==='leave'||kind==='guarantee')reward.ids=cards.map(c=>c.instance_id);
+   if(kind==='stack'){
+    reward.cards=cards.map(c=>c.name);
+    // Fixed shuffle for this interview, independent of subsequent reloads.
+    let seed=(m.seed+upcoming)>>>0;
+    for(let i=reward.cards.length-1;i>0;i--){
+     seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+     const j=seed%(i+1);
+     [reward.cards[i],reward.cards[j]]=[reward.cards[j],reward.cards[i]];
+    }
+   }
+   entry.reward=reward;managementSave();panel.hidden=true;
+   $('management-next').click();
+  }));
+  answers.append(response);
+ });
+ panel.hidden=false;
+ panel.scrollIntoView({behavior:'smooth'});
+ return true;
+}
+
 $('management-next').onclick=async()=>{
  const m=management;
  if(!m||!game?.finished||activeTournamentBout()!==m.round||m.results.length!==m.round+1)return;
@@ -1023,25 +1142,30 @@ $('management-next').onclick=async()=>{
   if(completedRewards(m))showTournamentFinal();
   return;
  }
- m.round++;managementSave();
+ if(isB12Campaign(m)&&m.round%3===2&&openHeyaInterview(m))return;
+ const previousRound=m.round;
+ m.round++;
  if(m.round%3===0){
   try{
-   if(isB12Campaign(m)){
-    const planned=await api('/api/b12/campaign/plan',
-     {roster:m.division_roster,league:m.division_league});
-    assignB12Block(m,planned);managementSave();
-   }
+   const planned=isB12Campaign(m)?await api('/api/b12/campaign/plan',
+    {roster:m.division_roster,league:m.division_league}):null;
+   const reward=interviewReward(m,m.round);
+   const fresh=Object.values(m.interviews||{}).some(entry=>entry.reward?.kind==='fresh');
+   const deckOptions={excluded_ids:interviewExclusions(m,m.round),
+    guaranteed_ids:reward?.kind==='guarantee'?reward.ids:[],
+    previous_ids:fresh?m.cards.map(c=>c.instance_id):[]};
    const data=m.draft_picks
-    ?await api('/api/b11/draft/deal',{starting_cards:m.starting_cards,picks:m.draft_picks,draft_seed:m.draft_seed,duplicated_indices:m.duplicated_indices||[],seed:m.seed+Math.floor(m.round/3)})
+    ?await api('/api/b11/draft/deal',{starting_cards:m.starting_cards,picks:m.draft_picks,draft_seed:m.draft_seed,duplicated_indices:m.duplicated_indices||[],seed:m.seed+Math.floor(m.round/3),...deckOptions})
     :await api('/api/management/deal/'+encodeURIComponent(m.human)+'?seed='+(m.seed+Math.floor(m.round/3)));
-   m.cards=data.cards;m.groups=Array.from({length:3},()=>[null,null,null]);clearBoutSession();
+   if(planned)assignB12Block(m,planned);
+   m.cards=data.cards;m.deck_size=data.deck_size;m.groups=Array.from({length:3},()=>[null,null,null]);clearBoutSession();
    $('management-rewards').hidden=true;$('management-board').hidden=false;
    $('management-start').disabled=true;$('management-next').hidden=true;
    managementBoard();managementSave();
-   $('management-notice').textContent='Round '+(Math.floor(m.round/3)+1)+': deck '+(m.draft_picks?28+(m.duplicated_indices||[]).length:'roster')+' cards. Assign nine to the next three opponents.';
+   $('management-notice').textContent='Round '+(Math.floor(m.round/3)+1)+': deck '+(m.draft_picks?m.deck_size??28+(m.duplicated_indices||[]).length:'roster')+' cards. Assign nine to the next three opponents.';
    $('management-board').scrollIntoView({behavior:'smooth'});
   }catch(e){
-   m.round--;managementSave();$('management-notice').textContent='Could not deal the next round: '+e.message;
+   m.round=previousRound;managementSave();$('management-notice').textContent='Could not deal the next round: '+e.message;
   }
  }else managementRound().catch(e=>{
   m.round--;managementSave();$('management-notice').textContent='Could not start next bout: '+e.message;managementStatus();
@@ -1115,7 +1239,9 @@ function renderPendingTachiai(g){
  const preview=node('div','tachiai-preview');
  preview.setAttribute('role','status');
  preview.setAttribute('aria-live','polite');
- const base=sessionSetup?.created_stats||b11PreviewBase(g.human.name);
+ const base={...(sessionSetup?.created_stats||b11PreviewBase(g.human.name))};
+ const stat=sessionSetup?.b12_interview?.kind;
+ if(['spirit','power','technique'].includes(stat))base[stat]++;
  const refreshPreview=()=>{
   summary.textContent=picked.size+' committed · '+(3-picked.size)+' retained';
   const totals=b11CommittedTachiaiTotals(g.tachiai_choice.cards,picked,base);

@@ -117,7 +117,7 @@ def apply_start_of_turn_exhaustion(state: BoutState, side: Side) -> None:
     own_grip = effective_total_grip(state, side)
     other_grip = effective_total_grip(state, state.opponent_side(side))
     grip_protected = own_grip > 0 and own_grip >= other_grip
-    if len(fighter.discard_pile) >= 7 and not grip_protected:
+    if len(fighter.discard_pile) >= fighter.exhaustion_threshold and not grip_protected:
         fighter.power -= 1
         state.log(f"{fighter.wrestler.name} loses 1 Power to Exhaustion.")
 

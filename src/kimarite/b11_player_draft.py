@@ -93,7 +93,17 @@ def grow_deck(starting: list[str], picks: list[str], draft_seed: int,
     )
 
 
-def deal_block(deck: list[str], seed: int, ids: list[str] | None = None) -> list[dict]:
+def remove_from_deck(deck, ids, excluded):
+    if (not isinstance(excluded, list) or len(excluded) > 4
+            or any(not isinstance(card_id, str) or card_id not in ids for card_id in excluded)
+            or len(set(excluded)) != len(excluded) or len(deck) - len(excluded) < 28):
+        raise ValueError("Invalid interview deck exclusions.")
+    return ([name for name, card_id in zip(deck, ids) if card_id not in excluded],
+            [card_id for card_id in ids if card_id not in excluded])
+
+
+def deal_block(deck: list[str], seed: int, ids: list[str] | None = None,
+               *, guaranteed=(), previous=()) -> list[dict]:
     """Sample nine current-deck physical copies; presentation uses card_info."""
     from .b10_card_info import card_info
     if not isinstance(deck, list) or len(deck) < 9:
@@ -105,6 +115,22 @@ def deal_block(deck: list[str], seed: int, ids: list[str] | None = None) -> list
     if len(ids) != len(deck) or len(set(ids)) != len(ids):
         raise ValueError("Invalid physical card identities.")
     rng = random.Random(seed)
-    selected = rng.sample(range(len(deck)), 9)
+    if (not isinstance(guaranteed, (list, tuple)) or len(guaranteed) > 3
+            or any(not isinstance(card_id, str) or card_id not in ids for card_id in guaranteed)
+            or len(set(guaranteed)) != len(guaranteed)):
+        raise ValueError("Invalid guaranteed interview cards.")
+    if (not isinstance(previous, (list, tuple)) or len(previous) > 9
+            or any(not isinstance(card_id, str) for card_id in previous)):
+        raise ValueError("Invalid prior deal for Fresh Nine.")
+    forced = [ids.index(card_id) for card_id in guaranteed]
+    available = [i for i in range(len(deck)) if i not in forced]
+    if previous:
+        rng.shuffle(available)
+        available.sort(key=lambda i: ids[i] in previous)
+        selected = forced + available[:9 - len(forced)]
+    else:
+        selected = forced + rng.sample(available, 9 - len(forced))
+    if forced:
+        rng.shuffle(selected)
     return [{**card_info(card_by_name(deck[j])), "deal_index": i,
              "instance_id": ids[j]} for i, j in enumerate(selected)]

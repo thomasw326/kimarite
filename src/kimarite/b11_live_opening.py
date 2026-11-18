@@ -61,6 +61,10 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
         stats = {"power": 0, "technique": 0, "spirit": 0}
         stats[order[0].lower()] = 2
         stats[order[1].lower()] = 1
+    interview = getattr(pending, "interview", {})
+    kind = interview.get("kind")
+    if kind in {"power", "technique", "spirit"}:
+        stats[kind] += 1
     # The AI retains its existing six-point roster stats and hidden Tachiai.
     blank = card_by_name("Oshi")  # unused classic-role placeholders; never zoned
     human = Wrestler(
@@ -74,7 +78,13 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
         hand=list(prepared.retained_hand),
         discard_pile=[],
     )
+    if kind == "stamina":
+        own.exhaustion_threshold = 10
     state = BoutState(own, ai)
+    if kind in {"power", "technique", "spirit"}:
+        state.log(f"Interview reward: +1 {kind.capitalize()}.")
+    elif kind == "stamina":
+        state.log("Stamina Boost: Exhaustion begins at 10 discarded cards.")
     state.b11_explain_wins = True
     comparison = compare_player_tachiai(human, ai.wrestler, prepared.committed)
     # Each committed reveal chain is consumed by the live resolver once.
@@ -82,11 +92,21 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     resolve_prepared_tachiai(
         state, comparison, committed_cards={Side.A: prepared.committed},
     )
+    if kind == "double_dip" and len(prepared.committed) == 3:
+        card = random.Random(seed * 2 + 3).choice(prepared.committed)
+        own.hand.append(replace(card))
+        state.log(f"Double Dip: {card.name} also starts in your Exchange hand.")
+    if kind == "stack":
+        selected = card_by_name(interview["card"])
+        existing = next((i for i, card in enumerate(own.draw_pile)
+                         if card.name == selected.name), None)
+        own.draw_pile.insert(0, replace(selected) if existing is None else own.draw_pile.pop(existing))
+        state.log(f"Interview reward: {selected.name} is stacked for this bout.")
     # Apply the saved card after Tachiai effects so it is the first Exchange draw.
     if pending.rematch_top_card is not None:
         selected = pending.rematch_top_card
         existing = next((i for i, card in enumerate(own.draw_pile)
-                         if card.name == selected.name), None)
+                         if card.name == selected.name and (kind != "stack" or i != 0)), None)
         top = replace(selected) if existing is None else own.draw_pile.pop(existing)
         own.draw_pile.insert(0, top)
         state.log(f"Rematch reward: {top.name} goes on top of your deck.")

@@ -543,7 +543,7 @@ def _get_underneath(
     if state.winner is None:
         give_opponent_kimarite(state, side, card.name)
     # Exchange-only exhausted penalty, using the current discard size.
-    if len(state.fighter(side).discard_pile) >= 7:
+    if len(state.fighter(side).discard_pile) >= state.fighter(side).exhaustion_threshold:
         make_unstable(state, side)
 
 
@@ -1044,7 +1044,7 @@ def _reckless_charge(state: BoutState, side: Side, card: Card, context: EffectCo
 
 def _sheer_grit(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_momentum(state, side, 1)
-    if state.winner is None and len(state.fighter(side).discard_pile) >= 7:
+    if state.winner is None and len(state.fighter(side).discard_pile) >= state.fighter(side).exhaustion_threshold:
         # "Exhausted" means at least seven discarded cards (fatigue window),
         # not the terminal empty-draw-pile defeat.
         gain_momentum(state, side, 1)
