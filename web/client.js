@@ -744,9 +744,16 @@ $('management-deal').onclick=async()=>{
    const tournament_history=previous?[...yearHistory(previous),tournamentSummary(previous)]:[];
    const starting=previous?(previous.next_starting_cards??earnedNextStartingCards(previous)):B11_STARTER_SUITE;
    const created=previous?.created_stats||creationChoices();
+   // Rank changes and one-way promotions occur once BETWEEN basho, not
+   // at the end of each 3-bout block. Preserve the resulting world in draft.
+   const division=previous&&isB12Campaign(previous)
+    ?await api('/api/b12/campaign/advance',{roster:previous.division_roster,league:previous.division_league})
+    :null;
    // Preserve the finished tournament until the new draft can be initialized.
    const names=await api('/api/b11/draft/catalogue',{});
-   activeDraft={human,seed,created_stats:created,tournament_history,starting_cards:[...starting],picks:[],
+   activeDraft={human,seed,world_seed:division?.roster?.seed??seed,
+     division_roster:division?.roster||null,division_league:division?.league||null,
+     created_stats:created,tournament_history,starting_cards:[...starting],picks:[],
      kimarite_names:names.kimarite_names};
    saveDraft();
    management=null;managementSave();
