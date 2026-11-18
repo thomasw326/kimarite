@@ -330,7 +330,8 @@ function tournamentSummary(m){
  }
  const results=m.results.map(r=>({
   won:!!r.won,opponent:r.opponent_name||r.opponent,finish:r.finish,
-  turns:r.turns,duplicated_card:r.duplicated_card||null
+  turns:r.turns,opponent_id:r.opponent_id,duplicated_card:r.duplicated_card||null,
+  rematch_top_card:r.rematch_top_card||null
  }));
  const wins=results.filter(r=>r.won).length;
  return {tournament:yearHistory(m).length+1,wins,losses:15-wins,results};
