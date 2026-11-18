@@ -126,6 +126,48 @@ $('discard-close').onclick=()=>$('discard-dialog').close();
 
 let management=null;
 function managementSave(){gameSaveSet('kimarite_management',JSON.stringify(management))}
+function isB12Campaign(m){return !!(m?.division_roster&&m?.division_league)}
+function assignB12Block(m,reply){
+ const start=Math.floor(m.round/3)*3;
+ if(!Array.isArray(reply.opponents)||reply.opponents.length!==3||reply.league?.day!==m.round)
+  throw new Error('The next three opponents could not be planned safely.');
+ m.division_league=reply.league;
+ m.opponents??=Array(15).fill(null);
+ m.b12_opponent_ids??=Array(15).fill(null);
+ for(let j=0;j<3;j++){
+  m.opponents[start+j]=reply.opponents[j].name;
+  m.b12_opponent_ids[start+j]=reply.opponents[j].id;
+ }
+}
+function b12Opponent(m,bout){
+ const id=m?.b12_opponent_ids?.[bout];
+ return id?m.division_league?.wrestlers?.find(w=>w.id===id):null;
+}
+function b12OpponentLabel(m,bout){
+ const foe=b12Opponent(m,bout);
+ return foe?foe.name+' · #'+foe.rank+' · '+foe.style+' · '+foe.wins+'–'+foe.losses:
+  (m.opponents[bout]||'Opponent not yet scheduled');
+}
+function showB12Banzuke(m){
+ const panel=$('b12-banzuke');
+ if(!panel)return;
+ panel.hidden=!isB12Campaign(m);
+ if(!isB12Campaign(m))return;
+ const league=m.division_league;
+ const people=[...league.wrestlers].sort((a,b)=>a.rank-b.rank);
+ const you=people.find(w=>w.id==='player');
+ $('b12-banzuke-heading').textContent='Banzuke · '+people.length+' wrestlers · Day '+league.day+'/15 · You: #'+you.rank+' ('+you.wins+'–'+you.losses+')';
+ const entries=$('b12-banzuke-entries');entries.replaceChildren();
+ for(const w of people){
+  const row=node('div','banzuke-entry'+(w.id==='player'?' banzuke-player':''));
+  row.append(node('strong','','#'+w.rank),
+   node('span','',w.name+(w.id==='player'?' · YOU':'')),
+   node('small','',w.style),
+   node('b','',''+w.wins+'–'+w.losses));
+  entries.append(row);
+ }
+}
+
 function activeTournamentBout(){
  if(!management||!sessionSetup)return null;
  if(Number.isInteger(sessionSetup.tournament_bout))return sessionSetup.tournament_bout;
