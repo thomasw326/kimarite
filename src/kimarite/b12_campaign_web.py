@@ -92,7 +92,7 @@ def campaign_request(path: str, request: dict, *, session=None) -> dict:
     if path == "/api/b12/campaign/resolve":
         if session is None:
             raise ValueError("The finished player bout must be restored before standings update")
-        if not session.finished or session.state.winner not in (Side.A, Side.B):
+        if not getattr(session, "finished", False) or session.state.winner not in (Side.A, Side.B):
             raise ValueError("Player bout has not produced a winner")
         day = league["day"]
         scheduled = league.get("pending_matches") or []
