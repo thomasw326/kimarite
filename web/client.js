@@ -650,6 +650,9 @@ function managementBoard(){
    +' vs '+(isB12Campaign(m)?b12OpponentLabel(m,bout):m.opponents[bout])
    +(locked?' · '+(locked==='completed'?'COMPLETED':'STARTED')+' — LOCKED':' · editable')));
   const opponentInfo=isB12Campaign(m)?b12Opponent(m,bout):null;
+  const rematchCard=opponentInfo&&!locked?savedRematchCard(m,opponentInfo.id):null;
+  if(rematchCard)box.append(node('strong','rematch-draw-note',
+   'Rematch · your first draw: '+displayCardName(rematchCard)));
   if(opponentInfo&&opponentInfo.format_description){
    const detail=node('details','opponent-deck-details');
    detail.append(node('summary','','Testing: opponent deck format'),
