@@ -835,6 +835,23 @@ def _morozashi(
     add_temporary(state, side, card, phase="exchange")
 
 
+def _mawashi_reversal(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    opponent = state.opponent_side(side)
+    wrestler = state.fighter(side).wrestler.name
+    if effective_total_grip(state, side) <= effective_total_grip(state, opponent):
+        state.log(f"Mawashi Reversal has no effect: {wrestler} is not leading Grip.")
+        return
+
+    if state.position * state.sign(side) < 0:
+        state.position = -state.position
+        state.log(f"Mawashi Reversal flips Position in {wrestler}'s favor.")
+    else:
+        gain_push(state, side, 1)
+        gain_momentum(state, side, 1)
+
+
 def _sidestep(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
@@ -1106,6 +1123,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Henka": _henka,
     "Pull": _pull,
     "Sidestep": _sidestep,
+    "Mawashi Reversal": _mawashi_reversal,
     "Reset to Neutral": _reset_to_neutral,
     "Get Underneath": _get_underneath,
     "Read the Move": _read_the_move,

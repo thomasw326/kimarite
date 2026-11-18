@@ -450,3 +450,32 @@ def test_explosive_step_always_pushes_and_mills_two_on_exchange(relative_momentu
     assert len(state.fighter_a.draw_pile) == 1
     assert sum(c.name == "Blank" for c in state.fighter_a.discard_pile) == 2
     assert state.winner is None
+
+
+@pytest.mark.parametrize("side", [Side.A, Side.B])
+@pytest.mark.parametrize("grip,opponent_grip,position,expected_position,momentum", [
+    (GripState.GRIP, GripState.NONE, -3, 3, 0),
+    (GripState.GRIP, GripState.NONE, 0, 1, 1),
+    (GripState.GRIP, GripState.NONE, 2, 3, 1),
+    (GripState.GRIP, GripState.GRIP, -3, -3, 0),
+    (GripState.NONE, GripState.GRIP, 0, 0, 0),
+    (GripState.NONE, GripState.NONE, 2, 2, 0),
+])
+def test_mawashi_reversal_requires_grip_lead_for_both_effects(
+    side, grip, opponent_grip, position, expected_position, momentum,
+):
+    card = card_by_name("Mawashi Reversal")
+    state, _ = bout()
+    state.active_side = side
+    state.fighter(side).hand.append(card)
+    state.fighter(side).left_grip = grip
+    state.opponent(side).left_grip = opponent_grip
+    sign = state.sign(side)
+    state.position = position * sign
+
+    play_card(state, side, card)
+
+    assert state.position * sign == expected_position
+    assert state.momentum * sign == momentum
+    assert state.side_by_side_owner is None
+    assert not state.opponent(side).unstable

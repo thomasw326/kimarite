@@ -11,7 +11,9 @@ from collections import Counter
 import json
 import random
 
-from .catalog import CARD_POOL, B9_CARD_POOL, B11_CARD_POOL, B12_CARD_POOL, card_by_name
+from .catalog import (
+    CARD_POOL, B9_CARD_POOL, B11_CARD_POOL, B12_CARD_POOL, PLAYER_DRAFT_CARD_POOL, card_by_name,
+)
 
 STARTERS = ("Yorikiri", "Oshidashi", "Oshi", "Tsuki",
             "Gain Left Grip", "Gain Right Grip", "Give Ground", "Sonkyo")
@@ -19,10 +21,12 @@ TARGET_SIZE = 28
 MAX_KIMARITE = 8
 MIN_KIMARITE = 3
 GENERATED_ONLY = frozenset(("Okuridashi", "Okuritaoshi"))
-AVAILABLE = {
+_ORIGINAL_POOL = {
     card.name: card for card in (*CARD_POOL, *B9_CARD_POOL, *B11_CARD_POOL, *B12_CARD_POOL)
     if card.name not in GENERATED_ONLY
 }
+
+AVAILABLE = _ORIGINAL_POOL | {card.name: card for card in PLAYER_DRAFT_CARD_POOL}
 
 
 def validate_starting_cards(starting: list[str]) -> None:
@@ -36,7 +40,7 @@ def validate_starting_cards(starting: list[str]) -> None:
         raise ValueError("Starting deck exceeds eight Kimarite.")
 
 
-def options_for(starting: list[str], picks: list[str], seed: int) -> list[str]:
+def options_for(starting: list[str], picks: list[str], seed: int, *, legacy: bool = False) -> list[str]:
     """A reproducible three-card choice, conditional on the CURRENT deck."""
     validate_starting_cards(starting)
     if not isinstance(picks, list) or any(not isinstance(n, str) for n in picks):
@@ -52,8 +56,9 @@ def options_for(starting: list[str], picks: list[str], seed: int) -> list[str]:
         raise ValueError("Draft exceeds eight Kimarite.")
     # Below three Kimarite, force a three-Kimarite offer before mixed picks.
     only_kimarite = kimarite < MIN_KIMARITE
+    pool = _ORIGINAL_POOL if legacy else AVAILABLE
     remaining = [
-        n for n, card in AVAILABLE.items() if n not in owned
+        n for n, card in pool.items() if n not in owned
         and (card.is_kimarite if only_kimarite else
              (not card.is_kimarite if kimarite == MAX_KIMARITE else True))
     ]
@@ -68,8 +73,10 @@ def validate_draft(starting: list[str], picks: list[str], seed: int) -> list[str
     validate_starting_cards(starting)
     if not isinstance(picks, list) or len(starting) + len(picks) != TARGET_SIZE:
         raise ValueError("Draft must finish at exactly 28 cards.")
+    # Saved drafts may have accepted an offer from before the pool expanded.
     for i, name in enumerate(picks):
-        if name not in options_for(starting, picks[:i], seed):
+        if (name not in options_for(starting, picks[:i], seed)
+                and name not in options_for(starting, picks[:i], seed, legacy=True)):
             raise ValueError(f"Invalid draft choice at pick {i + 1}.")
     deck = [*starting, *picks]
     if sum(AVAILABLE[n].is_kimarite for n in deck) < MIN_KIMARITE:

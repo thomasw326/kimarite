@@ -175,3 +175,22 @@ def test_full_twelve_growth_and_live_start_accepts_duplicate_kimarite():
     pending.confirm([0,1])
     result=build_resolved_b11_opening(pending)
     assert result.state.fighter_a.wrestler.base_power==2
+
+
+def test_mawashi_reversal_drafts_and_legacy_drafts_still_validate():
+    from kimarite.catalog import B12_CARD_POOL, card_by_id
+
+    name = "Mawashi Reversal"
+    card = AVAILABLE[name]
+    assert card_by_id(card.card_id) is card
+    assert (card.power, card.technique, card.spirit) == (1, 2, 0)
+    assert card not in B12_CARD_POOL
+    starting = list(STARTERS)
+    seed = 3
+    picks = pick_through(starting, seed, lambda offered: name if name in offered else offered[0])
+    assert name in validate_draft(starting, picks, seed)
+
+    old_picks = []
+    while len(starting) + len(old_picks) < 28:
+        old_picks.append(options_for(starting, old_picks, seed, legacy=True)[0])
+    assert validate_draft(starting, old_picks, seed) == starting + old_picks

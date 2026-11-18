@@ -143,8 +143,12 @@ STARTING_KIMARITE: tuple[Card, ...] = (
 )
 
 
+PLAYER_DRAFT_CARD_POOL = (Card(14015, "Mawashi Reversal", 1, 2, 0),)
+
+
 def card_by_id(card_id: int) -> Card:
-    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL, *B11_CARD_POOL, *B12_CARD_POOL):
+    for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL, *B11_CARD_POOL, *B12_CARD_POOL,
+                 *PLAYER_DRAFT_CARD_POOL):
         if card.card_id == card_id:
             return card
     raise KeyError(card_id)
@@ -155,7 +159,7 @@ def card_by_name(name: str, *, prefer_starting_kimarite: bool = False) -> Card:
         (STARTING_KIMARITE, CARD_POOL)
         if prefer_starting_kimarite
         else (CARD_POOL, STARTING_KIMARITE)
-    ) + (B9_CARD_POOL, B11_CARD_POOL, B12_CARD_POOL)
+    ) + (B9_CARD_POOL, B11_CARD_POOL, B12_CARD_POOL, PLAYER_DRAFT_CARD_POOL)
     for group in groups:
         for card in group:
             if card.name == name:
