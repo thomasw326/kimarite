@@ -260,6 +260,7 @@ def public_snapshot(session: HumanBout) -> dict:
         "side_by_side": side_by_side_snapshot(session),
         "human": {
             "name":own.wrestler.name, "power":view.own_power, "grip":list(view.own_grip),
+            "unstable": own.unstable,
             "hand":[{**enriched(card), "unavailable_reason":reason(i,card)} for i,card in enumerate(own.hand)],
             "draw_count":view.own_draw_count, "discard_count":view.own_discard_count,
             "discard":[shown_card(c) for c in own.discard_pile],
@@ -270,6 +271,7 @@ def public_snapshot(session: HumanBout) -> dict:
         },
         "opponent": {
             "name":other.wrestler.name, "power":view.opponent_power,
+            "unstable": other.unstable,
             "grip":list(view.opponent_grip), "hand_count":view.opponent_hand_size,
             "draw_count":view.opponent_draw_count,"discard_count":view.opponent_discard_count,
             "discard":[shown_card(c) for c in other.discard_pile],
