@@ -635,6 +635,19 @@ async function managementRound(){
   if(m.created_stats)request.created_stats=m.created_stats;
   if(m.draft_picks){request.starting_cards=m.starting_cards;request.draft_picks=m.draft_picks;request.draft_seed=m.draft_seed;request.duplicated_indices=m.duplicated_indices||[]}
  }
+ if(isB12Campaign(m)){
+  if(m.division_league.day!==i||m.b12_opponent_ids?.[i]===undefined)
+   throw new Error('The live banzuke is not synchronized with the upcoming bout.');
+  const paired=await api('/api/b12/campaign/pair',{roster:m.division_roster,league:m.division_league});
+  if(paired.opponent.id!==m.b12_opponent_ids[i]||paired.opponent.name!==request.opponent)
+   throw new Error('Scheduled B12 opponent changed after card allocation.');
+  m.division_league=paired.league;
+  managementSave(); // Persist frozen 21-pair day before the player enters the ring.
+  request.b12_opponent_ai=paired.opponent;
+  request.b12_player_rank=m.division_roster.player.rank;
+  request.b12_campaign={seed:m.division_roster.seed,basho:m.division_roster.completed_basho||0,
+   day:i,opponent_id:paired.opponent.id};
+ }
  launchingTournamentBout=i;
  $('management-start').disabled=true;
  try{
