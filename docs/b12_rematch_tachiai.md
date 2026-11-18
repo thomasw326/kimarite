@@ -1,26 +1,13 @@
-# B12 rematch Tachiai
+# B12 rematch card
 
-In the six-basho campaign, the player earns a top-card choice when their
-most recent bout against the scheduled wrestler was a loss. The eligibility
-lookup uses the wrestler's stable ID and saved results across basho. Older
-saves that stored only the opponent's name use the unique, stable name inside
-that campaign. A win in a later meeting clears eligibility until another loss.
+After each block of three bouts, a ranked loss offers the three cards assigned to
+your opening in that bout. Choose one to save against that wrestler. A win uses
+the existing deck duplication rules. Loss panels are red and win panels green,
+and each panel labels the action.
 
-The player commits zero to three of their own cards first. The game then
-shows the opponent's three seeded opening cards: starting Kimarite, prepared
-Tachiai, and original draw-pile top. Choosing one locks the decision and starts
-the usual Tachiai resolver, including any effects that reveal, mill, or shuffle
-the top card. The original top needs no change. Choosing either other card
-places a bout-only physical copy on top so the original still serves its
-starting-zone or prepared-effect role. The copy can be used normally during
-the bout and is discarded with the session at bout end.
-
-The browser keeps the commitment and choice in its existing action journal.
-The same seed and commands reproduce the offer and live opening during recovery.
-The normal B11 and B12 non-rematch flow proceeds directly from commitment to
-resolution. The B12 ranked AI-vs-AI setup uses its existing path.
-
-Implementation spans B12 campaign pairing, pending and live opening sessions,
-HTTP snapshots and action handling, and the browser Dohyō. The campaign HTTP
-tests exercise hidden pre-commit state, all three choices, physical card
-placement, rejected changes, retries, and deterministic replay.
+The choice travels with the bout result across basho. When you next face that
+wrestler, the saved card automatically goes on top of your draw pile after
+Tachiai effects. If there is no copy in the pile, this bout gets a temporary
+copy. The opponent's opening and deck follow the normal rules. The most recent
+meeting supersedes the previous one, and older summaries without a recorded
+choice grant no card.

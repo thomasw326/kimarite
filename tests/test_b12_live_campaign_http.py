@@ -213,96 +213,50 @@ def test_five_basho_transitions_keep_exact_rank_and_one_way_reserves(client):
     assert len(roster["reserve_queue"]) >= 4
 
 
-@pytest.mark.parametrize("index", [0, 1, 2])
-def test_rematch_top_card_waits_for_commit_and_replays(client, monkeypatch, index):
-    from kimarite import b11_live_opening
+@pytest.mark.parametrize("card_name,extra", [("Sonkyo", 0), (None, 1)])
+def test_saved_rematch_card_tops_only_player_deck(client, monkeypatch, card_name, extra):
+    from kimarite.human_bout import HumanBout
 
-    post = client
-    campaign = post("/api/b12/campaign/new", {"player_name": "Rematch Rikishi", "seed": 117})
-    request = {key: campaign[key] for key in ("roster", "league")}
-    next_foe = campaign["opponents"][0]
-    assert not post("/api/b12/campaign/pair", request)["rematch_tachiai"]
-
-    prior_loss = {"opponent": next_foe["name"], "won": False}  # Older campaign save.
-    later_win = {"opponent_id": next_foe["id"], "opponent": next_foe["name"], "won": True}
-    assert not post("/api/b12/campaign/pair", {
-        **request, "tournament_history": [{"results": [prior_loss]}, {"results": [later_win]}],
-    })["rematch_tachiai"]
-    id_only_loss = {"opponent_id": next_foe["id"], "opponent": "Old label", "won": False}
-    paired = post("/api/b12/campaign/pair", {
-        **request, "tournament_history": [{"results": [prior_loss]},
-                                         {"results": [id_only_loss if index else prior_loss]}],
-    })
-    assert paired["rematch_tachiai"]
+    campaign = client("/api/b12/campaign/new", {"player_name": "Rematch Rikishi", "seed": 117})
+    paired = client("/api/b12/campaign/pair", {k: campaign[k] for k in ("roster", "league")})
     foe = paired["opponent"]
-    starting, picks = draft(post, 121)
+    starting, picks = draft(client, 121)
+    if card_name is None:
+        from kimarite.b11_player_draft import AVAILABLE
+
+        card_name = next(name for name in AVAILABLE if name not in starting + picks)
     setup = {
         "human": "Rematch Rikishi", "opponent": foe["name"], "seed": 122,
         "opening_mode": "b11_live", "opening_cards": starting[:3],
         "starting_cards": starting, "draft_picks": picks, "draft_seed": 121,
         "created_stats": {"power": 2, "technique": 1, "spirit": 0},
         "b12_opponent_ai": foe, "b12_player_rank": 42,
-        "b12_campaign": {"seed": 117, "basho": 0, "day": 0, "opponent_id": foe["id"]},
-        "b12_rematch_tachiai": paired["rematch_tachiai"],
+        "b12_campaign": {"seed": 117, "basho": 1, "day": 0, "opponent_id": foe["id"]},
     }
+    captured = []
+    advance = HumanBout.advance
 
-    captures = []
-    resolve = b11_live_opening.resolve_prepared_tachiai
+    def capture(bout):
+        captured.append(tuple(tuple(c.name for c in fighter.draw_pile)
+                              for fighter in (bout.state.fighter_a, bout.state.fighter_b)))
+        return advance(bout)
 
-    def record_opening(state, comparison, **kwargs):
-        ai = state.fighter_b
-        captures.append((list(ai.draw_pile), list(ai.kimarite_zone), ai.wrestler, comparison.wrestler_b))
-        return resolve(state, comparison, **kwargs)
+    monkeypatch.setattr(HumanBout, "advance", capture)
 
-    monkeypatch.setattr(b11_live_opening, "resolve_prepared_tachiai", record_opening)
-    original = post("/api/session", {**setup, "b12_rematch_tachiai": False}, expected=201)
-    commit = {"type": "commit_tachiai", "indices": [0, 2]}
-    post(f"/api/session/{original['token']}/action", commit)
-    baseline, opening_zone, wrestler, stats = captures.pop()
+    def opening(override):
+        session = client("/api/session", {**setup, **override}, expected=201)
+        return client(f"/api/session/{session['token']}/action",
+                      {"type": "commit_tachiai", "indices": []})["state"]
 
-    def begin_rematch():
-        created = post("/api/session", setup, expected=201)
-        path = f"/api/session/{created['token']}/action"
-        assert created["state"]["phase"] == "choose_tachiai"
-        assert created["state"]["opponent"] == {"name": foe["name"]}
-        assert created["state"]["opening"] is None
-        assert "rematch_tachiai" not in created["state"]
-        post(path, {"type": "choose_rematch_top", "index": index}, expected=409)
-        offered = post(path, commit)["state"]
-        assert offered["phase"] == "choose_rematch_top"
-        assert offered["tachiai_commitment"] == [0, 2]
-        assert offered["events"] == []
-        assert offered["opening"] is None
-        assert not offered["can_end_turn"]
-        assert [c["name"] for c in offered["rematch_tachiai"]["cards"]] == [
-            wrestler.starting_kimarite.name, wrestler.prepared_tachiai_card.name,
-            wrestler.top_of_deck_card.name,
-        ]
-        assert post(path, commit)["state"] == offered  # Lost response retry.
-        post(path, {**commit, "indices": [1]}, expected=409)
-        assert not captures
-        return path, offered
-
-    path, offered = begin_rematch()
-    for invalid in (-1, 3, False, "0", None):
-        post(path, {"type": "choose_rematch_top", "index": invalid}, expected=400)
-    action = {"type": "choose_rematch_top", "index": index}
-    live = post(path, action)["state"]
-    assert live["rematch_tachiai_index"] == index
-    assert live["opening"]["opponent"]["top_of_deck"] == offered["rematch_tachiai"]["cards"][index]
-    assert post(path, action)["state"] == live
-    post(path, {**action, "index": (index + 1) % 3}, expected=409)
-    pile, zone, opening, orbs = captures.pop()
-    assert orbs == stats
-    assert zone == opening_zone
-    assert opening.prepared_tachiai_card == wrestler.prepared_tachiai_card
-    if index == 2:
-        assert pile == baseline
-    else:
-        assert pile[1:] == baseline
-        assert pile[0] is not zone[0] and pile[0] is not opening.prepared_tachiai_card
-    assert pile[0] is opening.top_of_deck_card
-
-    restored_path, restored_offer = begin_rematch()
-    assert restored_offer == offered
-    assert post(restored_path, action)["state"] == live
+    opening({})
+    baseline, opponent = captured[0]
+    captured.clear()
+    rematch = opening({"b12_rematch_top_card": card_name})
+    own, rematch_opponent = captured[0]
+    assert own[0] == card_name
+    assert len(own) == len(baseline) + extra
+    assert rematch_opponent == opponent
+    assert any(f"Rematch reward: {card_name}" in event for event in rematch["events"])
+    captured.clear()
+    opening({"b12_rematch_top_card": card_name})
+    assert captured[0] == (own, rematch_opponent)

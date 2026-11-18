@@ -362,3 +362,10 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
    Return is instant; do not border it while simulating or after an error. */
 #result-next.heya-standings-ready,#return-heya.heya-standings-ready{border:3px solid #f5d47b;box-shadow:0 0 0 2px #233a37,0 0 12px #f5d47b66;font-weight:800}
 #result-next.heya-standings-loading,#return-heya.heya-standings-loading{border:1px solid #9d9b8b}
+
+#management-rewards[data-result="win"]{border:2px solid #83ddb0;background:#17352d}
+#management-rewards[data-result="loss"]{border:2px solid #f0aaa4;background:#432a2c}
+#management-rewards[data-result="win"] #management-reward-progress{color:#9deac4}
+#management-rewards[data-result="loss"] #management-reward-progress{color:#ffc2bd}
+.tournament-result.tournament-win{background:#17352d}
+.tournament-result.tournament-loss{background:#432a2c}
