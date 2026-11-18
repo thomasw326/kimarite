@@ -159,7 +159,7 @@ def resolve_prepared_tachiai(
                 momentum_delta[side] += 1
                 extra_push[side] += 1
 
-        elif name == "Sonkyo":
+        elif name in REVEAL_FAMILY or name in {"Sonkyo", "Chiri-chozu", "Shikiri"}:
             pass
         elif name == "Nekodamashi":
             make_unstable(state, opponent_side)
