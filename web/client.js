@@ -56,7 +56,7 @@ function setGameLocation(location){
 }
 // This scenario is deployed from the dedicated rematch playtest branch.
 const rematchScenario=new URLSearchParams(window.location.search).get('rematch');
-const playtestSavePrefix=['loss','win','review'].includes(rematchScenario)?'playtest_rematch_'+rematchScenario+'_':'';
+const playtestSavePrefix=['loss','win','review'].includes(rematchScenario)?'playtest_player_rematch_'+rematchScenario+'_':'';
 
 function gameSaveGet(key){
  key=playtestSavePrefix+key;
