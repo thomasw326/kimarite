@@ -572,7 +572,15 @@ function managementBoard(){
   const bout=currentBlockStart(m)+group;
   const box=node('div','management-group'+(locked?' management-group-locked':''));
   box.append(node('h3','','Round '+(Math.floor(m.round/3)+1)+' · Bout '+(group+1)
-   +' vs '+m.opponents[bout]+(locked?' · '+(locked==='completed'?'COMPLETED':'STARTED')+' — LOCKED':' · editable')));
+   +' vs '+(isB12Campaign(m)?b12OpponentLabel(m,bout):m.opponents[bout])
+   +(locked?' · '+(locked==='completed'?'COMPLETED':'STARTED')+' — LOCKED':' · editable')));
+  const opponentInfo=isB12Campaign(m)?b12Opponent(m,bout):null;
+  if(opponentInfo&&opponentInfo.format_description){
+   const detail=node('details','opponent-deck-details');
+   detail.append(node('summary','','Testing: opponent deck format'),
+     node('p','',opponentInfo.format_description));
+   box.append(detail);
+  }
   if(locked)box.append(node('p','assignment-locked-note',locked==='completed'
    ?'Bout completed: its three original cards cannot be changed.'
    :'Bout already started: its three original cards are committed.'));
