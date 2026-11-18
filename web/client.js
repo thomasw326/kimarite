@@ -664,9 +664,13 @@ function showB12Banzuke(m){
  panel.hidden=!isB12Campaign(m);
  if(!isB12Campaign(m))return;
  const league=m.division_league;
- const people=[...league.wrestlers].sort((a,b)=>a.rank-b.rank);
+ const sort=$('b12-banzuke-sort');
+ if(sort)sort.onchange=()=>showB12Banzuke(m);
+ const byRecord=sort?.value==='record';
+ const people=[...league.wrestlers].sort((a,b)=>
+  (byRecord?(b.wins-a.wins||a.losses-b.losses):0)||a.rank-b.rank);
  const you=people.find(w=>w.id==='player');
- $('b12-banzuke-heading').textContent='Banzuke · '+people.length+' wrestlers · Day '+league.day+'/15 · You: '+banzukeRankLabel(you.rank)+' ('+you.wins+'–'+you.losses+')';
+ $('b12-banzuke-heading').textContent='Standings · '+people.length+' wrestlers · Day '+league.day+'/15 · You: '+banzukeRankLabel(you.rank)+' ('+you.wins+'–'+you.losses+')';
  const entries=$('b12-banzuke-entries');entries.replaceChildren();
  for(const w of people){
   const row=node('div','banzuke-entry'+(w.id==='player'?' banzuke-player':''));

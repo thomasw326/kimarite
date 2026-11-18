@@ -342,6 +342,7 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
    player's current record without taking space from nine-card allocation. */
 .b12-banzuke{margin:12px 0 16px;border:1px solid #758b85;border-radius:8px;padding:10px;background:#142d2e}
 .b12-banzuke summary{cursor:pointer;font-weight:750;color:#f0e1be;line-height:1.6}
+.b12-banzuke .banzuke-sort{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px}
 .b12-banzuke-entries{margin-top:10px;max-height:320px;overflow-y:auto;border-top:1px solid #54665f}
 .banzuke-entry{display:grid;grid-template-columns:110px minmax(0,2fr) minmax(0,1fr) 58px;gap:8px;padding:7px 8px;align-items:center;border-bottom:1px solid #52635f;font-size:13px}
 .banzuke-entry:nth-child(odd){background:rgba(255,255,255,.04)}
