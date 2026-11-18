@@ -936,7 +936,7 @@ function updateDohyoPosition(g){
  const ring=$('dohyo-ring'),label=$('ring-position-label'),warning=$('ring-edge-warning');
  const activeSideBySide=$('side-by-side-status');
  activeSideBySide.hidden=!g?.side_by_side;
- activeSideBySide.textContent=sideBySideSummary(g);
+ activeSideBySide.textContent=g?.side_by_side?sideBySideSummary(g):'';
  const ready=Number.isInteger(g?.position)&&g.position>=-4&&g.position<=4;
  const position=ready?g.position:0;
  ring.style.setProperty('--ring-shift',(position*6)+'%');
