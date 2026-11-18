@@ -97,21 +97,26 @@ console.log(JSON.stringify({a,heya:$('heya-view').hidden,
 
 
 def test_finished_return_does_not_advance_to_next_bout():
-    handler = JS.split("function returnToHeya(){", 1)[1].split(
+    handler = JS.split("async function returnToHeya(){", 1)[1].split(
         "$('result-next').onclick=returnToHeya;", 1
     )[0]
     assert "next.click()" not in handler
     assert "setGameLocation('heya')" in handler
-    assert "if(!game?.finished)return;" in handler
+    assert "if(!game?.finished||resolvingB12Matchday)return;" in handler
     result = run_browser_helpers(
-        "function returnToHeya(){" + handler + "\n"
+        "let resolvingB12Matchday=false;\n"
+        "function isB12Campaign(){return false}\n"
+        "function managementBoard(){}\n"
+        "async function returnToHeya(){" + handler + "\n"
         + """
-game={finished:false};setGameLocation('dohyo');
-returnToHeya();
-const activePhase=document.body.dataset.phase;
-game={finished:true};returnToHeya();
-console.log(JSON.stringify({activePhase,finishedPhase:document.body.dataset.phase,
-    backHidden:$('return-heya').hidden,saved:sessionStorage.getItem('kimarite_ui_phase')}));
+(async()=>{
+  game={finished:false};setGameLocation('dohyo');
+  await returnToHeya();
+  const activePhase=document.body.dataset.phase;
+  game={finished:true};await returnToHeya();
+  console.log(JSON.stringify({activePhase,finishedPhase:document.body.dataset.phase,
+      backHidden:$('return-heya').hidden,saved:sessionStorage.getItem('kimarite_ui_phase')}));
+})().catch(e=>{console.error(e);process.exit(1)});
 """
     )
     assert result == {

@@ -38,6 +38,7 @@ function saveDraft(){{}}
 function clearBoutSession(){{cleared=true;token=null;game=null;sessionSetup=null;actionJournal=[]}}
 function creationChoices(){{}}
 function showYearStatus(m){{$('year-record').textContent='Tournament '+(m.tournament_history.length+1)}}
+function showB12Banzuke(m){{$('b12-banzuke').hidden=!m}}
 function setGameLocation(p){{phase=p}}
 """
     # Existing JS handler reassigns management, so it must be mutable.
@@ -48,7 +49,8 @@ console.log(JSON.stringify({
  human:management?.human||null,activeDraft,cleared,phase,
  name:$('wrestler-name').value,
  draftVisible:!$('management-deal').hidden,
- newVisible:!$('new-wrestler').hidden
+ newVisible:!$('new-wrestler').hidden,
+ banzukeHidden:$('b12-banzuke').hidden
 }));
 """
     r = subprocess.run([node, "-e", script], capture_output=True, text=True)
@@ -69,6 +71,7 @@ def test_restart_only_after_sixth_tournament():
     assert after["name"] == "Your Rikishi"
     assert after["draftVisible"] is True
     assert after["newVisible"] is False
+    assert after["banzukeHidden"] is True
 
 
 def test_restart_requires_explicit_confirmation_and_warns_about_local_save():

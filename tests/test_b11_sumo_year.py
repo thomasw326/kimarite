@@ -74,7 +74,9 @@ console.log(JSON.stringify({summary,score:$('year-record').textContent,
 def test_year_cannot_advance_to_seventh_and_draft_preserves_history():
     assert "if(previous&&yearHistory(previous).length>=5)" in JS
     assert "tournament_history=previous?[...yearHistory(previous),tournamentSummary(previous)]:[]" in JS
-    assert "activeDraft={human,seed,created_stats:created,tournament_history,starting_cards:[...starting]" in JS
+    assert "activeDraft={human,seed,world_seed:" in JS
+    assert "created_stats:created,tournament_history,starting_cards:[...starting]" in JS
+    assert "division_roster:division?.roster||null" in JS
     assert "tournament_history:d.tournament_history||[]" in JS
     assert "yearHistory(management).length>=5)return" in JS
     assert "$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5" in JS

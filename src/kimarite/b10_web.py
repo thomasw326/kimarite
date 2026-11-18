@@ -233,7 +233,8 @@ class Handler(BaseHTTPRequestHandler):
         if content_type != "application/json":
             raise ValueError("Content-Type must be application/json")
         length = int(self.headers.get("Content-Length", "0"))
-        if not 0 < length <= 32768:
+        max_length = 262144 if urlsplit(self.path).path.startswith("/api/b12/campaign/") else 32768
+        if not 0 < length <= max_length:
             raise ValueError("Invalid request size")
         payload = json.loads(self.rfile.read(length))
         if not isinstance(payload, dict):
@@ -294,6 +295,33 @@ class Handler(BaseHTTPRequestHandler):
             })
         try:
             data = self.body()
+            # The 20 real AI bouts can take several seconds. Never hold the
+            # process-global human-session lock while computing their results.
+            if path.startswith("/api/b12/campaign/"):
+                from .b12_campaign_web import campaign_request
+                session = None
+                resolve_lock = None
+                if path == "/api/b12/campaign/resolve":
+                    from threading import Lock
+                    with _lock:
+                        _prune_sessions()
+                        session = _sessions.get(data.get("token"))
+                        if session is not None:
+                            _touch_session(data["token"])
+                            if not hasattr(session, "b12_resolve_lock"):
+                                session.b12_resolve_lock = Lock()
+                            resolve_lock = session.b12_resolve_lock
+                try:
+                    if resolve_lock is not None:
+                        # Only one resolution per player-bout token; different
+                        # browser sessions are free to play in parallel.
+                        with resolve_lock:
+                            result = campaign_request(path, data, session=session)
+                    else:
+                        result = campaign_request(path, data, session=session)
+                    return self.reply(200, result)
+                except (KeyError, ValueError, TypeError, RuntimeError) as exc:
+                    return self.reply(409, {"error": str(exc), "code": "campaign_conflict"})
             with _lock:
                 if path == "/api/b11/draft/catalogue":
                     from .b11_player_draft import AVAILABLE
@@ -319,8 +347,15 @@ class Handler(BaseHTTPRequestHandler):
                             from .b11_player_draft import grow_deck
                             drafted, _ = grow_deck(data["starting_cards"], data["draft_picks"],
                                                    int(data["draft_seed"]), data.get("duplicated_indices", []))
-                        session = PendingB11Session.start(data["human"], data["opponent"], data["opening_cards"], seed=int(data.get("seed", 20261021)), created_stats=data.get("created_stats"), drafted_deck=drafted)
+                        session = PendingB11Session.start(data["human"], data["opponent"], data["opening_cards"], seed=int(data.get("seed", 20261021)), created_stats=data.get("created_stats"), drafted_deck=drafted, opponent_ai=data.get("b12_opponent_ai"), player_rank=data.get("b12_player_rank", 1))
                         session.live_enabled = data.get("opening_mode") == "b11_live"
+                        if "b12_campaign" in data:
+                            if data.get("opening_mode") != "b11_live" or session.opponent_ai is None:
+                                raise ValueError("B12 match requires a live drafted bout")
+                            meta = data["b12_campaign"]
+                            if not isinstance(meta, dict) or any(type(meta.get(k)) is not int for k in ("seed", "basho", "day")) or not isinstance(meta.get("opponent_id"), str) or meta["opponent_id"] != session.opponent_ai["id"]:
+                                raise ValueError("B12 world match identity is malformed")
+                            session.b12_campaign = meta
                     else:
                         session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
                     token = secrets.token_urlsafe(24)
@@ -342,6 +377,8 @@ class Handler(BaseHTTPRequestHandler):
                             if getattr(session, "live_enabled", False):
                                 from .b11_live_opening import start_b11_human_bout
                                 live = start_b11_human_bout(session)
+                                if hasattr(session, "b12_campaign"):
+                                    live.b12_campaign = session.b12_campaign
                                 _sessions[token] = live
                                 return self.reply(200, {"state": public_snapshot(live)})
                             return self.reply(200, {"state": committed_snapshot})
