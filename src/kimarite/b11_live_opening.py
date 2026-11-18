@@ -40,7 +40,14 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
     # Without this, the roster JSON order groups Kimarite near the draw top.
     random.Random(seed * 2).shuffle(unallocated)
     records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
-    ai = _fighter(pending.opponent, records[pending.opponent], seed=seed * 2 + 1, ranking=2)
+    if pending.opponent_ai is None:
+        ai = _fighter(pending.opponent, records[pending.opponent], seed=seed * 2 + 1, ranking=2)
+    else:
+        from .b12_ai_day import build_ai_fighter
+        from .b12_division_roster import load_formats
+        f = next(f for f in load_formats() if f["id"] == pending.opponent_ai["format_id"])
+        ai = build_ai_fighter(pending.opponent_ai, f, seed * 2 + 1,
+                              pending.opponent_ai["wins"])
     # Player-created wrestlers use their chosen 2/1/0 allocation, without
     # consulting any roster style or prescribing a fighter archetype.
     if pending.created_stats is not None:
@@ -60,7 +67,7 @@ def build_resolved_b11_opening(pending: PendingB11Session, *, seed: int = 202610
         pending.human, stats["power"], stats["technique"], stats["spirit"],
         blank, blank, blank,
         primary=Stat(order[0]), secondary=Stat(order[1]), tertiary=Stat(order[2]),
-        ranking=1,
+        ranking=pending.player_rank,
     )
     own = FighterState(
         human, draw_pile=unallocated,
@@ -88,7 +95,8 @@ def start_b11_human_bout(pending: PendingB11Session, *, max_turns: int = 100):
     def opponent_turn(state, side, comparison):
         return play_style_turn(
             state, side, comparison,
-            STYLE_PROXIES.get(pending.opponent, pending.opponent),
+            pending.opponent_ai["style"] if pending.opponent_ai is not None
+            else STYLE_PROXIES.get(pending.opponent, pending.opponent),
         )
     session = HumanBout(result.state, result.comparison, Side.A, opponent_turn, max_turns)
     # B11 public serialization must never invent Classic prepared/top slots.
