@@ -710,12 +710,17 @@ async function offerDraft(){
 async function finishDraft(){
  const d=activeDraft;
  const first=await api('/api/b11/draft/deal',{starting_cards:d.starting_cards,picks:d.picks,draft_seed:d.seed,seed:d.seed});
- const roster=[...$('opponent').options].map(o=>o.value).filter(v=>v&&v!=='__random__'&&v!==d.human);
- for(let i=roster.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[roster[i],roster[j]]=[roster[j],roster[i]]}
+ // This is a new B12 season, or a saved continuation after the rank update.
+ // Use the same unique 60-format world across all six tournaments.
+ const division=d.division_roster
+  ?await api('/api/b12/campaign/plan',{roster:d.division_roster,league:d.division_league})
+  :await api('/api/b12/campaign/new',{player_name:d.human,seed:d.world_seed??d.seed});
  management={human:d.human,seed:d.seed,opening_mode:'b11_live',created_stats:d.created_stats,tournament_history:d.tournament_history||[],
    starting_cards:d.starting_cards,draft_picks:d.picks,draft_seed:d.seed,kimarite_names:d.kimarite_names,duplicated_indices:[],
    cards:first.cards,groups:Array.from({length:3},()=>[null,null,null]),
-   opponents:roster.slice(0,15),round:0,results:[]};
+   opponents:Array(15).fill(null),b12_opponent_ids:Array(15).fill(null),
+   division_roster:division.roster,division_league:division.league,round:0,results:[]};
+ assignB12Block(management,division);
  activeDraft=null;saveDraft();
  clearBoutSession(); // Avoid resurrecting an earlier finished bout during the new tournament.
  $('b11-draft').hidden=true;$('management-board').hidden=false;$('management-progress').hidden=true;
