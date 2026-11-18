@@ -95,3 +95,22 @@ def test_tournament_boundary_and_round_repair_have_real_canonical_state():
     assert "request.b12_player_rank=m.division_roster.player.rank" in fight
     assert "request.b12_campaign=" in fight
     assert "managementSave(); // Persist frozen 21-pair day" in fight
+
+
+def test_banzuke_titles_preserve_all_42_numeric_ranks():
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("Node is not available")
+    formatter = JS[JS.index("function banzukeTitle("):JS.index("function b12OpponentLabel(")]
+    run = subprocess.run([node, "-e", formatter + """
+const assert = require('node:assert/strict');
+const expected = ['East Yokozuna', 'West Yokozuna', 'East Ozeki', 'West Ozeki',
+ 'East Ozeki 2', 'East Sekiwake', 'West Sekiwake', 'East Komusubi', 'West Komusubi'];
+for (let i=1;i<=17;i++){
+ expected.push('East Maegashira '+i);
+ if(i<17)expected.push('West Maegashira '+i);
+}
+assert.deepEqual(expected.map((_,i)=>banzukeRankLabel(i+1)),
+ expected.map((title,i)=>'#'+(i+1)+' · '+title));
+"""], capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
