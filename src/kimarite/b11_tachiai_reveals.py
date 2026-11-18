@@ -18,6 +18,7 @@ REVEAL_FAMILY = frozenset(("Oshi", "Tsuki"))
 @dataclass(frozen=True)
 class TachiaiReveals:
     revealed: tuple[Card, ...]
+    sources: tuple[Card, ...]
     remaining: tuple[Card, ...]
     orbs: tuple[int, int, int]
 
@@ -26,16 +27,19 @@ def plan_reveals(committed: Sequence[Card], draw_pile: Sequence[Card]) -> Tachia
     """Evaluate all committed reveal cards without mutating the live state."""
     remaining = list(draw_pile)
     revealed: list[Card] = []
+    sources: list[Card] = []
     for played in committed:
         if played.name not in REVEAL_FAMILY:
             continue
         while remaining:
             card = remaining.pop(0)
             revealed.append(card)
+            sources.append(played)
             if card.name not in REVEAL_FAMILY:
                 break
     return TachiaiReveals(
         revealed=tuple(revealed),
+        sources=tuple(sources),
         remaining=tuple(remaining),
         orbs=(
             sum(card.power for card in revealed),
