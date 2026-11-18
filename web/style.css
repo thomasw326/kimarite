@@ -147,6 +147,14 @@ body[data-phase="heya"] .bout-hud{display:none!important}
 
 /* First-visit guide: equally available from the Heya and Dohyō. */
 .game-guide-trigger{display:inline-flex;margin-top:8px;min-height:44px;background:transparent;border:1px solid #cbb487;color:#f7e9cf;font-size:14px;padding:10px 16px}
+.reset-progress-trigger{display:inline-flex;margin:8px 0 0 8px;min-height:44px;background:transparent;border:1px solid #8f9e96;color:#f7e9cf;font-size:14px;padding:10px 16px}
+.reset-progress-trigger:focus-visible{outline:3px solid #f1d59d;outline-offset:2px}
+#reset-progress-confirm{width:min(92vw,450px);background:#253630;color:#f8f0df;border:1px solid #caad76;padding:22px;border-radius:10px}
+#reset-progress-confirm p{line-height:1.6}
+#reset-cancel{background:transparent;color:#f8f0df;border:1px solid #c7a67a}
+#reset-confirm{background:#d8c49c;color:#25332e}
+@media(max-width:560px){.reset-progress-trigger{width:100%;justify-content:center;margin-left:0}}
+
 .game-guide-dialog{width:min(94vw,690px);max-height:90dvh;overflow:auto;background:#253630;color:#f8f0df;border:1px solid #caad76;padding:clamp(18px,3vw,30px)}
 .game-guide-dialog h2{font-size:clamp(22px,4vw,30px);margin:6px 0 12px}
 .game-guide-dialog p,.game-guide-steps,.game-guide-terms{line-height:1.6}

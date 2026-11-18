@@ -97,6 +97,37 @@ function returnedToHeyaAfterBout(g){
  }catch(e){return false}
 }
 async function api(path,body){const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const v=await r.json();if(!r.ok){const e=new Error(v.message||v.error||'Request failed');e.data=v;throw e}return v}
+// Clear only this game's browser saves, in BOTH stores. Keeping the guide
+// preference avoids interrupting players who repeatedly run B12 playtests.
+const RESET_PROGRESS_KEYS=Object.freeze([
+ 'kimarite_management','kimarite_active_draft','kimarite_session',
+ 'kimarite_setup','kimarite_actions','kimarite_ui_phase'
+]);
+function clearSavedProgress(){
+ for(const key of RESET_PROGRESS_KEYS)gameSaveRemove(key);
+}
+function resetFromCleanLink(){
+ // A deliberately shared fresh-start URL also works when old progress was
+ // stored by a previous version of the client. Run BEFORE resume/restore.
+ const params=new URLSearchParams(window.location.search);
+ if(params.get('fresh')!=='1')return false;
+ clearSavedProgress();
+ params.delete('fresh');
+ const remainder=params.toString();
+ window.history.replaceState(null,'',window.location.pathname+
+  (remainder?'?'+remainder:'')+window.location.hash);
+ return true;
+}
+resetFromCleanLink();
+$('reset-progress').onclick=()=>$('reset-progress-confirm').showModal();
+$('reset-cancel').onclick=()=>$('reset-progress-confirm').close();
+$('reset-confirm').onclick=()=>{
+ $('reset-progress-confirm').close();
+ clearSavedProgress();
+ // Reload the entire app, not merely the Heya panel, to clear in-memory bout
+ // tokens, selected cards, the session journal and the old scheduled AI world.
+ window.location.replace(window.location.pathname+'?fresh=1');
+};
 function rememberSession(){if(token)gameSaveSet('kimarite_session',token);if(sessionSetup)gameSaveSet('kimarite_setup',JSON.stringify(sessionSetup));gameSaveSet('kimarite_actions',JSON.stringify(actionJournal))}
 async function recoverSession(){if(!sessionSetup)throw new Error('This bout expired and has no recovery data. Please start a new bout.');const restored=await api('/api/session',sessionSetup);let state=restored.state;for(const command of actionJournal){const next=await api('/api/session/'+restored.token+'/action',command);state=next.state}token=restored.token;rememberSession();return state}
 function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
