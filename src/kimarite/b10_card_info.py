@@ -91,6 +91,7 @@ CARD_TEXT = {
     "Uwatedashinage": {"timing":"Kimarite","effect":"Win: Left Grip, Momentum at least +1, and your Power at least 5 below opponent's. On play: draw 1; optionally discard 1 card to establish Left Grip.","status":"verified"},
 }
 GLOSSARY = {
+    "Power Water Cantrips": CARD_TEXT["Power Water Cantrip"]["effect"],
     "Position": "Your location relative to the opponent and the tawara. Positive values favour your side; reaching the ring-out boundary ends the bout.",
     "Momentum": "A signed measure of which wrestler is driving the exchange. Card effects and Kimarite can require relative Momentum.",
     "Power": "Your current physical strength during the bout. Some Kimarite and effects check this value.",
@@ -108,7 +109,7 @@ GLOSSARY = {
 }
 def card_info(card):
     entry = CARD_TEXT.get(card.name, {})
-    return {
+    info = {
         "name": card.name, "id": card.card_id,
         "power": card.power, "technique": card.technique, "spirit": card.spirit,
         "is_kimarite": card.is_kimarite,
@@ -116,3 +117,6 @@ def card_info(card):
         "description": entry.get("effect", ""),
         "description_status": entry.get("status", "needs_audit"),
     }
+    if card.name == "Power Water":
+        info["glossary"] = {"Power Water Cantrips": GLOSSARY["Power Water Cantrips"]}
+    return info
