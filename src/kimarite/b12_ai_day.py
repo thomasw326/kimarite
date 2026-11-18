@@ -4,10 +4,12 @@ The player's already-completed bout is the 21st result. Resolve the other
 20 using the *same* Tachiai/Exchange rules and style_ai_v5 as the B12
 60-framework big test; never estimate W/L from ranks, ratings or randomness.
 
-Per-basho AI decks begin with their 28 distinct format cards. One specified
-duplicate is added per prior tournament victory, capped at the source's
-12 physical copies, matching the player's victory-reward budget. No future
-results are simulated before a player completes their own bout.
+Per-basho AI decks retain 28 different initial cards and one source-designated
+duplicate per prior victory (maximum 12). In AI-only games, a hidden, rank-
+based difficulty softly tunes non-core basics and optional V5 stat boosts.
+The player's actual opponent continues using the original B12 deck and stats,
+with the existing W/L-driven duplicate reward and adaptive matchmaking.
+No future results are simulated before a player completes their own bout.
 """
 from __future__ import annotations
 
@@ -15,6 +17,7 @@ from hashlib import sha256
 import random
 
 from .b12_division_roster import load_formats, validate_world
+from .b12_difficulty import ai_difficulty, tuned_base_cards, tuned_stats
 from .b12_league import MATCHES_PER_DAY, PLAYER, commit_day
 from .catalog import card_by_name
 from .models import BoutState, Card, FighterState, Side, Stat, Wrestler
@@ -28,11 +31,18 @@ DEFAULT_MAX_TURNS = 100
 MAX_DUPLICATES = 12
 
 
-def ai_deck_names(framework: dict, prior_wins: int) -> list[str]:
-    """28 cards initially; 1 predetermined duplicate per previous basho win."""
+def ai_deck_names(framework: dict, prior_wins: int, *,
+                  difficulty: int | None = None) -> list[str]:
+    """28 originals + prior-win reward copies; optional NPC-only rank tuning.
+
+    Difficulty=None is the exact original B12 player-opponent deck and must
+    remain unchanged. AI-vs-AI alone supplies a rank-based difficulty.
+    """
     if type(prior_wins) is not int or prior_wins < 0:
         raise ValueError("Prior wins must be a nonnegative integer")
-    base, duplicates = framework["base"], framework["duplicates"]
+    base = (framework["base"] if difficulty is None
+            else tuned_base_cards(framework, difficulty))
+    duplicates = framework["duplicates"]
     if len(base) != 28 or len(set(base)) != 28:
         raise ValueError("B12 AI framework must have 28 different base cards")
     if len(duplicates) != MAX_DUPLICATES or len(set(duplicates)) != MAX_DUPLICATES:
@@ -48,12 +58,19 @@ def _physical_card(name: str) -> Card:
     return Card(c.card_id, c.name, c.power, c.technique, c.spirit, c.is_kimarite)
 
 
-def build_ai_fighter(wrestler: dict, framework: dict, seed: int, prior_wins: int) -> FighterState:
-    """Use the B12 big-test's exact opening-card selection and AI stats."""
+def build_ai_fighter(wrestler: dict, framework: dict, seed: int, prior_wins: int,
+                     *, difficulty: int | None = None) -> FighterState:
+    """Same seeded opening rules; ranked tuning applies only if explicitly passed.
+
+    The B12 player-versus-AI caller does not provide difficulty, preserving
+    its established wrestler stats, exact framework and W/L earned copies.
+    """
     if wrestler["format_id"] != framework["id"] or wrestler["style"] != framework["style_proxy"]:
         raise ValueError("The match wrestler does not own this unique framework")
     rng = random.Random(seed)
-    cards = [_physical_card(name) for name in ai_deck_names(framework, prior_wins)]
+    cards = [_physical_card(name) for name in ai_deck_names(
+        framework, prior_wins, difficulty=difficulty
+    )]
     try:
         index = next(i for i, c in enumerate(cards) if c.name == framework["starting_kimarite"])
     except StopIteration as exc:
@@ -73,7 +90,8 @@ def build_ai_fighter(wrestler: dict, framework: dict, seed: int, prior_wins: int
     order = list(dict.fromkeys((profile.primary, profile.secondary)))
     order += [s.value for s in (Stat.POWER, Stat.TECHNIQUE, Stat.SPIRIT)
               if s.value not in order]
-    identity = Wrestler(wrestler["name"], *profile.stats, starting, prepared, top,
+    stats = profile.stats if difficulty is None else tuned_stats(profile, difficulty)
+    identity = Wrestler(wrestler["name"], *stats, starting, prepared, top,
                         primary=Stat(order[0]), secondary=Stat(order[1]),
                         tertiary=Stat(order[2]), ranking=wrestler["rank"])
     return FighterState(identity, draw_pile=[top, *cards],
@@ -102,8 +120,17 @@ def simulate_ai_bout(left: dict, right: dict, frameworks: dict[str, dict],
         raise ValueError("Two AI wrestlers cannot share a deck framework")
     a_seed = match_seed(master_seed, basho, day, a_id, b_id, left["format_id"])
     b_seed = match_seed(master_seed, basho, day, a_id, b_id, right["format_id"])
-    a = build_ai_fighter(left, frameworks[left["format_id"]], a_seed, left["wins"])
-    b = build_ai_fighter(right, frameworks[right["format_id"]], b_seed, right["wins"])
+    # Only NPC-versus-NPC uses rank-weighted composition/stat difficulty.
+    # Human-facing opponents continue to use the previously verified B12
+    # construction and live W-L duplication rules, without this pyramid.
+    a = build_ai_fighter(
+        left, frameworks[left["format_id"]], a_seed, left["wins"],
+        difficulty=ai_difficulty(master_seed, a_id, left["rank"])
+    )
+    b = build_ai_fighter(
+        right, frameworks[right["format_id"]], b_seed, right["wins"],
+        difficulty=ai_difficulty(master_seed, b_id, right["rank"])
+    )
     state = BoutState(a, b)
     comp = compare_tachiai(a.wrestler, b.wrestler)
     try:
@@ -136,8 +163,8 @@ def simulate_ai_bout(left: dict, right: dict, frameworks: dict[str, dict],
         "method": state.win_method, "source": state.win_source,
         "turns": state.turn_number,
         "format_a": left["format_id"], "format_b": right["format_id"],
-        "deck_size_a": len(ai_deck_names(frameworks[left["format_id"]], left["wins"])),
-        "deck_size_b": len(ai_deck_names(frameworks[right["format_id"]], right["wins"])),
+        "deck_size_a": 28 + min(MAX_DUPLICATES, left["wins"]),
+        "deck_size_b": 28 + min(MAX_DUPLICATES, right["wins"]),
         "seed_a": a_seed, "seed_b": b_seed,
     }
 
