@@ -1,4 +1,4 @@
-// English-first card labels; original names remain untouched in saves/rules.
+// Bilingual card labels preserve the original language first in the UI.
 // Preserve established Card Library labels. Use concise English glosses
 // for the other Japanese names in the live catalogue.
 const CARD_ENGLISH_NAMES=Object.freeze({
@@ -37,7 +37,7 @@ const CARD_ENGLISH_NAMES=Object.freeze({
  'Sonkyo':"Defensive Crouch",
  'Gaburi':"Belly Drive",
  'Ottsuke':"Arm Clamp",
- 'Use the Tawara':"Use the Ring Bales",
+ 'Use the Tawara':"Ring Bales",
  'Kannuki':"Double Arm Clamp",
  'Morozashi':"Double Inside Grip",
  'Morotezuki':"Two-Handed Thrust",
@@ -59,15 +59,22 @@ const CARD_ENGLISH_NAMES=Object.freeze({
  'Inashi':"Redirect the Charge",
  'Chiri-chozu':"Purification Ritual",
  'Shikiri':"Pre-Bout Face-Off",
- 'Shiko Stomp':"Leg-Lift Stomp",
  'Kubinage':"Headlock Throw",
  'Kimedashi':"Arm-Lock Force Out",
  'Kimetaoshi':"Arm-Lock Force Down"
 });
+const CARD_DISPLAY_TITLES=Object.freeze({
+ 'Driving Force — Power Payoff':'Driving Force',
+ 'Crushing Pressure — Power Crusher':'Crushing Pressure',
+ 'Explosive Step — Fumikomi':'Explosive Step (Fumikomi)',
+ 'Power Water':'Power Water (力水)',
+ 'Salt Throw':'Salt Throw (塩まき)',
+ 'Shiko Stomp':'Shiko Stomp (四股)'
+});
 function displayCardName(name){
  if(typeof name!=='string')return name||'';
  const english=CARD_ENGLISH_NAMES[name];
- return english?english+' ('+name+')':name;
+ return CARD_DISPLAY_TITLES[name]??(english?name+' ('+english+')':name);
 }
 const $=id=>document.getElementById(id);let token=null,game=null,picked=new Set(),pendingPlay=null,sessionSetup=null,actionJournal=[];
 function setGameLocation(location){
