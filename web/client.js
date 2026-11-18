@@ -326,12 +326,17 @@ function openBlockRewards(){
  $('management-board').hidden=true;
  $('management-rewards').hidden=false;
  $('management-next').hidden=true;
+ const opponent=r.won?null:b12Opponent(m,i);
+ const rank=opponent?.rank??r.opponent_rank;
+ const rankLabel=rank?(typeof banzukeRankLabel==='function'?banzukeRankLabel(rank):'#'+rank):null;
+ const opponentLabel=[r.opponent_name||r.opponent,opponent?.style??r.opponent_style,rankLabel]
+  .filter(Boolean).join(' · ');
  const rewards=$('management-rewards');
  rewards.dataset.result=r.won?'win':'loss';
  $('management-reward-progress').textContent=r.won
   ?'Bout '+(i+1)+' · Win. Duplicate one assigned original for your deck ('+
     (28+(m.duplicated_indices||[]).length)+'/40 cards).'
-  :'Bout '+(i+1)+' · Loss to '+(r.opponent_name||r.opponent)+
+  :'Bout '+(i+1)+' · Loss to '+opponentLabel+
     '. Choose one of your three opening cards to go on top of your deck when you next face this wrestler.';
  const panel=$('management-reward-cards');panel.replaceChildren();
  for(const choice of choices){
