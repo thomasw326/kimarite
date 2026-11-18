@@ -821,6 +821,11 @@ $('management-next').onclick=async()=>{
  m.round++;managementSave();
  if(m.round%3===0){
   try{
+   if(isB12Campaign(m)){
+    const planned=await api('/api/b12/campaign/plan',
+     {roster:m.division_roster,league:m.division_league});
+    assignB12Block(m,planned);managementSave();
+   }
    const data=m.draft_picks
     ?await api('/api/b11/draft/deal',{starting_cards:m.starting_cards,picks:m.draft_picks,draft_seed:m.draft_seed,duplicated_indices:m.duplicated_indices||[],seed:m.seed+Math.floor(m.round/3)})
     :await api('/api/management/deal/'+encodeURIComponent(m.human)+'?seed='+(m.seed+Math.floor(m.round/3)));
