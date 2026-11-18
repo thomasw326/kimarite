@@ -134,6 +134,28 @@ function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.classNa
 function btn(text,fn,cls=''){const b=node('button',cls,text);b.onclick=fn;return b}
 function card(c,fn,enabled=true){const b=btn(displayCardName(c.name),fn,'card'+(c.is_kimarite?' kimarite':''));const o=node('div','orb','POWER '+c.power+'  ·  TECH '+c.technique+'  ·  SPIRIT '+c.spirit);b.append(o);b.disabled=!enabled;return b}
 function names(cards){return cards.map(c=>displayCardName(c.name)).join(', ')||'—'}
+function signedPosition(p){return Number.isInteger(p)?(p>0?'+':'')+p:'—'}
+function sideBySideSummary(g){
+ const side=g?.side_by_side;
+ if(!side)return '';
+ const resolve=signedPosition(side.resolution_position);
+ const removal=signedPosition(side.removal_position);
+ const favorable=side.favorable==='human'?'you':'opponent';
+ const extra=side.card==='Spin Away'?' If disrupted, your opponent gains Okuritaoshi if you own Spin Away (or you gain it if your opponent owns Spin Away).':'';
+ return side.card+' · '+side.owner_name+' owns Side-by-Side. Position NOW '+signedPosition(side.current_position)+
+  ' (stored distance '+side.saved_distance+'). All Push is suppressed. If it survives to its owner’s next turn: Position '+resolve+
+  ' (currently favors '+favorable+'). If removed early: Position '+removal+
+  ' (no saved Position restored). The survival prediction changes if Momentum changes.'+extra;
+}
+function sideBySideOnPlayPreview(g,name){
+ if(!g||!Number.isInteger(g.position)||!Number.isInteger(g.momentum))return '';
+ if(g.side_by_side)return sideBySideSummary(g);
+ const distance=Math.abs(g.position),resolve=g.momentum>=0?distance:-distance;
+ const caveat=name==='Spin Away'?' Spin Away gains 1 Momentum first; that can change the orientation, and Momentum overflow can change the stored distance.':'';
+ return 'If played now: Position '+signedPosition(g.position)+' → 0 (stored distance '+distance+
+  '). While active all Push is suppressed. If it survives with current Momentum: Position '+
+  signedPosition(resolve)+'. If removed early: Position 0 (no distance restored).'+caveat;
+}
 function zoneEffect(c,zone){
  const d=c.description||'';
  if(zone==='kimarite')return (d.match(/Win:\s*(.*?)(?=\s*On play:|$)/)||[])[1]||'Winning condition not available';
@@ -141,13 +163,13 @@ function zoneEffect(c,zone){
  if(c.name==='Sonkyo')return 'Prevents the next negative effect against you; persists until consumed.';
  if(c.name==='Kannuki')return 'While active: suppresses opponent Grip benefits and Grip-building cards. Next turn: reduce both opposing Grips one level and make opponent Unstable (subject to prevention).';
  if(c.name==='Henka')return 'Blocks the first incoming Push. If it survives: gain 1 Momentum and make opponent Unstable. If disrupted: you become Unstable.';
- if(c.name==='Sidestep')return 'While side-by-side: Push is suppressed. On survival: Momentum determines favourable orientation; opponent becomes Unstable.';
- if(c.name==='Spin Away')return 'While active: Push is suppressed. On survival: Momentum determines favourable orientation. If disrupted: opponent gains Okuritaoshi.';
+ if(c.name==='Sidestep')return 'On survival: opponent becomes Unstable. '+(game?.side_by_side?.card===c.name?sideBySideSummary(game):'While Side-by-Side, all Push is suppressed.');
+ if(c.name==='Spin Away')return 'On disruption: opponent gains Okuritaoshi. '+(game?.side_by_side?.card===c.name?sideBySideSummary(game):'While Side-by-Side, all Push is suppressed.');
  const m=d.match(/(?:Temporary(?: \([^)]*\))?|While active:|Next turn:|On each later turn:|At the start of your next turn:)[\s:]*(.*)$/i);
  return m?m[0]:d.replace(/^.*?Exchange:\s*/,'')||'Active effect unavailable';
 }
 
-function inspect(c,playAction){$('inspect-name').textContent=displayCardName(c.name);$('inspect-orbs').textContent=c.zone_only?'':('Power '+(c.power??0)+' · Technique '+(c.technique??0)+' · Spirit '+(c.spirit??0));const desc=c.description||'This card needs a B10 wording audit before its full rules can be shown.';const effect=$('inspect-effect');effect.replaceChildren();const terms=Object.keys((game&&game.glossary)||{}).sort((a,b)=>b.length-a.length);const split=terms.length?new RegExp('\\b('+terms.join('|')+')\\b','gi'):null;const chunks=split?desc.split(split):[desc];for(const chunk of chunks){const key=terms.find(t=>t.toLowerCase()===chunk.toLowerCase());if(key){const link=btn(chunk,()=>{const old=$('glossary-detail');if(old)old.remove();const panel=node('p','glossary-detail',key+': '+game.glossary[key]);panel.id='glossary-detail';effect.after(panel)},'term-link');link.type='button';effect.append(link)}else effect.append(document.createTextNode(chunk))}$('inspect-orbs').textContent+=' · '+(c.timing||'')+(c.description_status==='needs_audit'?' · TEXT PENDING AUDIT':'');$('inspect-actions').replaceChildren();if(c.unavailable_reason)$('inspect-actions').append(node('p','unavailable-reason','Cannot play: '+c.unavailable_reason));if(playAction)$('inspect-actions').append(btn('Play this card',()=>{$('inspect').close();playAction()},'confirm'));$('inspect').showModal()}
+function inspect(c,playAction){$('inspect-name').textContent=displayCardName(c.name);$('inspect-orbs').textContent=c.zone_only?'':('Power '+(c.power??0)+' · Technique '+(c.technique??0)+' · Spirit '+(c.spirit??0));const desc=c.description||'This card needs a B10 wording audit before its full rules can be shown.';const preview=(!c.zone_only&&['Sidestep','Spin Away'].includes(c.name))?sideBySideOnPlayPreview(game,c.name):'';const effect=$('inspect-effect');effect.replaceChildren();const terms=Object.keys((game&&game.glossary)||{}).sort((a,b)=>b.length-a.length);const split=terms.length?new RegExp('\\b('+terms.join('|')+')\\b','gi'):null;const chunks=split?desc.split(split):[desc];for(const chunk of chunks){const key=terms.find(t=>t.toLowerCase()===chunk.toLowerCase());if(key){const link=btn(chunk,()=>{const old=$('glossary-detail');if(old)old.remove();const panel=node('p','glossary-detail',key+': '+game.glossary[key]);panel.id='glossary-detail';effect.after(panel)},'term-link');link.type='button';effect.append(link)}else effect.append(document.createTextNode(chunk))}if(preview)effect.append(node('p','side-by-side-preview',preview));$('inspect-orbs').textContent+=' · '+(c.timing||'')+(c.description_status==='needs_audit'?' · TEXT PENDING AUDIT':'');$('inspect-actions').replaceChildren();if(c.unavailable_reason)$('inspect-actions').append(node('p','unavailable-reason','Cannot play: '+c.unavailable_reason));if(playAction)$('inspect-actions').append(btn('Play this card',()=>{$('inspect').close();playAction()},'confirm'));$('inspect').showModal()}
 $('inspect-close').onclick=()=>$('inspect').close();
 function logText(){if(!game)return '';return ['KIMARITE — BOUT HISTORY',game.human.name+' vs '+game.opponent.name,'Turn '+game.turn+(game.finished?' — Bout over':'')+(sessionSetup&&Number.isSafeInteger(sessionSetup.seed)?' · Seed '+sessionSetup.seed:''),'',...(game.events||[])].join('\n')}
 $('copy-history').onclick=async()=>{const value=logText();if(!value){$('copy-status').textContent='Start a bout first.';return}try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(value)}else{const field=document.createElement('textarea');field.value=value;field.style.position='fixed';field.style.opacity='0';document.body.append(field);field.select();if(!document.execCommand('copy'))throw new Error('Copy not supported');field.remove()}$('copy-status').textContent='Copied!'}catch(e){$('copy-status').textContent='Select and copy the log below.';const field=document.createElement('textarea');field.value=value;field.rows=8;field.className='log-copy-fallback';$('copy-status').after(field);field.focus();field.select()}};
@@ -887,7 +909,7 @@ function renderBoutHud(g){
  }
  hud.hidden=false;
  $('hud-turn').textContent='Turn '+(g.turn??'—');
- $('hud-position').textContent='Position '+(Number(g.position)>0?'+':'')+g.position;
+ $('hud-position').textContent='Position '+signedPosition(g.position)+(g.side_by_side?' · Side-by-Side (stored '+g.side_by_side.saved_distance+')':'');
  $('hud-momentum').textContent='Momentum '+(Number(g.momentum)>0?'+':'')+g.momentum;
  const own=g.human;
  $('hud-human').textContent='You: '+(own?.name||'Rikishi')+' · Power '+(own?.power??'—')+' · Grip '+(Array.isArray(own?.grip)?own.grip.join('/'):'—');
@@ -912,6 +934,9 @@ function updateDohyoPosition(g){
  // Position is the shared ring track, from the human player's perspective.
  // +4/-4 are still inside the tawara; crossing past 4 causes ring-out.
  const ring=$('dohyo-ring'),label=$('ring-position-label'),warning=$('ring-edge-warning');
+ const activeSideBySide=$('side-by-side-status');
+ activeSideBySide.hidden=!g?.side_by_side;
+ activeSideBySide.textContent=g?.side_by_side?sideBySideSummary(g):'';
  const ready=Number.isInteger(g?.position)&&g.position>=-4&&g.position<=4;
  const position=ready?g.position:0;
  ring.style.setProperty('--ring-shift',(position*6)+'%');
@@ -922,7 +947,7 @@ function updateDohyoPosition(g){
   ring.setAttribute('aria-label','Dohyō showing the neutral starting positions; awaiting Tachiai');
   return;
  }
- const state=position===0?'Neutral':position>0?'Advancing toward the opponent’s edge':'Being pushed toward your edge';
+ const state=g.side_by_side?'Side-by-Side · previous distance stored':position===0?'Neutral':position>0?'Advancing toward the opponent’s edge':'Being pushed toward your edge';
  label.textContent='Position '+(position>0?'+':'')+position+' · '+state;
  ring.setAttribute('aria-label','Dohyō at Position '+(position>0?'+':'')+position+' of ±4. '+state+'.');
 }
@@ -965,6 +990,7 @@ function showBoutResult(g){
  if(lastPresentedResult===key)return;
  lastPresentedResult=key;
  const won=g.winner==='A';
+ setB12MatchdayStatus('idle','');
  $('result-banner').textContent=won?'VICTORY!':'DEFEAT';
  $('result-banner').className='result-banner '+(won?'result-victory':'result-defeat');
  $('result-method').textContent=g.win_method||'Bout ended';
@@ -982,7 +1008,7 @@ function showBoutResult(g){
    }
   }
   const fields=[['Grip',info.grip],['Effective Grip',info.effective_grip],['Power',info.power],['Momentum advantage',info.momentum_advantage],['Position advantage',info.position_advantage],['Hand advantage',info.hand_advantage]];
-  for(const [name,value] of fields){const row=node('div','result-value');row.append(node('span','',name),node('strong','',String(value)));values.append(row)}
+  for(const [name,value] of fields){const row=node('div','result-value');row.append(node('span','',name),node('strong','',value??'—'));values.append(row)}
  }
  dialog.classList.remove('result-revealed');
  dialog.showModal();
@@ -990,6 +1016,53 @@ function showBoutResult(g){
 }
 $('result-review').onclick=()=>{$('bout-result').close();$('bout-history-details').open=true;$('bout-history-details').scrollIntoView({behavior:'smooth',block:'start'})};
 let resolvingB12Matchday=false;
+let matchdayPrefetch=null;
+let matchdayPrefetchKey=null;
+function setB12MatchdayStatus(status,message){
+ const ready=status==='ready';
+ for(const id of ['result-next','return-heya']){
+  const button=$(id);
+  button.classList.toggle('heya-standings-ready',ready);
+  button.classList.toggle('heya-standings-loading',status==='loading');
+  button.title=ready?'All 21 bouts are recorded — return to Heya now':message||'';
+ }
+ $('result-next').textContent=ready?'Return to Heya · Ready':
+  status==='loading'?'Return to Heya · Updating standings…':
+  status==='error'?'Return to Heya · Retry':'Return to Heya';
+ $('result-standings-status').textContent=message||'';
+}
+function startB12MatchdayPrefetch(g){
+ const m=management;
+ if(!g?.finished||!isB12Campaign(m)||activeTournamentBout()!==m.round)return null;
+ const key=[m.division_roster.seed,m.division_roster.completed_basho||0,m.round,
+  sessionSetup?.seed].join('|');
+ if(m.results.length===m.round+1){
+  setB12MatchdayStatus('ready','All 21 match results recorded. Standings ready.');
+  return Promise.resolve(true);
+ }
+ if(matchdayPrefetch&&matchdayPrefetchKey===key)return matchdayPrefetch;
+ matchdayPrefetchKey=key;
+ setB12MatchdayStatus('loading','Simulating the other 20 bouts while you review this result…');
+ // The server does the actual gameplay; the result screen renders immediately.
+ // Reusing this promise prevents a second batch if Return is clicked early.
+ const pending=commitB12PlayerResult(m).then(()=>{
+  if(matchdayPrefetchKey===key)
+   setB12MatchdayStatus('ready','All 21 matches finished. Return to Heya is ready.');
+  return true;
+ }).catch(error=>{
+  if(matchdayPrefetchKey===key){
+   matchdayPrefetch=null;
+   setB12MatchdayStatus('error','Standings update failed: '+error.message+
+    '. Select Return to Heya to retry.');
+  }
+  throw error;
+ });
+ matchdayPrefetch=pending;
+ // The result opens before the user clicks anything. Handle an async rejection
+ // here as well, so a server failure does not create an unhandled rejection.
+ void pending.catch(()=>{});
+ return pending;
+}
 async function commitB12PlayerResult(m){
  const i=m.round;
  if(!isB12Campaign(m)||!game?.finished||activeTournamentBout()!==i)
@@ -1040,8 +1113,8 @@ async function returnToHeya(){
   if(isB12Campaign(management)&&activeTournamentBout()===management.round&&
      management.results.length===management.round){
    $('result-next').disabled=true;$('return-heya').disabled=true;
-   $('notice').textContent='Simulating the other 20 matches and updating the banzuke…';
-   await commitB12PlayerResult(management);
+   $('notice').textContent='Completing the remaining matches and standings…';
+   await startB12MatchdayPrefetch(game);
   }
  }catch(error){
   $('notice').textContent='Could not complete the matchday: '+error.message+' — Retry Return to Heya.';
@@ -1080,7 +1153,10 @@ function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();if(g.selection){$('choices').append(node('h2','','Choose '+g.selection.keep+' cards to keep'));const strip=node('div','cards');g.selection.options.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}confirm.disabled=picked.size!==g.selection.keep});b.firstChild.textContent=(i+1)+'. '+displayCardName(c.name);const info=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');info.type='button';const wrap=node('div','choice-card-wrap');wrap.append(b,info);strip.append(wrap)});$('choices').append(strip);const confirm=btn('Keep selected cards',()=>act({type:'choose_cards',indices:[...picked]}),'confirm');confirm.disabled=g.selection.keep!==0;$('choices').append(confirm)}
  $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));g.human.hand.forEach((c,i)=>$('hand').append(card(c,()=>inspect(c,legal.has(i)?()=>play(i):null),true)));const history=$('history');history.replaceChildren();const events=g.events||[];if(!events.length)history.append(node('p','','No actions recorded yet.'));for(const event of events.slice().reverse())history.append(node('p',event.includes(' plays ')?'history-line':'history-event',event));const endButton=$('end');endButton.disabled=!g.can_end_turn;const canFinish=turnCues.winReady;endButton.classList.toggle('end-turn-no-plays',turnCues.noPlays);endButton.classList.toggle('end-turn-win',canFinish);endButton.textContent=canFinish?'End turn to win':'End turn';endButton.title=canFinish?'End turn to win with '+[...readyNames].join(', '):g.can_end_turn&&g.human.plays_remaining===0?'No Plays remaining — end your turn':'';$('notice').textContent=g.finished?('Winner: '+(g.winner==='A'?g.human.name:g.winner==='B'?g.opponent.name:'Undecided')+' · '+(g.win_method||g.stopped_reason||'')):'';
- if(g.finished&&!alreadyInHeya)showBoutResult(g);
+ if(g.finished&&!alreadyInHeya){
+  showBoutResult(g);
+  startB12MatchdayPrefetch(g);
+ }
 }
 async function play(hand_index){pendingPlay={type:'play_card',hand_index,choices:{}};await act(pendingPlay)}
 async function act(command){try{let r;try{r=await api('/api/session/'+token+'/action',command)}catch(e){if(e.data&&e.data.code==='session_expired'){await recoverSession();r=await api('/api/session/'+token+'/action',command)}else throw e}actionJournal.push(JSON.parse(JSON.stringify(command)));render(r.state)}catch(e){if(e.data&&e.data.choice_required){choicePrompt(e.data);return}if(e.data&&e.data.state){render(e.data.state);$('notice').textContent=e.message+(e.data.state.selection?' — Card selection is still pending above.':'');return}$('notice').textContent=e.message}}

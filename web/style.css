@@ -352,3 +352,13 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 .opponent-deck-details{margin:6px 0 9px;color:#e8dfc4;font-size:12px}
 .opponent-deck-details summary{cursor:pointer}
 @media(max-width:490px){.banzuke-entry{grid-template-columns:32px minmax(95px,1.5fr) minmax(70px,1fr) 44px;gap:4px;padding:7px 3px;font-size:12px}}
+
+/* B12 information-only combat previews; gameplay uses canonical engine. */
+.side-by-side-status{padding:10px 12px;border:1px solid #b8aa80;border-radius:8px;background:#213b40;color:#f4e7c8;font-size:.9rem;line-height:1.5}
+.side-by-side-status[hidden]{display:none!important}
+.side-by-side-preview{margin:12px 0;padding:10px 12px;background:#23393a;border:1px solid #b5a783;border-radius:8px;line-height:1.55}
+.result-standings-status{margin:12px 0 0;font-size:.9rem;line-height:1.5;color:#e8d9b8;min-height:1.5em}
+/* After all 20 AI-only bouts and the player bout are committed, signal that
+   Return is instant; do not border it while simulating or after an error. */
+#result-next.heya-standings-ready,#return-heya.heya-standings-ready{border:3px solid #f5d47b;box-shadow:0 0 0 2px #233a37,0 0 12px #f5d47b66;font-weight:800}
+#result-next.heya-standings-loading,#return-heya.heya-standings-loading{border:1px solid #9d9b8b}

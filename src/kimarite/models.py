@@ -205,11 +205,24 @@ class BoutState:
                     explanation = "Power loss: the opponent's Power fell below zero during the start-of-turn Exhaustion check."
                 else:
                     explanation = "The bout ended by a direct game effect, rather than a Kimarite Zone requirement check."
+                # Direct victories (including ring-out Yorikiri) must
+                # capture the same numeric result stats as zone Kimarite.
+                # This is a presentation snapshot, not an additional
+                # requirement or a gameplay condition.
+                from .rules import effective_total_grip
+                winner = self.fighter(side)
+                opponent = self.opponent(side)
                 self.b11_victory_details = {
                     "kimarite": method,
                     "source": source or method.lower(),
                     "requirement_text": explanation,
                     "checks": [],
                     "turn": self.turn_number,
+                    "grip": winner.total_grip,
+                    "effective_grip": effective_total_grip(self, side),
+                    "power": winner.power,
+                    "momentum_advantage": self.momentum * self.sign(side),
+                    "position_advantage": self.position * self.sign(side),
+                    "hand_advantage": len(winner.hand) - len(opponent.hand),
                 }
             self.log(f"{self.fighter(side).wrestler.name} wins by {method}.")

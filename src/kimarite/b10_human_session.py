@@ -156,6 +156,35 @@ def new_b10_session(human: str, opponent: str, *, seed: int = 20261021,
     return session
 
 
+def side_by_side_snapshot(session: HumanBout) -> dict | None:
+    """Actual Side-by-Side orientation projections from the human perspective.
+
+    During Sidestep/Spin Away, Position is zero. The saved absolute distance
+    returns only on *survival* at the owner's next start-of-turn, with the
+    favorable side chosen from Momentum then. Early removal leaves Position
+    unchanged at zero. Never expose opponent hand cards or planned actions.
+    """
+    state = session.state
+    owner = state.side_by_side_owner
+    if owner is None:
+        return None
+    card_name = next((t.card.name for t in state.fighter(owner).temporary_zone
+                      if t.card.name in {"Sidestep", "Spin Away"}), "Side-by-Side")
+    favorable = owner if state.momentum * state.sign(owner) >= 0 else state.opponent_side(owner)
+    player_sign = state.sign(session.human_side)
+    return {
+        "card": card_name,
+        "owner": "human" if owner is session.human_side else "opponent",
+        "owner_name": state.fighter(owner).wrestler.name,
+        "current_position": state.position * player_sign,
+        "saved_distance": state.side_by_side_distance,
+        "momentum": state.momentum * player_sign,
+        "resolution_position": state.sign(favorable) * state.side_by_side_distance * player_sign,
+        "removal_position": state.position * player_sign,
+        "favorable": "human" if favorable is session.human_side else "opponent",
+    }
+
+
 def public_snapshot(session: HumanBout) -> dict:
     """JSON-compatible display state; never expose opposing hidden cards."""
     view = session.view()
@@ -228,6 +257,7 @@ def public_snapshot(session: HumanBout) -> dict:
         "turn": view.turn_number,
         "position": view.position,
         "momentum": view.momentum,
+        "side_by_side": side_by_side_snapshot(session),
         "human": {
             "name":own.wrestler.name, "power":view.own_power, "grip":list(view.own_grip),
             "hand":[{**enriched(card), "unavailable_reason":reason(i,card)} for i,card in enumerate(own.hand)],
