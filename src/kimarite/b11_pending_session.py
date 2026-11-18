@@ -25,14 +25,34 @@ class PendingB11Session:
     seed: int = 20261021
     created_stats: dict[str, int] | None = None
     drafted_deck: list[str] | None = None
+    opponent_ai: dict | None = None
+    player_rank: int = 1
 
     @classmethod
-    def start(cls, human: str, opponent: str, names: list[str], *, seed: int = 20261021, created_stats: dict[str, int] | None = None, drafted_deck: list[str] | None = None) -> "PendingB11Session":
+    def start(cls, human: str, opponent: str, names: list[str], *, seed: int = 20261021, created_stats: dict[str, int] | None = None, drafted_deck: list[str] | None = None, opponent_ai: dict | None = None, player_rank: int = 1) -> "PendingB11Session":
         if (not isinstance(human, str) or not 1 <= len(human) <= 32
                 or human != human.strip() or any(ord(char) < 32 for char in human)):
             raise ValueError("Created wrestler name must be 1–32 visible characters.")
-        if opponent not in roster():
-            raise ValueError("Opponent must belong to the available AI roster.")
+        if opponent_ai is None:
+            if opponent not in roster():
+                raise ValueError("Opponent must belong to the available AI roster.")
+        else:
+            # B12 AI belongs to the world's 60 unique framework identities.
+            # Its *own* deck will be generated privately only AFTER Tachiai.
+            from .b12_division_roster import load_formats
+            if not isinstance(opponent_ai, dict):
+                raise ValueError("B12 AI opponent must be a wrestler record.")
+            source = {f["id"]: f for f in load_formats()}
+            fmt = source.get(opponent_ai.get("format_id"))
+            if (fmt is None or opponent_ai.get("name") != opponent or
+                    fmt["style_proxy"] != opponent_ai.get("style") or
+                    not isinstance(opponent_ai.get("id"), str) or
+                    type(opponent_ai.get("wins")) is not int or opponent_ai["wins"] < 0 or
+                    type(opponent_ai.get("rank")) is not int or
+                    not 1 <= opponent_ai["rank"] <= 42):
+                raise ValueError("Invalid B12 wrestler name, format, style or record.")
+            if type(player_rank) is not int or not 1 <= player_rank <= 42:
+                raise ValueError("Invalid player banzuke rank.")
         # Legacy preset bouts still work, but player-created wrestlers are
         # defined by a real drafted deck and chosen stats, not a roster entry.
         if human not in roster() and (drafted_deck is None or created_stats is None):
@@ -50,7 +70,7 @@ class PendingB11Session:
                 raise ValueError("Invalid B11 grown deck; require 28–40 eligible cards.")
         deck = [card_by_name(name) for name in (drafted_deck if drafted_deck is not None else records[human]["cards"])]
         opening = PlayerOpening.from_names(deck, names)
-        return cls(human, opponent, PendingPlayerTachiai(opening), seed=seed, created_stats=created_stats, drafted_deck=drafted_deck)
+        return cls(human, opponent, PendingPlayerTachiai(opening), seed=seed, created_stats=created_stats, drafted_deck=drafted_deck, opponent_ai=opponent_ai, player_rank=player_rank)
 
     def confirm(self, indices: list[int]) -> dict[str, Any]:
         """Record a one-time human decision; actual resolution remains gated."""
