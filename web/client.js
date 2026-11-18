@@ -686,6 +686,7 @@ async function offerDraft(){
  const d=activeDraft;if(!d)return;
  setGameLocation('heya');
  showYearStatus(d);
+ showB12Banzuke(d.division_roster&&d.division_league?d:null);
  const owned=[...d.starting_cards,...d.picks];
  $('b11-draft').hidden=false;$('management-board').hidden=true;$('management-deal').hidden=true;
  $('management-opening-mode').disabled=true;$('management-deck').disabled=true;$('b11-creation').hidden=true;
@@ -791,6 +792,7 @@ $('confirm-new-wrestler').onclick=()=>{
  if($('tournament-final').open)$('tournament-final').close();
  management=null;managementSave();
  activeDraft=null;saveDraft();
+ showB12Banzuke(null);
  clearBoutSession();
  lastPresentedResult=null;
  $('management-opening-mode').value='b11_live';
