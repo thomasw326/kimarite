@@ -49,7 +49,8 @@ def test_standard_draft_uses_created_name_and_stats_independently_of_legacy_rost
     assert "const draftedName=$('wrestler-name').value.trim()" in JS
     assert "const human=standard?(continuing?management.human:draftedName):$('management-deck').value" in JS
     assert "const created=previous?.created_stats||creationChoices()" in JS
-    assert "activeDraft={human,seed,created_stats:created" in JS
+    assert "activeDraft={human,seed,world_seed:" in JS
+    assert "created_stats:created,tournament_history,starting_cards:[...starting]" in JS
     assert "management={human:d.human,seed:d.seed,opening_mode:'b11_live',created_stats:d.created_stats" in JS
     assert "request.created_stats=m.created_stats" in JS
     assert "request.starting_cards=m.starting_cards" in JS
@@ -63,6 +64,9 @@ def test_created_identity_survives_resume_and_next_tournament_draft():
     assert "const previous=continuing?management:null" in JS
     assert "previous.next_starting_cards??earnedNextStartingCards(previous)" in JS
     assert "management.next_starting_cards=earnedNextStartingCards(management)" in JS
-    # The old 26-wrestler roster is still used to seed existing AI opponents.
+    # The legacy practice dropdown is still available; standard created
+    # wrestlers instead draw 15 nonrepeating opponents from the 42-place league.
     assert "const roster=[...$('opponent').options]" in JS
-    assert ".filter(v=>v&&v!=='__random__'&&v!==d.human)" in JS
+    assert "opponents:Array(15).fill(null),b12_opponent_ids:Array(15).fill(null)" in JS
+    assert "assignB12Block(management,division)" in JS
+    assert "division_roster:division.roster" in JS
