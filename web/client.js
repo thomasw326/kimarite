@@ -990,6 +990,7 @@ function showBoutResult(g){
  if(lastPresentedResult===key)return;
  lastPresentedResult=key;
  const won=g.winner==='A';
+ setB12MatchdayStatus('idle','');
  $('result-banner').textContent=won?'VICTORY!':'DEFEAT';
  $('result-banner').className='result-banner '+(won?'result-victory':'result-defeat');
  $('result-method').textContent=g.win_method||'Bout ended';
@@ -1007,7 +1008,7 @@ function showBoutResult(g){
    }
   }
   const fields=[['Grip',info.grip],['Effective Grip',info.effective_grip],['Power',info.power],['Momentum advantage',info.momentum_advantage],['Position advantage',info.position_advantage],['Hand advantage',info.hand_advantage]];
-  for(const [name,value] of fields){const row=node('div','result-value');row.append(node('span','',name),node('strong','',String(value)));values.append(row)}
+  for(const [name,value] of fields){const row=node('div','result-value');row.append(node('span','',name),node('strong','',value??'—'));values.append(row)}
  }
  dialog.classList.remove('result-revealed');
  dialog.showModal();
@@ -1015,6 +1016,53 @@ function showBoutResult(g){
 }
 $('result-review').onclick=()=>{$('bout-result').close();$('bout-history-details').open=true;$('bout-history-details').scrollIntoView({behavior:'smooth',block:'start'})};
 let resolvingB12Matchday=false;
+let matchdayPrefetch=null;
+let matchdayPrefetchKey=null;
+function setB12MatchdayStatus(status,message){
+ const ready=status==='ready';
+ for(const id of ['result-next','return-heya']){
+  const button=$(id);
+  button.classList.toggle('heya-standings-ready',ready);
+  button.classList.toggle('heya-standings-loading',status==='loading');
+  button.title=ready?'All 21 bouts are recorded — return to Heya now':message||'';
+ }
+ $('result-next').textContent=ready?'Return to Heya · Ready':
+  status==='loading'?'Return to Heya · Updating standings…':
+  status==='error'?'Return to Heya · Retry':'Return to Heya';
+ $('result-standings-status').textContent=message||'';
+}
+function startB12MatchdayPrefetch(g){
+ const m=management;
+ if(!g?.finished||!isB12Campaign(m)||activeTournamentBout()!==m.round)return null;
+ const key=[m.division_roster.seed,m.division_roster.completed_basho||0,m.round,
+  sessionSetup?.seed].join('|');
+ if(m.results.length===m.round+1){
+  setB12MatchdayStatus('ready','All 21 match results recorded. Standings ready.');
+  return Promise.resolve(true);
+ }
+ if(matchdayPrefetch&&matchdayPrefetchKey===key)return matchdayPrefetch;
+ matchdayPrefetchKey=key;
+ setB12MatchdayStatus('loading','Simulating the other 20 bouts while you review this result…');
+ // The server does the actual gameplay; the result screen renders immediately.
+ // Reusing this promise prevents a second batch if Return is clicked early.
+ const pending=commitB12PlayerResult(m).then(()=>{
+  if(matchdayPrefetchKey===key)
+   setB12MatchdayStatus('ready','All 21 matches finished. Return to Heya is ready.');
+  return true;
+ }).catch(error=>{
+  if(matchdayPrefetchKey===key){
+   matchdayPrefetch=null;
+   setB12MatchdayStatus('error','Standings update failed: '+error.message+
+    '. Select Return to Heya to retry.');
+  }
+  throw error;
+ });
+ matchdayPrefetch=pending;
+ // The result opens before the user clicks anything. Handle an async rejection
+ // here as well, so a server failure does not create an unhandled rejection.
+ void pending.catch(()=>{});
+ return pending;
+}
 async function commitB12PlayerResult(m){
  const i=m.round;
  if(!isB12Campaign(m)||!game?.finished||activeTournamentBout()!==i)
@@ -1065,8 +1113,8 @@ async function returnToHeya(){
   if(isB12Campaign(management)&&activeTournamentBout()===management.round&&
      management.results.length===management.round){
    $('result-next').disabled=true;$('return-heya').disabled=true;
-   $('notice').textContent='Simulating the other 20 matches and updating the banzuke…';
-   await commitB12PlayerResult(management);
+   $('notice').textContent='Completing the remaining matches and standings…';
+   await startB12MatchdayPrefetch(game);
   }
  }catch(error){
   $('notice').textContent='Could not complete the matchday: '+error.message+' — Retry Return to Heya.';
@@ -1105,7 +1153,10 @@ function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();if(g.selection){$('choices').append(node('h2','','Choose '+g.selection.keep+' cards to keep'));const strip=node('div','cards');g.selection.options.forEach((c,i)=>{const b=card(c,()=>{if(picked.has(i)){picked.delete(i);b.classList.remove('selected')}else{picked.add(i);b.classList.add('selected')}confirm.disabled=picked.size!==g.selection.keep});b.firstChild.textContent=(i+1)+'. '+displayCardName(c.name);const info=btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect');info.type='button';const wrap=node('div','choice-card-wrap');wrap.append(b,info);strip.append(wrap)});$('choices').append(strip);const confirm=btn('Keep selected cards',()=>act({type:'choose_cards',indices:[...picked]}),'confirm');confirm.disabled=g.selection.keep!==0;$('choices').append(confirm)}
  $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));g.human.hand.forEach((c,i)=>$('hand').append(card(c,()=>inspect(c,legal.has(i)?()=>play(i):null),true)));const history=$('history');history.replaceChildren();const events=g.events||[];if(!events.length)history.append(node('p','','No actions recorded yet.'));for(const event of events.slice().reverse())history.append(node('p',event.includes(' plays ')?'history-line':'history-event',event));const endButton=$('end');endButton.disabled=!g.can_end_turn;const canFinish=turnCues.winReady;endButton.classList.toggle('end-turn-no-plays',turnCues.noPlays);endButton.classList.toggle('end-turn-win',canFinish);endButton.textContent=canFinish?'End turn to win':'End turn';endButton.title=canFinish?'End turn to win with '+[...readyNames].join(', '):g.can_end_turn&&g.human.plays_remaining===0?'No Plays remaining — end your turn':'';$('notice').textContent=g.finished?('Winner: '+(g.winner==='A'?g.human.name:g.winner==='B'?g.opponent.name:'Undecided')+' · '+(g.win_method||g.stopped_reason||'')):'';
- if(g.finished&&!alreadyInHeya)showBoutResult(g);
+ if(g.finished&&!alreadyInHeya){
+  showBoutResult(g);
+  startB12MatchdayPrefetch(g);
+ }
 }
 async function play(hand_index){pendingPlay={type:'play_card',hand_index,choices:{}};await act(pendingPlay)}
 async function act(command){try{let r;try{r=await api('/api/session/'+token+'/action',command)}catch(e){if(e.data&&e.data.code==='session_expired'){await recoverSession();r=await api('/api/session/'+token+'/action',command)}else throw e}actionJournal.push(JSON.parse(JSON.stringify(command)));render(r.state)}catch(e){if(e.data&&e.data.choice_required){choicePrompt(e.data);return}if(e.data&&e.data.state){render(e.data.state);$('notice').textContent=e.message+(e.data.state.selection?' — Card selection is still pending above.':'');return}$('notice').textContent=e.message}}
