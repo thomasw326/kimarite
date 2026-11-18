@@ -1,7 +1,6 @@
 // English-first card labels; original names remain untouched in saves/rules.
-// Exact approved English descriptions are taken from Google Sheets:
-// 'Kimarite Card Library' -> 'Kimarite Library'!B:C and 'Other Cards'!A,I:J.
-// Cards not explicitly sourced in those tabs remain Japanese-only.
+// Preserve established Card Library labels. Use concise English glosses
+// for the other Japanese names in the live catalogue.
 const CARD_ENGLISH_NAMES=Object.freeze({
  'Oshi':"Push",
  'Tsuki':"Thrust",
@@ -32,7 +31,38 @@ const CARD_ENGLISH_NAMES=Object.freeze({
  'Kirikaeshi':"Reversal Leg Trip",
  'Okuritaoshi':"Rear Push Down",
  'Tottari':"Arm Bar Throw",
- 'Utchari':"Edge Pivot Throw"
+ 'Utchari':"Edge Pivot Throw",
+ 'Uwate':"Outside Grip",
+ 'Shitate':"Inside Grip",
+ 'Sonkyo':"Defensive Crouch",
+ 'Gaburi':"Belly Drive",
+ 'Ottsuke':"Arm Clamp",
+ 'Use the Tawara':"Use the Ring Bales",
+ 'Kannuki':"Double Arm Clamp",
+ 'Morozashi':"Double Inside Grip",
+ 'Morotezuki':"Two-Handed Thrust",
+ 'Kachiage':"Rising Forearm Strike",
+ 'Nekodamashi':"Clap Feint",
+ 'Maesabaki':"Fight for Inside Position",
+ 'Deashi':"Quick First Step",
+ 'Butsukari':"Charging Drill",
+ 'Denshamichi':"Straight-Line Drive",
+ 'Ankogata':"Heavyset Build",
+ 'Tsuriotoshi':"Lift and Drop",
+ 'Shitatedashinage':"Pulling Underarm Throw",
+ 'Shitatehineri':"Twisting Underarm Throw",
+ 'Renzoku':"Chain Attacks",
+ 'Meguri':"Cycle",
+ 'Nokotta!':"Still In!",
+ 'Hakkeyoi!':"Get Moving!",
+ 'Hazuoshi':"Underarm Push",
+ 'Inashi':"Redirect the Charge",
+ 'Chiri-chozu':"Purification Ritual",
+ 'Shikiri':"Pre-Bout Face-Off",
+ 'Shiko Stomp':"Leg-Lift Stomp",
+ 'Kubinage':"Headlock Throw",
+ 'Kimedashi':"Arm-Lock Force Out",
+ 'Kimetaoshi':"Arm-Lock Force Down"
 });
 function displayCardName(name){
  if(typeof name!=='string')return name||'';
