@@ -411,3 +411,43 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 #creation-error:empty{display:none}
 .practice-coach{padding:10px 14px;margin:8px 0;border:1px solid #c9aa72;border-radius:8px;background:#253834}
 .practice-coach p{margin:5px 0 8px}
+
+/* Practice tabletop */
+.table-layout{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.table-layout .bout-state,.table-layout .bout-decisions{display:contents}
+.table-layout #score,.table-layout #dohyo-details>summary{display:none}
+body:has(.table-layout) #bout-hud{display:none}
+body:has(.table-layout) main{max-width:1150px}
+.table-layout .table-opponent{order:0}
+.table-layout .arena{order:1}
+.table-layout .table-player-zones{order:2}
+.table-layout #choices{order:3}
+.table-layout .play{order:4}
+.table-layout #practice-coach,.table-layout #notice{order:5}
+.table-layout .ring-composite{grid-template-columns:auto minmax(0,1fr);justify-content:center}
+.table-layout .arena .dohyo{width:80px;height:80px;border-width:6px;margin:0 10px}
+.table-layout .arena .rikishi{font-size:25px}
+.table-layout .tracks{max-width:400px;margin-inline:auto}
+.table-opponent,.table-player-zones{background:#172c30}
+.table-foe-piles,.table-hand-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center}
+.table-foe-zones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:6px}
+.table-foe-hand{text-align:center;font-size:12px}
+.table-hand-backs{display:flex;justify-content:center;min-height:30px;margin-bottom:3px}
+.table-hand-backs .table-card-back{width:21px;height:30px;margin-inline:-3px;transform:rotate(-6deg)}
+.table-pile{display:grid;justify-items:center;gap:4px;min-width:52px;padding:4px;background:transparent;color:#f7f2e6;font-size:12px}
+.table-card-back{display:grid;place-items:center;width:40px;height:46px;border:2px solid #bd9862;border-radius:5px;background:repeating-linear-gradient(135deg,#2e5358 0 5px,#254449 5px 10px);box-shadow:2px 2px #141f20;font-size:15px;font-weight:800}
+.table-zone{display:grid;grid-template-columns:minmax(76px,auto) minmax(0,1fr);align-items:center;gap:8px;min-width:0;min-height:40px;border-top:1px solid #567176}
+.table-zone h3{font-size:12px;margin:0;color:#f4ce8a}
+.table-zone-cards{display:flex;gap:5px;overflow-x:auto;padding:4px}
+.table-zone-card{flex:none;min-height:32px;padding:5px 8px;background:#eed9b2;font-size:12px;text-align:left}
+.table-zone-card.temporary{background:#b8d1bd}
+.table-zone-card small{display:block}
+.table-empty{font-size:12px;color:#cfdbd6}
+.table-layout .playtop{background:transparent}
+@media(max-width:560px){
+ .table-foe-zones .table-zone{grid-template-columns:minmax(0,1fr);gap:0}
+ .table-layout .table-hand-row{gap:4px}
+}
+.bout-layout:not(.table-layout) .table-hand-row{display:block}
+.table-layout #table-status{display:flex;justify-content:center;flex-wrap:wrap;gap:3px 16px;margin-top:7px;font-size:12px}
+.table-layout .table-pile:focus-visible,.table-zone-card:focus-visible{outline:2px solid #fff1d2;outline-offset:2px}

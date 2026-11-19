@@ -1606,18 +1606,88 @@ function kimariteTurnCues(g){
   winReady:readyNames.length>0,
  };
 }
+let classicPracticeLayout=false;
+function setPracticeBoard(g){
+ const available=sessionSetup?.practice===true&&g.phase!=='choose_tachiai';
+ const visible=available&&!classicPracticeLayout;
+ $('board-toggle').hidden=!available;
+ $('board-toggle').textContent=visible?'Classic layout':'Tabletop layout';
+ $('bout-layout').classList.toggle('table-layout',visible);
+ if(visible)$('dohyo-details').open=true;
+ for(const id of ['table-opponent','table-player-zones','table-player-deck','table-player-discard','table-status']){
+  $(id).hidden=!visible;
+ }
+}
+$('board-toggle').onclick=()=>{
+ classicPracticeLayout=!classicPracticeLayout;
+ setPracticeBoard(game);
+};
+function tablePile(owner,label,open){
+ const count=open?owner.discard_count:owner.draw_count;
+ const text=label+' · '+count+' cards';
+ const pile=open?btn('',open,'table-pile'):node('div','table-pile');
+ pile.title=text;
+ pile.setAttribute('aria-label',text);
+ pile.append(node('span','table-card-back',String(count)),node('span','',label));
+ return pile;
+}
+function tableZone(owner,key,label,readyNames=new Set()){
+ const zone=node('section','table-zone');
+ const cards=node('div','table-zone-cards');
+ for(const c of owner[key]){
+  const ready=readyNames.has(c.name);
+  const timing=key==='kimarite'?'Winning condition':'Active Temporary effect';
+  const tile=btn(displayCardName(c.name),()=>inspect({
+   ...c,description:zoneEffect(c,key),zone_only:true,timing
+  }),'table-zone-card '+key+(ready?' kimarite-ready':''));
+  tile.title=zoneEffect(c,key);
+  if(ready)tile.append(node('small','','Ready to win'));
+  cards.append(tile);
+ }
+ if(!cards.childElementCount)cards.append(node('span','table-empty','Empty'));
+ zone.append(node('h3','',label),cards);
+ return zone;
+}
+function renderPracticeBoard(g,readyNames){
+ if(!sessionSetup?.practice)return;
+ const foe=g.opponent;
+ const status=$('table-status');
+ status.replaceChildren();
+ for(const [label,wrestler] of [['You',g.human],['Opponent',foe]]){
+  const line=node('div','',label+' · '+wrestler.name+' · Power '+wrestler.power+' · Grip '+wrestler.grip.join('/')+(label==='You'?' · Plays '+wrestler.plays_remaining:''));
+  appendStability(line,wrestler);
+  status.append(line);
+ }
+ const foeHand=node('div','table-foe-hand');
+ foeHand.title=foe.hand_count+' cards in hand';
+ const backs=node('div','table-hand-backs');
+ backs.setAttribute('aria-hidden','true');
+ for(let i=0;i<Math.min(foe.hand_count,8);i++)backs.append(node('span','table-card-back'));
+ foeHand.append(backs,node('span','','Hand · '+foe.hand_count));
+ const foePiles=node('div','table-foe-piles');
+ foePiles.append(tablePile(foe,'Deck'),foeHand,tablePile(foe,'Discard',()=>showDiscard(foe,'Opponent')));
+ const foeZones=node('div','table-foe-zones');
+ foeZones.append(tableZone(foe,'kimarite','Kimarite'),tableZone(foe,'temporary','Temporary'));
+ $('table-opponent').replaceChildren(foePiles,foeZones);
+ $('table-player-zones').replaceChildren(
+  tableZone(g.human,'temporary','Your Temporary zone'),
+  tableZone(g.human,'kimarite','Your Kimarite zone',readyNames)
+ );
+ $('table-player-deck').replaceChildren(tablePile(g.human,'Deck'));
+ $('table-player-discard').replaceChildren(tablePile(g.human,'Discard',()=>showDiscard(g.human,'Your rikishi')));
+}
 function updatePracticeCoach(g){
  const practice=sessionSetup?.practice===true;
  $('practice-coach').hidden=!practice;
  if(!practice)return;
  let hint='Click a card to inspect it, then choose Play this card. Check your remaining Plays before ending the turn.';
- if(g.phase==='choose_tachiai')hint='Commit a card to add its orbs to the opening clash. Keep the others for your first hand. Try committing one now.';
+ if(g.phase==='choose_tachiai')hint='Tachiai is the opening clash. Committed cards contribute their orbs and any Tachiai effects. Try committing Gain Left Grip to see its effect. Uncommitted cards go to your first Exchange hand.';
  else if(g.finished)hint='Practice complete. You can return to the Heya and create your wrestler.';
  else if(g.selection)hint='Keep the indicated number of cards. If you can keep every card shown, choose Accept all.';
  else if(g.human?.ready_kimarite?.length)hint='A finishing move is ready. End your turn to win with it.';
  else if(g.human?.plays_remaining===0)hint='You’re out of Plays. End your turn and watch what your opponent does.';
  else if(g.position>=3)hint='You’ve pushed your opponent near the edge. Push them past +4 to win by ring-out.';
- else if(g.turn<=2)hint='Start by inspecting a card. Push moves Position toward the edge. Grip and Momentum can help meet the requirements of finishing moves.';
+ else if(g.turn<=2)hint='Exchange effects resolve when you play cards on your turn. A Temporary card can stay active in the Temporary zone until its effect ends or it is removed. Inspect a card to see when its effects apply.';
  $('practice-hint').textContent=hint;
 }
 async function startPractice(){
@@ -1643,8 +1713,10 @@ function leavePractice(){
 $('start-practice').onclick=startPractice;
 $('exit-practice').onclick=leavePractice;
 function render(g){
+ setPracticeBoard(g);
  updatePracticeCoach(g);
  if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management){managementStatus();if(alreadyInHeya&&unresolvedRewards(management).length)openBlockRewards()}$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();const turnCues=kimariteTurnCues(g);const readyNames=new Set(turnCues.readyNames);
+ renderPracticeBoard(g,readyNames);
  for(const [title,s,own] of [['YOUR RIKISHI',g.human,true],['OPPONENT',g.opponent,false]]){const box=node('div','rikishi-info');const name=node('h2','',s.name);appendStability(name,s);box.append(node('div','eyebrow',title),name,node('p','', 'Power '+s.power+'  ·  Grip '+s.grip.join('/')+'  ·  '+(own?'Plays '+s.plays_remaining:'Hand '+s.hand_count)));const zones=node('p','zones');zones.append(node('b','','Kimarite: '),document.createTextNode(names(s.kimarite)),node('br'),node('b','','Temporary: '),document.createTextNode(names(s.temporary)));box.append(zones);const discard=btn('Discard pile: '+s.discard_count+' · View cards',()=>showDiscard(s,own?'Your rikishi':'Opponent'),'discard-button');box.append(discard);for(const zoneName of ['kimarite','temporary']){const zone=node('div','zone-list');zone.append(node('div','eyebrow',zoneName.toUpperCase()));for(const c of s[zoneName]){const item=node('div','zone-entry');const ready=own&&zoneName==='kimarite'&&readyNames.has(c.name);item.append(btn(displayCardName(c.name)+(ready?' · READY TO WIN':' · Inspect'),()=>inspect({...c,description:zoneEffect(c,zoneName),zone_only:true,timing:zoneName==='kimarite'?'Winning condition':'Active Temporary effect'}),'zone-card'+(ready?' kimarite-ready':'')));if(ready)item.append(node('span','kimarite-ready-cue','End turn to win'));item.append(node('p','temporary-detail',zoneEffect(c,zoneName)));zone.append(item)}box.append(zone)}$('score').append(box)}
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();
