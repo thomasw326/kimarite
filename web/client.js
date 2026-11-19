@@ -110,21 +110,11 @@ function gameSaveRemove(key){
  try{sessionStorage.removeItem(key)}catch(e){}
  try{localStorage.removeItem(key)}catch(e){}
 }
-function shouldShowGameGuide(){
- // Do not interrupt a returning wrestler's saved draft, bout or tournament.
- const savedManagement=gameSaveGet('kimarite_management');
- const savedDraft=gameSaveGet('kimarite_active_draft');
- return !gameSaveGet('kimarite_guide_seen')
-  &&(!savedManagement||savedManagement==='null')
-  &&(!savedDraft||savedDraft==='null')
-  &&!gameSaveGet('kimarite_session');
-}
 function installGameGuide(){
  const guide=$('game-guide');
  $('open-game-guide').onclick=()=>{if(!guide.open)guide.showModal()};
  $('guide-dismiss').onclick=()=>guide.close();
  guide.addEventListener('close',()=>gameSaveSet('kimarite_guide_seen','1'));
- if(shouldShowGameGuide())guide.showModal();
 }
 function clearBoutSession(){
  token=null;game=null;sessionSetup=null;actionJournal=[];
@@ -1781,7 +1771,7 @@ function leavePractice(){
  if($('bout-result').open)$('bout-result').close();
  clearBoutSession();$('practice-coach').hidden=true;
  setGameLocation('heya');
- $('management-notice').textContent='Practice ended. Create your wrestler or practice again.';
+ $('management-notice').textContent=activeDraft?'Practice ended. Your draft is ready to continue.':'';
 }
 $('start-practice').onclick=startPractice;
 $('exit-practice').onclick=leavePractice;
@@ -1914,4 +1904,5 @@ if(playtestSavePrefix){
  gameSaveSet('kimarite_guide_seen','1');
  if(!gameSaveGet('kimarite_management'))startRematchPlaytest();
 }
+document.body.classList.toggle('show-developer-setup',new URLSearchParams(location.search).has('dev'));
 installGameGuide();

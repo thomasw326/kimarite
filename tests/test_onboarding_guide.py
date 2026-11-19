@@ -28,8 +28,8 @@ def run_guide(saved):
     node = shutil.which("node")
     if not node:
         pytest.skip("Node required to execute the browser onboarding logic")
-    helper = "function shouldShowGameGuide(){" + JS.split(
-        "function shouldShowGameGuide(){", 1
+    helper = "function installGameGuide(){" + JS.split(
+        "function installGameGuide(){", 1
     )[1].split("function clearBoutSession(){", 1)[0]
     script = """
 const values=new Map(Object.entries(JSON.parse(process.argv[1])));
@@ -89,15 +89,15 @@ def test_guide_is_accessible_and_available_from_both_locations():
 
 
 @pytest.mark.parametrize("saved,expected", [
-    ({}, True),
-    ({"kimarite_management": "null"}, True),
-    ({"kimarite_active_draft": "null"}, True),
+    ({}, False),
+    ({"kimarite_management": "null"}, False),
+    ({"kimarite_active_draft": "null"}, False),
     ({"kimarite_management": '{"round":2}'}, False),
     ({"kimarite_active_draft": '{"picks":[]}'}, False),
     ({"kimarite_session": "active-token"}, False),
     ({"kimarite_guide_seen": "1"}, False),
 ])
-def test_first_run_guide_respects_saves_and_can_be_reopened(saved, expected):
+def test_guide_opens_on_request(saved, expected):
     result = run_guide(saved)
     assert result == {
         "shownInitially": expected,

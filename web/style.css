@@ -518,3 +518,11 @@ body:has(.table-layout) main{max-width:1150px}
 #inspect-orbs .card-orbs{font-size:13px;gap:10px}
 #inspect-orbs .orb-dot{width:10px;height:10px;border-color:#b9c7bf}
 .card-inspect-timing{display:block;margin-top:4px}
+
+
+/* Keep the first Heya visit focused on entering play. */
+body[data-phase="heya"]:not(.show-developer-setup):has(#b11-creation:not([hidden])) #open-game-guide,
+body[data-phase="heya"]:not(.show-developer-setup):has(#b11-creation:not([hidden])) #reset-progress,
+body:not(.show-developer-setup) #heya-view:has(#b11-creation:not([hidden])) > :is(.heya-masthead,#single-bout-details),
+body:not(.show-developer-setup) #heya-view:has(#b11-creation:not([hidden])) .management > :is(h2,p:not(#management-notice),#legacy-management-options,#year-record),
+.management:has(#b11-creation[hidden]):has(#b11-draft[hidden]) #start-practice{display:none}
