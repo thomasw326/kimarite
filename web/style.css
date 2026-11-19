@@ -503,3 +503,15 @@ body:has(.table-layout) main{max-width:1150px}
 @media(max-width:1179px){
  .guided-practice.table-layout #practice-coach{order:3}
 }
+
+.card-orbs{display:flex;flex-wrap:wrap;gap:3px 6px;margin-top:6px;font-size:10px;line-height:1.15}
+.card-orb-group,.orb-dots{display:inline-flex;align-items:center;gap:2px}
+.card-orb-group{color:inherit}
+.orb-label{font-weight:800}
+.orb-dot{width:7px;height:7px;border:1px solid #263234;border-radius:50%;background:var(--orb-color);box-shadow:inset 0 1px #ffffff80}
+.orb-power{--orb-color:#e97b65}
+.orb-technique{--orb-color:#6cc6de}
+.orb-spirit{--orb-color:#f9d26d}
+#inspect-orbs .card-orbs{font-size:13px;gap:10px}
+#inspect-orbs .orb-dot{width:10px;height:10px;border-color:#b9c7bf}
+.card-inspect-timing{display:block;margin-top:4px}

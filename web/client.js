@@ -178,7 +178,31 @@ function rememberSession(){if(token)gameSaveSet('kimarite_session',token);if(ses
 async function recoverSession(){if(!sessionSetup)throw new Error('This bout expired and has no recovery data. Please start a new bout.');const restored=await api('/api/session',sessionSetup);let state=restored.state;for(const command of actionJournal){const next=await api('/api/session/'+restored.token+'/action',command);state=next.state}token=restored.token;rememberSession();return state}
 function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
 function btn(text,fn,cls=''){const b=node('button',cls,text);b.onclick=fn;return b}
-function card(c,fn,enabled=true){const b=btn(displayCardName(c.name),fn,'card'+(c.is_kimarite?' kimarite':''));const o=node('div','orb','POWER '+c.power+'  ·  TECH '+c.technique+'  ·  SPIRIT '+c.spirit);b.append(o);b.disabled=!enabled;return b}
+function cardOrbs(c){
+ const row=node('span','card-orbs');
+ for(const [key,label,initial] of [['power','Power','P'],['technique','Technique','T'],['spirit','Spirit','S']]){
+  const count=c[key]??0;
+  const group=node('span','card-orb-group orb-'+key);
+  group.title=label+' · '+count+' '+(count===1?'orb':'orbs');
+  group.setAttribute('role','img');
+  group.setAttribute('aria-label',count+' '+label+' '+(count===1?'orb':'orbs'));
+  const mark=node('span','orb-label',initial);
+  mark.setAttribute('aria-hidden','true');
+  const dots=node('span','orb-dots');
+  dots.setAttribute('aria-hidden','true');
+  for(let i=0;i<count;i++)dots.append(node('span','orb-dot'));
+  if(!count)dots.textContent='–';
+  group.append(mark,dots);
+  row.append(group);
+ }
+ return row;
+}
+function card(c,fn,enabled=true){
+ const tile=btn(displayCardName(c.name),fn,'card'+(c.is_kimarite?' kimarite':''));
+ tile.append(cardOrbs(c));
+ tile.disabled=!enabled;
+ return tile;
+}
 function names(cards){return cards.map(c=>displayCardName(c.name)).join(', ')||'—'}
 function signedPosition(p){return Number.isInteger(p)?(p>0?'+':'')+p:'—'}
 function sideBySideSummary(g){
@@ -237,7 +261,7 @@ function appendRulesText(container,text,glossary={}){
   container.append(link);
  }
 }
-function inspect(c,playAction){$('inspect-name').textContent=displayCardName(c.name);$('inspect-orbs').textContent=c.zone_only?'':('Power '+(c.power??0)+' · Technique '+(c.technique??0)+' · Spirit '+(c.spirit??0));const desc=c.description||'This card needs a B10 wording audit before its full rules can be shown.';const preview=(!c.zone_only&&['Sidestep','Spin Away'].includes(c.name))?sideBySideOnPlayPreview(game,c.name):'';const effect=$('inspect-effect');effect.replaceChildren();if(effect.nextElementSibling?.classList.contains('glossary-detail'))effect.nextElementSibling.remove();appendRulesText(effect,desc,{...game?.glossary,...c.glossary});if(preview)effect.append(node('p','side-by-side-preview',preview));$('inspect-orbs').textContent+=' · '+(c.timing||'')+(c.description_status==='needs_audit'?' · TEXT PENDING AUDIT':'');$('inspect-actions').replaceChildren();if(c.unavailable_reason)$('inspect-actions').append(node('p','unavailable-reason','Cannot play: '+c.unavailable_reason));if(playAction)$('inspect-actions').append(btn('Play this card',()=>{$('inspect').close();playAction()},'confirm'));$('inspect').showModal()}
+function inspect(c,playAction){$('inspect-name').textContent=displayCardName(c.name);const readout=$('inspect-orbs');readout.replaceChildren();if(!c.zone_only)readout.append(cardOrbs(c));const desc=c.description||'This card needs a B10 wording audit before its full rules can be shown.';const preview=(!c.zone_only&&['Sidestep','Spin Away'].includes(c.name))?sideBySideOnPlayPreview(game,c.name):'';const effect=$('inspect-effect');effect.replaceChildren();if(effect.nextElementSibling?.classList.contains('glossary-detail'))effect.nextElementSibling.remove();appendRulesText(effect,desc,{...game?.glossary,...c.glossary});if(preview)effect.append(node('p','side-by-side-preview',preview));readout.append(node('span','card-inspect-timing',(c.timing||'')+(c.description_status==='needs_audit'?' · TEXT PENDING AUDIT':'')));$('inspect-actions').replaceChildren();if(c.unavailable_reason)$('inspect-actions').append(node('p','unavailable-reason','Cannot play: '+c.unavailable_reason));if(playAction)$('inspect-actions').append(btn('Play this card',()=>{$('inspect').close();playAction()},'confirm'));$('inspect').showModal()}
 $('inspect-close').onclick=()=>$('inspect').close();
 function logText(){if(!game)return '';return ['KIMARITE — BOUT HISTORY',game.human.name+' vs '+game.opponent.name,'Turn '+game.turn+(game.finished?' — Bout over':'')+(sessionSetup&&Number.isSafeInteger(sessionSetup.seed)?' · Seed '+sessionSetup.seed:''),'',...(game.events||[])].join('\n')}
 $('copy-history').onclick=async()=>{const value=logText();if(!value){$('copy-status').textContent='Start a bout first.';return}try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(value)}else{const field=document.createElement('textarea');field.value=value;field.style.position='fixed';field.style.opacity='0';document.body.append(field);field.select();if(!document.execCommand('copy'))throw new Error('Copy not supported');field.remove()}$('copy-status').textContent='Copied!'}catch(e){$('copy-status').textContent='Select and copy the log below.';const field=document.createElement('textarea');field.value=value;field.rows=8;field.className='log-copy-fallback';$('copy-status').after(field);field.focus();field.select()}};
@@ -1733,7 +1757,7 @@ function updatePracticeCoach(g){
  if(!practice)return;
  let hint='Inspect a card to read its effects, then choose Play this card.';
  if(g.finished)hint='You won by Yorikiri! Oshidashi’s on-play effect gave Yorikiri the Momentum it needed.';
- else if(guided&&g.phase==='choose_tachiai')hint='Let’s win by Yorikiri (Force Out). A Kimarite is a winning technique and goes in your Kimarite Zone. Shikiri is a pre-bout ritual with 2 Technique and 2 Spirit orbs. Gain Left Grip has a conditional Tachiai effect. Select all three cards and confirm.';
+ else if(guided&&g.phase==='choose_tachiai')hint='Let’s win by Yorikiri (Force Out). A Kimarite is a winning technique and goes in your Kimarite Zone. Shikiri is a pre-bout ritual with five orbs: 1 Power, 2 Technique, and 2 Spirit. Gain Left Grip has a conditional Tachiai effect. Select all three cards and confirm.';
  else if(guided)hint=yorikiriLessons[g.tutorial_step];
  $('practice-hint').textContent=hint;
 }
