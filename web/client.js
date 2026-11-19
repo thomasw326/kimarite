@@ -110,21 +110,11 @@ function gameSaveRemove(key){
  try{sessionStorage.removeItem(key)}catch(e){}
  try{localStorage.removeItem(key)}catch(e){}
 }
-function shouldShowGameGuide(){
- // Do not interrupt a returning wrestler's saved draft, bout or tournament.
- const savedManagement=gameSaveGet('kimarite_management');
- const savedDraft=gameSaveGet('kimarite_active_draft');
- return !gameSaveGet('kimarite_guide_seen')
-  &&(!savedManagement||savedManagement==='null')
-  &&(!savedDraft||savedDraft==='null')
-  &&!gameSaveGet('kimarite_session');
-}
 function installGameGuide(){
  const guide=$('game-guide');
  $('open-game-guide').onclick=()=>{if(!guide.open)guide.showModal()};
  $('guide-dismiss').onclick=()=>guide.close();
  guide.addEventListener('close',()=>gameSaveSet('kimarite_guide_seen','1'));
- if(shouldShowGameGuide())guide.showModal();
 }
 function clearBoutSession(){
  token=null;game=null;sessionSetup=null;actionJournal=[];
@@ -178,7 +168,31 @@ function rememberSession(){if(token)gameSaveSet('kimarite_session',token);if(ses
 async function recoverSession(){if(!sessionSetup)throw new Error('This bout expired and has no recovery data. Please start a new bout.');const restored=await api('/api/session',sessionSetup);let state=restored.state;for(const command of actionJournal){const next=await api('/api/session/'+restored.token+'/action',command);state=next.state}token=restored.token;rememberSession();return state}
 function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
 function btn(text,fn,cls=''){const b=node('button',cls,text);b.onclick=fn;return b}
-function card(c,fn,enabled=true){const b=btn(displayCardName(c.name),fn,'card'+(c.is_kimarite?' kimarite':''));const o=node('div','orb','POWER '+c.power+'  ·  TECH '+c.technique+'  ·  SPIRIT '+c.spirit);b.append(o);b.disabled=!enabled;return b}
+function cardOrbs(c){
+ const row=node('span','card-orbs');
+ for(const [key,label,initial] of [['power','Power','P'],['technique','Technique','T'],['spirit','Spirit','S']]){
+  const count=c[key]??0;
+  const group=node('span','card-orb-group orb-'+key);
+  group.title=label+' · '+count+' '+(count===1?'orb':'orbs');
+  group.setAttribute('role','img');
+  group.setAttribute('aria-label',count+' '+label+' '+(count===1?'orb':'orbs'));
+  const mark=node('span','orb-label',initial);
+  mark.setAttribute('aria-hidden','true');
+  const dots=node('span','orb-dots');
+  dots.setAttribute('aria-hidden','true');
+  for(let i=0;i<count;i++)dots.append(node('span','orb-dot'));
+  if(!count)dots.textContent='–';
+  group.append(mark,dots);
+  row.append(group);
+ }
+ return row;
+}
+function card(c,fn,enabled=true){
+ const tile=btn(displayCardName(c.name),fn,'card'+(c.is_kimarite?' kimarite':''));
+ tile.append(cardOrbs(c));
+ tile.disabled=!enabled;
+ return tile;
+}
 function names(cards){return cards.map(c=>displayCardName(c.name)).join(', ')||'—'}
 function signedPosition(p){return Number.isInteger(p)?(p>0?'+':'')+p:'—'}
 function sideBySideSummary(g){
@@ -215,7 +229,29 @@ function zoneEffect(c,zone){
  return m?m[0]:d.replace(/^.*?Exchange:\s*/,'')||'Active effect unavailable';
 }
 
-function inspect(c,playAction){$('inspect-name').textContent=displayCardName(c.name);$('inspect-orbs').textContent=c.zone_only?'':('Power '+(c.power??0)+' · Technique '+(c.technique??0)+' · Spirit '+(c.spirit??0));const desc=c.description||'This card needs a B10 wording audit before its full rules can be shown.';const preview=(!c.zone_only&&['Sidestep','Spin Away'].includes(c.name))?sideBySideOnPlayPreview(game,c.name):'';const effect=$('inspect-effect');effect.replaceChildren();$('glossary-detail')?.remove();const glossary={...game?.glossary,...c.glossary};const terms=Object.keys(glossary).sort((a,b)=>b.length-a.length);const split=terms.length?new RegExp('\\b('+terms.join('|')+')\\b','gi'):null;const chunks=split?desc.split(split):[desc];for(const chunk of chunks){const key=terms.find(t=>t.toLowerCase()===chunk.toLowerCase());if(key){const link=btn(chunk,()=>{const old=$('glossary-detail');if(old)old.remove();const panel=node('p','glossary-detail',key+': '+glossary[key]);panel.id='glossary-detail';effect.after(panel)},'term-link');link.type='button';link.title=glossary[key];effect.append(link)}else effect.append(document.createTextNode(chunk))}if(preview)effect.append(node('p','side-by-side-preview',preview));$('inspect-orbs').textContent+=' · '+(c.timing||'')+(c.description_status==='needs_audit'?' · TEXT PENDING AUDIT':'');$('inspect-actions').replaceChildren();if(c.unavailable_reason)$('inspect-actions').append(node('p','unavailable-reason','Cannot play: '+c.unavailable_reason));if(playAction)$('inspect-actions').append(btn('Play this card',()=>{$('inspect').close();playAction()},'confirm'));$('inspect').showModal()}
+const searchHelp='Starting at the top of the draw pile, the game automatically takes the first matching card and moves it where the effect says. Other cards stay hidden and in order. If nothing matches, no card moves.';
+function appendRulesText(container,text,glossary={}){
+ const definitions={...glossary,Search:searchHelp};
+ const terms=Object.keys(definitions).sort((a,b)=>b.length-a.length);
+ const escaped=terms.map(term=>term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+ const split=new RegExp('\\b('+escaped.join('|')+')\\b','gi');
+ for(const chunk of text.split(split)){
+  const term=terms.find(key=>key.toLowerCase()===chunk.toLowerCase());
+  if(!term){container.append(document.createTextNode(chunk));continue}
+  const definition=definitions[term];
+  const link=btn(chunk,()=>{
+   const old=container.nextElementSibling;
+   if(old?.classList.contains('glossary-detail'))old.remove();
+   const detail=node('p','glossary-detail',term+' — '+definition);
+   detail.setAttribute('role','status');
+   container.after(detail);
+  },'term-link');
+  link.type='button';
+  link.title=definition;
+  container.append(link);
+ }
+}
+function inspect(c,playAction){$('inspect-name').textContent=displayCardName(c.name);const readout=$('inspect-orbs');readout.replaceChildren();if(!c.zone_only)readout.append(cardOrbs(c));const desc=c.description||'This card needs a B10 wording audit before its full rules can be shown.';const preview=(!c.zone_only&&['Sidestep','Spin Away'].includes(c.name))?sideBySideOnPlayPreview(game,c.name):'';const effect=$('inspect-effect');effect.replaceChildren();if(effect.nextElementSibling?.classList.contains('glossary-detail'))effect.nextElementSibling.remove();appendRulesText(effect,desc,{...game?.glossary,...c.glossary});if(preview)effect.append(node('p','side-by-side-preview',preview));readout.append(node('span','card-inspect-timing',(c.timing||'')+(c.description_status==='needs_audit'?' · TEXT PENDING AUDIT':'')));$('inspect-actions').replaceChildren();if(c.unavailable_reason)$('inspect-actions').append(node('p','unavailable-reason','Cannot play: '+c.unavailable_reason));if(playAction)$('inspect-actions').append(btn('Play this card',()=>{$('inspect').close();playAction()},'confirm'));$('inspect').showModal()}
 $('inspect-close').onclick=()=>$('inspect').close();
 function logText(){if(!game)return '';return ['KIMARITE — BOUT HISTORY',game.human.name+' vs '+game.opponent.name,'Turn '+game.turn+(game.finished?' — Bout over':'')+(sessionSetup&&Number.isSafeInteger(sessionSetup.seed)?' · Seed '+sessionSetup.seed:''),'',...(game.events||[])].join('\n')}
 $('copy-history').onclick=async()=>{const value=logText();if(!value){$('copy-status').textContent='Start a bout first.';return}try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(value)}else{const field=document.createElement('textarea');field.value=value;field.style.position='fixed';field.style.opacity='0';document.body.append(field);field.select();if(!document.execCommand('copy'))throw new Error('Copy not supported');field.remove()}$('copy-status').textContent='Copied!'}catch(e){$('copy-status').textContent='Select and copy the log below.';const field=document.createElement('textarea');field.value=value;field.rows=8;field.className='log-copy-fallback';$('copy-status').after(field);field.focus();field.select()}};
@@ -576,16 +612,25 @@ async function randomPlayerShikona(){
 $('random-wrestler-name').onclick=randomPlayerShikona;
 
 const CREATED_STAT_NAMES={power:'Power',technique:'Technique',spirit:'Spirit'};
+const creationStats=['create-food','create-training','create-final'];
+let creationStep=0;
 function creationChoices(){
  const food=$('create-food').value,training=$('create-training').value;
- const allowed=food===training?Object.keys(CREATED_STAT_NAMES).filter(k=>k!==food):[food,training];
+ const allowed=!food||!training?[]:food===training
+  ?Object.keys(CREATED_STAT_NAMES).filter(k=>k!==food):[food,training];
  const final=$('create-final'),previous=final.value;
  final.replaceChildren();
  for(const k of allowed){const option=node('option','',CREATED_STAT_NAMES[k]);option.value=k;final.append(option)}
- if(allowed.includes(previous))final.value=previous;
+ final.value=allowed.includes(previous)?previous:'';
  const result={power:0,technique:0,spirit:0};
- for(const k of [food,training,final.value])result[k]++;
- $('create-summary').textContent=Object.entries(result).map(([k,v])=>CREATED_STAT_NAMES[k]+' '+v).join(' · ');
+ const preview={...result};
+ for(const [index,stat] of [food,training,final.value].entries()){
+  if(!stat)continue;
+  result[stat]++;
+  if(index<creationStep)preview[stat]++;
+ }
+ $('create-summary').textContent=Object.entries(preview).map(([k,v])=>CREATED_STAT_NAMES[k]+' '+v).join(' · ');
+ $('creation-next').disabled=creationStep>0&&!$(creationStats[creationStep-1]).value;
  return result;
 }
 for(const id of ['create-food','create-training'])$(id).addEventListener('change',creationChoices);
@@ -593,7 +638,55 @@ $('create-final').addEventListener('change',creationChoices);
 $('management-opening-mode').addEventListener('change',()=>{
  $('b11-creation').hidden=$('management-opening-mode').value!=='b11_live';
 });
+$('create-food').value='';
+$('create-training').value='';
 creationChoices();
+const creationPanels=[...document.querySelectorAll('[data-creation-step]')];
+function showCreationStep(step){
+ creationStep=step;
+ $('creation-step').textContent='Wrestler creation · '+(step+1)+' of '+creationPanels.length;
+ $('creation-title').textContent=creationPanels[step].dataset.title||'Name your wrestler';
+ for(const [index,panel] of creationPanels.entries())panel.hidden=index!==step;
+ $('creation-back').hidden=step===0;
+ $('creation-next').textContent=step===3?'Start tournament draft':'Continue';
+ $('creation-error').textContent='';
+ creationChoices();
+ if(step){
+  const id=creationStats[step-1],select=$(id),options=$(id+'-choices');
+  options.replaceChildren();
+  for(const choice of select.options){
+   const choiceButton=btn(choice.textContent,()=>{
+    select.value=choice.value;
+    creationChoices();
+    for(const sibling of options.children)sibling.setAttribute('aria-pressed',String(sibling===choiceButton));
+   },'creation-option');
+   choiceButton.type='button';
+   choiceButton.setAttribute('aria-pressed',String(select.value===choice.value));
+   options.append(choiceButton);
+  }
+ }
+ $('creation-title').focus();
+}
+$('create-wrestler').onclick=()=>{
+ $('creation-flow').showModal();
+ showCreationStep(0);
+};
+$('creation-close').onclick=()=>$('creation-flow').close();
+$('creation-back').onclick=()=>showCreationStep(creationStep-1);
+$('creation-next').onclick=()=>{
+ const name=$('wrestler-name').value.trim();
+ if(creationStep===0&&(!name||Array.from(name).some(ch=>ch.codePointAt(0)<32||ch.codePointAt(0)===127))){
+  $('creation-error').textContent='Enter a wrestler name.';
+  $('wrestler-name').focus();
+  return;
+ }
+ if(creationStep<3){showCreationStep(creationStep+1);return}
+ $('creation-flow').close();
+ $('management-deal').click();
+};
+$('management-opening-mode').addEventListener('change',()=>{
+ $('management-deal').hidden=$('management-opening-mode').value==='b11_live';
+});
 const B11_BASE_STYLES={
  'Heavy Hitter':'power,spirit','Bulldozer':'power,spirit','Charger':'spirit,power','Pressure Fighter':'spirit,power',
  'Power Grappler':'power,technique','Unorthodox Powerhouse':'power,technique','The Technician':'technique,power',
@@ -611,10 +704,10 @@ function b11PreviewBase(name){
  const base={power:0,technique:0,spirit:0};base[order[0]]=2;base[order[1]]=1;return base;
 }
 function b11PreviewTotals(cards){return ['power','technique','spirit'].map(k=>cards.reduce((n,c)=>n+Number(c[k]||0),0))}
-function b11CommittedTachiaiTotals(cards,indices,base){
+function b11CommittedTachiaiTotals(cards,indices,base,bonus=1){
  const committed=cards.filter((_,i)=>indices.has(i));
  const orbs=b11PreviewTotals(committed);
- return ['power','technique','spirit'].map((k,i)=>Number(base[k]||0)+1+orbs[i]);
+ return ['power','technique','spirit'].map((k,i)=>Number(base[k]||0)+bonus+orbs[i]);
 }
 function b11TachiaiPreview(m,group){
  const box=node('div','tachiai-preview');
@@ -984,7 +1077,7 @@ function earnedNextStartingCards(m){
   return originals[i];
  });
 }
-const B11_STARTER_SUITE=['Yorikiri','Oshidashi','Oshi','Tsuki','Gain Left Grip','Gain Right Grip','Give Ground','Sonkyo'];
+const B11_STARTER_SUITE=['Yorikiri','Oshidashi','Oshi','Sheer Grit','Gain Left Grip','Gain Right Grip','Regain Balance','Shikiri'];
 let activeDraft=null;
 function saveDraft(){if(activeDraft)gameSaveSet('kimarite_active_draft',JSON.stringify(activeDraft));else gameSaveRemove('kimarite_active_draft')}
 async function offerDraft(){
@@ -1106,11 +1199,12 @@ $('confirm-new-wrestler').onclick=()=>{
  $('management-deck').disabled=false;
  $('b11-creation').hidden=false;
  $('wrestler-name').value='Your Rikishi';
- $('create-food').value='power';
- $('create-training').value='technique';
+ $('create-food').value='';
+ $('create-training').value='';
+ $('create-final').value='';
  creationChoices();
  for(const id of ['b11-draft','management-board','management-rewards','management-progress','management-next','management-summary','management-new','new-wrestler'])$(id).hidden=true;
- $('management-deal').hidden=false;
+ $('management-deal').hidden=true;
  $('management-notice').textContent='New year: create your wrestler, then draft your first 28 cards.';
  showYearStatus({tournament_history:[],results:[]});
  setGameLocation('heya');
@@ -1341,23 +1435,27 @@ function renderPendingTachiai(g){
  $('round').textContent='CHOOSE TACHIAI';$('tracks').replaceChildren();
  $('score').replaceChildren(node('h2','','Your opening: '+g.human.name+' vs '+g.opponent.name));
  $('opening').replaceChildren(node('p','','Your opponent’s Tachiai cards remain hidden until you commit.'));
- $('choices').replaceChildren(node('h2','','Commit 0–3 cards to Tachiai'),node('p','','Committed cards contribute orbs and Tachiai effects; cards you keep will start in your Exchange hand.'));
+ const guided=sessionSetup?.opening_mode==='tutorial';
+ $('choices').replaceChildren(node('h2','',guided?'Commit all three Tachiai cards':'Commit 0–3 cards to Tachiai'),node('p','','Committed cards contribute orbs and Tachiai effects; cards you keep will start in your Exchange hand.'));
  const strip=node('div','cards');
  const summary=node('p','zones','');
  const preview=node('div','tachiai-preview');
  preview.setAttribute('role','status');
  preview.setAttribute('aria-live','polite');
- const base={...(sessionSetup?.created_stats||b11PreviewBase(g.human.name))};
+ const base={...(g.tutorial_stats||sessionSetup?.created_stats||b11PreviewBase(g.human.name))};
  const stat=sessionSetup?.b12_interview?.kind;
  if(['spirit','power','technique'].includes(stat))base[stat]++;
+ const confirm=btn('Confirm Tachiai commitment',()=>act({type:'commit_tachiai',indices:[...picked].sort()}),'confirm');
  const refreshPreview=()=>{
+  confirm.disabled=guided&&picked.size!==3;
   summary.textContent=picked.size+' committed · '+(3-picked.size)+' retained';
-  const totals=b11CommittedTachiaiTotals(g.tachiai_choice.cards,picked,base);
+  const totals=b11CommittedTachiaiTotals(g.tachiai_choice.cards,picked,base,guided?0:1);
   preview.replaceChildren(
    node('strong','','Your projected Tachiai · '+picked.size+' committed'),
    node('p','','Power '+totals[0]+' · Technique '+totals[1]+' · Spirit '+totals[2]),
-   node('small','','Each total = base + 1 + printed orbs from committed cards, before Tachiai effects. Power helps opening strength/defense; Technique influences Exchange priority and card access; Spirit can grant opening Push/Momentum. Opponent totals stay hidden until you confirm.')
+   node('small','',(guided?'Each total is your base stat plus the orbs on your committed cards.':'Each total = base + 1 + printed orbs from committed cards, before Tachiai effects.')+' Power helps opening strength/defense. Technique influences who goes first and how many cards they draw. Spirit can grant opening Push. Opponent totals stay hidden until you confirm.')
   );
+
  };
  g.tachiai_choice.cards.forEach((c,i)=>{
   const b=card(c,()=>{
@@ -1369,19 +1467,21 @@ function renderPendingTachiai(g){
   const wrap=node('div','choice-card-wrap'+(hasTachiaiEffect?' tachiai-effect-card':''));
   wrap.append(b);
   if(hasTachiaiEffect)wrap.append(node('small','tachiai-effect-label','Tachiai effect'));
-  wrap.append(node('p','tachiai-card-rules',c.description||'Rules text unavailable.'),
+  const rules=node('p','tachiai-card-rules');
+  appendRulesText(rules,c.description||'Rules text unavailable.');
+  wrap.append(rules,
    btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect'));
   strip.append(wrap);
  });
  $('choices').append(strip);
- $('choices').append(summary,preview,btn('Confirm Tachiai commitment',()=>act({type:'commit_tachiai',indices:[...picked].sort()}),'confirm'));
+ $('choices').append(summary,preview,confirm);
  refreshPreview();
  $('hand').replaceChildren();$('history').replaceChildren();$('end').disabled=true;$('end').classList.remove('end-turn-no-plays','end-turn-win');$('end').textContent='End turn';$('notice').textContent='';
 }
 let lastPresentedResult=null;
 function showBoutResult(g){
  const dialog=$('bout-result');
- if(!dialog||!g.finished||!g.winner||!sessionSetup||sessionSetup.opening_mode!=='b11_live')return;
+ if(!dialog||!g.finished||!g.winner||!sessionSetup||!['b11_live','tutorial'].includes(sessionSetup.opening_mode))return;
  const key=[sessionSetup.seed,g.human.name,g.opponent.name,g.turn,g.winner,g.win_method].join('|');
  if(lastPresentedResult===key)return;
  lastPresentedResult=key;
@@ -1504,6 +1604,7 @@ async function commitB12PlayerResult(m){
 }
 async function returnToHeya(){
  if(!game?.finished||resolvingB12Matchday)return; // No retreat from a live bout.
+ if(sessionSetup?.practice){leavePractice();return}
  resolvingB12Matchday=true;
  try{
   const m=management;
@@ -1556,7 +1657,129 @@ function kimariteTurnCues(g){
   winReady:readyNames.length>0,
  };
 }
-function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management){managementStatus();if(alreadyInHeya&&unresolvedRewards(management).length)openBlockRewards()}$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();const turnCues=kimariteTurnCues(g);const readyNames=new Set(turnCues.readyNames);
+let classicPracticeLayout=false;
+function setPracticeBoard(g){
+ const available=sessionSetup?.practice===true&&g.phase!=='choose_tachiai';
+ const visible=available&&!classicPracticeLayout;
+ $('board-toggle').hidden=!available;
+ $('board-toggle').textContent=visible?'Classic layout':'Tabletop layout';
+ $('bout-layout').classList.toggle('table-layout',visible);
+ if(visible)$('dohyo-details').open=true;
+ for(const id of ['table-opponent','table-player-zones','table-player-deck','table-player-discard','table-status']){
+  $(id).hidden=!visible;
+ }
+}
+$('board-toggle').onclick=()=>{
+ classicPracticeLayout=!classicPracticeLayout;
+ setPracticeBoard(game);
+};
+function tablePile(owner,label,open){
+ const count=open?owner.discard_count:owner.draw_count;
+ const text=label+' · '+count+' cards';
+ const pile=open?btn('',open,'table-pile'):node('div','table-pile');
+ pile.title=text;
+ pile.setAttribute('aria-label',text);
+ pile.append(node('span','table-card-back',String(count)),node('span','',label));
+ return pile;
+}
+function tableZone(owner,key,label,readyNames=new Set()){
+ const zone=node('section','table-zone');
+ const cards=node('div','table-zone-cards');
+ for(const c of owner[key]){
+  const ready=readyNames.has(c.name);
+  const timing=key==='kimarite'?'Winning condition':'Active Temporary effect';
+  const tile=btn(displayCardName(c.name),()=>inspect({
+   ...c,description:zoneEffect(c,key),zone_only:true,timing
+  }),'table-zone-card '+key+(ready?' kimarite-ready':''));
+  tile.title=zoneEffect(c,key);
+  if(ready)tile.append(node('small','','Ready to win'));
+  cards.append(tile);
+ }
+ if(!cards.childElementCount)cards.append(node('span','table-empty','Empty'));
+ zone.append(node('h3','',label),cards);
+ return zone;
+}
+function renderPracticeBoard(g,readyNames){
+ if(!sessionSetup?.practice)return;
+ const foe=g.opponent;
+ const status=$('table-status');
+ status.replaceChildren();
+ for(const [label,wrestler] of [['You',g.human],['Opponent',foe]]){
+  const line=node('div','',label+' · '+wrestler.name+' · Power '+wrestler.power+' · Grip '+wrestler.grip.join('/')+(label==='You'?' · Plays '+wrestler.plays_remaining:''));
+  appendStability(line,wrestler);
+  status.append(line);
+ }
+ const foeHand=node('div','table-foe-hand');
+ foeHand.title=foe.hand_count+' cards in hand';
+ const backs=node('div','table-hand-backs');
+ backs.setAttribute('aria-hidden','true');
+ for(let i=0;i<Math.min(foe.hand_count,8);i++)backs.append(node('span','table-card-back'));
+ foeHand.append(backs,node('span','','Hand · '+foe.hand_count));
+ const foePiles=node('div','table-foe-piles');
+ foePiles.append(tablePile(foe,'Deck'),foeHand,tablePile(foe,'Discard',()=>showDiscard(foe,'Opponent')));
+ const foeZones=node('div','table-foe-zones');
+ foeZones.append(tableZone(foe,'kimarite','Kimarite'),tableZone(foe,'temporary','Temporary'));
+ $('table-opponent').replaceChildren(foePiles,foeZones);
+ $('table-player-zones').replaceChildren(
+  tableZone(g.human,'temporary','Your Temporary zone'),
+  tableZone(g.human,'kimarite','Your Kimarite zone',readyNames)
+ );
+ $('table-player-deck').replaceChildren(tablePile(g.human,'Deck'));
+ $('table-player-discard').replaceChildren(tablePile(g.human,'Discard',()=>showDiscard(g.human,'Your rikishi')));
+}
+const yorikiriLessons=[
+ 'You won Spirit 8–4 for 2 Push. Your opponent’s higher Power blocked 1, so you start at +1 Position. You won Technique 5–2, which lets you go first and draw three cards. Choose Accept all.',
+ 'Play Oshi (Push). Discard your second Sheer Grit to pay for it. You can have up to two copies of a card in your deck.',
+ 'You started with two Plays. Oshi spent one and gave you one back, so you still have two. It moved you to +2 Position and drew Gain Right Grip. Play Gain Left Grip first. Its Exchange effect improves your left hand from None to Grip. Your left and right hands track Grip separately.',
+ 'Play Gain Right Grip with your remaining Play to improve your right hand from None to Grip. Without Oshi’s extra Play, you’d already be out of Plays.',
+ 'You played three cards this turn. Both hands now have Grip, and your grip cards’ Temporary effects can block incoming Push. End your turn.',
+ 'Your opponent gained 1 Momentum, so your side of the shared track fell to −1. Their Tsuki stripped your Left Grip, but your Right Grip stayed and the Temporary effect from Gain Left Grip still blocked their Push. Your Right Grip lets you look at three cards and keep two. Choose Regain Balance and Attempt Deep Outside Grip.',
+ 'Play Regain Balance. It draws a card and rewards you for playing it at negative Momentum with +1 Momentum and +2 Power.',
+ 'Play Attempt Deep Outside Grip. It establishes Left Grip immediately and enters your Temporary Zone. At the start of your next turn, it will take that hand from Grip to Deep.',
+ 'You now have Grip with both hands. You can leave Power Water in your hand and end your turn. You’re allowed to end your turn with cards in hand, even if you have Plays left. Watch what your opponent does to your discard pile.',
+ 'Harite milled two cards straight to discard and knocked a card out of your hand. At seven cards in discard, Exhaustion can cost 1 Power at the start of your turn. Your Grip protects you because it ties or leads. Keep Oshidashi and any other card.',
+ 'Your Left Grip is now Deep, worth two Grip levels. Play Oshidashi (Push Out). It enters the Kimarite Zone beside Yorikiri, and its on-play effect gives you the last point of Momentum you need for Yorikiri.',
+ 'Both Kimarite are in play. Yorikiri is ready because you have Grip, +2 Position and +1 Momentum. Choose End turn to win.',
+];
+function updatePracticeCoach(g){
+ const practice=sessionSetup?.practice===true;
+ const guided=sessionSetup?.opening_mode==='tutorial';
+ $('bout-layout').classList.toggle('guided-practice',guided);
+ $('practice-coach').hidden=!practice;
+ if(!practice)return;
+ let hint='Inspect a card to read its effects, then choose Play this card.';
+ if(g.finished)hint='You won by Yorikiri! Oshidashi’s on-play effect gave Yorikiri the Momentum it needed.';
+ else if(guided&&g.phase==='choose_tachiai')hint='Let’s win by Yorikiri (Force Out). A Kimarite is a winning technique and goes in your Kimarite Zone. Sheer Grit gives you 3 Spirit orbs to help you push hard at the opening clash. Most cards have 3 orbs. Shikiri is a pre-bout ritual with 5: 1 Power, 2 Technique, and 2 Spirit. Select all three cards and confirm.';
+ else if(guided)hint=yorikiriLessons[g.tutorial_step];
+ $('practice-hint').textContent=hint;
+}
+async function startPractice(){
+ const button=$('start-practice');
+ button.disabled=true;
+ try{
+  const request={opening_mode:'tutorial',seed:20261021};
+  const result=await api('/api/session',request);
+  sessionSetup={...request,practice:true};actionJournal=[];token=result.token;
+  lastPresentedResult=null;
+  $('seed-used').textContent='Practice bout';
+  render(result.state);
+ }catch(error){$('management-notice').textContent=error.message}
+ finally{button.disabled=false}
+}
+function leavePractice(){
+ if(!sessionSetup?.practice)return;
+ if($('bout-result').open)$('bout-result').close();
+ clearBoutSession();$('practice-coach').hidden=true;
+ setGameLocation('heya');
+ $('management-notice').textContent=activeDraft?'Practice ended. Your draft is ready to continue.':'';
+}
+$('start-practice').onclick=startPractice;
+$('exit-practice').onclick=leavePractice;
+function render(g){
+ setPracticeBoard(g);
+ updatePracticeCoach(g);
+ if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management){managementStatus();if(alreadyInHeya&&unresolvedRewards(management).length)openBlockRewards()}$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();const turnCues=kimariteTurnCues(g);const readyNames=new Set(turnCues.readyNames);
+ renderPracticeBoard(g,readyNames);
  for(const [title,s,own] of [['YOUR RIKISHI',g.human,true],['OPPONENT',g.opponent,false]]){const box=node('div','rikishi-info');const name=node('h2','',s.name);appendStability(name,s);box.append(node('div','eyebrow',title),name,node('p','', 'Power '+s.power+'  ·  Grip '+s.grip.join('/')+'  ·  '+(own?'Plays '+s.plays_remaining:'Hand '+s.hand_count)));const zones=node('p','zones');zones.append(node('b','','Kimarite: '),document.createTextNode(names(s.kimarite)),node('br'),node('b','','Temporary: '),document.createTextNode(names(s.temporary)));box.append(zones);const discard=btn('Discard pile: '+s.discard_count+' · View cards',()=>showDiscard(s,own?'Your rikishi':'Opponent'),'discard-button');box.append(discard);for(const zoneName of ['kimarite','temporary']){const zone=node('div','zone-list');zone.append(node('div','eyebrow',zoneName.toUpperCase()));for(const c of s[zoneName]){const item=node('div','zone-entry');const ready=own&&zoneName==='kimarite'&&readyNames.has(c.name);item.append(btn(displayCardName(c.name)+(ready?' · READY TO WIN':' · Inspect'),()=>inspect({...c,description:zoneEffect(c,zoneName),zone_only:true,timing:zoneName==='kimarite'?'Winning condition':'Active Temporary effect'}),'zone-card'+(ready?' kimarite-ready':'')));if(ready)item.append(node('span','kimarite-ready-cue','End turn to win'));item.append(node('p','temporary-detail',zoneEffect(c,zoneName)));zone.append(item)}box.append(zone)}$('score').append(box)}
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();
@@ -1584,7 +1807,14 @@ function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return
   });
   $('choices').append(strip,confirm);
  }
- $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));g.human.hand.forEach((c,i)=>$('hand').append(card(c,()=>inspect(c,legal.has(i)?()=>play(i):null),true)));const history=$('history');history.replaceChildren();const events=g.events||[];if(!events.length)history.append(node('p','','No actions recorded yet.'));for(const event of events.slice().reverse())history.append(node('p',event.includes(' plays ')?'history-line':'history-event',event));const endButton=$('end');endButton.disabled=!g.can_end_turn;const canFinish=turnCues.winReady;endButton.classList.toggle('end-turn-no-plays',turnCues.noPlays);endButton.classList.toggle('end-turn-win',canFinish);endButton.textContent=canFinish?'End turn to win':'End turn';endButton.title=canFinish?'End turn to win with '+[...readyNames].join(', '):g.can_end_turn&&g.human.plays_remaining===0?'No Plays remaining — end your turn':'';$('notice').textContent=g.finished?('Winner: '+(g.winner==='A'?g.human.name:g.winner==='B'?g.opponent.name:'Undecided')+' · '+(g.win_method||g.stopped_reason||'')):'';
+ $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));const practiceCard={1:'Oshi',2:'Gain Left Grip',3:'Gain Right Grip',6:'Regain Balance',7:'Attempt Deep Outside Grip',10:'Oshidashi'}[g.tutorial_step];
+ g.human.hand.forEach((c,i)=>{
+  const suggested=practiceCard===c.name;
+  const playable=legal.has(i)&&(g.tutorial_step===undefined||suggested);
+  const tile=card(c,()=>inspect(c,playable?()=>play(i):null));
+  tile.classList.toggle('practice-card',suggested);
+  $('hand').append(tile);
+ });const history=$('history');history.replaceChildren();const events=g.events||[];if(!events.length)history.append(node('p','','No actions recorded yet.'));for(const event of events.slice().reverse())history.append(node('p',event.includes(' plays ')?'history-line':'history-event',event));const endButton=$('end');endButton.disabled=!g.can_end_turn||(g.tutorial_step!==undefined&&![4,8,11].includes(g.tutorial_step));const canFinish=turnCues.winReady;endButton.classList.toggle('end-turn-no-plays',turnCues.noPlays);endButton.classList.toggle('end-turn-win',canFinish);endButton.textContent=canFinish?'End turn to win':'End turn';endButton.title=canFinish?'End turn to win with '+[...readyNames].join(', '):g.can_end_turn&&g.human.plays_remaining===0?'No Plays remaining — end your turn':'';$('notice').textContent=g.finished?('Winner: '+(g.winner==='A'?g.human.name:g.winner==='B'?g.opponent.name:'Undecided')+' · '+(g.win_method||g.stopped_reason||'')):'';
  if(g.finished&&!alreadyInHeya){
   showBoutResult(g);
   startB12MatchdayPrefetch(g);
@@ -1674,4 +1904,91 @@ if(playtestSavePrefix){
  gameSaveSet('kimarite_guide_seen','1');
  if(!gameSaveGet('kimarite_management'))startRematchPlaytest();
 }
+document.body.classList.toggle('show-developer-setup',new URLSearchParams(location.search).has('dev'));
+let compendiumCards;
+const compendiumOrbStats=[['power','Power'],['technique','Technique'],['spirit','Spirit']];
+function matchesCompendiumCard(c,query,type,tachiai,orbs){
+ if(type&&c.is_kimarite!==(type==='kimarite'))return false;
+ if(tachiai&&tachiaiEffectCards.has(c.name)!==(tachiai==='yes'))return false;
+ for(const [stat,minimum] of orbs){
+  if(minimum==='0'&&c[stat]!==0)return false;
+  if(minimum!==''&&c[stat]<Number(minimum))return false;
+ }
+ return [c.name,displayCardName(c.name),c.description]
+  .some(value=>value?.toLocaleLowerCase().includes(query));
+}
+function renderCompendium(){
+ const list=$('compendium-cards');
+ const query=$('compendium-search').value.trim().toLocaleLowerCase();
+ const type=$('compendium-type').value;
+ const tachiai=$('compendium-tachiai').value;
+ const orbs=compendiumOrbStats.map(([stat])=>[stat,$('compendium-'+stat).value]);
+ const matches=compendiumCards.filter(c=>matchesCompendiumCard(c,query,type,tachiai,orbs));
+ list.replaceChildren();
+ if(!matches.length)list.append(node('p','','No cards match these filters.'));
+ $('compendium-status').textContent=matches.length+' of '+compendiumCards.length+' cards';
+ for(const c of matches){
+  const entry=node('details','compendium-card');
+  const heading=node('summary','',displayCardName(c.name));
+  heading.append(cardOrbs(c));
+  const rules=node('p','compendium-rules');
+  appendRulesText(rules,c.description||'Rules text unavailable.',c.glossary);
+  entry.append(heading,node('small','',c.timing),rules);
+  list.append(entry);
+ }
+}
+async function openCompendium(){
+ const dialog=$('compendium');
+ if(dialog.open)return;
+ dialog.showModal();
+ if(compendiumCards){renderCompendium();return}
+ $('compendium-status').textContent='Loading cards…';
+ try{
+  const result=await api('/api/compendium');
+  compendiumCards=result.cards;
+  renderCompendium();
+ }catch(error){$('compendium-status').textContent='Could not load cards. Close and reopen the compendium to retry.'}
+}
+const compendiumFilters=$('compendium-filters');
+for(const [stat,label] of compendiumOrbStats){
+ const field=node('label','',label+' orbs');
+ const select=node('select');
+ select.id='compendium-'+stat;
+ for(const [value,text] of [['','Any'],['0','None'],['1','Has '+label],['2','2 or more'],['3','3 or more'],['4','4 or more']]){
+  const option=node('option','',text);
+  option.value=value;
+  select.append(option);
+ }
+ field.append(select);
+ compendiumFilters.append(field);
+}
+compendiumFilters.onchange=()=>{if(compendiumCards)renderCompendium()};
+$('compendium-clear-filters').onclick=()=>{
+ for(const select of compendiumFilters.querySelectorAll('select'))select.value='';
+ if(compendiumCards)renderCompendium();
+};
+$('compendium-search').oninput=()=>{if(compendiumCards)renderCompendium()};
+$('compendium-close').onclick=()=>$('compendium').close();
+$('settings-close').onclick=()=>$('settings-menu').close();
+function installGameMenus(){
+ const menus=[['Compendium','compendium',openCompendium],
+              ['Settings','settings-menu',()=>$('settings-menu').showModal()]];
+ const containers=[$('game-utilities')];
+ for(const dialog of document.querySelectorAll('dialog:not(#compendium):not(#settings-menu)')){
+  const nav=node('nav','game-utilities dialog-utilities');
+  nav.setAttribute('aria-label','Game menus');
+  (dialog.querySelector('.creation-shell')||dialog).prepend(nav);
+  containers.push(nav);
+ }
+ for(const container of containers){
+  for(const [label,id,open] of menus){
+   const button=btn(label,open,'choice-inspect');
+   button.type='button';
+   button.setAttribute('aria-haspopup','dialog');
+   button.setAttribute('aria-controls',id);
+   container.append(button);
+  }
+ }
+}
+installGameMenus();
 installGameGuide();

@@ -50,6 +50,7 @@ console.log(JSON.stringify({
  human:management?.human||null,activeDraft,cleared,phase,
  name:$('wrestler-name').value,
  draftVisible:!$('management-deal').hidden,
+ creationVisible:!$('b11-creation').hidden,
  newVisible:!$('new-wrestler').hidden,
  banzukeHidden:$('b12-banzuke').hidden
 }));
@@ -70,7 +71,8 @@ def test_restart_only_after_sixth_tournament():
     assert after["cleared"] is True
     assert after["phase"] == "heya"
     assert after["name"] == "Your Rikishi"
-    assert after["draftVisible"] is True
+    assert after["draftVisible"] is False
+    assert after["creationVisible"] is True
     assert after["newVisible"] is False
     assert after["banzukeHidden"] is True
 

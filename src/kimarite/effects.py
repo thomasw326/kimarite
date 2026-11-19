@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Callable
 
+from .catalog import POWER_WATER_CANTRIP
 from .models import BoutState, Card, GripState, Side, Stat
 from .prevention import prevent_negative_effect
 from .rules import (
@@ -660,10 +661,7 @@ def _power_water(
     import random
 
     fighter = state.fighter(side)
-    cantrips = [
-        Card(62, "Power Water Cantrip")
-        for _ in range(6)
-    ]
+    cantrips = [replace(POWER_WATER_CANTRIP) for _ in range(6)]
 
     # Derive a reproducible shuffle from the current bout state.
     signature = repr((

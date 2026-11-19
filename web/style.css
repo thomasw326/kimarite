@@ -128,10 +128,6 @@ body[data-phase="heya"] .bout-hud{display:none!important}
 #random-name-status:empty{display:none}
 @media(max-width:440px){#random-wrestler-name{flex:1 1 100%}}
 
-#legacy-management-options{border:1px dashed #897b66;border-radius:10px;padding:8px 12px;background:#27312d}
-#legacy-management-options summary{color:#c9c0aa;font-size:.9rem}
-#legacy-management-options>p{color:#d3c5af;font-size:.88rem;line-height:1.45}
-#legacy-management-options>label{margin:10px 0}
 
 /* Compact year-to-date scorecard, carried with the drafted wrestler. */
 .year-record{border:1px solid #bba276;background:#21342f;color:#f6dfb3;border-radius:12px;padding:13px 16px;margin:12px 0;font-size:1rem;font-weight:800;line-height:1.5}
@@ -383,9 +379,12 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 .banzuke-movement-table th,.banzuke-movement-table td{padding:6px;text-align:left;border-bottom:1px solid #52635f;overflow-wrap:anywhere}
 .banzuke-movement-table small{display:block}
 
-.tachiai-effect-card{border:1px solid #ffd184;border-radius:10px;background:#2e281e}
-.choice-card-wrap.tachiai-effect-card{padding:8px}
-.tachiai-effect-label{color:#ffdb9e;font-weight:800}
+.tachiai-effect-card>.card{border-color:#ffd184}
+.tachiai-effect-label{
+ display:block;width:fit-content;max-width:100%;align-self:flex-start;
+ padding:2px 6px;border:1px solid #ffd184;border-radius:5px;
+ background:#2e281e;color:#ffdb9e;font-weight:800;
+}
 
 .interview-affected-cards{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 
@@ -394,3 +393,152 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 
 .management-card-assigned>.card{background:#d7d5cf;border-color:#a4a19a}
 .management-group .assignment-option-other-bout{background:#42494a;color:#d7d9d6}
+
+.onboarding-entry{display:flex;gap:10px;flex-wrap:wrap}
+#creation-flow{width:100%;max-width:none;height:100%;max-height:none;margin:0;border:0;border-radius:0;padding:0;overflow:auto;background:radial-gradient(ellipse at top,#4b3c30,#192826 72%);color:#f7f2e6}
+.creation-shell{max-width:880px;min-height:100%;margin:auto;padding:clamp(20px,5vw,56px);display:flex;flex-direction:column;gap:18px}
+#creation-flow .creation-header{display:flex;justify-content:space-between;align-items:center;gap:12px;position:static;padding:0;background:transparent;border:0}
+.creation-header p{margin:0;color:#ecd2a1;font-weight:700}
+.creation-shell h2{font-size:clamp(28px,6vw,48px);margin:0}
+.creation-shell section:not([hidden]){display:grid;gap:14px;align-content:start}
+.creation-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,185px),1fr));gap:12px}
+.creation-option{min-height:92px;background:#263a36;border:2px solid #9eae96;color:#f7f2e6;text-align:left}
+.creation-option[aria-pressed="true"]{border-color:#f0c77d;background:#4a3a25}
+.creation-actions{display:flex;justify-content:space-between;gap:12px;margin-top:auto}
+.creation-actions #creation-next{margin-inline-start:auto}
+.creation-shell label{display:block}
+#creation-error:empty{display:none}
+.practice-coach{padding:10px 14px;margin:8px 0;border:1px solid #c9aa72;border-radius:8px;background:#253834}
+.practice-coach p{margin:5px 0 8px}
+
+/* Practice tabletop */
+.table-layout{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.table-layout .bout-state,.table-layout .bout-decisions{display:contents}
+.table-layout #score,.table-layout #dohyo-details>summary{display:none}
+body:has(.table-layout) #bout-hud{display:none}
+body:has(.table-layout) main{max-width:1150px}
+.table-layout .table-opponent{order:0}
+.table-layout .arena{order:1}
+.table-layout .table-player-zones{order:2}
+.table-layout #choices{order:3}
+.table-layout .play{order:4}
+.table-layout #practice-coach,.table-layout #notice{order:5}
+.table-layout .ring-composite{grid-template-columns:auto minmax(0,1fr);justify-content:center}
+.table-layout .arena .dohyo{width:80px;height:80px;border-width:6px;margin:0 10px}
+.table-layout .arena .rikishi{font-size:25px}
+.table-layout .tracks{max-width:400px;margin-inline:auto}
+.table-opponent,.table-player-zones{background:#172c30}
+.table-foe-piles,.table-hand-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center}
+.table-foe-zones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:6px}
+.table-foe-hand{text-align:center;font-size:12px}
+.table-hand-backs{display:flex;justify-content:center;min-height:30px;margin-bottom:3px}
+.table-hand-backs .table-card-back{width:21px;height:30px;margin-inline:-3px;transform:rotate(-6deg)}
+.table-pile{display:grid;justify-items:center;gap:4px;min-width:52px;padding:4px;background:transparent;color:#f7f2e6;font-size:12px}
+.table-card-back{display:grid;place-items:center;width:40px;height:46px;border:2px solid #bd9862;border-radius:5px;background:repeating-linear-gradient(135deg,#2e5358 0 5px,#254449 5px 10px);box-shadow:2px 2px #141f20;font-size:15px;font-weight:800}
+.table-zone{display:grid;grid-template-columns:minmax(76px,auto) minmax(0,1fr);align-items:center;gap:8px;min-width:0;min-height:40px;border-top:1px solid #567176}
+.table-zone h3{font-size:12px;margin:0;color:#f4ce8a}
+.table-zone-cards{display:flex;gap:5px;overflow-x:auto;padding:4px}
+.table-zone-card{flex:none;min-height:32px;padding:5px 8px;background:#eed9b2;font-size:12px;text-align:left}
+.table-zone-card.temporary{background:#b8d1bd}
+.table-zone-card small{display:block}
+.table-empty{font-size:12px;color:#cfdbd6}
+.table-layout .playtop{background:transparent}
+@media(max-width:560px){
+ .table-foe-zones .table-zone{grid-template-columns:minmax(0,1fr);gap:0}
+ .table-layout .table-hand-row{gap:4px}
+}
+.bout-layout:not(.table-layout) .table-hand-row{display:block}
+.table-layout #table-status{display:flex;justify-content:center;flex-wrap:wrap;gap:3px 16px;margin-top:7px;font-size:12px}
+.table-layout .table-pile:focus-visible,.table-zone-card:focus-visible{outline:2px solid #fff1d2;outline-offset:2px}
+
+/* Keep the live tabletop compact at normal browser zoom. */
+#dohyo-view .table-layout{gap:5px}
+#dohyo-view .table-layout .panel{padding:5px 8px}
+.table-layout #dohyo-details{padding:0}
+.table-layout .arena .dohyo{width:64px;height:64px}
+.table-layout .ring-readout{gap:3px}
+.table-layout .tracks{margin-top:2px}
+.table-layout .track{padding:3px 8px}
+.table-layout #table-status{margin-top:3px}
+.table-layout .table-foe-zones{margin-top:2px}
+.table-layout .table-zone{min-height:30px}
+.table-layout .table-zone-card{min-height:26px;padding:3px 7px}
+.table-layout .table-zone-cards{padding:2px 4px}
+.table-layout .table-card-back{height:36px}
+.table-layout .table-hand-backs{min-height:24px}
+.table-layout .table-hand-backs .table-card-back{height:24px}
+.table-layout .practice-coach{display:flex;align-items:center;gap:8px;margin:0;padding:4px 8px;font-size:13px}
+.table-layout .practice-coach p{flex:1;margin:0}
+.table-layout #exit-practice{min-height:32px;flex-shrink:0}
+.table-layout .bout-decisions #hand .card{min-height:88px}
+.table-layout .bout-decisions #choices .card{min-height:74px}
+.table-layout .bout-decisions #choices .cards{margin-top:3px;padding:3px}
+.table-layout .bout-decisions #choices .confirm{margin-top:4px;min-height:35px}
+.table-layout .bout-decisions .playtop button{min-height:32px}
+.tachiai-card-rules .term-link{min-height:0;padding:0 2px}
+@media(max-width:560px){
+ .table-layout .practice-coach{flex-wrap:wrap}
+ .table-layout .practice-coach p{flex-basis:100%;order:1}
+}
+
+.guided-practice .practice-card{border-color:#8de6af;box-shadow:inset 0 0 0 1px #37694e}
+@media(min-width:1180px){
+ body:has(.guided-practice.table-layout) main{max-width:1360px}
+ #dohyo-view .guided-practice.table-layout{
+  display:grid;grid-template-columns:minmax(0,1fr) 216px;align-items:start;
+ }
+ .guided-practice.table-layout .table-opponent,
+ .guided-practice.table-layout .arena,
+ .guided-practice.table-layout .table-player-zones,
+ .guided-practice.table-layout #choices,
+ .guided-practice.table-layout .play,
+ .guided-practice.table-layout #notice{grid-column:1}
+ .guided-practice.table-layout #practice-coach{
+  grid-column:2;grid-row:1 / span 5;display:grid;gap:8px;
+  padding:10px;line-height:1.45;
+ }
+}
+.guided-practice:not(.table-layout) #practice-coach{order:-1}
+@media(max-width:1179px){
+ .guided-practice.table-layout #practice-coach{order:3}
+}
+
+.card-orbs{display:flex;flex-wrap:wrap;gap:3px 6px;margin-top:6px;font-size:10px;line-height:1.15}
+.card-orb-group,.orb-dots{display:inline-flex;align-items:center;gap:2px}
+.card-orb-group{color:inherit}
+.orb-label{font-weight:800}
+.orb-dot{width:7px;height:7px;border:1px solid #263234;border-radius:50%;background:var(--orb-color);box-shadow:inset 0 1px #ffffff80}
+.orb-power{--orb-color:#e97b65}
+.orb-technique{--orb-color:#6cc6de}
+.orb-spirit{--orb-color:#f9d26d}
+#inspect-orbs .card-orbs{font-size:13px;gap:10px}
+#inspect-orbs .orb-dot{width:10px;height:10px;border-color:#b9c7bf}
+.card-inspect-timing{display:block;margin-top:4px}
+
+
+/* Keep the first Heya visit focused on entering play. */
+body[data-phase="heya"]:not(.show-developer-setup):has(#b11-creation:not([hidden])) #open-game-guide,
+body[data-phase="heya"]:not(.show-developer-setup):has(#b11-creation:not([hidden])) #reset-progress,
+body:not(.show-developer-setup) #heya-view:has(#b11-creation:not([hidden])) > :is(.heya-masthead,#single-bout-details),
+body:not(.show-developer-setup) #heya-view:has(#b11-creation:not([hidden])) .management > :is(h2,p:not(#management-notice),#year-record),
+.management:has(#b11-creation[hidden]):has(#b11-draft[hidden]) #start-practice{display:none}
+
+.game-utilities{display:inline-flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.game-utilities button{min-height:36px;padding:5px 10px;font-size:13px}
+.dialog-utilities{display:flex;justify-content:flex-end}
+body[data-phase="dohyo"] > header{flex-wrap:wrap}
+.game-menu{width:min(680px,calc(100% - 24px));max-height:85dvh;overflow:auto}
+#compendium-search{display:block;width:100%;margin-top:5px;padding:8px;border-radius:6px;font:inherit}
+.compendium-cards{display:grid;gap:6px}
+.compendium-card{border:1px solid #718582;border-radius:7px;padding:8px;background:#203639}
+.compendium-card summary{cursor:pointer;font-weight:700}
+.compendium-card summary .card-orbs{display:inline-flex;margin-inline-start:8px;vertical-align:middle}
+.compendium-card small{display:block;margin-top:8px;color:#e7c38c}
+.compendium-card .compendium-rules{margin:4px 0 0}
+
+.compendium-filters{margin-top:10px;padding:8px;border:1px solid #718582;border-radius:7px}
+.compendium-filters summary{cursor:pointer;font-weight:700}
+.compendium-filter-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px;margin:8px 0}
+.compendium-filter-fields label{display:grid;gap:4px;font-size:13px}
+.compendium-filter-fields select{width:100%;min-height:38px;padding:5px;font:inherit}
+#compendium-clear-filters{min-height:36px;padding:5px 10px}

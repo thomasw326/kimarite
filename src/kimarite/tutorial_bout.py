@@ -1,0 +1,134 @@
+"""A fixed teaching bout played through the normal Exchange rules."""
+from dataclasses import replace
+
+from .b11_pending_session import PendingB11Session
+from .b11_player_opening import PlayerOpening
+from .b11_player_tachiai import compare_player_tachiai
+from .b11_tachiai_phase import PendingPlayerTachiai
+from .catalog import card_by_name
+from .effects import EffectContext, IllegalPlay
+from .human_bout import HumanBout
+from .models import BoutState, FighterState, Side, Wrestler
+from .playing import play_card
+from .tachiai import first_exchange_side
+from .tachiai_effects import resolve_prepared_tachiai
+from .turns import apply_initial_power
+
+OPENING = ("Yorikiri", "Sheer Grit", "Shikiri")
+PLAYER_STATS = {"power": 2, "technique": 2, "spirit": 2}
+PLAYER_DRAWS = (
+    "Oshi", "Sheer Grit", "Gain Left Grip", "Gain Right Grip", "Tsuki",
+    "Regain Balance", "Attempt Deep Outside Grip", "Shove",
+    "Power Water", "Tsuppari", "Ottsuke",
+    "Oshidashi", "Pull", "Sonkyo", "Nokotta!", "Belt Slap", "Salt Throw",
+)
+OPPONENT_DRAWS = (
+    "Tsuki", "Shiko Stomp", "Sonkyo", "Stare Down",
+    "Harite", "Gain Left Grip", "Tsuppari", "Belt Slap",
+)
+OPPONENT_PLAYS = {
+    2: ("Tsuki", "Shiko Stomp", "Sonkyo"),
+    4: ("Harite", "Gain Left Grip"),
+}
+PLAYER_STEPS = (
+    ("choose_cards", ("Oshi", "Sheer Grit", "Gain Left Grip")),
+    ("play_card", "Oshi"),
+    ("play_card", "Gain Left Grip"),
+    ("play_card", "Gain Right Grip"),
+    ("end_turn", None),
+    ("choose_cards", ("Regain Balance", "Attempt Deep Outside Grip")),
+    ("play_card", "Regain Balance"),
+    ("play_card", "Attempt Deep Outside Grip"),
+    ("end_turn", None),
+    ("choose_cards", ("Oshidashi",)),
+    ("play_card", "Oshidashi"),
+    ("end_turn", None),
+)
+
+
+class TutorialOpening(PendingB11Session):
+    @classmethod
+    def new(cls):
+        cards = [card_by_name(name) for name in OPENING]
+        phase = PendingPlayerTachiai(PlayerOpening.from_names(cards, list(OPENING)))
+        return cls("Your Rikishi", "Training Partner", phase, created_stats=PLAYER_STATS)
+
+    def snapshot(self):
+        return {**super().snapshot(), "tutorial_stats": PLAYER_STATS.copy()}
+
+    def confirm(self, indices):
+        if not isinstance(indices, list) or len(indices) != 3:
+            raise ValueError("Commit all three cards for this practice bout.")
+        return super().confirm(indices)
+
+    def start_bout(self):
+        decision = self.phase.decision
+        yorikiri = card_by_name("Yorikiri")
+        oshi = card_by_name("Oshi")
+        player = Wrestler(self.human, PLAYER_STATS["power"], PLAYER_STATS["technique"],
+                          PLAYER_STATS["spirit"], yorikiri, oshi, oshi)
+        opponent = Wrestler(self.opponent, 1, 2, 1, card_by_name("Oshidashi"),
+                            card_by_name("Regain Balance"), card_by_name("Shove"))
+        own = FighterState(player, draw_pile=[card_by_name(name) for name in PLAYER_DRAWS])
+        foe = FighterState(opponent, draw_pile=[card_by_name(name) for name in OPPONENT_DRAWS])
+        state = BoutState(own, foe)
+        state.b11_explain_wins = True
+        comparison = compare_player_tachiai(player, opponent, decision.committed)
+        # The tutorial teaches base stats plus card orbs. Drop the shared
+        # +1 from both wrestlers so the comparisons and turn order stay intact.
+        def base_plus_orbs(stats):
+            return replace(stats, power=stats.power - 1, technique=stats.technique - 1,
+                           spirit=stats.spirit - 1)
+
+        comparison = replace(comparison, wrestler_a=base_plus_orbs(comparison.wrestler_a),
+                             wrestler_b=base_plus_orbs(comparison.wrestler_b))
+        apply_initial_power(state, comparison)
+        resolve_prepared_tachiai(state, comparison, committed_cards={Side.A: decision.committed})
+        state.active_side = first_exchange_side(comparison, player, opponent)
+        session = TutorialBout(state, comparison, Side.A, _opponent_turn, annotate_turns=True)
+        session.b11_opening = {
+            "allocated": decision.allocated, "committed": decision.committed,
+            "retained": decision.retained,
+        }
+        session.advance()
+        return session
+
+
+def _opponent_turn(state, side, _comparison):
+    fighter = state.fighter(side)
+    for name in OPPONENT_PLAYS[state.turn_number]:
+        card = next(card for card in fighter.hand if card.name == name)
+        context = EffectContext(choices={"grip": "left"}) if name == "Tsuki" else None
+        play_card(state, side, card, context=context)
+
+
+class TutorialBout(HumanBout):
+    tutorial_step = 0
+
+    def check_instruction(self, command):
+        if self.finished:
+            raise IllegalPlay("The practice bout is already over.")
+        action, target = PLAYER_STEPS[self.tutorial_step]
+        if command.get("type") == action:
+            if action == "end_turn":
+                return
+            if action == "choose_cards" and self.pending_selection:
+                options = self.pending_selection.options
+                indices = command.get("indices", [])
+                if (isinstance(indices, list) and len(indices) == self.pending_selection.keep
+                        and all(type(index) is int and 0 <= index < len(options) for index in indices)):
+                    names = [options[index].name for index in indices]
+                    if set(target).issubset(names):
+                        return
+            if action == "play_card":
+                hand = self.state.fighter(self.human_side).hand
+                index = command.get("hand_index")
+                if type(index) is int and 0 <= index < len(hand) and hand[index].name == target:
+                    discard_index = (command.get("choices") or {}).get("hand_index")
+                    if target == "Oshi" and discard_index is not None:
+                        remaining = hand[:index] + hand[index + 1:]
+                        if (type(discard_index) is not int or not 0 <= discard_index < len(remaining)
+                                or remaining[discard_index].name != "Sheer Grit"):
+                            raise IllegalPlay("Discard Sheer Grit to pay for Oshi in this practice bout.")
+                    return
+        raise IllegalPlay("Follow your oyakata’s current instruction to continue the practice bout.")

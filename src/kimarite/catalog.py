@@ -146,6 +146,21 @@ STARTING_KIMARITE: tuple[Card, ...] = (
 PLAYER_DRAFT_CARD_POOL = (Card(14015, "Mawashi Reversal", 1, 2, 0),)
 
 
+POWER_WATER_CANTRIP = Card(62, "Power Water Cantrip")
+
+
+def compendium_cards() -> tuple[Card, ...]:
+    """List each named card once, using the normal playable version."""
+    names = dict.fromkeys(
+        card.name for pool in (CARD_POOL, STARTING_KIMARITE, B9_CARD_POOL, B11_CARD_POOL,
+                               B12_CARD_POOL, PLAYER_DRAFT_CARD_POOL)
+        for card in pool
+    )
+    cards = [card_by_name(name) for name in names]
+    cards.append(POWER_WATER_CANTRIP)
+    return tuple(sorted(cards, key=lambda card: card.name.casefold()))
+
+
 def card_by_id(card_id: int) -> Card:
     for card in (*CARD_POOL, *STARTING_KIMARITE, *B9_CARD_POOL, *B11_CARD_POOL, *B12_CARD_POOL,
                  *PLAYER_DRAFT_CARD_POOL):
