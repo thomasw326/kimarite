@@ -1,4 +1,6 @@
 """A fixed teaching bout played through the normal Exchange rules."""
+from dataclasses import replace
+
 from .b11_pending_session import PendingB11Session
 from .b11_player_opening import PlayerOpening
 from .b11_player_tachiai import compare_player_tachiai
@@ -71,6 +73,14 @@ class TutorialOpening(PendingB11Session):
         state = BoutState(own, foe)
         state.b11_explain_wins = True
         comparison = compare_player_tachiai(player, opponent, decision.committed)
+        # The tutorial teaches base stats plus card orbs. Drop the shared
+        # +1 from both wrestlers so the comparisons and turn order stay intact.
+        def base_plus_orbs(stats):
+            return replace(stats, power=stats.power - 1, technique=stats.technique - 1,
+                           spirit=stats.spirit - 1)
+
+        comparison = replace(comparison, wrestler_a=base_plus_orbs(comparison.wrestler_a),
+                             wrestler_b=base_plus_orbs(comparison.wrestler_b))
         apply_initial_power(state, comparison)
         resolve_prepared_tachiai(state, comparison, committed_cards={Side.A: decision.committed})
         state.active_side = first_exchange_side(comparison, player, opponent)

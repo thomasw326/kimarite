@@ -25,6 +25,8 @@ class TutorialBoutTest(unittest.TestCase):
             return dispatch(bout, {"type": "end_turn"})
 
         comparison = bout.comparison
+        self.assertEqual((comparison.wrestler_a.power, comparison.wrestler_a.technique,
+                          comparison.wrestler_a.spirit), (4, 5, 8))
         self.assertEqual((comparison.power_advantage_a, comparison.technique_advantage_a,
                           comparison.spirit_advantage_a), (-1, 3, 4))
         self.assertEqual(bout.state.position, 1)

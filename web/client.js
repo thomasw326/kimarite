@@ -714,10 +714,10 @@ function b11PreviewBase(name){
  const base={power:0,technique:0,spirit:0};base[order[0]]=2;base[order[1]]=1;return base;
 }
 function b11PreviewTotals(cards){return ['power','technique','spirit'].map(k=>cards.reduce((n,c)=>n+Number(c[k]||0),0))}
-function b11CommittedTachiaiTotals(cards,indices,base){
+function b11CommittedTachiaiTotals(cards,indices,base,bonus=1){
  const committed=cards.filter((_,i)=>indices.has(i));
  const orbs=b11PreviewTotals(committed);
- return ['power','technique','spirit'].map((k,i)=>Number(base[k]||0)+1+orbs[i]);
+ return ['power','technique','spirit'].map((k,i)=>Number(base[k]||0)+bonus+orbs[i]);
 }
 function b11TachiaiPreview(m,group){
  const box=node('div','tachiai-preview');
@@ -1459,16 +1459,13 @@ function renderPendingTachiai(g){
  const refreshPreview=()=>{
   confirm.disabled=guided&&picked.size!==3;
   summary.textContent=picked.size+' committed · '+(3-picked.size)+' retained';
-  const totals=b11CommittedTachiaiTotals(g.tachiai_choice.cards,picked,base);
+  const totals=b11CommittedTachiaiTotals(g.tachiai_choice.cards,picked,base,guided?0:1);
   preview.replaceChildren(
    node('strong','','Your projected Tachiai · '+picked.size+' committed'),
    node('p','','Power '+totals[0]+' · Technique '+totals[1]+' · Spirit '+totals[2]),
-   node('small','','Each total = base + 1 + printed orbs from committed cards, before Tachiai effects. Power helps opening strength/defense; Technique influences Exchange priority and card access; Spirit can grant opening Push. Opponent totals stay hidden until you confirm.')
+   node('small','',(guided?'Each total is your base stat plus the orbs on your committed cards.':'Each total = base + 1 + printed orbs from committed cards, before Tachiai effects.')+' Power helps opening strength/defense. Technique influences who goes first and how many cards they draw. Spirit can grant opening Push. Opponent totals stay hidden until you confirm.')
   );
-  if(guided){
-   const [power,technique,spirit]=totals.map(total=>total-1);
-   preview.insertBefore(node('p','','Base + card orbs: Power '+power+' · Technique '+technique+' · Spirit '+spirit),preview.lastElementChild);
-  }
+
  };
  g.tachiai_choice.cards.forEach((c,i)=>{
   const b=card(c,()=>{
@@ -1741,7 +1738,7 @@ function renderPracticeBoard(g,readyNames){
  $('table-player-discard').replaceChildren(tablePile(g.human,'Discard',()=>showDiscard(g.human,'Your rikishi')));
 }
 const yorikiriLessons=[
- 'You won Spirit 9–5 for 2 Push. Your opponent’s higher Power blocked 1, so you start at +1 Position. You won Technique 6–3, which lets you go first and draw three cards. Choose Accept all.',
+ 'You won Spirit 8–4 for 2 Push. Your opponent’s higher Power blocked 1, so you start at +1 Position. You won Technique 5–2, which lets you go first and draw three cards. Choose Accept all.',
  'Play Oshi (Push). Discard your second Sheer Grit to pay for it. You can have up to two copies of a card in your deck.',
  'Oshi moved you to +2, drew Gain Right Grip from the top, and milled the next card. Play Gain Right Grip now. Its Exchange effect improves your right hand from None to Grip. Your left and right hands track Grip separately.',
  'Your right hand has Grip, and the card’s Temporary effect can block one incoming Push. End your turn to see your opponent’s response.',
