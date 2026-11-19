@@ -253,13 +253,17 @@ function availableRewardCards(m,result){
  });
 }
 function calculateCardRecords(m){
- const plays=new Map(),wins=new Map(),kims=new Set(m.kimarite_names||[]);
+ const plays=new Map(),wins=new Map(),finishes=new Map(),kims=new Set(m.kimarite_names||[]);
+ const nonKimariteFinishes=new Set(['Unknown','Finisher unavailable','Exhaustion','Power','Shove','Fumidashi','Koshikudake']);
  for(const r of m.results){
   const seen=new Set();
   for(const name of r.human_card_plays||[]){
    plays.set(name,(plays.get(name)||0)+1);seen.add(name);
   }
-  if(r.won)for(const name of seen)wins.set(name,(wins.get(name)||0)+1);
+  if(!r.won)continue;
+  for(const name of seen)wins.set(name,(wins.get(name)||0)+1);
+  if(r.finish&&!nonKimariteFinishes.has(r.finish))
+   finishes.set(r.finish,(finishes.get(r.finish)||0)+1);
  }
  // Only cards tied for the highest raw count are eligible for a category.
  // Find distinct category winners wherever possible; a sole count leader
@@ -268,7 +272,7 @@ function calculateCardRecords(m){
   ['most_played_card',plays,false],
   ['most_played_kimarite',plays,true],
   ['most_winning_card',wins,false],
-  ['most_winning_kimarite',wins,true]
+  ['most_winning_kimarite',finishes,false]
  ];
  const candidates=new Map();
  for(const [key,counts,kimariteOnly] of categories){
