@@ -34,15 +34,9 @@ def test_player_name_is_primary_form_control_and_preset_is_not_required():
     assert attrs["type"] == "text"
     assert attrs["maxlength"] == "32"
     assert attrs["value"] == "Your Rikishi"
-    # Legacy wrestler roster and classic opening mode are contained in
-    # optional collapsed developer details, not required public setup.
-    legacy = parser.elements["legacy-management-options"][1]
-    assert "open" not in legacy
-    assert ("details", "legacy-management-options") in parser.elements["management-deck"][2]
-    assert ("details", "legacy-management-options") in parser.elements["management-opening-mode"][2]
-    assert ("details", "legacy-management-options") not in parser.elements["wrestler-name"][2]
-    assert "Developer practice options" in HTML
-    assert "#legacy-management-options" in CSS
+    assert "Developer practice options" not in HTML
+    assert "legacy-management-options" not in parser.elements
+    assert '<div hidden><select id="management-deck">' in HTML
 
 
 def test_standard_draft_uses_created_name_and_stats_independently_of_legacy_roster():

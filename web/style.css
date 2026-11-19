@@ -128,10 +128,6 @@ body[data-phase="heya"] .bout-hud{display:none!important}
 #random-name-status:empty{display:none}
 @media(max-width:440px){#random-wrestler-name{flex:1 1 100%}}
 
-#legacy-management-options{border:1px dashed #897b66;border-radius:10px;padding:8px 12px;background:#27312d}
-#legacy-management-options summary{color:#c9c0aa;font-size:.9rem}
-#legacy-management-options>p{color:#d3c5af;font-size:.88rem;line-height:1.45}
-#legacy-management-options>label{margin:10px 0}
 
 /* Compact year-to-date scorecard, carried with the drafted wrestler. */
 .year-record{border:1px solid #bba276;background:#21342f;color:#f6dfb3;border-radius:12px;padding:13px 16px;margin:12px 0;font-size:1rem;font-weight:800;line-height:1.5}
@@ -524,5 +520,5 @@ body:has(.table-layout) main{max-width:1150px}
 body[data-phase="heya"]:not(.show-developer-setup):has(#b11-creation:not([hidden])) #open-game-guide,
 body[data-phase="heya"]:not(.show-developer-setup):has(#b11-creation:not([hidden])) #reset-progress,
 body:not(.show-developer-setup) #heya-view:has(#b11-creation:not([hidden])) > :is(.heya-masthead,#single-bout-details),
-body:not(.show-developer-setup) #heya-view:has(#b11-creation:not([hidden])) .management > :is(h2,p:not(#management-notice),#legacy-management-options,#year-record),
+body:not(.show-developer-setup) #heya-view:has(#b11-creation:not([hidden])) .management > :is(h2,p:not(#management-notice),#year-record),
 .management:has(#b11-creation[hidden]):has(#b11-draft[hidden]) #start-practice{display:none}
