@@ -1077,7 +1077,7 @@ function earnedNextStartingCards(m){
   return originals[i];
  });
 }
-const B11_STARTER_SUITE=['Yorikiri','Oshidashi','Oshi','Tsuki','Gain Left Grip','Gain Right Grip','Give Ground','Sonkyo'];
+const B11_STARTER_SUITE=['Yorikiri','Oshidashi','Oshi','Tsuki','Gain Left Grip','Gain Right Grip','Regain Balance','Shikiri'];
 let activeDraft=null;
 function saveDraft(){if(activeDraft)gameSaveSet('kimarite_active_draft',JSON.stringify(activeDraft));else gameSaveRemove('kimarite_active_draft')}
 async function offerDraft(){
