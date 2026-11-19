@@ -1421,22 +1421,25 @@ function renderPendingTachiai(g){
  $('round').textContent='CHOOSE TACHIAI';$('tracks').replaceChildren();
  $('score').replaceChildren(node('h2','','Your opening: '+g.human.name+' vs '+g.opponent.name));
  $('opening').replaceChildren(node('p','','Your opponent’s Tachiai cards remain hidden until you commit.'));
- $('choices').replaceChildren(node('h2','','Commit 0–3 cards to Tachiai'),node('p','','Committed cards contribute orbs and Tachiai effects; cards you keep will start in your Exchange hand.'));
+ const guided=sessionSetup?.opening_mode==='tutorial';
+ $('choices').replaceChildren(node('h2','',guided?'Commit all three Tachiai cards':'Commit 0–3 cards to Tachiai'),node('p','','Committed cards contribute orbs and Tachiai effects; cards you keep will start in your Exchange hand.'));
  const strip=node('div','cards');
  const summary=node('p','zones','');
  const preview=node('div','tachiai-preview');
  preview.setAttribute('role','status');
  preview.setAttribute('aria-live','polite');
- const base={...(sessionSetup?.created_stats||b11PreviewBase(g.human.name))};
+ const base={...(g.tutorial_stats||sessionSetup?.created_stats||b11PreviewBase(g.human.name))};
  const stat=sessionSetup?.b12_interview?.kind;
  if(['spirit','power','technique'].includes(stat))base[stat]++;
+ const confirm=btn('Confirm Tachiai commitment',()=>act({type:'commit_tachiai',indices:[...picked].sort()}),'confirm');
  const refreshPreview=()=>{
+  confirm.disabled=guided&&picked.size!==3;
   summary.textContent=picked.size+' committed · '+(3-picked.size)+' retained';
   const totals=b11CommittedTachiaiTotals(g.tachiai_choice.cards,picked,base);
   preview.replaceChildren(
    node('strong','','Your projected Tachiai · '+picked.size+' committed'),
    node('p','','Power '+totals[0]+' · Technique '+totals[1]+' · Spirit '+totals[2]),
-   node('small','','Each total = base + 1 + printed orbs from committed cards, before Tachiai effects. Power helps opening strength/defense; Technique influences Exchange priority and card access; Spirit can grant opening Push/Momentum. Opponent totals stay hidden until you confirm.')
+   node('small','','Each total = base + 1 + printed orbs from committed cards, before Tachiai effects. Power helps opening strength/defense; Technique influences Exchange priority and card access; Spirit can grant opening Push. Opponent totals stay hidden until you confirm.')
   );
  };
  g.tachiai_choice.cards.forEach((c,i)=>{
@@ -1456,14 +1459,14 @@ function renderPendingTachiai(g){
   strip.append(wrap);
  });
  $('choices').append(strip);
- $('choices').append(summary,preview,btn('Confirm Tachiai commitment',()=>act({type:'commit_tachiai',indices:[...picked].sort()}),'confirm'));
+ $('choices').append(summary,preview,confirm);
  refreshPreview();
  $('hand').replaceChildren();$('history').replaceChildren();$('end').disabled=true;$('end').classList.remove('end-turn-no-plays','end-turn-win');$('end').textContent='End turn';$('notice').textContent='';
 }
 let lastPresentedResult=null;
 function showBoutResult(g){
  const dialog=$('bout-result');
- if(!dialog||!g.finished||!g.winner||!sessionSetup||sessionSetup.opening_mode!=='b11_live')return;
+ if(!dialog||!g.finished||!g.winner||!sessionSetup||!['b11_live','tutorial'].includes(sessionSetup.opening_mode))return;
  const key=[sessionSetup.seed,g.human.name,g.opponent.name,g.turn,g.winner,g.win_method].join('|');
  if(lastPresentedResult===key)return;
  lastPresentedResult=key;
@@ -1709,28 +1712,39 @@ function renderPracticeBoard(g,readyNames){
  $('table-player-deck').replaceChildren(tablePile(g.human,'Deck'));
  $('table-player-discard').replaceChildren(tablePile(g.human,'Discard',()=>showDiscard(g.human,'Your rikishi')));
 }
+const yorikiriLessons=[
+ 'Power tied at 5. Your opponent won Technique 9–8 and took the first turn. You won Spirit 8–4 for 2 Push. Their Shove brought you back to +1 Position. Gain Left Grip needed a Technique win to establish Grip. Accept both cards to begin the Exchange.',
+ 'Play Oshi (Push). Discard your second Gain Left Grip to pay for it. You can have up to two copies of a card in your deck.',
+ 'Oshi put you back at +2, drew Gain Right Grip from the top, and milled the next card. Play Gain Right Grip now. Its Exchange effect improves your right hand from None to Grip. Your left and right hands track Grip separately.',
+ 'Your right hand has Grip, and the card’s Temporary effect can block one incoming Push. End your turn to see your opponent’s response.',
+ 'Your opponent gained 1 Momentum, so your side of the shared track fell to −1. They also left Sonkyo in their Temporary Zone. Your Right Grip lets you look at three cards and keep two. Choose Regain Balance and Attempt Deep Outside Grip.',
+ 'Play Regain Balance. It draws a card and rewards you for playing it at negative Momentum with +1 Momentum and +2 Power.',
+ 'Play Attempt Deep Outside Grip. It establishes Left Grip immediately and enters your Temporary Zone. At the start of your next turn, it will take that hand from Grip to Deep.',
+ 'You now have Grip with both hands. End your turn and watch your opponent’s cards and your discard pile.',
+ 'Harite milled two cards straight to discard and knocked a card out of your hand. At seven cards in discard, Exhaustion can cost 1 Power at the start of your turn. Your Grip protects you because it ties or leads. Keep Oshidashi and any other card.',
+ 'Your Left Grip is now Deep, worth two Grip levels. Play Oshidashi (Push Out). It enters the Kimarite Zone beside Yorikiri, and its on-play effect gives you the last point of Momentum.',
+ 'Both Kimarite are in play. Yorikiri is ready because you have Grip, +2 Position and +1 Momentum. Choose End turn to win.',
+];
 function updatePracticeCoach(g){
  const practice=sessionSetup?.practice===true;
+ const guided=sessionSetup?.opening_mode==='tutorial';
+ $('bout-layout').classList.toggle('guided-practice',guided);
  $('practice-coach').hidden=!practice;
  if(!practice)return;
- let hint='Click a card to inspect it, then choose Play this card. Check your remaining Plays before ending the turn.';
- if(g.phase==='choose_tachiai')hint='Tachiai is the opening clash. Committed cards contribute their orbs and any Tachiai effects. Try committing Gain Left Grip to see its effect. Uncommitted cards go to your first Exchange hand.';
- else if(g.finished)hint='Practice complete. You can return to the Heya and create your wrestler.';
- else if(g.selection)hint='Keep the indicated number of cards. If you can keep every card shown, choose Accept all.';
- else if(g.human?.ready_kimarite?.length)hint='A finishing move is ready. End your turn to win with it.';
- else if(g.human?.plays_remaining===0)hint='You’re out of Plays. End your turn and watch what your opponent does.';
- else if(g.position>=3)hint='You’ve pushed your opponent near the edge. Push them past +4 to win by ring-out.';
- else if(g.turn<=2)hint='Exchange effects resolve when you play cards on your turn. A Temporary card can stay active in the Temporary zone until its effect ends or it is removed. Inspect a card to see when its effects apply.';
+ let hint='Inspect a card to read its effects, then choose Play this card.';
+ if(g.finished)hint='You won by Yorikiri! Oshidashi’s on-play effect gave Yorikiri the Momentum it needed.';
+ else if(guided&&g.phase==='choose_tachiai')hint='Let’s win by Yorikiri (Force Out). A Kimarite is a winning technique and goes in your Kimarite Zone. Shikiri is a pre-bout ritual with 2 Technique and 2 Spirit orbs. Gain Left Grip has a conditional Tachiai effect. Select all three cards and confirm.';
+ else if(guided)hint=yorikiriLessons[g.tutorial_step];
  $('practice-hint').textContent=hint;
 }
 async function startPractice(){
  const button=$('start-practice');
  button.disabled=true;
  try{
-  const request={human:'Arm Controller',opponent:'The Technician',seed:20261021,
-   opening_mode:'b11_live',opening_cards:['Gain Left Grip','Yori','Ottsuke']};
+  const request={opening_mode:'tutorial',seed:20261021};
   const result=await api('/api/session',request);
   sessionSetup={...request,practice:true};actionJournal=[];token=result.token;
+  lastPresentedResult=null;
   $('seed-used').textContent='Practice bout';
   render(result.state);
  }catch(error){$('management-notice').textContent=error.message}
@@ -1777,7 +1791,14 @@ function render(g){
   });
   $('choices').append(strip,confirm);
  }
- $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));g.human.hand.forEach((c,i)=>$('hand').append(card(c,()=>inspect(c,legal.has(i)?()=>play(i):null),true)));const history=$('history');history.replaceChildren();const events=g.events||[];if(!events.length)history.append(node('p','','No actions recorded yet.'));for(const event of events.slice().reverse())history.append(node('p',event.includes(' plays ')?'history-line':'history-event',event));const endButton=$('end');endButton.disabled=!g.can_end_turn;const canFinish=turnCues.winReady;endButton.classList.toggle('end-turn-no-plays',turnCues.noPlays);endButton.classList.toggle('end-turn-win',canFinish);endButton.textContent=canFinish?'End turn to win':'End turn';endButton.title=canFinish?'End turn to win with '+[...readyNames].join(', '):g.can_end_turn&&g.human.plays_remaining===0?'No Plays remaining — end your turn':'';$('notice').textContent=g.finished?('Winner: '+(g.winner==='A'?g.human.name:g.winner==='B'?g.opponent.name:'Undecided')+' · '+(g.win_method||g.stopped_reason||'')):'';
+ $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));const practiceCard={1:'Oshi',2:'Gain Right Grip',5:'Regain Balance',6:'Attempt Deep Outside Grip',9:'Oshidashi'}[g.tutorial_step];
+ g.human.hand.forEach((c,i)=>{
+  const suggested=practiceCard===c.name;
+  const playable=legal.has(i)&&(g.tutorial_step===undefined||suggested);
+  const tile=card(c,()=>inspect(c,playable?()=>play(i):null));
+  tile.classList.toggle('practice-card',suggested);
+  $('hand').append(tile);
+ });const history=$('history');history.replaceChildren();const events=g.events||[];if(!events.length)history.append(node('p','','No actions recorded yet.'));for(const event of events.slice().reverse())history.append(node('p',event.includes(' plays ')?'history-line':'history-event',event));const endButton=$('end');endButton.disabled=!g.can_end_turn||(g.tutorial_step!==undefined&&![3,7,10].includes(g.tutorial_step));const canFinish=turnCues.winReady;endButton.classList.toggle('end-turn-no-plays',turnCues.noPlays);endButton.classList.toggle('end-turn-win',canFinish);endButton.textContent=canFinish?'End turn to win':'End turn';endButton.title=canFinish?'End turn to win with '+[...readyNames].join(', '):g.can_end_turn&&g.human.plays_remaining===0?'No Plays remaining — end your turn':'';$('notice').textContent=g.finished?('Winner: '+(g.winner==='A'?g.human.name:g.winner==='B'?g.opponent.name:'Undecided')+' · '+(g.win_method||g.stopped_reason||'')):'';
  if(g.finished&&!alreadyInHeya){
   showBoutResult(g);
   startB12MatchdayPrefetch(g);

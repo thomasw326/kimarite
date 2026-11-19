@@ -481,3 +481,25 @@ body:has(.table-layout) main{max-width:1150px}
  .table-layout .practice-coach{flex-wrap:wrap}
  .table-layout .practice-coach p{flex-basis:100%;order:1}
 }
+
+.guided-practice .practice-card{border-color:#8de6af;box-shadow:inset 0 0 0 1px #37694e}
+@media(min-width:1180px){
+ body:has(.guided-practice.table-layout) main{max-width:1360px}
+ #dohyo-view .guided-practice.table-layout{
+  display:grid;grid-template-columns:minmax(0,1fr) 216px;align-items:start;
+ }
+ .guided-practice.table-layout .table-opponent,
+ .guided-practice.table-layout .arena,
+ .guided-practice.table-layout .table-player-zones,
+ .guided-practice.table-layout #choices,
+ .guided-practice.table-layout .play,
+ .guided-practice.table-layout #notice{grid-column:1}
+ .guided-practice.table-layout #practice-coach{
+  grid-column:2;grid-row:1 / span 5;display:grid;gap:8px;
+  padding:10px;line-height:1.45;
+ }
+}
+.guided-practice:not(.table-layout) #practice-coach{order:-1}
+@media(max-width:1179px){
+ .guided-practice.table-layout #practice-coach{order:3}
+}

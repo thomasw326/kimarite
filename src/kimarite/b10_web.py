@@ -19,6 +19,7 @@ from urllib.parse import urlsplit
 from .b10_human_session import dispatch, new_b10_session, public_snapshot, roster, opening_options, management_deal
 from .effects import ChoiceRequired, IllegalPlay
 from .b11_pending_session import PendingB11Session
+from .tutorial_bout import TutorialOpening
 
 STATIC = Path(__file__).resolve().parents[2] / "web"
 _sessions = {}
@@ -344,7 +345,9 @@ class Handler(BaseHTTPRequestHandler):
                     _prune_sessions()
                     if len(_sessions) >= MAX_SESSIONS:
                         return self.reply(503, {"error": "Session capacity reached; retry later."})
-                    if data.get("opening_mode") in {"b11_preview", "b11_live"}:
+                    if data.get("opening_mode") == "tutorial":
+                        session = TutorialOpening.new()
+                    elif data.get("opening_mode") in {"b11_preview", "b11_live"}:
                         drafted = None
                         if "draft_picks" in data:
                             from .b11_player_draft import grow_deck, remove_from_deck
@@ -396,6 +399,10 @@ class Handler(BaseHTTPRequestHandler):
                             if not session.phase.pending:
                                 return self.reply(409, {"error": "Tachiai is already committed.", "code": "tachiai_already_committed", "state": session.snapshot()})
                             committed_snapshot = session.confirm(data["indices"])
+                            if isinstance(session, TutorialOpening):
+                                live = session.start_bout()
+                                _sessions[token] = live
+                                return self.reply(200, {"state": public_snapshot(live)})
                             if getattr(session, "live_enabled", False):
                                 from .b11_live_opening import start_b11_human_bout
                                 live = start_b11_human_bout(session)
