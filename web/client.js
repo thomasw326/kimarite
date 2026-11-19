@@ -1465,6 +1465,10 @@ function renderPendingTachiai(g){
    node('p','','Power '+totals[0]+' · Technique '+totals[1]+' · Spirit '+totals[2]),
    node('small','','Each total = base + 1 + printed orbs from committed cards, before Tachiai effects. Power helps opening strength/defense; Technique influences Exchange priority and card access; Spirit can grant opening Push. Opponent totals stay hidden until you confirm.')
   );
+  if(guided){
+   const [power,technique,spirit]=totals.map(total=>total-1);
+   preview.insertBefore(node('p','','Base + card orbs: Power '+power+' · Technique '+technique+' · Spirit '+spirit),preview.lastElementChild);
+  }
  };
  g.tachiai_choice.cards.forEach((c,i)=>{
   const b=card(c,()=>{
@@ -1737,11 +1741,11 @@ function renderPracticeBoard(g,readyNames){
  $('table-player-discard').replaceChildren(tablePile(g.human,'Discard',()=>showDiscard(g.human,'Your rikishi')));
 }
 const yorikiriLessons=[
- 'Power tied at 5. Your opponent won Technique 6–5 and took the first turn. You won Spirit 8–4 for 2 Push. Their Shove brought you back to +1 Position. Accept both cards to begin the Exchange.',
+ 'You won Spirit 9–5 for 2 Push. Your opponent’s higher Power blocked 1, so you start at +1 Position. You won Technique 6–3, which lets you go first and draw three cards. Choose Accept all.',
  'Play Oshi (Push). Discard your second Sheer Grit to pay for it. You can have up to two copies of a card in your deck.',
- 'Oshi put you back at +2, drew Gain Right Grip from the top, and milled the next card. Play Gain Right Grip now. Its Exchange effect improves your right hand from None to Grip. Your left and right hands track Grip separately.',
+ 'Oshi moved you to +2, drew Gain Right Grip from the top, and milled the next card. Play Gain Right Grip now. Its Exchange effect improves your right hand from None to Grip. Your left and right hands track Grip separately.',
  'Your right hand has Grip, and the card’s Temporary effect can block one incoming Push. End your turn to see your opponent’s response.',
- 'Your opponent gained 1 Momentum, so your side of the shared track fell to −1. They also left Sonkyo in their Temporary Zone. Your Right Grip lets you look at three cards and keep two. Choose Regain Balance and Attempt Deep Outside Grip.',
+ 'Your opponent gained 1 Momentum, so your side of the shared track fell to −1. Your Right Grip Temporary blocked their Push, and they left Sonkyo in their Temporary Zone. Your Right Grip lets you look at three cards and keep two. Choose Regain Balance and Attempt Deep Outside Grip.',
  'Play Regain Balance. It draws a card and rewards you for playing it at negative Momentum with +1 Momentum and +2 Power.',
  'Play Attempt Deep Outside Grip. It establishes Left Grip immediately and enters your Temporary Zone. At the start of your next turn, it will take that hand from Grip to Deep.',
  'You now have Grip with both hands. End your turn and watch your opponent’s cards and your discard pile.',
@@ -1757,7 +1761,7 @@ function updatePracticeCoach(g){
  if(!practice)return;
  let hint='Inspect a card to read its effects, then choose Play this card.';
  if(g.finished)hint='You won by Yorikiri! Oshidashi’s on-play effect gave Yorikiri the Momentum it needed.';
- else if(guided&&g.phase==='choose_tachiai')hint='Let’s win by Yorikiri (Force Out). A Kimarite is a winning technique and goes in your Kimarite Zone. Shikiri is a pre-bout ritual with five orbs: 1 Power, 2 Technique, and 2 Spirit. Sheer Grit adds 3 Spirit orbs and keeps your Technique low. Select all three cards and confirm.';
+ else if(guided&&g.phase==='choose_tachiai')hint='Let’s win by Yorikiri (Force Out). A Kimarite is a winning technique and goes in your Kimarite Zone. Shikiri is a pre-bout ritual with five orbs: 1 Power, 2 Technique, and 2 Spirit. Sheer Grit adds 3 Spirit orbs. Select all three cards and confirm.';
  else if(guided)hint=yorikiriLessons[g.tutorial_step];
  $('practice-hint').textContent=hint;
 }

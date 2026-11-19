@@ -13,24 +13,23 @@ from .tachiai_effects import resolve_prepared_tachiai
 from .turns import apply_initial_power
 
 OPENING = ("Sheer Grit", "Shikiri", "Yorikiri")
-PLAYER_STATS = {"power": 2, "technique": 1, "spirit": 1}
+PLAYER_STATS = {"power": 2, "technique": 2, "spirit": 2}
 PLAYER_DRAWS = (
-    "Oshi", "Sheer Grit", "Gain Right Grip", "Tsuki",
+    "Oshi", "Sheer Grit", "Stare Down", "Gain Right Grip", "Tsuki",
     "Regain Balance", "Attempt Deep Outside Grip", "Shove",
     "Power Water", "Tsuppari", "Ottsuke",
     "Oshidashi", "Pull", "Sonkyo", "Nokotta!", "Belt Slap", "Salt Throw",
 )
 OPPONENT_DRAWS = (
-    "Shove", "Stare Down", "Tsuki", "Shiko Stomp", "Sonkyo",
+    "Shiko Stomp", "Sonkyo",
     "Harite", "Gain Left Grip", "Tsuppari", "Belt Slap",
 )
 OPPONENT_PLAYS = {
-    1: ("Shove",),
-    3: ("Shiko Stomp", "Sonkyo"),
-    5: ("Harite", "Gain Left Grip"),
+    2: ("Shiko Stomp", "Sonkyo"),
+    4: ("Harite", "Gain Left Grip"),
 }
 PLAYER_STEPS = (
-    ("choose_cards", ("Oshi", "Sheer Grit")),
+    ("choose_cards", ("Oshi", "Sheer Grit", "Stare Down")),
     ("play_card", "Oshi"),
     ("play_card", "Gain Right Grip"),
     ("end_turn", None),
@@ -65,7 +64,7 @@ class TutorialOpening(PendingB11Session):
         oshi = card_by_name("Oshi")
         player = Wrestler(self.human, PLAYER_STATS["power"], PLAYER_STATS["technique"],
                           PLAYER_STATS["spirit"], yorikiri, oshi, oshi)
-        opponent = Wrestler(self.opponent, 0, 5, 0, card_by_name("Oshidashi"),
+        opponent = Wrestler(self.opponent, 1, 2, 1, card_by_name("Oshidashi"),
                             card_by_name("Regain Balance"), card_by_name("Shove"))
         own = FighterState(player, draw_pile=[card_by_name(name) for name in PLAYER_DRAWS])
         foe = FighterState(opponent, draw_pile=[card_by_name(name) for name in OPPONENT_DRAWS])
@@ -112,5 +111,11 @@ class TutorialBout(HumanBout):
                 hand = self.state.fighter(self.human_side).hand
                 index = command.get("hand_index")
                 if type(index) is int and 0 <= index < len(hand) and hand[index].name == target:
+                    discard_index = (command.get("choices") or {}).get("hand_index")
+                    if target == "Oshi" and discard_index is not None:
+                        remaining = hand[:index] + hand[index + 1:]
+                        if (type(discard_index) is not int or not 0 <= discard_index < len(remaining)
+                                or remaining[discard_index].name != "Sheer Grit"):
+                            raise IllegalPlay("Discard Sheer Grit to pay for Oshi in this practice bout.")
                     return
         raise IllegalPlay("Follow your oyakata’s current instruction to continue the practice bout.")
