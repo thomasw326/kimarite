@@ -1746,7 +1746,7 @@ const yorikiriLessons=[
  'Your opponent gained 1 Momentum, so your side of the shared track fell to −1. Their Tsuki stripped your Left Grip, but your Right Grip stayed and the Temporary effect from Gain Left Grip still blocked their Push. Your Right Grip lets you look at three cards and keep two. Choose Regain Balance and Attempt Deep Outside Grip.',
  'Play Regain Balance. It draws a card and rewards you for playing it at negative Momentum with +1 Momentum and +2 Power.',
  'Play Attempt Deep Outside Grip. It establishes Left Grip immediately and enters your Temporary Zone. At the start of your next turn, it will take that hand from Grip to Deep.',
- 'You now have Grip with both hands. End your turn and watch your opponent’s cards and your discard pile.',
+ 'You now have Grip with both hands. You can leave Power Water in your hand and end your turn. You’re allowed to end your turn with cards in hand, even if you have Plays left. Watch what your opponent does to your discard pile.',
  'Harite milled two cards straight to discard and knocked a card out of your hand. At seven cards in discard, Exhaustion can cost 1 Power at the start of your turn. Your Grip protects you because it ties or leads. Keep Oshidashi and any other card.',
  'Your Left Grip is now Deep, worth two Grip levels. Play Oshidashi (Push Out). It enters the Kimarite Zone beside Yorikiri, and its on-play effect gives you the last point of Momentum.',
  'Both Kimarite are in play. Yorikiri is ready because you have Grip, +2 Position and +1 Momentum. Choose End turn to win.',
