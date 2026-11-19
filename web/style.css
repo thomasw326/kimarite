@@ -394,3 +394,20 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 
 .management-card-assigned>.card{background:#d7d5cf;border-color:#a4a19a}
 .management-group .assignment-option-other-bout{background:#42494a;color:#d7d9d6}
+
+.onboarding-entry{display:flex;gap:10px;flex-wrap:wrap}
+#creation-flow{width:100%;max-width:none;height:100%;max-height:none;margin:0;border:0;border-radius:0;padding:0;overflow:auto;background:radial-gradient(ellipse at top,#4b3c30,#192826 72%);color:#f7f2e6}
+.creation-shell{max-width:880px;min-height:100%;margin:auto;padding:clamp(20px,5vw,56px);display:flex;flex-direction:column;gap:18px}
+#creation-flow .creation-header{display:flex;justify-content:space-between;align-items:center;gap:12px;position:static;padding:0;background:transparent;border:0}
+.creation-header p{margin:0;color:#ecd2a1;font-weight:700}
+.creation-shell h2{font-size:clamp(28px,6vw,48px);margin:0}
+.creation-shell section:not([hidden]){display:grid;gap:14px;align-content:start}
+.creation-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,185px),1fr));gap:12px}
+.creation-option{min-height:92px;background:#263a36;border:2px solid #9eae96;color:#f7f2e6;text-align:left}
+.creation-option[aria-pressed="true"]{border-color:#f0c77d;background:#4a3a25}
+.creation-actions{display:flex;justify-content:space-between;gap:12px;margin-top:auto}
+.creation-actions #creation-next{margin-inline-start:auto}
+.creation-shell label{display:block}
+#creation-error:empty{display:none}
+.practice-coach{padding:10px 14px;margin:8px 0;border:1px solid #c9aa72;border-radius:8px;background:#253834}
+.practice-coach p{margin:5px 0 8px}

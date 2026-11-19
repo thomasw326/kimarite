@@ -594,6 +594,55 @@ $('management-opening-mode').addEventListener('change',()=>{
  $('b11-creation').hidden=$('management-opening-mode').value!=='b11_live';
 });
 creationChoices();
+const creationPanels=[...document.querySelectorAll('[data-creation-step]')];
+const creationStats=['create-food','create-training','create-final'];
+let creationStep=0;
+function showCreationStep(step){
+ creationStep=step;
+ $('creation-step').textContent='Wrestler creation · '+(step+1)+' of '+creationPanels.length;
+ $('creation-title').textContent=creationPanels[step].dataset.title||'Name your wrestler';
+ for(const [index,panel] of creationPanels.entries())panel.hidden=index!==step;
+ $('creation-back').hidden=step===0;
+ $('creation-next').textContent=step===3?'Start tournament draft':'Continue';
+ $('creation-error').textContent='';
+ creationChoices();
+ if(step){
+  const id=creationStats[step-1],select=$(id),options=$(id+'-choices');
+  options.replaceChildren();
+  for(const choice of select.options){
+   const choiceButton=btn(choice.textContent,()=>{
+    select.value=choice.value;
+    creationChoices();
+    for(const sibling of options.children)sibling.setAttribute('aria-pressed',String(sibling===choiceButton));
+   },'creation-option');
+   choiceButton.type='button';
+   choiceButton.setAttribute('aria-pressed',String(select.value===choice.value));
+   options.append(choiceButton);
+  }
+ }
+ $('create-summary').hidden=step===0;
+ $('creation-title').focus();
+}
+$('create-wrestler').onclick=()=>{
+ $('creation-flow').showModal();
+ showCreationStep(0);
+};
+$('creation-close').onclick=()=>$('creation-flow').close();
+$('creation-back').onclick=()=>showCreationStep(creationStep-1);
+$('creation-next').onclick=()=>{
+ const name=$('wrestler-name').value.trim();
+ if(creationStep===0&&(!name||Array.from(name).some(ch=>ch.codePointAt(0)<32||ch.codePointAt(0)===127))){
+  $('creation-error').textContent='Enter a wrestler name.';
+  $('wrestler-name').focus();
+  return;
+ }
+ if(creationStep<3){showCreationStep(creationStep+1);return}
+ $('creation-flow').close();
+ $('management-deal').click();
+};
+$('management-opening-mode').addEventListener('change',()=>{
+ $('management-deal').hidden=$('management-opening-mode').value==='b11_live';
+});
 const B11_BASE_STYLES={
  'Heavy Hitter':'power,spirit','Bulldozer':'power,spirit','Charger':'spirit,power','Pressure Fighter':'spirit,power',
  'Power Grappler':'power,technique','Unorthodox Powerhouse':'power,technique','The Technician':'technique,power',
@@ -1110,7 +1159,7 @@ $('confirm-new-wrestler').onclick=()=>{
  $('create-training').value='technique';
  creationChoices();
  for(const id of ['b11-draft','management-board','management-rewards','management-progress','management-next','management-summary','management-new','new-wrestler'])$(id).hidden=true;
- $('management-deal').hidden=false;
+ $('management-deal').hidden=true;
  $('management-notice').textContent='New year: create your wrestler, then draft your first 28 cards.';
  showYearStatus({tournament_history:[],results:[]});
  setGameLocation('heya');
@@ -1504,6 +1553,7 @@ async function commitB12PlayerResult(m){
 }
 async function returnToHeya(){
  if(!game?.finished||resolvingB12Matchday)return; // No retreat from a live bout.
+ if(sessionSetup?.practice){leavePractice();return}
  resolvingB12Matchday=true;
  try{
   const m=management;
@@ -1556,7 +1606,45 @@ function kimariteTurnCues(g){
   winReady:readyNames.length>0,
  };
 }
-function render(g){if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management){managementStatus();if(alreadyInHeya&&unresolvedRewards(management).length)openBlockRewards()}$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();const turnCues=kimariteTurnCues(g);const readyNames=new Set(turnCues.readyNames);
+function updatePracticeCoach(g){
+ const practice=sessionSetup?.practice===true;
+ $('practice-coach').hidden=!practice;
+ if(!practice)return;
+ let hint='Click a card to inspect it, then choose Play this card. Check your remaining Plays before ending the turn.';
+ if(g.phase==='choose_tachiai')hint='Commit a card to add its orbs to the opening clash. Keep the others for your first hand. Try committing one now.';
+ else if(g.finished)hint='Practice complete. You can return to the Heya and create your wrestler.';
+ else if(g.selection)hint='Keep the indicated number of cards. If you can keep every card shown, choose Accept all.';
+ else if(g.human?.ready_kimarite?.length)hint='A finishing move is ready. End your turn to win with it.';
+ else if(g.human?.plays_remaining===0)hint='You’re out of Plays. End your turn and watch what your opponent does.';
+ else if(g.position>=3)hint='You’ve pushed your opponent near the edge. Push them past +4 to win by ring-out.';
+ else if(g.turn<=2)hint='Start by inspecting a card. Push moves Position toward the edge. Grip and Momentum can help meet the requirements of finishing moves.';
+ $('practice-hint').textContent=hint;
+}
+async function startPractice(){
+ const button=$('start-practice');
+ button.disabled=true;
+ try{
+  const request={human:'Arm Controller',opponent:'The Technician',seed:20261021,
+   opening_mode:'b11_live',opening_cards:['Gain Left Grip','Yori','Ottsuke']};
+  const result=await api('/api/session',request);
+  sessionSetup={...request,practice:true};actionJournal=[];token=result.token;
+  $('seed-used').textContent='Practice bout';
+  render(result.state);
+ }catch(error){$('management-notice').textContent=error.message}
+ finally{button.disabled=false}
+}
+function leavePractice(){
+ if(!sessionSetup?.practice)return;
+ if($('bout-result').open)$('bout-result').close();
+ clearBoutSession();$('practice-coach').hidden=true;
+ setGameLocation('heya');
+ $('management-notice').textContent='Practice ended. Create your wrestler or practice again.';
+}
+$('start-practice').onclick=startPractice;
+$('exit-practice').onclick=leavePractice;
+function render(g){
+ updatePracticeCoach(g);
+ if(g.phase==='choose_tachiai'){renderPendingTachiai(g);return}updateDohyoPosition(g);const alreadyInHeya=returnedToHeyaAfterBout(g);if(!alreadyInHeya)setGameLocation('dohyo');$('return-heya').hidden=!g.finished||alreadyInHeya;renderBoutHud(g);game=g;picked=new Set();pendingPlay=null;rememberSession();if(management){managementStatus();if(alreadyInHeya&&unresolvedRewards(management).length)openBlockRewards()}$('round').textContent='TURN '+g.turn+' · '+(g.finished?'BOUT OVER':g.phase==='select_cards'?'SELECT CARDS':'EXCHANGE');$('tracks').replaceChildren(node('span','track','POSITION '+g.position),node('span','track','MOMENTUM '+g.momentum));$('score').replaceChildren();const turnCues=kimariteTurnCues(g);const readyNames=new Set(turnCues.readyNames);
  for(const [title,s,own] of [['YOUR RIKISHI',g.human,true],['OPPONENT',g.opponent,false]]){const box=node('div','rikishi-info');const name=node('h2','',s.name);appendStability(name,s);box.append(node('div','eyebrow',title),name,node('p','', 'Power '+s.power+'  ·  Grip '+s.grip.join('/')+'  ·  '+(own?'Plays '+s.plays_remaining:'Hand '+s.hand_count)));const zones=node('p','zones');zones.append(node('b','','Kimarite: '),document.createTextNode(names(s.kimarite)),node('br'),node('b','','Temporary: '),document.createTextNode(names(s.temporary)));box.append(zones);const discard=btn('Discard pile: '+s.discard_count+' · View cards',()=>showDiscard(s,own?'Your rikishi':'Opponent'),'discard-button');box.append(discard);for(const zoneName of ['kimarite','temporary']){const zone=node('div','zone-list');zone.append(node('div','eyebrow',zoneName.toUpperCase()));for(const c of s[zoneName]){const item=node('div','zone-entry');const ready=own&&zoneName==='kimarite'&&readyNames.has(c.name);item.append(btn(displayCardName(c.name)+(ready?' · READY TO WIN':' · Inspect'),()=>inspect({...c,description:zoneEffect(c,zoneName),zone_only:true,timing:zoneName==='kimarite'?'Winning condition':'Active Temporary effect'}),'zone-card'+(ready?' kimarite-ready':'')));if(ready)item.append(node('span','kimarite-ready-cue','End turn to win'));item.append(node('p','temporary-detail',zoneEffect(c,zoneName)));zone.append(item)}box.append(zone)}$('score').append(box)}
  const opening=$('opening');opening.replaceChildren();if(g.opening){for(const [side,label] of [['human','Your opening'],['opponent','Opponent opening']]){const o=g.opening[side];opening.append(node('h2','',label));opening.append(node('p','', 'Tachiai totals — Power '+o.tachiai_orbs[0]+' · Technique '+o.tachiai_orbs[1]+' · Spirit '+o.tachiai_orbs[2]));for(const [key,title] of [['starting_kimarite','Starting Kimarite'],['prepared_tachiai','Prepared Tachiai'],['top_of_deck','Top of deck']]){if(o[key])opening.append(btn(title+': '+o[key].name+' · Inspect',()=>inspect(o[key]),'zone-card'))}}opening.append(node('p','zones','Your selected opening cards are shown here. Choose cards before a new bout; automatic mode remains available for comparison.'))}
  $('choices').replaceChildren();
