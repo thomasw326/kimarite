@@ -30,7 +30,7 @@ const sessionStorage={
     setItem:(key,value)=>data.set(key,value)
 };
 let scrolls=0;
-const window={scrollTo(){scrolls++}};
+const window={location:{search:''},scrollTo(){scrolls++}};
 const document={body:{dataset:{phase:'heya'}}};
 let management=null,sessionSetup=null,game=null;
 function managementStatus(){}

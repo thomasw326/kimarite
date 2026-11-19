@@ -13,7 +13,7 @@ def call_save_helpers(script):
     node = shutil.which("node")
     if not node:
         pytest.skip("Node needed for browser storage regression")
-    helper = "function gameSaveGet(key){" + JS.split("function gameSaveGet(key){", 1)[1].split(
+    helper = "const playtestSavePrefix='';function gameSaveGet(key){" + JS.split("function gameSaveGet(key){", 1)[1].split(
         "function returnedToHeyaAfterBout(g){", 1
     )[0]
     prep = """
@@ -84,7 +84,7 @@ def test_phase_and_draft_resume_take_precedence_over_old_bout():
     assert "const saved=JSON.parse(gameSaveGet('kimarite_management')||'null')" in JS
     assert "const pending=JSON.parse(gameSaveGet('kimarite_active_draft')||'null')" in JS
     assert "activeDraft=null;saveDraft();\n clearBoutSession();" in JS
-    assert "m.cards=data.cards;m.groups=Array.from({length:3},()=>[null,null,null]);clearBoutSession();" in JS
+    assert "m.cards=data.cards;m.deck_size=data.deck_size;m.groups=Array.from({length:3},()=>[null,null,null]);clearBoutSession();" in JS
 
 
 def test_next_basho_retains_saved_rematch_rewards_by_opponent_id():

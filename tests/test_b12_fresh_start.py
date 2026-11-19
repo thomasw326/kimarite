@@ -60,7 +60,7 @@ def test_reset_runs_before_any_existing_game_is_loaded():
     assert "params.get('fresh')!=='1'" in JS
     assert "params.delete('fresh')" in JS
     assert "window.history.replaceState" in JS
-    assert "window.location.replace(window.location.pathname+'?fresh=1')" in JS
+    assert "window.location.replace(window.location.pathname+'?'+params)" in JS
     assert "clearSavedProgress();" in JS
 
 
@@ -158,4 +158,4 @@ def test_clean_link_is_not_required_for_existing_legacy_restart_button():
     # End-of-sixth-basho reset remains available and unchanged.
     assert "$('new-wrestler').onclick=()=>" in JS
     assert "$('confirm-new-wrestler').onclick=()=>" in JS
-    assert "if(!management||management.results.length!==15||yearHistory(management).length<5)return" in JS
+    assert "if(!management||management.results.length!==15||championshipPending(management)||yearHistory(management).length<5)return" in JS
