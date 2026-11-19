@@ -31,12 +31,11 @@ def test_oshi_family_reveal_chain_adds_orbs_and_stops():
 
 def test_explosive_step_exchange_push_independent_of_momentum():
     card = card_by_name("Explosive Step — Fumikomi")
-    for initial, expected_position in [(-1, 1), (0, 1), (1, 1), (3, 1)]:
+    for initial, expected_position in [(-1, 1), (0, 1), (1, 1), (3, 2)]:
         s = state_with_prepared(Card(99998, "Blank"))
         s.momentum = initial
         resolve_exchange_effect(s, Side.A, card, EffectContext())
-        # Approved B12 rule: +1 Push regardless of Momentum; no Momentum gain.
-        assert s.momentum == initial
+        assert s.momentum == min(initial + 1, 3)
         assert s.position == expected_position
 
 

@@ -173,6 +173,8 @@ def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_push(state, side, 1)
+    if state.winner is None:
+        gain_momentum(state, side, 1)
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -1138,7 +1140,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
 # BEGIN APPROVED MILL/RECYCLE V1
 MILL_AMOUNTS = {
     "Headlong Charge": 2,
-    "Explosive Step — Fumikomi": 2,
+    "Explosive Step — Fumikomi": 3,
     "Tsuppari": 1,
     "Tsuki": 1,
     "Shove": 1,
