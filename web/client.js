@@ -1906,12 +1906,26 @@ if(playtestSavePrefix){
 }
 document.body.classList.toggle('show-developer-setup',new URLSearchParams(location.search).has('dev'));
 let compendiumCards;
+const compendiumOrbStats=[['power','Power'],['technique','Technique'],['spirit','Spirit']];
+function matchesCompendiumCard(c,query,type,tachiai,orbs){
+ if(type&&c.is_kimarite!==(type==='kimarite'))return false;
+ if(tachiai&&tachiaiEffectCards.has(c.name)!==(tachiai==='yes'))return false;
+ for(const [stat,minimum] of orbs){
+  if(minimum==='0'&&c[stat]!==0)return false;
+  if(minimum!==''&&c[stat]<Number(minimum))return false;
+ }
+ return [c.name,displayCardName(c.name),c.description]
+  .some(value=>value?.toLocaleLowerCase().includes(query));
+}
 function renderCompendium(){
  const list=$('compendium-cards');
  const query=$('compendium-search').value.trim().toLocaleLowerCase();
- const matches=compendiumCards.filter(c=>[c.name,displayCardName(c.name),c.description]
-  .some(value=>value?.toLocaleLowerCase().includes(query)));
+ const type=$('compendium-type').value;
+ const tachiai=$('compendium-tachiai').value;
+ const orbs=compendiumOrbStats.map(([stat])=>[stat,$('compendium-'+stat).value]);
+ const matches=compendiumCards.filter(c=>matchesCompendiumCard(c,query,type,tachiai,orbs));
  list.replaceChildren();
+ if(!matches.length)list.append(node('p','','No cards match these filters.'));
  $('compendium-status').textContent=matches.length+' of '+compendiumCards.length+' cards';
  for(const c of matches){
   const entry=node('details','compendium-card');
@@ -1935,6 +1949,24 @@ async function openCompendium(){
   renderCompendium();
  }catch(error){$('compendium-status').textContent='Could not load cards. Close and reopen the compendium to retry.'}
 }
+const compendiumFilters=$('compendium-filters');
+for(const [stat,label] of compendiumOrbStats){
+ const field=node('label','',label+' orbs');
+ const select=node('select');
+ select.id='compendium-'+stat;
+ for(const [value,text] of [['','Any'],['0','None'],['1','Has '+label],['2','2 or more'],['3','3 or more'],['4','4 or more']]){
+  const option=node('option','',text);
+  option.value=value;
+  select.append(option);
+ }
+ field.append(select);
+ compendiumFilters.append(field);
+}
+compendiumFilters.onchange=()=>{if(compendiumCards)renderCompendium()};
+$('compendium-clear-filters').onclick=()=>{
+ for(const select of compendiumFilters.querySelectorAll('select'))select.value='';
+ if(compendiumCards)renderCompendium();
+};
 $('compendium-search').oninput=()=>{if(compendiumCards)renderCompendium()};
 $('compendium-close').onclick=()=>$('compendium').close();
 $('settings-close').onclick=()=>$('settings-menu').close();

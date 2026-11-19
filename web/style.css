@@ -535,3 +535,10 @@ body[data-phase="dohyo"] > header{flex-wrap:wrap}
 .compendium-card summary .card-orbs{display:inline-flex;margin-inline-start:8px;vertical-align:middle}
 .compendium-card small{display:block;margin-top:8px;color:#e7c38c}
 .compendium-card .compendium-rules{margin:4px 0 0}
+
+.compendium-filters{margin-top:10px;padding:8px;border:1px solid #718582;border-radius:7px}
+.compendium-filters summary{cursor:pointer;font-weight:700}
+.compendium-filter-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px;margin:8px 0}
+.compendium-filter-fields label{display:grid;gap:4px;font-size:13px}
+.compendium-filter-fields select{width:100%;min-height:38px;padding:5px;font:inherit}
+#compendium-clear-filters{min-height:36px;padding:5px 10px}

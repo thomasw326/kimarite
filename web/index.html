@@ -63,6 +63,14 @@
 <div class="inspect-head"><h2 id="compendium-title">Card compendium</h2><button type="button" id="compendium-close">Close</button></div>
 <label for="compendium-search">Search cards</label>
 <input type="search" id="compendium-search" autocomplete="off" placeholder="Card name or rules text">
+<details class="compendium-filters">
+<summary>Advanced search</summary>
+<div id="compendium-filters" class="compendium-filter-fields">
+<label>Card type<select id="compendium-type"><option value="">Any type</option><option value="kimarite">Kimarite</option><option value="other">Non-Kimarite</option></select></label>
+<label>Tachiai effect<select id="compendium-tachiai"><option value="">Either</option><option value="yes">Has a Tachiai effect</option><option value="no">Printed orbs only</option></select></label>
+</div>
+<button type="button" id="compendium-clear-filters" class="choice-inspect">Clear filters</button>
+</details>
 <p id="compendium-status" role="status"></p>
 <div id="compendium-cards" class="compendium-cards"></div>
 </dialog>
