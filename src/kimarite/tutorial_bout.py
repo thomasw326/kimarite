@@ -33,8 +33,8 @@ OPPONENT_PLAYS = {
 PLAYER_STEPS = (
     ("choose_cards", ("Oshi", "Sheer Grit", "Gain Left Grip")),
     ("play_card", "Oshi"),
-    ("play_card", "Gain Right Grip"),
     ("play_card", "Gain Left Grip"),
+    ("play_card", "Gain Right Grip"),
     ("end_turn", None),
     ("choose_cards", ("Regain Balance", "Attempt Deep Outside Grip")),
     ("play_card", "Regain Balance"),

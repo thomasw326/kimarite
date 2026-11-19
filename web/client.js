@@ -1740,10 +1740,10 @@ function renderPracticeBoard(g,readyNames){
 const yorikiriLessons=[
  'You won Spirit 8–4 for 2 Push. Your opponent’s higher Power blocked 1, so you start at +1 Position. You won Technique 5–2, which lets you go first and draw three cards. Choose Accept all.',
  'Play Oshi (Push). Discard your second Sheer Grit to pay for it. You can have up to two copies of a card in your deck.',
- 'You started with two Plays. Oshi spent one and gave you one back, so you still have two. It moved you to +2 Position and drew Gain Right Grip. Play Gain Right Grip now. Its Exchange effect improves your right hand from None to Grip. Your left and right hands track Grip separately.',
- 'Play Gain Left Grip with your remaining Play to improve your left hand from None to Grip. Without Oshi’s extra Play, you’d already be out of Plays.',
+ 'You started with two Plays. Oshi spent one and gave you one back, so you still have two. It moved you to +2 Position and drew Gain Right Grip. Play Gain Left Grip first. Its Exchange effect improves your left hand from None to Grip. Your left and right hands track Grip separately.',
+ 'Play Gain Right Grip with your remaining Play to improve your right hand from None to Grip. Without Oshi’s extra Play, you’d already be out of Plays.',
  'You played three cards this turn. Both hands now have Grip, and your grip cards’ Temporary effects can block incoming Push. End your turn.',
- 'Your opponent gained 1 Momentum, so your side of the shared track fell to −1. Their Tsuki stripped your Left Grip, but your Right Grip stayed and its Temporary effect blocked their Push. Your Right Grip lets you look at three cards and keep two. Choose Regain Balance and Attempt Deep Outside Grip.',
+ 'Your opponent gained 1 Momentum, so your side of the shared track fell to −1. Their Tsuki stripped your Left Grip, but your Right Grip stayed and the Temporary effect from Gain Left Grip still blocked their Push. Your Right Grip lets you look at three cards and keep two. Choose Regain Balance and Attempt Deep Outside Grip.',
  'Play Regain Balance. It draws a card and rewards you for playing it at negative Momentum with +1 Momentum and +2 Power.',
  'Play Attempt Deep Outside Grip. It establishes Left Grip immediately and enters your Temporary Zone. At the start of your next turn, it will take that hand from Grip to Deep.',
  'You now have Grip with both hands. End your turn and watch your opponent’s cards and your discard pile.',
@@ -1817,7 +1817,7 @@ function render(g){
   });
   $('choices').append(strip,confirm);
  }
- $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));const practiceCard={1:'Oshi',2:'Gain Right Grip',3:'Gain Left Grip',6:'Regain Balance',7:'Attempt Deep Outside Grip',10:'Oshidashi'}[g.tutorial_step];
+ $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));const practiceCard={1:'Oshi',2:'Gain Left Grip',3:'Gain Right Grip',6:'Regain Balance',7:'Attempt Deep Outside Grip',10:'Oshidashi'}[g.tutorial_step];
  g.human.hand.forEach((c,i)=>{
   const suggested=practiceCard===c.name;
   const playable=legal.has(i)&&(g.tutorial_step===undefined||suggested);
