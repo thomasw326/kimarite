@@ -383,9 +383,12 @@ body[data-phase="dohyo"] header .game-guide-trigger{margin:0 0 0 auto;min-height
 .banzuke-movement-table th,.banzuke-movement-table td{padding:6px;text-align:left;border-bottom:1px solid #52635f;overflow-wrap:anywhere}
 .banzuke-movement-table small{display:block}
 
-.tachiai-effect-card{border:1px solid #ffd184;border-radius:10px;background:#2e281e}
-.choice-card-wrap.tachiai-effect-card{padding:8px}
-.tachiai-effect-label{color:#ffdb9e;font-weight:800}
+.tachiai-effect-card>.card{border-color:#ffd184}
+.tachiai-effect-label{
+ display:block;width:fit-content;max-width:100%;align-self:flex-start;
+ padding:2px 6px;border:1px solid #ffd184;border-radius:5px;
+ background:#2e281e;color:#ffdb9e;font-weight:800;
+}
 
 .interview-affected-cards{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 
