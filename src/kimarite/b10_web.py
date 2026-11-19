@@ -301,7 +301,7 @@ class Handler(BaseHTTPRequestHandler):
                 from .b12_campaign_web import campaign_request
                 session = None
                 resolve_lock = None
-                if path == "/api/b12/campaign/resolve":
+                if path in ("/api/b12/campaign/resolve", "/api/b12/campaign/playoff/resolve"):
                     from threading import Lock
                     with _lock:
                         _prune_sessions()
@@ -332,10 +332,13 @@ class Handler(BaseHTTPRequestHandler):
                     choices = options_for(data["starting_cards"], data["picks"], int(data["seed"]))
                     return self.reply(200, {"choices": [card_info(AVAILABLE[n]) for n in choices]})
                 if path == "/api/b11/draft/deal":
-                    from .b11_player_draft import grow_deck, deal_block
+                    from .b11_player_draft import grow_deck, deal_block, remove_from_deck
                     deck, ids = grow_deck(data["starting_cards"], data["picks"], int(data["draft_seed"]),
                                           data.get("duplicated_indices", []))
-                    return self.reply(200, {"cards": deal_block(deck, int(data["seed"]), ids),
+                    deck, ids = remove_from_deck(deck, ids, data.get("excluded_ids", []))
+                    return self.reply(200, {"cards": deal_block(
+                        deck, int(data["seed"]), ids, guaranteed=data.get("guaranteed_ids", []),
+                        previous=data.get("previous_ids", [])),
                                             "deck_size": len(deck)})
                 if path == "/api/session":
                     _prune_sessions()
@@ -344,9 +347,10 @@ class Handler(BaseHTTPRequestHandler):
                     if data.get("opening_mode") in {"b11_preview", "b11_live"}:
                         drafted = None
                         if "draft_picks" in data:
-                            from .b11_player_draft import grow_deck
-                            drafted, _ = grow_deck(data["starting_cards"], data["draft_picks"],
+                            from .b11_player_draft import grow_deck, remove_from_deck
+                            drafted, ids = grow_deck(data["starting_cards"], data["draft_picks"],
                                                    int(data["draft_seed"]), data.get("duplicated_indices", []))
+                            drafted, _ = remove_from_deck(drafted, ids, data.get("excluded_ids", []))
                         session = PendingB11Session.start(data["human"], data["opponent"], data["opening_cards"], seed=int(data.get("seed", 20261021)), created_stats=data.get("created_stats"), drafted_deck=drafted, opponent_ai=data.get("b12_opponent_ai"), player_rank=data.get("b12_player_rank", 1))
                         session.live_enabled = data.get("opening_mode") == "b11_live"
                         if "b12_campaign" in data:
@@ -356,6 +360,24 @@ class Handler(BaseHTTPRequestHandler):
                             if not isinstance(meta, dict) or any(type(meta.get(k)) is not int for k in ("seed", "basho", "day")) or not isinstance(meta.get("opponent_id"), str) or meta["opponent_id"] != session.opponent_ai["id"]:
                                 raise ValueError("B12 world match identity is malformed")
                             session.b12_campaign = meta
+                        interview = data.get("b12_interview")
+                        if interview is not None:
+                            if not hasattr(session, "b12_campaign") or not isinstance(interview, dict):
+                                raise ValueError("Interview rewards require a B12 campaign bout.")
+                            kind = interview.get("kind")
+                            if kind == "stack":
+                                name = interview.get("card")
+                                if not isinstance(name, str) or drafted is None or name not in drafted:
+                                    raise ValueError("Interview top card must be in the deck.")
+                            elif kind not in {"power", "technique", "spirit", "double_dip", "stamina"}:
+                                raise ValueError("Unknown bout interview reward.")
+                            session.interview = interview
+                        rematch_card = data.get("b12_rematch_top_card")
+                        if rematch_card is not None:
+                            from .catalog import card_by_name
+                            if not hasattr(session, "b12_campaign") or not isinstance(rematch_card, str):
+                                raise ValueError("A rematch top card requires a B12 campaign bout.")
+                            session.rematch_top_card = card_by_name(rematch_card)
                     else:
                         session = new_b10_session(data["human"], data["opponent"], seed=int(data.get("seed", 20261021)), opening=data.get("opening"))
                     token = secrets.token_urlsafe(24)

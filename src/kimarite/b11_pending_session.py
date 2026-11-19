@@ -15,6 +15,7 @@ from .b11_player_opening import PlayerOpening
 from .b11_tachiai_phase import PendingPlayerTachiai
 from .b11_tachiai_public import pending_tachiai_snapshot
 from .catalog import card_by_name
+from .models import Card
 
 
 @dataclass
@@ -27,6 +28,7 @@ class PendingB11Session:
     drafted_deck: list[str] | None = None
     opponent_ai: dict | None = None
     player_rank: int = 1
+    rematch_top_card: Card | None = None
 
     @classmethod
     def start(cls, human: str, opponent: str, names: list[str], *, seed: int = 20261021, created_stats: dict[str, int] | None = None, drafted_deck: list[str] | None = None, opponent_ai: dict | None = None, player_rank: int = 1) -> "PendingB11Session":

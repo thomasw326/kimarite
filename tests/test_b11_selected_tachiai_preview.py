@@ -47,7 +47,7 @@ def test_live_pending_choice_refreshes_preview_without_revealing_opponent():
     end = CLIENT.index("let lastPresentedResult=null;", start)
     source = CLIENT[start:end]
     assert "b11CommittedTachiaiTotals(g.tachiai_choice.cards,picked,base)" in source
-    assert "const base=sessionSetup?.created_stats||b11PreviewBase(g.human.name)" in source
+    assert "const base={...(sessionSetup?.created_stats||b11PreviewBase(g.human.name))}" in source
     assert "refreshPreview()" in source
     assert "refreshPreview();" in source
     assert "preview.setAttribute(\'aria-live\',\'polite\')" in source

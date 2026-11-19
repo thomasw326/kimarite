@@ -38,8 +38,10 @@ def _reveal_tachiai_orbs(
         fighter.draw_pile[:] = outcome.remaining
         fighter.discard_pile.extend(outcome.revealed)
         extras[side] = outcome.orbs
-        for card in outcome.revealed:
-            state.log(f"{fighter.wrestler.name} reveals {card.name} for Tachiai orbs.")
+        for card, source in zip(outcome.revealed, outcome.sources, strict=True):
+            state.log(
+                f"{fighter.wrestler.name} reveals {card.name} for Tachiai orbs from {source.name}."
+            )
     a, b = extras[Side.A], extras[Side.B]
     # apply_initial_power already copied the pre-reveal opening Power totals
     # into persistent fighter Power. Revealed Power orbs must be added there
@@ -159,7 +161,7 @@ def resolve_prepared_tachiai(
                 momentum_delta[side] += 1
                 extra_push[side] += 1
 
-        elif name == "Sonkyo":
+        elif name in REVEAL_FAMILY or name in {"Sonkyo", "Chiri-chozu", "Shikiri"}:
             pass
         elif name == "Nekodamashi":
             make_unstable(state, opponent_side)

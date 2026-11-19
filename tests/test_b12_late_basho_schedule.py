@@ -140,3 +140,34 @@ def test_old_saved_tournament_with_early_marquee_result_remains_playable():
             frozenset(p) for p in pairs}
         league, _ = resolve_test_day(league, day)
     assert league["day"] == BASHO_DAYS
+
+
+@pytest.mark.parametrize("player_rank", [22, 42])
+def test_player_opening_samples_rank_window_and_next_block_varies(player_rank):
+    first_blocks, second_blocks = set(), set()
+    for seed in range(8):
+        league = season(seed, player_rank=player_rank)
+        first = plan_block(league)
+        ranks = {foe["rank"] for foe in first}
+        assert len(ranks) == 3
+        assert all(0 < abs(rank - player_rank) <= 7 for rank in ranks)
+        assert plan_block(json.loads(json.dumps(league))) == first
+        first_blocks.add(frozenset(ranks))
+        for day in range(3):
+            league, _ = resolve_test_day(league, day)
+        second = {foe["rank"] for foe in plan_block(league)}
+        assert len(second) == 3 and not second & ranks
+        assert all(abs(rank - player_rank) <= 10 for rank in second)
+        second_blocks.add(frozenset(second))
+    assert len(first_blocks) > 1
+    assert len(second_blocks) > 1
+
+
+@pytest.mark.parametrize("player_rank", [1, 2, 8, 9, 16, 42])
+def test_early_yokozuna_komusubi_pairings_include_player_when_ranked_there(player_rank):
+    league = season(133, player_rank=player_rank)
+    for day, ranks in enumerate((((1, 9), (2, 8)), ((1, 8), (2, 9)))):
+        league, matches = resolve_test_day(league, day)
+        assert {ranked_pair_ids(league, a, b) for a, b in ranks} <= {
+            frozenset(pair) for pair in matches
+        }

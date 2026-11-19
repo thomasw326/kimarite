@@ -44,7 +44,7 @@ function $(id){
  }
  return buttons.get(id);
 }
-const management={division_roster:{seed:9,completed_basho:0},round:0,results:[]};
+const management={division_roster:{seed:9,completed_basho:0},division_league:{},round:0,results:[]};
 const sessionSetup={seed:9001};
 const game={finished:true};
 let calls=0;

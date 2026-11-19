@@ -30,7 +30,7 @@ assert.equal(s.most_winning_card.count,4);
 
 // Four tied cards should yield four distinct records when possible.
 // Two of the tied cards are Kimarite.
-const four=tournament(Array.from({length:4},()=>bout(true,'Oshidashi','Yorikiri','Oshi','Tsuki')));
+const four=tournament(Array.from({length:4},()=>({...bout(true,'Oshidashi','Yorikiri','Oshi','Tsuki'),finish:'Oshidashi'})));
 const f=calculate(four);
 assert.equal(new Set(Object.values(f).map(v=>v.name)).size,4);
 assert(Object.values(f).every(v=>v.count===4));
@@ -38,7 +38,7 @@ assert(['Oshidashi','Yorikiri'].includes(f.most_played_kimarite.name));
 assert(['Oshidashi','Yorikiri'].includes(f.most_winning_kimarite.name));
 
 // A sole leader stays the leader even if this necessarily repeats the name.
-const solo=calculate(tournament([bout(true,'Oshidashi'),bout(true,'Oshidashi'),bout(false,'Oshidashi')]));
+const solo=calculate(tournament([bout(true,'Oshidashi'),bout(true,'Oshidashi'),bout(false,'Oshidashi')].map(b=>({...b,finish:'Oshidashi'}))));
 assert(Object.values(solo).every(v=>v.name==='Oshidashi'));
 assert.equal(solo.most_played_card.count,3);
 assert.equal(solo.most_winning_card.count,2);
@@ -49,4 +49,15 @@ assert.equal(counted.most_played_card.count,4);
 assert.equal(counted.most_winning_card.count,1);
 assert.equal(counted.most_played_kimarite,null);
 assert.equal(counted.most_winning_kimarite,null);
+const decisive=calculate(tournament([
+ {...bout(true,'Oshitaoshi'),finish:'Okuridashi'},
+ {...bout(true,'Oshitaoshi'),finish:'Okuridashi'},
+ {...bout(true,'Oshitaoshi'),finish:'Shove'},
+ {...bout(true,'Oshitaoshi'),finish:'Unknown'},
+ {...bout(false,'Oshitaoshi'),finish:'Oshitaoshi'}
+]));
+assert.equal(decisive.most_winning_kimarite.name,'Okuridashi');
+assert.equal(decisive.most_winning_kimarite.count,2);
+assert.equal(decisive.most_winning_card.name,'Oshitaoshi');
+assert.equal(decisive.most_winning_card.count,4);
 console.log('B11 card records: tied-leader diversity, sole leaders and raw counts passed.');

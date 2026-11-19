@@ -18,15 +18,16 @@ CARD_TEXT = {
     "Tsuri": {"timing":"Exchange / Tachiai","effect":"Exchange: If you have no effective Grip, establish a Grip. Otherwise, gain 1 Power. Then place Tsuri in your Temporary Zone. At the start of your next turn, gain 3 Push if you have at least 5 Power and 2 effective Grip; otherwise, gain 1 Push.","status":"verified"},
     "Yori": {"timing":"Exchange / Tachiai","effect":"Exchange: if no usable Grip, improve your shallower Grip; otherwise gain 1 Push. Temporary (next turn): gain 2 Momentum if your total usable Grip exceeds opponent's; otherwise gain 1 Momentum.","status":"verified"},
     "Gaburi": {"timing":"Exchange / Tachiai","effect":"Exchange: if no usable Grip, improve your shallower Grip; otherwise gain 1 Momentum. Temporary (next turn): create Yorikiri in your Kimarite Zone if your Power exceeds opponent Power.","status":"verified"},
-    "Hold Position": {"timing":"Exchange / Tachiai","effect":"Exchange: enter Temporary Zone. While active: prevent opponent from gaining Push. At the start of your next turn: gain 1 Momentum and 1 Power.","status":"verified"},
-    "Immovable": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Power and enter Temporary Zone. Temporary (next turn): gain 2 Momentum only if opponent gained no Push while this card was active.","status":"verified"},
+    "Hold Position": {"timing":"Exchange / Tachiai","effect":"Tachiai: gain 2 Power and reduce opposing Spirit Push by 2, subject to prevention. Exchange: enter Temporary Zone. While active: prevent opponent from gaining Push. At the start of your next turn: gain 1 Momentum and 1 Power.","status":"verified"},
+    "Immovable": {"timing":"Exchange / Tachiai","effect":"Tachiai: gain 2 Power and reduce opposing Spirit Push by 2, subject to prevention. Exchange: gain 1 Power and enter Temporary Zone. Temporary (next turn): gain 2 Momentum only if opponent gained no Push while this card was active.","status":"verified"},
     "Denshamichi": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Push; enter Temporary Zone. Temporary (next turn): gain 1 Momentum then 1 Push. If disrupted, opponent receives Okuridashi and Position is reoriented toward them.","status":"verified"},
-    "Nekodamashi": {"timing":"Exchange / Tachiai","effect":"Exchange: make opponent Unstable immediately; enter Temporary Zone. Next turn: make opponent Unstable again. No penalty if disrupted.","status":"verified"},
+    "Nekodamashi": {"timing":"Exchange / Tachiai","effect":"Tachiai: make the opponent Unstable and enter your Temporary Zone. Exchange: make opponent Unstable immediately; enter Temporary Zone. Next turn: make opponent Unstable again. No penalty if disrupted.","status":"verified"},
     "Kannuki": {"timing":"Exchange / Tachiai","effect":"Exchange: enter Temporary Zone and suppress opponent's Grip benefits and Grip-building cards. Temporary (next turn): reduce both opponent Grips one level and make opponent Unstable, subject to prevention.","status":"verified"},
+    "Mawashi Reversal": {"timing":"Exchange / Tachiai","effect":"Exchange: If your usable total Grip is tied with or lower than your opponent's, this card does nothing. If you lead Grip and your Position is negative, flip it to positive at the same distance. If you lead Grip and your Position is 0 or higher, gain 1 Push and 1 Momentum. Tachiai: printed orbs only.","status":"verified"},
     "Sidestep": {"timing":"Exchange / Tachiai","effect":"Tachiai: if opponent won Spirit with positive Spirit difference, gain 1 Momentum. Exchange: enter Side-by-Side and Temporary Zone, storing current Position distance. While side-by-side, Push is suppressed; on survival, resolve orientation from Momentum and make opponent Unstable.","status":"verified"},
     "Spin Away": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Momentum, enter Side-by-Side stance and Temporary Zone. While active, Push is suppressed. At the start of your next turn, resolve orientation according to Momentum. If disrupted, grant opponent Okuritaoshi.","status":"verified"},
-    "Salt Throw": {"timing":"Exchange / Tachiai","effect":"Exchange: move all cards from your Discard Pile to the bottom of your Draw Pile; enter Temporary Zone and gain 1 additional Play. Tachiai: enter Temporary Zone. On each later turn, recycle one discarded card; does not expire normally.","status":"verified"},
-    "Sonkyo": {"timing":"Exchange / Tachiai","effect":"Exchange: enter Temporary Zone to prevent one negative effect and gain 1 additional Play; persists until used instead of expiring each turn. Prepared Tachiai use also establishes its protection.","status":"verified"},
+    "Salt Throw": {"timing":"Exchange / Tachiai","effect":"Exchange: move all cards from your Discard Pile to the bottom of your Draw Pile; enter Temporary Zone and gain 1 additional Play. Tachiai: move all discarded cards to the bottom of your draw pile and enter your Temporary Zone. On each later turn, recycle one discarded card; does not expire normally.","status":"verified"},
+    "Sonkyo": {"timing":"Exchange / Tachiai","effect":"Exchange: enter Temporary Zone to prevent one negative effect and gain 1 additional Play; persists until used instead of expiring each turn. Tachiai: enter your Temporary Zone to prevent one negative effect.","status":"verified"},
     "Renzoku": {"timing":"Exchange / Tachiai","effect":"Exchange: for the remainder of this turn, each card you draw grants 1 Play. Does not draw a card itself.","status":"B12 design"},
     "Meguri": {"timing":"Exchange / Tachiai","effect":"Exchange: draw 2; enter permanent Temporary. Ordinary discards go to the bottom of your Draw Pile instead; if opposing Push moves your Position backwards, Exhaust Meguri.","status":"B12 design"},
     "Nokotta!": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 2 Push if your Position is negative; otherwise gain 1 Push.","status":"B12 design"},
@@ -41,11 +42,11 @@ CARD_TEXT = {
     "Kimetaoshi": {"timing":"Kimarite","effect":"Win: neither wrestler has Grip, Power advantage at least 4, and opponent discard pile has at least 10 cards. Exchange: opponent mills up to 4 minus their total Grip.","status":"B12 design"},
     "Reckless Charge": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 2 Push and 1 Momentum; enter Temporary. Next turn lose 1 Position and 1 Momentum. If disrupted early, recoil happens immediately.","status":"B12 design"},
     "Sheer Grit": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Momentum. If your discard pile has at least 7 cards (Exhausted threshold), gain an additional 1 Momentum and 1 Push.","status":"B12 design"},
-    "Oshi": {"timing":"Exchange / Tachiai","effect":"Exchange: discard one card from hand to gain 1 Push, 1 additional Play and draw 1; mill 1 card from your draw pile.","status":"verified"},
+    "Oshi": {"timing":"Exchange / Tachiai","effect":"Tachiai: reveal the top card of your draw pile, add its printed orbs to your Tachiai totals, and discard it. Repeat if it was Oshi or Tsuki. Exchange: discard one card from hand to gain 1 Push, 1 additional Play and draw 1; mill 1 card from your draw pile.","status":"verified"},
     "Shove": {"timing":"Exchange / Tachiai","effect":"Tachiai: gain 1 extra Push. Exchange: gain 1 Push; if Oshi, Tsuki or Tsuppari was played earlier this turn, draw 1 then discard 1. Mill 1 card.","status":"verified"},
-    "Tsuki": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 additional Play; reduce one chosen opponent Grip by one level if possible; draw 1; mill 1 from draw pile.","status":"verified"},
+    "Tsuki": {"timing":"Exchange / Tachiai","effect":"Tachiai: reveal the top card of your draw pile, add its printed orbs to your Tachiai totals, and discard it. Repeat if it was Oshi or Tsuki. Exchange: gain 1 additional Play; reduce one chosen opponent Grip by one level if possible; draw 1; mill 1 from draw pile.","status":"verified"},
     "Tsuppari": {"timing":"Exchange / Tachiai","effect":"Tachiai: shuffle 3 Oshi, 3 Tsuki and 3 Shove into draw pile. Exchange: gain 1 Push if a preceding card this turn was Oshi, Tsuki, Tsuppari or Shove; gain 1 additional Play, draw 1 and mill 1 card.","status":"verified"},
-    "Explosive Step — Fumikomi": {"timing":"Exchange / Tachiai","effect":"Tachiai: gain 1 additional Push if you won Spirit. Exchange: gain 1 Push regardless of Momentum. Mill 2 cards from your draw pile.","status":"verified"},
+    "Explosive Step — Fumikomi": {"timing":"Exchange / Tachiai","effect":"Tachiai: gain 1 additional Push if you won Spirit. Mill 2. Exchange: gain 1 Push and 1 Momentum. Mill 3.","status":"verified"},
     "Harite": {"timing":"Exchange / Tachiai","effect":"Tachiai or Exchange: opponent discards 1 random card from hand (if any), loses 1 Power and mills 2 cards from their draw pile, unless protected.","status":"verified"},
     "Headlong Charge": {"timing":"Exchange / Tachiai","effect":"Tachiai: optionally sacrifice a Kimarite to gain 1 Momentum and 1 Push. Exchange: sacrifice one of your Kimarite to gain 1 Momentum and 1 Push; mill 2 cards.","status":"verified"},
     "Belt Slap": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Push. If your Tachiai Spirit advantage was at least 3, gain 1 Momentum.","status":"verified"},
@@ -90,6 +91,7 @@ CARD_TEXT = {
     "Uwatedashinage": {"timing":"Kimarite","effect":"Win: Left Grip, Momentum at least +1, and your Power at least 5 below opponent's. On play: draw 1; optionally discard 1 card to establish Left Grip.","status":"verified"},
 }
 GLOSSARY = {
+    "Power Water Cantrips": CARD_TEXT["Power Water Cantrip"]["effect"],
     "Position": "Your location relative to the opponent and the tawara. Positive values favour your side; reaching the ring-out boundary ends the bout.",
     "Momentum": "A signed measure of which wrestler is driving the exchange. Card effects and Kimarite can require relative Momentum.",
     "Power": "Your current physical strength during the bout. Some Kimarite and effects check this value.",
@@ -107,7 +109,7 @@ GLOSSARY = {
 }
 def card_info(card):
     entry = CARD_TEXT.get(card.name, {})
-    return {
+    info = {
         "name": card.name, "id": card.card_id,
         "power": card.power, "technique": card.technique, "spirit": card.spirit,
         "is_kimarite": card.is_kimarite,
@@ -115,3 +117,6 @@ def card_info(card):
         "description": entry.get("effect", ""),
         "description_status": entry.get("status", "needs_audit"),
     }
+    if card.name == "Power Water":
+        info["glossary"] = {"Power Water Cantrips": GLOSSARY["Power Water Cantrips"]}
+    return info

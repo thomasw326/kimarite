@@ -57,6 +57,7 @@ function $(id){return elements[id]??=(node('div',id))}
 function card(c,fn){return node('button','card',c.name)}
 function displayCardName(name){return name}
 function inspect(){}
+function interviewReward(){return null}
 function b11TachiaiPreview(m,g){return node('div','preview','Tachiai preview')}
 const saved=[];
 function managementSave(){saved.push(JSON.stringify(management))}

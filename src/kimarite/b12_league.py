@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import hashlib
+from random import Random
 
 from .b12_division_roster import ACTIVE_AI, BASHO_COUNT, PLAYER_RANK, validate_world
 
@@ -18,6 +19,9 @@ WRESTLERS = 42
 MATCHES_PER_DAY = WRESTLERS // 2
 PLAYER = "player"
 TOP_TIER_MAX_RANK = 8
+JOI_MAX_RANK = 16
+OPENING_RANK_RADIUS = 7
+KOMUSUBI_OPENERS = (((1, 9), (2, 8)), ((1, 8), (2, 9)))
 RECORD_MATCH_START = 9  # Day 10 (zero-indexed)
 FINAL_DAY = BASHO_DAYS - 1
 # Reserve top-of-banzuke clashes for the senshuraku whenever possible.
@@ -47,7 +51,8 @@ def new_basho(roster: dict) -> dict:
     if sorted(r["rank"] for r in rows) != list(range(1, WRESTLERS + 1)):
         raise ValueError("Banzuke must have every rank from 1 to 42 exactly once")
     return {"schema": "b12-basho-ledger-v1", "seed": roster["seed"],
-            "day": 0, "wrestlers": rows, "player_id": PLAYER,
+            "day": 0, "basho_index": roster.get("completed_basho", 0),
+            "wrestlers": rows, "player_id": PLAYER,
             "block_player_opponents": [], "pending_matches": [],
             "results": []}
 
@@ -86,17 +91,46 @@ def _opponent_score(day: int, left: dict, right: dict, seed: int) -> tuple:
     rank_gap = abs(left["rank"] - right["rank"])
     record_gap = abs(left["wins"] - right["wins"])
     tie = _seed_tie(seed, day, left["id"], right["id"])
-    both_top = left["rank"] <= TOP_TIER_MAX_RANK and right["rank"] <= TOP_TIER_MAX_RANK
+    left_joi = left["rank"] <= JOI_MAX_RANK
+    right_joi = right["rank"] <= JOI_MAX_RANK
+    crosses_joi = left_joi != right_joi
+    if crosses_joi and day >= RECORD_MATCH_START:
+        outsider = right if left_joi else left
+        # A standout from outside the joi can face upper-rank opposition.
+        crosses_joi = not (4 * outsider["wins"] >= 3 * day and record_gap <= 1)
     if day < RECORD_MATCH_START:
-        # Keep top-tier rivalries for later: prefer a nearby non-elite.
-        return (int(both_top), rank_gap, record_gap, tie)
-    if left["rank"] <= TOP_TIER_MAX_RANK:
-        # The top-ranked rikishi now prioritize facing each other. Current
-        # W–L records choose among *available* top-ranked opponents.
-        return (0 if both_top else 1, record_gap, rank_gap, tie)
-    # A rising lower-ranked wrestler is promoted toward opponents with a
-    # similar live record, regardless of their original banzuke position.
-    return (record_gap, rank_gap, tie)
+        both_elite = max(left["rank"], right["rank"]) <= TOP_TIER_MAX_RANK
+        return (crosses_joi, both_elite, rank_gap, record_gap, tie)
+    if left_joi or left["id"] != PLAYER:
+        return (crosses_joi, record_gap, rank_gap, tie)
+    return (record_gap, crosses_joi, rank_gap, tie)
+
+
+def _opening_player_opponents(league: dict, player: dict, candidates: list[dict]) -> list[dict]:
+    """Draw nearby opponents, allowing the early Yokozuna pairings first."""
+    start = league["day"]
+    rank = player["rank"]
+    rng = Random(_seed_tie(league["seed"], start, PLAYER, str(league.get("basho_index", 0))))
+    selected = []
+    for day in range(start, start + BOUT_BLOCK):
+        pairs = KOMUSUBI_OPENERS[day] if day < len(KOMUSUBI_OPENERS) else ()
+        booked = {r: opponent for a, b in pairs for r, opponent in ((a, b), (b, a))}
+        available = [w for w in candidates if w not in selected]
+        forced = next((w for w in available if w["rank"] == booked.get(rank)), None)
+        if forced is not None:
+            selected.append(forced)
+            continue
+        unbooked = [w for w in available if w["rank"] not in booked] or available
+        if rank <= JOI_MAX_RANK:
+            unbooked = [w for w in unbooked if w["rank"] <= JOI_MAX_RANK] or unbooked
+        if start == 0:
+            nearby = [w for w in unbooked if abs(w["rank"] - rank) <= OPENING_RANK_RADIUS]
+            if nearby:
+                selected.append(rng.choice(nearby))
+                continue
+        selected.append(min(unbooked, key=lambda w:
+                            abs(w["rank"] - rank) + rng.random() * OPENING_RANK_RADIUS))
+    return selected
 
 
 def plan_block(league: dict) -> list[dict]:
@@ -125,8 +159,11 @@ def plan_block(league: dict) -> list[dict]:
     if len(candidates) < BOUT_BLOCK:
         raise ValueError("Not enough fresh AI opponents")
     selectable = [w for w in candidates if not _blocked_marquee(day, player, w)]
-    ordered = sorted(selectable, key=lambda w:
-                     _opponent_score(day, player, w, league["seed"]))
+    if block_start < RECORD_MATCH_START:
+        ordered = _opening_player_opponents(league, player, selectable)
+    else:
+        ordered = sorted(selectable, key=lambda w:
+                         _opponent_score(day, player, w, league["seed"]))
     if block_start == 12:
         # The final three-opponent preview must be fixed before allocation.
         # Place the player's reserved #1/#2 or #3/#4 rival on Day 15, while
@@ -178,15 +215,18 @@ def _match_remaining(pool: list[dict], day: int, seed: int) -> list[list[str]]:
     ids = {w["id"] for w in pool}
     rows = {w["id"]: w for w in pool}
     prepaired: list[list[str]] = []
-    if day == FINAL_DAY:
-        by_rank = {w["rank"]: w for w in pool}
-        for rank_a, rank_b in MARQUEE_RANK_PAIRS:
-            if rank_a not in by_rank or rank_b not in by_rank:
-                continue  # One of the rivals is playing the human today.
-            a, b = by_rank[rank_a], by_rank[rank_b]
-            if b["id"] not in a["played"] and a["id"] not in b["played"]:
-                prepaired.append([a["id"], b["id"]])
-                ids -= {a["id"], b["id"]}
+    fixed_pairs = MARQUEE_RANK_PAIRS if day == FINAL_DAY else (
+        KOMUSUBI_OPENERS[day] if day < len(KOMUSUBI_OPENERS) else ()
+    )
+    by_rank = {w["rank"]: w for w in pool}
+    for rank_a, rank_b in fixed_pairs:
+        if rank_a not in by_rank or rank_b not in by_rank:
+            continue  # One of the wrestlers is playing the human today.
+        a, b = by_rank[rank_a], by_rank[rank_b]
+        if b["id"] not in a["played"] and a["id"] not in b["played"]:
+            prepaired.append([a["id"], b["id"]])
+            ids -= {a["id"], b["id"]}
+
 
     def recurse(remaining: frozenset[str]) -> list[list[str]] | None:
         if not remaining:

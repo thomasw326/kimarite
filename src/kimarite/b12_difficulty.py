@@ -4,7 +4,7 @@ Only NPC-versus-NPC bouts use this scale. The human-facing opponent-selection,
 chosen 28-card deck, current-W/L duplicate rewards and six-basho ranking
 rules are deliberately left unchanged.
 
-Each rank band is a triangular/pyramid tier: 1; 2-3; 4-6; ...; 37-42.
+Fifteen Banzuke difficulty tiers run from Maegashira 15 and below to East Yokozuna.
 The fixed +2..-2 personality variation is deterministic per world seed and
 stable wrestler identity, not generated every turn, day or tournament.
 
@@ -26,24 +26,25 @@ from .b11_player_draft import AVAILABLE
 from .stat_boosts import boosted_stats
 
 MAX_RANK = 42
-MAX_TIER = 9
+MAX_TIER = 15
+SANYAKU_DIFFICULTIES = (14, 13, 12, 11, 10, 9, 9, 8, 8)
 DIFFICULTY_VARIANCE = 2
 MAX_CARD_SWAPS = 5
 
 
 def pyramid_tier(rank: int) -> int:
-    """1→1, 2–3→2, 4–6→3, ..., 37–42→9."""
-    if type(rank) is not int or not 1 <= rank <= MAX_RANK:
-        raise ValueError("B12 AI difficulty requires a rank from 1 through 42")
-    tier = 1
-    while rank > tier * (tier + 1) // 2:
-        tier += 1
-    return tier
+    """Return the tier number, with East Yokozuna at tier 1."""
+    return MAX_TIER - base_difficulty(rank)
 
 
 def base_difficulty(rank: int) -> int:
-    """Highest rank has baseline 8; the bottom tier has baseline 0."""
-    return MAX_TIER - pyramid_tier(rank)
+    """Return the Banzuke baseline from 0 (lowest) to 14 (highest)."""
+    if type(rank) is not int or not 1 <= rank <= MAX_RANK:
+        raise ValueError("B12 AI difficulty requires a rank from 1 through 42")
+    if rank <= len(SANYAKU_DIFFICULTIES):
+        return SANYAKU_DIFFICULTIES[rank - 1]
+    maegashira_index = rank - len(SANYAKU_DIFFICULTIES) - 1
+    return max(0, 7 - maegashira_index // 4)
 
 
 def hidden_variance(world_seed: int, wrestler_id: str) -> int:

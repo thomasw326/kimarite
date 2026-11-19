@@ -34,6 +34,7 @@ let activeDraft={{picks:['Oshi']}},token='old',game={{finished:true}},
  lastPresentedResult='old',cleared=false,phase='';
 function yearHistory(m){{return m.tournament_history||[]}}
 function managementSave(){{}}
+function championshipPending(){{return false}}
 function saveDraft(){{}}
 function clearBoutSession(){{cleared=true;token=null;game=null;sessionSetup=null;actionJournal=[]}}
 function creationChoices(){{}}

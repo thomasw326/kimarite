@@ -173,6 +173,8 @@ def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_push(state, side, 1)
+    if state.winner is None:
+        gain_momentum(state, side, 1)
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -543,7 +545,7 @@ def _get_underneath(
     if state.winner is None:
         give_opponent_kimarite(state, side, card.name)
     # Exchange-only exhausted penalty, using the current discard size.
-    if len(state.fighter(side).discard_pile) >= 7:
+    if len(state.fighter(side).discard_pile) >= state.fighter(side).exhaustion_threshold:
         make_unstable(state, side)
 
 
@@ -835,6 +837,23 @@ def _morozashi(
     add_temporary(state, side, card, phase="exchange")
 
 
+def _mawashi_reversal(
+    state: BoutState, side: Side, card: Card, context: EffectContext
+) -> None:
+    opponent = state.opponent_side(side)
+    wrestler = state.fighter(side).wrestler.name
+    if effective_total_grip(state, side) <= effective_total_grip(state, opponent):
+        state.log(f"Mawashi Reversal has no effect: {wrestler} is not leading Grip.")
+        return
+
+    if state.position * state.sign(side) < 0:
+        state.position = -state.position
+        state.log(f"Mawashi Reversal flips Position in {wrestler}'s favor.")
+    else:
+        gain_push(state, side, 1)
+        gain_momentum(state, side, 1)
+
+
 def _sidestep(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
@@ -1044,7 +1063,7 @@ def _reckless_charge(state: BoutState, side: Side, card: Card, context: EffectCo
 
 def _sheer_grit(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_momentum(state, side, 1)
-    if state.winner is None and len(state.fighter(side).discard_pile) >= 7:
+    if state.winner is None and len(state.fighter(side).discard_pile) >= state.fighter(side).exhaustion_threshold:
         # "Exhausted" means at least seven discarded cards (fatigue window),
         # not the terminal empty-draw-pile defeat.
         gain_momentum(state, side, 1)
@@ -1106,6 +1125,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Henka": _henka,
     "Pull": _pull,
     "Sidestep": _sidestep,
+    "Mawashi Reversal": _mawashi_reversal,
     "Reset to Neutral": _reset_to_neutral,
     "Get Underneath": _get_underneath,
     "Read the Move": _read_the_move,
@@ -1120,7 +1140,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
 # BEGIN APPROVED MILL/RECYCLE V1
 MILL_AMOUNTS = {
     "Headlong Charge": 2,
-    "Explosive Step — Fumikomi": 2,
+    "Explosive Step — Fumikomi": 3,
     "Tsuppari": 1,
     "Tsuki": 1,
     "Shove": 1,

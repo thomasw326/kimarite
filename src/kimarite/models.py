@@ -111,6 +111,7 @@ class FighterState:
     turns_started: int = 0
     unstable_recovery_turn: int = 0
     exhaust_pile: list[Card] = field(default_factory=list)
+    exhaustion_threshold: int = 7
 
     @property
     def total_grip(self) -> int:

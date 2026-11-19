@@ -211,3 +211,87 @@ def test_five_basho_transitions_keep_exact_rank_and_one_way_reserves(client):
         assert sorted(w["rank"] for w in league["wrestlers"]) == list(range(1, 43))
     assert len(all_promoted) <= 15
     assert len(roster["reserve_queue"]) >= 4
+
+
+@pytest.mark.parametrize("card_name,extra", [("Sonkyo", 0), (None, 1)])
+def test_saved_rematch_card_tops_only_player_deck(client, monkeypatch, card_name, extra):
+    from kimarite.human_bout import HumanBout
+
+    campaign = client("/api/b12/campaign/new", {"player_name": "Rematch Rikishi", "seed": 117})
+    paired = client("/api/b12/campaign/pair", {k: campaign[k] for k in ("roster", "league")})
+    foe = paired["opponent"]
+    starting, picks = draft(client, 121)
+    if card_name is None:
+        from kimarite.b11_player_draft import AVAILABLE
+
+        card_name = next(name for name in AVAILABLE if name not in starting + picks)
+    setup = {
+        "human": "Rematch Rikishi", "opponent": foe["name"], "seed": 122,
+        "opening_mode": "b11_live", "opening_cards": starting[:3],
+        "starting_cards": starting, "draft_picks": picks, "draft_seed": 121,
+        "created_stats": {"power": 2, "technique": 1, "spirit": 0},
+        "b12_opponent_ai": foe, "b12_player_rank": 42,
+        "b12_campaign": {"seed": 117, "basho": 1, "day": 0, "opponent_id": foe["id"]},
+    }
+    captured = []
+    advance = HumanBout.advance
+
+    def capture(bout):
+        captured.append(tuple(tuple(c.name for c in fighter.draw_pile)
+                              for fighter in (bout.state.fighter_a, bout.state.fighter_b)))
+        return advance(bout)
+
+    monkeypatch.setattr(HumanBout, "advance", capture)
+
+    def opening(override):
+        session = client("/api/session", {**setup, **override}, expected=201)
+        return client(f"/api/session/{session['token']}/action",
+                      {"type": "commit_tachiai", "indices": []})["state"]
+
+    opening({})
+    baseline, opponent = captured[0]
+    captured.clear()
+    rematch = opening({"b12_rematch_top_card": card_name})
+    own, rematch_opponent = captured[0]
+    assert own[0] == card_name
+    assert len(own) == len(baseline) + extra
+    assert rematch_opponent == opponent
+    assert any(f"Rematch reward: {card_name}" in event for event in rematch["events"])
+    captured.clear()
+    opening({"b12_rematch_top_card": card_name})
+    assert captured[0] == (own, rematch_opponent)
+
+
+def test_player_championship_playoff_uses_the_live_bout_and_keeps_day_fifteen(client):
+    post = client
+    started = post("/api/b12/campaign/new", {"player_name": "Playoff Rikishi", "seed": 902})
+    roster, league = started["roster"], started["league"]
+    for _ in range(15):
+        league = commit_day(league, [{"a": a, "b": b, "winner": a}
+                                     for a, b in next_day_matches(league)])
+    # Isolate a two-way title tie while retaining a complete scheduled league.
+    foe = next(w for w in league["wrestlers"] if w["id"] != PLAYER)
+    for w in league["wrestlers"]:
+        wins = 15 if w["id"] in (PLAYER, foe["id"]) else min(14, w["wins"])
+        w.update(wins=wins, losses=15-wins)
+    pending = post("/api/b12/campaign/playoff", {"roster": roster, "league": league})
+    starting, picks = draft(post, 99)
+    deck = {"starting_cards": starting, "draft_picks": picks, "draft_seed": 99}
+    deal = post("/api/b11/draft/deal", {**deck, "picks": picks, "seed": pending["seed"]})
+    started = post("/api/session", {
+        **deck, "human": roster["player"]["name"], "opponent": foe["name"],
+        "seed": pending["seed"], "opening_mode": "b11_live",
+        "opening_cards": [c["name"] for c in deal["cards"][:3]],
+        "created_stats": {"power": 2, "technique": 1, "spirit": 0},
+        "b12_opponent_ai": pending["opponent"], "b12_campaign": pending["bout"],
+        "b12_player_rank": roster["player"]["rank"],
+    }, expected=201)
+    token = started["token"]
+    state = post(f"/api/session/{token}/action", {"type": "commit_tachiai", "indices": []})["state"]
+    finished = play_passive(post, token, state)
+    result = post("/api/b12/campaign/playoff/resolve",
+                  {"roster": roster, "league": pending["league"], "token": token})["league"]
+    assert result["champion_id"] == (PLAYER if finished["winner"] == "A" else foe["id"])
+    assert result["playoff_matches"][0]["method"] == finished["win_method"]
+    assert result["results"] == league["results"]
+    assert result["day"] == 15

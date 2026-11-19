@@ -20,16 +20,18 @@ from kimarite.b12_league import PLAYER, banzuke, new_basho, next_opponents, plan
 from kimarite.styles_v5 import STYLES
 
 
-@pytest.mark.parametrize("rank,tier,base", [
-    (1, 1, 8), (2, 2, 7), (3, 2, 7), (4, 3, 6),
-    (6, 3, 6), (7, 4, 5), (10, 4, 5), (11, 5, 4),
-    (15, 5, 4), (16, 6, 3), (21, 6, 3), (22, 7, 2),
-    (28, 7, 2), (29, 8, 1), (36, 8, 1), (37, 9, 0),
-    (41, 9, 0), (42, 9, 0),
+@pytest.mark.parametrize("ranks,base", [
+    (range(1, 2), 14), (range(2, 3), 13),
+    (range(3, 4), 12), (range(4, 5), 11), (range(5, 6), 10),
+    (range(6, 8), 9), (range(8, 10), 8),
+    (range(10, 14), 7), (range(14, 18), 6), (range(18, 22), 5),
+    (range(22, 26), 4), (range(26, 30), 3), (range(30, 34), 2),
+    (range(34, 38), 1), (range(38, 43), 0),
 ])
-def test_triangular_pyramid_exact_rank_groups(rank, tier, base):
-    assert pyramid_tier(rank) == tier
-    assert base_difficulty(rank) == base
+def test_banzuke_pyramid_exact_rank_groups(ranks, base):
+    for rank in ranks:
+        assert pyramid_tier(rank) == 15 - base
+        assert base_difficulty(rank) == base
 
 
 @pytest.mark.parametrize("rank", [None, 0, -2, 43, "1", 1.0, True])
