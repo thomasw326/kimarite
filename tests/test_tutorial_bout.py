@@ -32,7 +32,7 @@ class TutorialBoutTest(unittest.TestCase):
         self.assertEqual(bout.state.position, 1)
         self.assertEqual(bout.pending_selection.keep, 3)
         first = keep(0, 1, 2)
-        self.assertEqual([card["name"] for card in first["human"]["hand"]], ["Oshi", "Sheer Grit", "Stare Down"])
+        self.assertEqual([card["name"] for card in first["human"]["hand"]], ["Oshi", "Sheer Grit", "Gain Left Grip"])
         with self.assertRaises(IllegalPlay):
             play("Sheer Grit")
         with self.assertRaises(ChoiceRequired):
@@ -41,12 +41,18 @@ class TutorialBoutTest(unittest.TestCase):
             play("Oshi", hand_index=1)
         pushed = play("Oshi", hand_index=0)
         self.assertEqual(pushed["position"], 2)
-        self.assertEqual([card["name"] for card in pushed["human"]["hand"]], ["Stare Down", "Gain Right Grip"])
+        self.assertEqual([card["name"] for card in pushed["human"]["hand"]], ["Gain Left Grip", "Gain Right Grip"])
         right_grip = play("Gain Right Grip")
         self.assertEqual(right_grip["human"]["grip"], [0, 1])
+        self.assertEqual(pushed["human"]["plays_remaining"], 2)
+        both_grips = play("Gain Left Grip")
+        self.assertEqual(both_grips["human"]["grip"], [1, 1])
+        self.assertEqual(both_grips["human"]["plays_remaining"], 0)
         draw = end()
+        self.assertEqual(draw["human"]["grip"], [0, 1])
         self.assertEqual(draw["momentum"], -1)
         self.assertEqual(draw["position"], 2)
+        self.assertIn("Gain Right Grip prevents 1 incoming Push.", draw["events"])
         self.assertEqual([card["name"] for card in draw["selection"]["options"]],
                          ["Regain Balance", "Attempt Deep Outside Grip", "Shove"])
         with self.assertRaises(IllegalPlay):

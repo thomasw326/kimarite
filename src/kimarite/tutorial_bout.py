@@ -6,7 +6,7 @@ from .b11_player_opening import PlayerOpening
 from .b11_player_tachiai import compare_player_tachiai
 from .b11_tachiai_phase import PendingPlayerTachiai
 from .catalog import card_by_name
-from .effects import IllegalPlay
+from .effects import EffectContext, IllegalPlay
 from .human_bout import HumanBout
 from .models import BoutState, FighterState, Side, Wrestler
 from .playing import play_card
@@ -17,23 +17,24 @@ from .turns import apply_initial_power
 OPENING = ("Yorikiri", "Sheer Grit", "Shikiri")
 PLAYER_STATS = {"power": 2, "technique": 2, "spirit": 2}
 PLAYER_DRAWS = (
-    "Oshi", "Sheer Grit", "Stare Down", "Gain Right Grip", "Tsuki",
+    "Oshi", "Sheer Grit", "Gain Left Grip", "Gain Right Grip", "Tsuki",
     "Regain Balance", "Attempt Deep Outside Grip", "Shove",
     "Power Water", "Tsuppari", "Ottsuke",
     "Oshidashi", "Pull", "Sonkyo", "Nokotta!", "Belt Slap", "Salt Throw",
 )
 OPPONENT_DRAWS = (
-    "Shiko Stomp", "Sonkyo",
+    "Tsuki", "Shiko Stomp", "Sonkyo", "Stare Down",
     "Harite", "Gain Left Grip", "Tsuppari", "Belt Slap",
 )
 OPPONENT_PLAYS = {
-    2: ("Shiko Stomp", "Sonkyo"),
+    2: ("Tsuki", "Shiko Stomp", "Sonkyo"),
     4: ("Harite", "Gain Left Grip"),
 }
 PLAYER_STEPS = (
-    ("choose_cards", ("Oshi", "Sheer Grit", "Stare Down")),
+    ("choose_cards", ("Oshi", "Sheer Grit", "Gain Left Grip")),
     ("play_card", "Oshi"),
     ("play_card", "Gain Right Grip"),
+    ("play_card", "Gain Left Grip"),
     ("end_turn", None),
     ("choose_cards", ("Regain Balance", "Attempt Deep Outside Grip")),
     ("play_card", "Regain Balance"),
@@ -96,7 +97,9 @@ class TutorialOpening(PendingB11Session):
 def _opponent_turn(state, side, _comparison):
     fighter = state.fighter(side)
     for name in OPPONENT_PLAYS[state.turn_number]:
-        play_card(state, side, next(card for card in fighter.hand if card.name == name))
+        card = next(card for card in fighter.hand if card.name == name)
+        context = EffectContext(choices={"grip": "left"}) if name == "Tsuki" else None
+        play_card(state, side, card, context=context)
 
 
 class TutorialBout(HumanBout):

@@ -1740,9 +1740,10 @@ function renderPracticeBoard(g,readyNames){
 const yorikiriLessons=[
  'You won Spirit 8–4 for 2 Push. Your opponent’s higher Power blocked 1, so you start at +1 Position. You won Technique 5–2, which lets you go first and draw three cards. Choose Accept all.',
  'Play Oshi (Push). Discard your second Sheer Grit to pay for it. You can have up to two copies of a card in your deck.',
- 'Oshi moved you to +2, drew Gain Right Grip from the top, and milled the next card. Play Gain Right Grip now. Its Exchange effect improves your right hand from None to Grip. Your left and right hands track Grip separately.',
- 'Your right hand has Grip, and the card’s Temporary effect can block one incoming Push. End your turn to see your opponent’s response.',
- 'Your opponent gained 1 Momentum, so your side of the shared track fell to −1. Your Right Grip Temporary blocked their Push, and they left Sonkyo in their Temporary Zone. Your Right Grip lets you look at three cards and keep two. Choose Regain Balance and Attempt Deep Outside Grip.',
+ 'You started with two Plays. Oshi spent one and gave you one back, so you still have two. It moved you to +2 Position and drew Gain Right Grip. Play Gain Right Grip now. Its Exchange effect improves your right hand from None to Grip. Your left and right hands track Grip separately.',
+ 'Play Gain Left Grip with your remaining Play to improve your left hand from None to Grip. Without Oshi’s extra Play, you’d already be out of Plays.',
+ 'You played three cards this turn. Both hands now have Grip, and your grip cards’ Temporary effects can block incoming Push. End your turn.',
+ 'Your opponent gained 1 Momentum, so your side of the shared track fell to −1. Their Tsuki stripped your Left Grip, but your Right Grip stayed and its Temporary effect blocked their Push. Your Right Grip lets you look at three cards and keep two. Choose Regain Balance and Attempt Deep Outside Grip.',
  'Play Regain Balance. It draws a card and rewards you for playing it at negative Momentum with +1 Momentum and +2 Power.',
  'Play Attempt Deep Outside Grip. It establishes Left Grip immediately and enters your Temporary Zone. At the start of your next turn, it will take that hand from Grip to Deep.',
  'You now have Grip with both hands. End your turn and watch your opponent’s cards and your discard pile.',
@@ -1816,14 +1817,14 @@ function render(g){
   });
   $('choices').append(strip,confirm);
  }
- $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));const practiceCard={1:'Oshi',2:'Gain Right Grip',5:'Regain Balance',6:'Attempt Deep Outside Grip',9:'Oshidashi'}[g.tutorial_step];
+ $('hand').replaceChildren();const legal=new Set(g.legal_plays.map(a=>a.hand_index));const practiceCard={1:'Oshi',2:'Gain Right Grip',3:'Gain Left Grip',6:'Regain Balance',7:'Attempt Deep Outside Grip',10:'Oshidashi'}[g.tutorial_step];
  g.human.hand.forEach((c,i)=>{
   const suggested=practiceCard===c.name;
   const playable=legal.has(i)&&(g.tutorial_step===undefined||suggested);
   const tile=card(c,()=>inspect(c,playable?()=>play(i):null));
   tile.classList.toggle('practice-card',suggested);
   $('hand').append(tile);
- });const history=$('history');history.replaceChildren();const events=g.events||[];if(!events.length)history.append(node('p','','No actions recorded yet.'));for(const event of events.slice().reverse())history.append(node('p',event.includes(' plays ')?'history-line':'history-event',event));const endButton=$('end');endButton.disabled=!g.can_end_turn||(g.tutorial_step!==undefined&&![3,7,10].includes(g.tutorial_step));const canFinish=turnCues.winReady;endButton.classList.toggle('end-turn-no-plays',turnCues.noPlays);endButton.classList.toggle('end-turn-win',canFinish);endButton.textContent=canFinish?'End turn to win':'End turn';endButton.title=canFinish?'End turn to win with '+[...readyNames].join(', '):g.can_end_turn&&g.human.plays_remaining===0?'No Plays remaining — end your turn':'';$('notice').textContent=g.finished?('Winner: '+(g.winner==='A'?g.human.name:g.winner==='B'?g.opponent.name:'Undecided')+' · '+(g.win_method||g.stopped_reason||'')):'';
+ });const history=$('history');history.replaceChildren();const events=g.events||[];if(!events.length)history.append(node('p','','No actions recorded yet.'));for(const event of events.slice().reverse())history.append(node('p',event.includes(' plays ')?'history-line':'history-event',event));const endButton=$('end');endButton.disabled=!g.can_end_turn||(g.tutorial_step!==undefined&&![4,8,11].includes(g.tutorial_step));const canFinish=turnCues.winReady;endButton.classList.toggle('end-turn-no-plays',turnCues.noPlays);endButton.classList.toggle('end-turn-win',canFinish);endButton.textContent=canFinish?'End turn to win':'End turn';endButton.title=canFinish?'End turn to win with '+[...readyNames].join(', '):g.can_end_turn&&g.human.plays_remaining===0?'No Plays remaining — end your turn':'';$('notice').textContent=g.finished?('Winner: '+(g.winner==='A'?g.human.name:g.winner==='B'?g.opponent.name:'Undecided')+' · '+(g.win_method||g.stopped_reason||'')):'';
  if(g.finished&&!alreadyInHeya){
   showBoutResult(g);
   startB12MatchdayPrefetch(g);
