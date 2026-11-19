@@ -215,7 +215,29 @@ function zoneEffect(c,zone){
  return m?m[0]:d.replace(/^.*?Exchange:\s*/,'')||'Active effect unavailable';
 }
 
-function inspect(c,playAction){$('inspect-name').textContent=displayCardName(c.name);$('inspect-orbs').textContent=c.zone_only?'':('Power '+(c.power??0)+' · Technique '+(c.technique??0)+' · Spirit '+(c.spirit??0));const desc=c.description||'This card needs a B10 wording audit before its full rules can be shown.';const preview=(!c.zone_only&&['Sidestep','Spin Away'].includes(c.name))?sideBySideOnPlayPreview(game,c.name):'';const effect=$('inspect-effect');effect.replaceChildren();$('glossary-detail')?.remove();const glossary={...game?.glossary,...c.glossary};const terms=Object.keys(glossary).sort((a,b)=>b.length-a.length);const split=terms.length?new RegExp('\\b('+terms.join('|')+')\\b','gi'):null;const chunks=split?desc.split(split):[desc];for(const chunk of chunks){const key=terms.find(t=>t.toLowerCase()===chunk.toLowerCase());if(key){const link=btn(chunk,()=>{const old=$('glossary-detail');if(old)old.remove();const panel=node('p','glossary-detail',key+': '+glossary[key]);panel.id='glossary-detail';effect.after(panel)},'term-link');link.type='button';link.title=glossary[key];effect.append(link)}else effect.append(document.createTextNode(chunk))}if(preview)effect.append(node('p','side-by-side-preview',preview));$('inspect-orbs').textContent+=' · '+(c.timing||'')+(c.description_status==='needs_audit'?' · TEXT PENDING AUDIT':'');$('inspect-actions').replaceChildren();if(c.unavailable_reason)$('inspect-actions').append(node('p','unavailable-reason','Cannot play: '+c.unavailable_reason));if(playAction)$('inspect-actions').append(btn('Play this card',()=>{$('inspect').close();playAction()},'confirm'));$('inspect').showModal()}
+const searchHelp='Starting at the top of the draw pile, the game automatically takes the first matching card and moves it where the effect says. Other cards stay hidden and in order. If nothing matches, no card moves.';
+function appendRulesText(container,text,glossary={}){
+ const definitions={...glossary,Search:searchHelp};
+ const terms=Object.keys(definitions).sort((a,b)=>b.length-a.length);
+ const escaped=terms.map(term=>term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+ const split=new RegExp('\\b('+escaped.join('|')+')\\b','gi');
+ for(const chunk of text.split(split)){
+  const term=terms.find(key=>key.toLowerCase()===chunk.toLowerCase());
+  if(!term){container.append(document.createTextNode(chunk));continue}
+  const definition=definitions[term];
+  const link=btn(chunk,()=>{
+   const old=container.nextElementSibling;
+   if(old?.classList.contains('glossary-detail'))old.remove();
+   const detail=node('p','glossary-detail',term+' — '+definition);
+   detail.setAttribute('role','status');
+   container.after(detail);
+  },'term-link');
+  link.type='button';
+  link.title=definition;
+  container.append(link);
+ }
+}
+function inspect(c,playAction){$('inspect-name').textContent=displayCardName(c.name);$('inspect-orbs').textContent=c.zone_only?'':('Power '+(c.power??0)+' · Technique '+(c.technique??0)+' · Spirit '+(c.spirit??0));const desc=c.description||'This card needs a B10 wording audit before its full rules can be shown.';const preview=(!c.zone_only&&['Sidestep','Spin Away'].includes(c.name))?sideBySideOnPlayPreview(game,c.name):'';const effect=$('inspect-effect');effect.replaceChildren();if(effect.nextElementSibling?.classList.contains('glossary-detail'))effect.nextElementSibling.remove();appendRulesText(effect,desc,{...game?.glossary,...c.glossary});if(preview)effect.append(node('p','side-by-side-preview',preview));$('inspect-orbs').textContent+=' · '+(c.timing||'')+(c.description_status==='needs_audit'?' · TEXT PENDING AUDIT':'');$('inspect-actions').replaceChildren();if(c.unavailable_reason)$('inspect-actions').append(node('p','unavailable-reason','Cannot play: '+c.unavailable_reason));if(playAction)$('inspect-actions').append(btn('Play this card',()=>{$('inspect').close();playAction()},'confirm'));$('inspect').showModal()}
 $('inspect-close').onclick=()=>$('inspect').close();
 function logText(){if(!game)return '';return ['KIMARITE — BOUT HISTORY',game.human.name+' vs '+game.opponent.name,'Turn '+game.turn+(game.finished?' — Bout over':'')+(sessionSetup&&Number.isSafeInteger(sessionSetup.seed)?' · Seed '+sessionSetup.seed:''),'',...(game.events||[])].join('\n')}
 $('copy-history').onclick=async()=>{const value=logText();if(!value){$('copy-status').textContent='Start a bout first.';return}try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(value)}else{const field=document.createElement('textarea');field.value=value;field.style.position='fixed';field.style.opacity='0';document.body.append(field);field.select();if(!document.execCommand('copy'))throw new Error('Copy not supported');field.remove()}$('copy-status').textContent='Copied!'}catch(e){$('copy-status').textContent='Select and copy the log below.';const field=document.createElement('textarea');field.value=value;field.rows=8;field.className='log-copy-fallback';$('copy-status').after(field);field.focus();field.select()}};
@@ -1418,7 +1440,9 @@ function renderPendingTachiai(g){
   const wrap=node('div','choice-card-wrap'+(hasTachiaiEffect?' tachiai-effect-card':''));
   wrap.append(b);
   if(hasTachiaiEffect)wrap.append(node('small','tachiai-effect-label','Tachiai effect'));
-  wrap.append(node('p','tachiai-card-rules',c.description||'Rules text unavailable.'),
+  const rules=node('p','tachiai-card-rules');
+  appendRulesText(rules,c.description||'Rules text unavailable.');
+  wrap.append(rules,
    btn('Inspect '+displayCardName(c.name),()=>inspect(c),'choice-inspect'));
   strip.append(wrap);
  });

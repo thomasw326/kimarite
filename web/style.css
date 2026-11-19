@@ -451,3 +451,33 @@ body:has(.table-layout) main{max-width:1150px}
 .bout-layout:not(.table-layout) .table-hand-row{display:block}
 .table-layout #table-status{display:flex;justify-content:center;flex-wrap:wrap;gap:3px 16px;margin-top:7px;font-size:12px}
 .table-layout .table-pile:focus-visible,.table-zone-card:focus-visible{outline:2px solid #fff1d2;outline-offset:2px}
+
+/* Keep the live tabletop compact at normal browser zoom. */
+#dohyo-view .table-layout{gap:5px}
+#dohyo-view .table-layout .panel{padding:5px 8px}
+.table-layout #dohyo-details{padding:0}
+.table-layout .arena .dohyo{width:64px;height:64px}
+.table-layout .ring-readout{gap:3px}
+.table-layout .tracks{margin-top:2px}
+.table-layout .track{padding:3px 8px}
+.table-layout #table-status{margin-top:3px}
+.table-layout .table-foe-zones{margin-top:2px}
+.table-layout .table-zone{min-height:30px}
+.table-layout .table-zone-card{min-height:26px;padding:3px 7px}
+.table-layout .table-zone-cards{padding:2px 4px}
+.table-layout .table-card-back{height:36px}
+.table-layout .table-hand-backs{min-height:24px}
+.table-layout .table-hand-backs .table-card-back{height:24px}
+.table-layout .practice-coach{display:flex;align-items:center;gap:8px;margin:0;padding:4px 8px;font-size:13px}
+.table-layout .practice-coach p{flex:1;margin:0}
+.table-layout #exit-practice{min-height:32px;flex-shrink:0}
+.table-layout .bout-decisions #hand .card{min-height:88px}
+.table-layout .bout-decisions #choices .card{min-height:74px}
+.table-layout .bout-decisions #choices .cards{margin-top:3px;padding:3px}
+.table-layout .bout-decisions #choices .confirm{margin-top:4px;min-height:35px}
+.table-layout .bout-decisions .playtop button{min-height:32px}
+.tachiai-card-rules .term-link{min-height:0;padding:0 2px}
+@media(max-width:560px){
+ .table-layout .practice-coach{flex-wrap:wrap}
+ .table-layout .practice-coach p{flex-basis:100%;order:1}
+}
