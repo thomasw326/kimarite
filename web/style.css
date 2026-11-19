@@ -522,3 +522,16 @@ body[data-phase="heya"]:not(.show-developer-setup):has(#b11-creation:not([hidden
 body:not(.show-developer-setup) #heya-view:has(#b11-creation:not([hidden])) > :is(.heya-masthead,#single-bout-details),
 body:not(.show-developer-setup) #heya-view:has(#b11-creation:not([hidden])) .management > :is(h2,p:not(#management-notice),#year-record),
 .management:has(#b11-creation[hidden]):has(#b11-draft[hidden]) #start-practice{display:none}
+
+.game-utilities{display:inline-flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.game-utilities button{min-height:36px;padding:5px 10px;font-size:13px}
+.dialog-utilities{display:flex;justify-content:flex-end}
+body[data-phase="dohyo"] > header{flex-wrap:wrap}
+.game-menu{width:min(680px,calc(100% - 24px));max-height:85dvh;overflow:auto}
+#compendium-search{display:block;width:100%;margin-top:5px;padding:8px;border-radius:6px;font:inherit}
+.compendium-cards{display:grid;gap:6px}
+.compendium-card{border:1px solid #718582;border-radius:7px;padding:8px;background:#203639}
+.compendium-card summary{cursor:pointer;font-weight:700}
+.compendium-card summary .card-orbs{display:inline-flex;margin-inline-start:8px;vertical-align:middle}
+.compendium-card small{display:block;margin-top:8px;color:#e7c38c}
+.compendium-card .compendium-rules{margin:4px 0 0}

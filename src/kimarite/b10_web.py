@@ -257,6 +257,10 @@ class Handler(BaseHTTPRequestHandler):
             # the future 60-wrestler campaign. Never return real-wrestler names.
             from .b12_division_roster import load_shikona
             return self.reply(200, {"names": load_shikona()})
+        if path == "/api/compendium":
+            from .b10_card_info import card_info
+            from .catalog import compendium_cards
+            return self.reply(200, {"cards": [card_info(card) for card in compendium_cards()]})
         if path == "/api/roster":
             return self.reply(200, {"roster": roster()})
         if path.startswith("/api/opening/"):

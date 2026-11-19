@@ -1905,4 +1905,58 @@ if(playtestSavePrefix){
  if(!gameSaveGet('kimarite_management'))startRematchPlaytest();
 }
 document.body.classList.toggle('show-developer-setup',new URLSearchParams(location.search).has('dev'));
+let compendiumCards;
+function renderCompendium(){
+ const list=$('compendium-cards');
+ const query=$('compendium-search').value.trim().toLocaleLowerCase();
+ const matches=compendiumCards.filter(c=>[c.name,displayCardName(c.name),c.description]
+  .some(value=>value?.toLocaleLowerCase().includes(query)));
+ list.replaceChildren();
+ $('compendium-status').textContent=matches.length+' of '+compendiumCards.length+' cards';
+ for(const c of matches){
+  const entry=node('details','compendium-card');
+  const heading=node('summary','',displayCardName(c.name));
+  heading.append(cardOrbs(c));
+  const rules=node('p','compendium-rules');
+  appendRulesText(rules,c.description||'Rules text unavailable.',c.glossary);
+  entry.append(heading,node('small','',c.timing),rules);
+  list.append(entry);
+ }
+}
+async function openCompendium(){
+ const dialog=$('compendium');
+ if(dialog.open)return;
+ dialog.showModal();
+ if(compendiumCards){renderCompendium();return}
+ $('compendium-status').textContent='Loading cards…';
+ try{
+  const result=await api('/api/compendium');
+  compendiumCards=result.cards;
+  renderCompendium();
+ }catch(error){$('compendium-status').textContent='Could not load cards. Close and reopen the compendium to retry.'}
+}
+$('compendium-search').oninput=()=>{if(compendiumCards)renderCompendium()};
+$('compendium-close').onclick=()=>$('compendium').close();
+$('settings-close').onclick=()=>$('settings-menu').close();
+function installGameMenus(){
+ const menus=[['Compendium','compendium',openCompendium],
+              ['Settings','settings-menu',()=>$('settings-menu').showModal()]];
+ const containers=[$('game-utilities')];
+ for(const dialog of document.querySelectorAll('dialog:not(#compendium):not(#settings-menu)')){
+  const nav=node('nav','game-utilities dialog-utilities');
+  nav.setAttribute('aria-label','Game menus');
+  (dialog.querySelector('.creation-shell')||dialog).prepend(nav);
+  containers.push(nav);
+ }
+ for(const container of containers){
+  for(const [label,id,open] of menus){
+   const button=btn(label,open,'choice-inspect');
+   button.type='button';
+   button.setAttribute('aria-haspopup','dialog');
+   button.setAttribute('aria-controls',id);
+   container.append(button);
+  }
+ }
+}
+installGameMenus();
 installGameGuide();
