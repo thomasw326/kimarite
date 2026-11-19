@@ -1748,7 +1748,7 @@ const yorikiriLessons=[
  'Play Attempt Deep Outside Grip. It establishes Left Grip immediately and enters your Temporary Zone. At the start of your next turn, it will take that hand from Grip to Deep.',
  'You now have Grip with both hands. You can leave Power Water in your hand and end your turn. You’re allowed to end your turn with cards in hand, even if you have Plays left. Watch what your opponent does to your discard pile.',
  'Harite milled two cards straight to discard and knocked a card out of your hand. At seven cards in discard, Exhaustion can cost 1 Power at the start of your turn. Your Grip protects you because it ties or leads. Keep Oshidashi and any other card.',
- 'Your Left Grip is now Deep, worth two Grip levels. Play Oshidashi (Push Out). It enters the Kimarite Zone beside Yorikiri, and its on-play effect gives you the last point of Momentum.',
+ 'Your Left Grip is now Deep, worth two Grip levels. Play Oshidashi (Push Out). It enters the Kimarite Zone beside Yorikiri, and its on-play effect gives you the last point of Momentum you need for Yorikiri.',
  'Both Kimarite are in play. Yorikiri is ready because you have Grip, +2 Position and +1 Momentum. Choose End turn to win.',
 ];
 function updatePracticeCoach(g){
