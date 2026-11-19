@@ -598,16 +598,25 @@ async function randomPlayerShikona(){
 $('random-wrestler-name').onclick=randomPlayerShikona;
 
 const CREATED_STAT_NAMES={power:'Power',technique:'Technique',spirit:'Spirit'};
+const creationStats=['create-food','create-training','create-final'];
+let creationStep=0;
 function creationChoices(){
  const food=$('create-food').value,training=$('create-training').value;
- const allowed=food===training?Object.keys(CREATED_STAT_NAMES).filter(k=>k!==food):[food,training];
+ const allowed=!food||!training?[]:food===training
+  ?Object.keys(CREATED_STAT_NAMES).filter(k=>k!==food):[food,training];
  const final=$('create-final'),previous=final.value;
  final.replaceChildren();
  for(const k of allowed){const option=node('option','',CREATED_STAT_NAMES[k]);option.value=k;final.append(option)}
- if(allowed.includes(previous))final.value=previous;
+ final.value=allowed.includes(previous)?previous:'';
  const result={power:0,technique:0,spirit:0};
- for(const k of [food,training,final.value])result[k]++;
- $('create-summary').textContent=Object.entries(result).map(([k,v])=>CREATED_STAT_NAMES[k]+' '+v).join(' · ');
+ const preview={...result};
+ for(const [index,stat] of [food,training,final.value].entries()){
+  if(!stat)continue;
+  result[stat]++;
+  if(index<creationStep)preview[stat]++;
+ }
+ $('create-summary').textContent=Object.entries(preview).map(([k,v])=>CREATED_STAT_NAMES[k]+' '+v).join(' · ');
+ $('creation-next').disabled=creationStep>0&&!$(creationStats[creationStep-1]).value;
  return result;
 }
 for(const id of ['create-food','create-training'])$(id).addEventListener('change',creationChoices);
@@ -615,10 +624,10 @@ $('create-final').addEventListener('change',creationChoices);
 $('management-opening-mode').addEventListener('change',()=>{
  $('b11-creation').hidden=$('management-opening-mode').value!=='b11_live';
 });
+$('create-food').value='';
+$('create-training').value='';
 creationChoices();
 const creationPanels=[...document.querySelectorAll('[data-creation-step]')];
-const creationStats=['create-food','create-training','create-final'];
-let creationStep=0;
 function showCreationStep(step){
  creationStep=step;
  $('creation-step').textContent='Wrestler creation · '+(step+1)+' of '+creationPanels.length;
@@ -642,7 +651,6 @@ function showCreationStep(step){
    options.append(choiceButton);
   }
  }
- $('create-summary').hidden=step===0;
  $('creation-title').focus();
 }
 $('create-wrestler').onclick=()=>{
@@ -1177,8 +1185,9 @@ $('confirm-new-wrestler').onclick=()=>{
  $('management-deck').disabled=false;
  $('b11-creation').hidden=false;
  $('wrestler-name').value='Your Rikishi';
- $('create-food').value='power';
- $('create-training').value='technique';
+ $('create-food').value='';
+ $('create-training').value='';
+ $('create-final').value='';
  creationChoices();
  for(const id of ['b11-draft','management-board','management-rewards','management-progress','management-next','management-summary','management-new','new-wrestler'])$(id).hidden=true;
  $('management-deal').hidden=true;
