@@ -136,8 +136,8 @@ function returnedToHeyaAfterBout(g){
  try{
   const m=management||JSON.parse(gameSaveGet('kimarite_management')||'null');
   return !!(m&&Array.isArray(m.results)&&sessionSetup
-   &&sessionSetup.tournament_bout===m.round
-   &&m.results.length===m.round+1);
+   &&(sessionSetup.tournament_bout===m.round&&m.results.length===m.round+1
+    ||Number.isInteger(sessionSetup.playoff_match)&&m.division_league?.playoff_matches?.length>sessionSetup.playoff_match));
  }catch(e){return false}
 }
 async function api(path,body){const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const v=await r.json();if(!r.ok){const e=new Error(v.message||v.error||'Request failed');e.data=v;throw e}return v}
@@ -391,7 +391,8 @@ function tournamentSummary(m){
  const wins=results.filter(r=>r.won).length;
  const standings=m.division_league?.wrestlers.map(({id,name,rank,wins,losses})=>
   ({id,name,rank,wins,losses}));
- return {tournament:yearHistory(m).length+1,wins,losses:15-wins,results,standings};
+ const champion=m.division_league?.day===15?championshipLeader(m)?.name:undefined;
+ return {tournament:yearHistory(m).length+1,wins,losses:15-wins,results,standings,champion};
 }
 function showYearStatus(m){
  const h=yearHistory(m);
@@ -427,16 +428,82 @@ function tournamentFinalText(m){
   const r=m.results[i];
   lines.push('Bout '+(i+1)+' · '+(r.won?'WIN':'LOSS')+' vs '+(r.opponent_name||r.opponent)+' · '+displayCardName(r.finish)+' · Turn '+r.turns+(r.duplicated_card?' · Duplicated '+displayCardName(r.duplicated_card):''));
  }
+ const champion=championshipLeader(m);
+ if(champion)lines.push('Champion: '+champion.name);
+ const playoff=m.division_league?.playoff_matches||[];
+ if(playoff.length){
+  const roster=new Map(m.division_league.wrestlers.map(w=>[w.id,w.name]));
+  for(const match of playoff){
+   const loser=match.winner===match.a?match.b:match.a;
+   lines.push('Playoff · '+roster.get(match.winner)+' defeated '+roster.get(loser)+' · '+displayCardName(match.method||'Finish unavailable'));
+  }
+ }
  const stats=calculateCardRecords(m);
  for(const [key,label] of [['most_played_card','Most played card'],['most_played_kimarite','Most played Kimarite'],['most_winning_card','Most winning card'],['most_winning_kimarite','Most winning Kimarite']]){
   const v=stats[key];lines.push(label+': '+(v?displayCardName(v.name)+' ('+v.count+')':'None'));
  }
  return lines.join('\n');
 }
+function championshipLeader(m){
+ const league=m.division_league;
+ if(league?.day!==15)return null;
+ const best=Math.max(...league.wrestlers.map(w=>w.wins));
+ const leaders=league.wrestlers.filter(w=>w.wins===best);
+ return leaders.length===1?leaders[0]:leaders.find(w=>w.id===league.champion_id)||null;
+}
+function championshipPending(m){
+ return m.division_league?.day===15&&!championshipLeader(m);
+}
+let startingPlayoff=false;
+async function startChampionshipPlayoff(m,button){
+ if(startingPlayoff||management!==m)return;
+ startingPlayoff=true;button.disabled=true;
+ const status=node('p','','Preparing championship playoff…');
+ button.after(status);
+ try{
+  const next=await api('/api/b12/campaign/playoff',{roster:m.division_roster,league:m.division_league});
+  m.division_league=next.league;managementSave();
+  if(!next.opponent){managementStatus();showTournamentFinal();return}
+  const match=next.league.playoff_matches.length;
+  if(sessionSetup?.playoff_match===match&&game&&sessionSetup.b12_campaign?.seed===next.bout.seed
+     &&sessionSetup.b12_campaign?.basho===next.bout.basho){
+   $('tournament-final').close();setGameLocation('dohyo');
+   if(game.finished)showBoutResult(game);
+   return;
+  }
+  const deck={starting_cards:m.starting_cards,draft_picks:m.draft_picks,draft_seed:m.draft_seed,
+   duplicated_indices:m.duplicated_indices||[],excluded_ids:interviewExclusions(m,14)};
+  const deal=await api('/api/b11/draft/deal',{...deck,picks:deck.draft_picks,seed:next.seed});
+  const request={...deck,human:m.human,opponent:next.opponent.name,seed:next.seed,
+   opening_mode:'b11_live',created_stats:m.created_stats,opening_cards:deal.cards.slice(0,3).map(c=>c.name),
+   b12_opponent_ai:next.opponent,b12_player_rank:m.division_roster.player.rank,b12_campaign:next.bout};
+  const result=await api('/api/session',request);
+  sessionSetup={...request,playoff_match:match};actionJournal=[];token=result.token;game=null;
+  $('tournament-final').close();$('seed-used').textContent='Playoff seed: '+next.seed;
+  rememberSession();render(result.state);
+ }catch(error){status.textContent=error.message}
+ finally{startingPlayoff=false;button.disabled=false}
+}
+function renderChampionship(m){
+ const panel=$('tournament-championship');
+ if(!panel)return;
+ panel.replaceChildren();
+ const league=m.division_league;
+ if(league?.day!==15)return;
+ const roster=new Map(league.wrestlers.map(w=>[w.id,w.name]));
+ const winner=championshipLeader(m);
+ panel.append(node('h3','',winner?'Champion · '+winner.name:'Championship playoff'));
+ for(const match of league.playoff_matches||[]){
+  const loser=match.winner===match.a?match.b:match.a;
+  panel.append(node('p','',roster.get(match.winner)+' defeated '+roster.get(loser)+' · '+displayCardName(match.method||'Finish unavailable')));
+ }
+ if(!winner)panel.append(btn('Continue to playoff',e=>startChampionshipPlayoff(m,e.currentTarget),'confirm'));
+}
 function showTournamentFinal(){
  const m=management;
  if(!m||m.results.length!==15||!completedRewards(m))return;
  const dialog=$('tournament-final');
+ renderChampionship(m);
  const wins=m.results.filter(r=>r.won).length;
  $('tournament-final-record').textContent=wins+'–'+(15-wins);
  $('tournament-final-player').textContent=m.human+' · Tournament '+(yearHistory(m).length+1)+' of 6 · 15 bouts completed · '+(m.draft_picks?28+(m.duplicated_indices||[]).length+' cards in final deck':'Classic deck');
@@ -482,7 +549,7 @@ $('tournament-final-copy').onclick=async()=>{
  try{await navigator.clipboard.writeText(summary);$('tournament-final-copy').textContent='Copied!'}
  catch(e){$('tournament-final-copy').textContent='Copy unavailable'}
 };
-function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;showB12Banzuke(m);if(!isB12Campaign(m)&&game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({...c})),duplication_resolved:false});updateTournamentLeaders(m);managementSave();managementBoard()}const wins=m.results.filter(r=>r.won).length;showYearStatus(m);progress.replaceChildren(node('h3','','Tournament '+(yearHistory(m).length+1)+' of 6 · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve round rewards / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result '+(r.won?'tournament-win':'tournament-loss'));row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+(r.opponent_rank?' · '+banzukeRankLabel(r.opponent_rank):'')+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',displayCardName(r.finish||'Finisher unavailable')));if(r.duplicated_card)row.append(node('small','','Duplicated: '+displayCardName(r.duplicated_card)));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15||!completedRewards(m);$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5;$('new-wrestler').hidden=m.opening_mode!=='b11_live'||m.results.length!==15||!completedRewards(m)||yearHistory(m).length<5;if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
+function managementStatus(){if(!management)return;const m=management;const progress=$('management-progress');progress.hidden=false;showB12Banzuke(m);if(!isB12Campaign(m)&&game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round){m.results.push({human:m.human,opponent:m.opponents[m.round],opponent_style:m.opponents[m.round],opponent_name:null,won:game.winner==='A',turns:game.turn,finish:game.win_method||'Unknown',seed:sessionSetup?.seed??null,human_card_plays:[...(game.opening?.human?.committed||[]).map(c=>c.name),...(game.human_card_plays||[])],assigned_cards:(m.groups[m.round%3]||[]).map(k=>m.cards.find(c=>c.deal_index===k)).filter(Boolean).map(c=>({...c})),duplication_resolved:false});updateTournamentLeaders(m);managementSave();managementBoard()}const wins=m.results.filter(r=>r.won).length;showYearStatus(m);progress.replaceChildren(node('h3','','Tournament '+(yearHistory(m).length+1)+' of 6 · Round '+(Math.floor(m.round/3)+1)+' of 5'));progress.append(node('p','','Completed '+m.results.length+'/15 · Record '+wins+'–'+(m.results.length-wins)));$('management-next').hidden=!(game&&game.finished&&activeTournamentBout()===m.round&&m.results.length===m.round+1&&(m.round<14||unresolvedRewards(m).length>0));$('management-next').textContent=m.round%3===2?'Resolve round rewards / Deal next nine':'Next bout';const table=node('div','tournament-results');table.append(node('h3','',m.results.length===15?'Final results':'Bout results'));for(let round=0;round<5;round++){const subset=m.results.slice(round*3,round*3+3);if(!subset.length)continue;const section=node('section','tournament-round');section.append(node('h4','','Round '+(round+1)+' · '+subset.filter(r=>r.won).length+'–'+(subset.length-subset.filter(r=>r.won).length)));for(const [index,r] of subset.entries()){const row=node('div','tournament-result '+(r.won?'tournament-win':'tournament-loss'));row.append(node('strong',r.won?'result-win':'result-loss','Bout '+(round*3+index+1)+' · '+(r.won?'Win':'Loss')));row.append(node('span','',r.opponent_name? r.opponent_name+' ('+(r.opponent_style||r.opponent)+(r.opponent_rank?' · '+banzukeRankLabel(r.opponent_rank):'')+')':(r.opponent_style||r.opponent)));row.append(node('span','',r.turns!=null?'Turn '+r.turns:'Turns unavailable'));row.append(node('span','',displayCardName(r.finish||'Finisher unavailable')));if(r.duplicated_card)row.append(node('small','','Duplicated: '+displayCardName(r.duplicated_card)));section.append(row)}table.append(section)}progress.append(table);if(game?.finished&&activeTournamentBout()===m.round&&m.results.length!==m.round+1)progress.append(node('p','management-error','Tournament result could not be recorded. Keep this bout open and report the seed; do not start another bout.'));$('management-summary').hidden=m.results.length!==15||!completedRewards(m);$('management-new').hidden=m.results.length!==15||m.opening_mode==='classic'||!completedRewards(m)||yearHistory(m).length>=5||championshipPending(m);$('new-wrestler').hidden=m.opening_mode!=='b11_live'||m.results.length!==15||!completedRewards(m)||yearHistory(m).length<5||championshipPending(m);if(m.results.length===15){$('management-next').hidden=unresolvedRewards(m).length===0;progress.prepend(node('strong','','Tournament complete: '+wins+'–'+(15-wins)))}}
 let playerShikonaPool=null;
 async function randomPlayerShikona(){
  const field=$('wrestler-name'),notice=$('random-name-status'),button=$('random-wrestler-name');
@@ -980,6 +1047,7 @@ $('management-deal').onclick=async()=>{
   const seed=Math.floor(Math.random()*2147483647);
   if(standard){
    const previous=continuing?management:null;
+   if(previous&&championshipPending(previous))throw new Error('Finish the championship playoff before starting the next basho.');
    if(previous&&yearHistory(previous).length>=5)throw new Error('Six tournaments complete: the sumo year has ended.');
    const tournament_history=previous?[...yearHistory(previous),tournamentSummary(previous)]:[];
    const starting=previous?(previous.next_starting_cards??earnedNextStartingCards(previous)):B11_STARTER_SUITE;
@@ -1010,7 +1078,7 @@ $('management-deal').onclick=async()=>{
  }catch(e){$('management-notice').textContent=e.message}
 };
 $('management-new').onclick=()=>{
- if(!management||management.results.length!==15||!completedRewards(management)||yearHistory(management).length>=5)return;
+ if(!management||management.results.length!==15||!completedRewards(management)||championshipPending(management)||yearHistory(management).length>=5)return;
  try{
   management.next_starting_cards=earnedNextStartingCards(management);
   managementSave();
@@ -1020,12 +1088,12 @@ $('management-new').onclick=()=>{
  }catch(e){$('management-notice').textContent=e.message}
 };
 $('new-wrestler').onclick=()=>{
- if(!management||management.opening_mode!=='b11_live'||management.results.length!==15||yearHistory(management).length<5)return;
+ if(!management||management.opening_mode!=='b11_live'||management.results.length!==15||championshipPending(management)||yearHistory(management).length<5)return;
  $('new-wrestler-confirm').showModal();
 };
 $('cancel-new-wrestler').onclick=()=>$('new-wrestler-confirm').close();
 $('confirm-new-wrestler').onclick=()=>{
- if(!management||management.results.length!==15||yearHistory(management).length<5)return;
+ if(!management||management.results.length!==15||championshipPending(management)||yearHistory(management).length<5)return;
  $('new-wrestler-confirm').close();
  if($('tournament-final').open)$('tournament-final').close();
  management=null;managementSave();
@@ -1438,7 +1506,19 @@ async function returnToHeya(){
  if(!game?.finished||resolvingB12Matchday)return; // No retreat from a live bout.
  resolvingB12Matchday=true;
  try{
-  if(isB12Campaign(management)&&activeTournamentBout()===management.round&&
+  const m=management;
+  if(isB12Campaign(m)&&sessionSetup?.playoff_match===(m.division_league.playoff_matches?.length??0)){
+   const path='/api/b12/campaign/playoff/resolve';
+   const request={roster:m.division_roster,league:m.division_league,token};
+   let next;
+   try{next=await api(path,request)}
+   catch(error){
+    if(!/restore the finished championship bout/i.test(error.message))throw error;
+    await recoverSession();
+    next=await api(path,{...request,token});
+   }
+   m.division_league=next.league;managementSave();
+  }else if(isB12Campaign(management)&&activeTournamentBout()===management.round&&
      management.results.length===management.round){
    $('result-next').disabled=true;$('return-heya').disabled=true;
    $('notice').textContent='Completing the remaining matches and standings…';

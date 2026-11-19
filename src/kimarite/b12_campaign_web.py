@@ -8,11 +8,13 @@ existing session token and replay journal.
 """
 from __future__ import annotations
 
+from collections import deque
 from copy import deepcopy
+from random import Random
 
-from .b12_ai_day import commit_real_ai_matchday
+from .b12_ai_day import commit_real_ai_matchday, match_seed, simulate_ai_bout
 from .b12_banzuke import end_of_basho
-from .b12_division_roster import make_roster, validate_world
+from .b12_division_roster import load_formats, make_roster, validate_world
 from .b12_league import (
     PLAYER, banzuke, new_basho, next_day_matches, next_opponents, plan_block,
 )
@@ -54,6 +56,61 @@ def _preview(roster: dict, league: dict) -> dict:
             "banzuke": banzuke(league)}
 
 
+def championship_playoff(roster: dict, league: dict, *, session=None) -> dict:
+    """Resolve a seeded knockout bracket without altering the 15-day ledger."""
+    if league["day"] != 15:
+        raise ValueError("The championship playoff starts after day 15")
+    rows = {w["id"]: w for w in league["wrestlers"]}
+    best = max(w["wins"] for w in rows.values())
+    contenders = sorted(w["id"] for w in rows.values() if w["wins"] == best)
+    world_seed = roster["seed"]
+    basho = roster.get("completed_basho", 0)
+    Random(f"{world_seed}:{basho}:championship").shuffle(contenders)
+    queue = deque(contenders)
+    matches = league.setdefault("playoff_matches", [])
+    for match in matches:
+        if len(queue) < 2:
+            raise ValueError("The championship playoff is already complete")
+        a, b = queue.popleft(), queue.popleft()
+        if (match["a"], match["b"]) != (a, b) or match["winner"] not in (a, b):
+            raise ValueError("Invalid championship playoff result")
+        queue.append(match["winner"])
+
+    frameworks = {f["id"]: f for f in load_formats()} if len(queue) > 1 else {}
+    while len(queue) > 1:
+        a, b = queue.popleft(), queue.popleft()
+        day = 15 + len(matches)
+        if PLAYER in (a, b):
+            foe = rows[b if a == PLAYER else a]
+            tag = {"seed": world_seed, "basho": basho, "day": day, "opponent_id": foe["id"]}
+            if session is None:
+                seed = match_seed(world_seed, basho, day, PLAYER, foe["id"], foe["format_id"]) % (1 << 53)
+                details = {key: foe[key] for key in (
+                    "id", "name", "style", "rank", "format_id", "wins", "losses",
+                )}
+                return {"league": league, "opponent": details, "seed": seed, "bout": tag}
+            if (getattr(session, "b12_campaign", None) != tag
+                    or not getattr(session, "finished", False)
+                    or session.state.winner not in (Side.A, Side.B)
+                    or session.state.fighter_a.wrestler.name != rows[PLAYER]["name"]
+                    or session.state.fighter_b.wrestler.name != foe["name"]):
+                raise ValueError("Restore the finished championship bout before recording it")
+            winner = PLAYER if session.state.winner is Side.A else foe["id"]
+            match = {"a": a, "b": b, "winner": winner, "method": session.state.win_method}
+            session = None
+        else:
+            audit = simulate_ai_bout(rows[a], rows[b], frameworks,
+                                     master_seed=world_seed, basho=basho, day=day)
+            match = {key: audit[key] for key in ("a", "b", "winner", "method")}
+        matches.append(match)
+        queue.append(match["winner"])
+
+    if session is not None:
+        raise ValueError("No championship player bout is pending")
+    league["champion_id"] = queue[0]
+    return {"league": league, "opponent": None}
+
+
 def campaign_request(path: str, request: dict, *, session=None) -> dict:
     """Handle a single POST; no room for random or probability-only winners."""
     if path == "/api/b12/campaign/new":
@@ -82,6 +139,11 @@ def campaign_request(path: str, request: dict, *, session=None) -> dict:
         )}
         return {**_preview(roster, league),
                 "opponent": details}
+
+    if path in ("/api/b12/campaign/playoff", "/api/b12/campaign/playoff/resolve"):
+        if path.endswith("/resolve") and session is None:
+            raise ValueError("Restore the finished championship bout before recording it")
+        return championship_playoff(roster, league, session=session)
 
     if path == "/api/b12/campaign/advance":
         updated, changes = end_of_basho(roster, league)

@@ -301,7 +301,7 @@ class Handler(BaseHTTPRequestHandler):
                 from .b12_campaign_web import campaign_request
                 session = None
                 resolve_lock = None
-                if path == "/api/b12/campaign/resolve":
+                if path in ("/api/b12/campaign/resolve", "/api/b12/campaign/playoff/resolve"):
                     from threading import Lock
                     with _lock:
                         _prune_sessions()

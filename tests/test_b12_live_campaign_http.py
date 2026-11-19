@@ -260,3 +260,38 @@ def test_saved_rematch_card_tops_only_player_deck(client, monkeypatch, card_name
     captured.clear()
     opening({"b12_rematch_top_card": card_name})
     assert captured[0] == (own, rematch_opponent)
+
+
+def test_player_championship_playoff_uses_the_live_bout_and_keeps_day_fifteen(client):
+    post = client
+    started = post("/api/b12/campaign/new", {"player_name": "Playoff Rikishi", "seed": 902})
+    roster, league = started["roster"], started["league"]
+    for _ in range(15):
+        league = commit_day(league, [{"a": a, "b": b, "winner": a}
+                                     for a, b in next_day_matches(league)])
+    # Isolate a two-way title tie while retaining a complete scheduled league.
+    foe = next(w for w in league["wrestlers"] if w["id"] != PLAYER)
+    for w in league["wrestlers"]:
+        wins = 15 if w["id"] in (PLAYER, foe["id"]) else min(14, w["wins"])
+        w.update(wins=wins, losses=15-wins)
+    pending = post("/api/b12/campaign/playoff", {"roster": roster, "league": league})
+    starting, picks = draft(post, 99)
+    deck = {"starting_cards": starting, "draft_picks": picks, "draft_seed": 99}
+    deal = post("/api/b11/draft/deal", {**deck, "picks": picks, "seed": pending["seed"]})
+    started = post("/api/session", {
+        **deck, "human": roster["player"]["name"], "opponent": foe["name"],
+        "seed": pending["seed"], "opening_mode": "b11_live",
+        "opening_cards": [c["name"] for c in deal["cards"][:3]],
+        "created_stats": {"power": 2, "technique": 1, "spirit": 0},
+        "b12_opponent_ai": pending["opponent"], "b12_campaign": pending["bout"],
+        "b12_player_rank": roster["player"]["rank"],
+    }, expected=201)
+    token = started["token"]
+    state = post(f"/api/session/{token}/action", {"type": "commit_tachiai", "indices": []})["state"]
+    finished = play_passive(post, token, state)
+    result = post("/api/b12/campaign/playoff/resolve",
+                  {"roster": roster, "league": pending["league"], "token": token})["league"]
+    assert result["champion_id"] == (PLAYER if finished["winner"] == "A" else foe["id"])
+    assert result["playoff_matches"][0]["method"] == finished["win_method"]
+    assert result["results"] == league["results"]
+    assert result["day"] == 15
