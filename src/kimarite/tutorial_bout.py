@@ -12,10 +12,10 @@ from .tachiai import first_exchange_side
 from .tachiai_effects import resolve_prepared_tachiai
 from .turns import apply_initial_power
 
-OPENING = ("Gain Left Grip", "Shikiri", "Yorikiri")
-PLAYER_STATS = {"power": 2, "technique": 1, "spirit": 4}
+OPENING = ("Sheer Grit", "Shikiri", "Yorikiri")
+PLAYER_STATS = {"power": 2, "technique": 1, "spirit": 1}
 PLAYER_DRAWS = (
-    "Oshi", "Gain Left Grip", "Gain Right Grip", "Tsuki",
+    "Oshi", "Sheer Grit", "Gain Right Grip", "Tsuki",
     "Regain Balance", "Attempt Deep Outside Grip", "Shove",
     "Power Water", "Tsuppari", "Ottsuke",
     "Oshidashi", "Pull", "Sonkyo", "Nokotta!", "Belt Slap", "Salt Throw",
@@ -30,7 +30,7 @@ OPPONENT_PLAYS = {
     5: ("Harite", "Gain Left Grip"),
 }
 PLAYER_STEPS = (
-    ("choose_cards", ("Oshi", "Gain Left Grip")),
+    ("choose_cards", ("Oshi", "Sheer Grit")),
     ("play_card", "Oshi"),
     ("play_card", "Gain Right Grip"),
     ("end_turn", None),
@@ -65,7 +65,7 @@ class TutorialOpening(PendingB11Session):
         oshi = card_by_name("Oshi")
         player = Wrestler(self.human, PLAYER_STATS["power"], PLAYER_STATS["technique"],
                           PLAYER_STATS["spirit"], yorikiri, oshi, oshi)
-        opponent = Wrestler(self.opponent, 0, 8, 0, card_by_name("Oshidashi"),
+        opponent = Wrestler(self.opponent, 0, 5, 0, card_by_name("Oshidashi"),
                             card_by_name("Regain Balance"), card_by_name("Shove"))
         own = FighterState(player, draw_pile=[card_by_name(name) for name in PLAYER_DRAWS])
         foe = FighterState(opponent, draw_pile=[card_by_name(name) for name in OPPONENT_DRAWS])

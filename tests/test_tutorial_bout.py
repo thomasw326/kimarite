@@ -28,7 +28,7 @@ class TutorialBoutTest(unittest.TestCase):
                           comparison.spirit_advantage_a), (0, -1, 4))
         self.assertEqual(bout.state.position, 1)
         first = keep(0, 1)
-        self.assertEqual([card["name"] for card in first["human"]["hand"]], ["Oshi", "Gain Left Grip"])
+        self.assertEqual([card["name"] for card in first["human"]["hand"]], ["Oshi", "Sheer Grit"])
         with self.assertRaises(IllegalPlay):
             play(1)
         pushed = play(0)
