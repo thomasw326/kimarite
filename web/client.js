@@ -35,7 +35,6 @@ const CARD_ENGLISH_NAMES=Object.freeze({
  'Uwate':"Outside Grip",
  'Shitate':"Inside Grip",
  'Sonkyo':"Defensive Crouch",
- 'Gaburi':"Belly Drive",
  'Ottsuke':"Arm Clamp",
  'Use the Tawara':"Ring Bales",
  'Kannuki':"Double Arm Clamp",
@@ -64,6 +63,7 @@ const CARD_ENGLISH_NAMES=Object.freeze({
  'Kimetaoshi':"Arm-Lock Force Down"
 });
 const CARD_DISPLAY_TITLES=Object.freeze({
+ 'Gaburi':'Hug and Chug (Gaburi)',
  'Driving Force — Power Payoff':'Driving Force',
  'Crushing Pressure — Power Crusher':'Crushing Pressure',
  'Explosive Step — Fumikomi':'Explosive Step (Fumikomi)',
