@@ -12,7 +12,7 @@ from .tachiai import first_exchange_side
 from .tachiai_effects import resolve_prepared_tachiai
 from .turns import apply_initial_power
 
-OPENING = ("Sheer Grit", "Shikiri", "Yorikiri")
+OPENING = ("Yorikiri", "Sheer Grit", "Shikiri")
 PLAYER_STATS = {"power": 2, "technique": 2, "spirit": 2}
 PLAYER_DRAWS = (
     "Oshi", "Sheer Grit", "Stare Down", "Gain Right Grip", "Tsuki",

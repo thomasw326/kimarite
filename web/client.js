@@ -1761,7 +1761,7 @@ function updatePracticeCoach(g){
  if(!practice)return;
  let hint='Inspect a card to read its effects, then choose Play this card.';
  if(g.finished)hint='You won by Yorikiri! Oshidashi’s on-play effect gave Yorikiri the Momentum it needed.';
- else if(guided&&g.phase==='choose_tachiai')hint='Let’s win by Yorikiri (Force Out). A Kimarite is a winning technique and goes in your Kimarite Zone. Shikiri is a pre-bout ritual with five orbs: 1 Power, 2 Technique, and 2 Spirit. Sheer Grit adds 3 Spirit orbs. Select all three cards and confirm.';
+ else if(guided&&g.phase==='choose_tachiai')hint='Let’s win by Yorikiri (Force Out). A Kimarite is a winning technique and goes in your Kimarite Zone. Sheer Grit gives you 3 Spirit orbs to help you push hard at the opening clash. Most cards have 3 orbs. Shikiri is a pre-bout ritual with 5: 1 Power, 2 Technique, and 2 Spirit. Select all three cards and confirm.';
  else if(guided)hint=yorikiriLessons[g.tutorial_step];
  $('practice-hint').textContent=hint;
 }
