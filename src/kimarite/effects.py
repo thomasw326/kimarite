@@ -392,9 +392,9 @@ def _stare_down(
 def _belt_slap(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
-    gain_push(state, side, 1)
-    if tachiai_advantage(context, side, Stat.SPIRIT) >= 3:
-        gain_momentum(state, side, 1)
+    gain_momentum(state, side, 1)
+    if state.winner is None and tachiai_advantage(context, side, Stat.SPIRIT) >= 3:
+        gain_push(state, side, 1)
 
 
 def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
