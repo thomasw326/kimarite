@@ -49,7 +49,7 @@ CARD_TEXT = {
     "Explosive Step — Fumikomi": {"timing":"Exchange / Tachiai","effect":"Tachiai: gain 1 additional Push if you won Spirit. Exchange: gain 1 Momentum. If you are not Exhausted (fewer than 7 cards in your discard pile), gain 1 Push.","status":"verified"},
     "Harite": {"timing":"Exchange / Tachiai","effect":"Tachiai or Exchange: opponent discards 1 random card from hand (if any), loses 1 Power and mills 2 cards from their draw pile, unless protected.","status":"verified"},
     "Headlong Charge": {"timing":"Exchange / Tachiai","effect":"Tachiai: optionally sacrifice a Kimarite to gain 1 Momentum and 1 Push. Exchange: sacrifice one of your Kimarite to gain 1 Momentum and 1 Push; mill 2 cards.","status":"verified"},
-    "Belt Slap": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Push. If your Tachiai Spirit advantage was at least 3, gain 1 Momentum.","status":"verified"},
+    "Belt Slap": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Momentum. If your Tachiai Spirit advantage was at least 3, gain 1 Push.","status":"verified"},
     "Stare Down": {"timing":"Exchange / Tachiai","effect":"Tachiai: +1 Push if you win Power, +1 card kept during Technique access if you win Technique, +1 Momentum if you win Spirit. Exchange: look at 1 + number of won Tachiai comparisons and keep 1 card.","status":"verified"},
     "Regain Balance": {"timing":"Exchange / Tachiai","effect":"Exchange: draw 1. If your relative Momentum was negative, gain 1 Momentum and 2 Power.","status":"verified"},
     "Give Ground": {"timing":"Exchange / Tachiai","effect":"Exchange: lose 1 Position, gain 1 Momentum and 1 Power, then draw 1.","status":"verified"},
