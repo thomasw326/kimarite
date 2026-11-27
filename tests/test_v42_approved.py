@@ -59,6 +59,9 @@ def test_approved_kinematic_finishes():
     s.position = -2
     assert not kimarite_is_satisfied(s, Side.A, card_by_name("Tsukidashi"))
     s.momentum = 2
+    assert not kimarite_is_satisfied(s, Side.A, card_by_name("Tsukitaoshi"))
+    s.position = 0
+    s.momentum = -3
     assert kimarite_is_satisfied(s, Side.A, card_by_name("Tsukitaoshi"))
 
 
