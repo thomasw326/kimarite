@@ -132,7 +132,7 @@ CARD_LIBRARY_TEXT = {
   },
   "hold position": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange — Temporary: Your opponent cannot gain Push while Hold Position remains. Remains until the beginning of your next turn. If it survives, gain 1 Momentum and 1 Power.",
+    "effect": "Tachiai: Gain 2 Power. Exchange starts at Position 0. Exchange — Temporary: Your opponent cannot gain Push while Hold Position remains. Remains until the beginning of your next turn. If it survives, gain 1 Momentum and 1 Power.",
     "notes": ""
   },
   "immovable": {
