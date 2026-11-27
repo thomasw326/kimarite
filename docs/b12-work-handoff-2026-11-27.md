@@ -28,3 +28,13 @@
 - Sync consolidated catalogue and 60 proposed 28+12 deck sheet, preserving historical records; flag experimental vs main. Check Render deployment after eventual merge.
 - Before next batch ensure Salt Throw execution order matches agreed wording; terminal-win behavior requires explicit regression coverage. Current batch reflects old order.
 - No need for another dedicated large batch solely for these changes before continuing card audit. Next batch should include seat rule and all subsequently approved changes, then update active audit and preserve previous snapshot.
+
+## Continuation checkpoint — later 27 Nov 2026
+- Earlier full pytest 46029099370 and canonical smoke 46029099294 both success at efb1328.
+- Salt Throw approved bonus-before-recycle order implemented in 09aa151; terminal ringout no-followup regression test added in 0d3d173. Later commits are not covered by the earlier green CI.
+- Diagnostic artifact 15211795813 reconciled against active B12 Card Audit CSV: 928 rate/count, 347 delta and 174 finish entries verified; 1,449 checks, zero discrepancies.
+- Exact active sheet snapshot preserved in docs/b12-audit-sheet-snapshot-2026-11-27.json; archived 35,400-bout baseline untouched.
+- All 60 current experimental decks match the 60 Proposed 28+12 sheet exactly; each has 28 unique base cards and 12 duplicated base cards; no Renzoku slots. docs/b12-60-framework-audit-2026-11-27.md documents per-framework suitability flags and shared-style AI limitations.
+- Historic 60-Framework Reconciliation tab still includes older Renzoku suggestions; retain as superseded history, not the current authoritative deck source.
+- No deck or approved mechanics alterations made beyond Salt Throw sequencing to match previously approved wording.
+- Release gate: confirm post-change CI; ensure experimental workflow does not contaminate release settings; verify deployment parity before any merge. Next balance test must include seat selection and Salt Throw ordering and preserve old snapshot.
