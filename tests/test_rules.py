@@ -1,5 +1,5 @@
 from kimarite.models import BoutState, Card, FighterState, GripState, Side, Wrestler
-from kimarite.rules import gain_momentum, gain_push, gain_position, lose_position, POSITION_MIN, POSITION_MAX
+from kimarite.rules import gain_momentum, lose_momentum, gain_push, gain_position, lose_position, POSITION_MIN, POSITION_MAX
 
 
 def wrestler(name: str) -> Wrestler:
@@ -13,18 +13,19 @@ def state() -> BoutState:
     return BoutState(FighterState(wrestler("A")), FighterState(wrestler("B")))
 
 
-def test_momentum_overflow_converts_excess_to_push():
+def test_momentum_overflow_is_discarded():
     bout = state()
     bout.momentum = 3
 
     gain_momentum(bout, Side.A, 2)
 
     assert bout.momentum == 3
-    assert bout.position == 2  # Two excess Momentum becomes two Push.
+    assert bout.position == 0
+    assert not bout.fighter_a.gained_push_this_turn
     assert bout.winner is None
 
 
-def test_push_overflow_converts_to_momentum():
+def test_push_crossing_boundary_wins_without_momentum():
     bout = state()
     bout.position = 2
 
@@ -34,7 +35,7 @@ def test_push_overflow_converts_to_momentum():
     assert bout.winner is Side.A
 
 
-def test_overflow_loop_without_grip_is_oshidashi():
+def test_ringout_without_grip_is_oshidashi():
     bout = state()
     bout.position = 4
     bout.momentum = 3
@@ -45,7 +46,7 @@ def test_overflow_loop_without_grip_is_oshidashi():
     assert bout.win_method == "Oshidashi"
 
 
-def test_overflow_loop_with_grip_is_yorikiri():
+def test_ringout_with_grip_is_yorikiri():
     bout = state()
     bout.position = 4
     bout.momentum = 3
@@ -83,7 +84,49 @@ def test_direct_position_ringout_both_sides():
     assert bout.winner is Side.B
 
 
-def test_momentum_overflow_push_at_zero_position():
+def test_momentum_overflow_does_not_push_at_zero_position():
     bout = state()
     gain_momentum(bout, Side.A, 4)
-    assert bout.momentum == 3 and bout.position == 1
+    assert bout.momentum == 3 and bout.position == 0
+
+
+def test_momentum_cap_never_ringouts_either_seat():
+    for side, sign in ((Side.A, 1), (Side.B, -1)):
+        bout = state()
+        bout.position = sign * 4
+        bout.momentum = sign * 2
+        gain_momentum(bout, side, 4)
+        assert bout.momentum == sign * 3
+        assert bout.position == sign * 4
+        assert bout.winner is None
+        assert bout.fighter(side).gained_momentum_this_turn
+        assert not bout.fighter(side).gained_push_this_turn
+        lose_momentum(bout, bout.opponent_side(side), 2)
+        assert bout.position == sign * 4
+        assert bout.winner is None
+        gain_push(bout, side, 1)
+        assert bout.winner is side
+
+
+def test_momentum_overflow_does_not_bypass_push_defenses():
+    from kimarite.temporary import add_temporary
+    for name in ("Hold Position", "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate", "Henka", "Immovable", "Meguri"):
+        bout = state()
+        bout.momentum = 3
+        bout.position = 4
+        instance = add_temporary(bout, Side.B, Card(900, name), phase="exchange")
+        gain_momentum(bout, Side.A, 2)
+        assert bout.position == 4 and bout.winner is None
+        assert instance in bout.fighter_b.temporary_zone
+        assert not instance.opponent_gained_push_while_active
+
+
+def test_momentum_overflow_does_not_move_side_by_side_position():
+    bout = state()
+    bout.side_by_side_owner = Side.B
+    bout.side_by_side_distance = 4
+    bout.momentum = 3
+    gain_momentum(bout, Side.A, 2)
+    assert bout.position == 0 and bout.winner is None
+    assert bout.side_by_side_owner is Side.B
+    assert bout.side_by_side_distance == 4
