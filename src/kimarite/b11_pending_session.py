@@ -66,9 +66,9 @@ class PendingB11Session:
                 raise ValueError("Created wrestler stats must be an exact 2-1-0 distribution.")
         records = json.loads(ROSTER_PATH.read_text(encoding="utf-8"))["decks"]
         if drafted_deck is not None:
-            from .b11_player_draft import AVAILABLE
+            from .b11_player_draft import OWNED_CARD_POOL
             if (not isinstance(drafted_deck, list) or not 28 <= len(drafted_deck) <= 40
-                    or any(not isinstance(n, str) or n not in AVAILABLE for n in drafted_deck)):
+                    or any(not isinstance(n, str) or n not in OWNED_CARD_POOL for n in drafted_deck)):
                 raise ValueError("Invalid B11 grown deck; require 28–40 eligible cards.")
         deck = [card_by_name(name) for name in (drafted_deck if drafted_deck is not None else records[human]["cards"])]
         opening = PlayerOpening.from_names(deck, names)

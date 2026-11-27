@@ -186,11 +186,32 @@ def test_mawashi_reversal_drafts_and_legacy_drafts_still_validate():
     assert (card.power, card.technique, card.spirit) == (1, 2, 0)
     assert card not in B12_CARD_POOL
     starting = list(STARTERS)
-    seed = 3
-    picks = pick_through(starting, seed, lambda offered: name if name in offered else offered[0])
+    for seed in range(100):
+        picks = pick_through(starting, seed, lambda offered: name if name in offered else offered[0])
+        if name in picks:
+            break
     assert name in validate_draft(starting, picks, seed)
+    assert "Renzoku" not in picks
 
     old_picks = []
     while len(starting) + len(old_picks) < 28:
         old_picks.append(options_for(starting, old_picks, seed, legacy=True)[0])
     assert validate_draft(starting, old_picks, seed) == starting + old_picks
+
+
+def test_retirement_preserves_pre_retirement_draft_and_owned_cards():
+    from kimarite.b11_player_draft import OWNED_CARD_POOL
+    starting = list(STARTERS)
+    for seed in range(100):
+        picks = []
+        while len(starting) + len(picks) < 28:
+            offered = options_for(starting, picks, seed, pre_retirement=True)
+            picks.append("Renzoku" if "Renzoku" in offered else offered[0])
+        if "Renzoku" in picks:
+            break
+    assert "Renzoku" in picks
+    assert validate_draft(starting, picks, seed) == starting + picks
+    assert "Renzoku" not in AVAILABLE and "Renzoku" in OWNED_CARD_POOL
+    assert len(deal_block(starting + picks, 123)) == 9
+    inherited = ["Renzoku"]
+    assert "Renzoku" not in options_for(inherited, [], seed)
