@@ -1,4 +1,4 @@
-name: B12 Six-Delta Card Review — 35400 max40 bouts
+name: B12 Neutral Tachiai Review — 35400 max40 bouts
 
 on:
   push:
@@ -96,6 +96,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-six-delta-card-review-max40-35400-diagnostics
+          name: b12-neutral-tachiai-max40-35400-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore
