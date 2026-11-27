@@ -973,7 +973,6 @@ def _aggressive_shiko_stomp(state: BoutState, side: Side, card: Card, context: E
     # create an otherwise unavailable Push on the same play.
     has_position_lead = state.position * state.sign(side) > 0
     has_power_lead = state.fighter(side).power > state.opponent(side).power
-    gain_momentum(state, side, 1)
     if state.winner is not None:
         return
     if has_position_lead:
