@@ -316,16 +316,22 @@ def test_regain_balance_reduced_momentum_bonus():
     assert bout.fighter_a.hand[-1].name == "Tsuki"
 
 
-def test_denshamichi_grants_momentum_only_on_temporary_resolution():
+@pytest.mark.parametrize("owner", [Side.A, Side.B])
+@pytest.mark.parametrize("relative_momentum", [-3, 0, 3])
+def test_denshamichi_grants_two_push_and_no_momentum(owner, relative_momentum):
     bout = state()
-    effect(bout, "Denshamichi")
-    assert bout.position == 1 and bout.momentum == 0
-    bout.active_side = Side.A
-    bout.fighter_a.turns_started = 1
-    from kimarite.temporary import resolve_start_of_turn_temporaries
-    resolve_start_of_turn_temporaries(bout, Side.A)
-    assert bout.momentum == 1
-    assert bout.position == 2
+    sign = bout.sign(owner)
+    bout.momentum = sign * relative_momentum
+    resolve_exchange_effect(bout, owner, card_by_name("Denshamichi"), EffectContext())
+    assert bout.position == sign
+    assert bout.momentum == sign * relative_momentum
+    bout.active_side = owner
+    bout.fighter(owner).turns_started = 1
+    resolve_start_of_turn_temporaries(bout, owner)
+    assert bout.position == 2 * sign
+    assert bout.momentum == sign * relative_momentum
+    assert not bout.fighter(owner).temporary_zone
+    assert bout.winner is None
 
 
 
