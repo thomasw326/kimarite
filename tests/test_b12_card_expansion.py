@@ -440,15 +440,18 @@ def test_get_underneath_tachiai_no_exhaustion_penalty():
     assert not state.fighter_a.unstable
 
 @pytest.mark.parametrize("relative_momentum", [-3, -1, 0, 1, 3])
-def test_explosive_step_gains_push_and_momentum_and_mills_three_on_exchange(relative_momentum):
+@pytest.mark.parametrize("discard_count", [0, 6, 7, 8])
+def test_explosive_step_momentum_and_non_exhausted_push_without_mill(relative_momentum, discard_count):
     card = card_by_name("Explosive Step — Fumikomi")
-    state, _ = bout(hand=[card], draw=[blank_card() for _ in range(3)])
+    draw = [blank_card() for _ in range(3)]
+    state, _ = bout(hand=[card], draw=list(draw))
+    state.fighter_a.discard_pile = [blank_card() for _ in range(discard_count)]
     state.momentum = relative_momentum
     play_card(state, Side.A, card)
-    assert state.position == 1  # Excess Momentum is discarded at the cap.
+    assert state.position == (1 if discard_count < 7 else 0)
     assert state.momentum == min(relative_momentum + 1, 3)
-    assert not state.fighter_a.draw_pile
-    assert sum(c.name == "Blank" for c in state.fighter_a.discard_pile) == 3
+    assert state.fighter_a.draw_pile == draw
+    assert sum(c.name == "Blank" for c in state.fighter_a.discard_pile) == discard_count
     assert state.winner is None
 
 
