@@ -5,6 +5,9 @@ on:
     branches:
       - experiment/b12-grip-counter-max40
     paths:
+      - 'src/kimarite/rules.py'
+      - 'src/kimarite/legality.py'
+      - 'tests/test_b12_anti_grip_experiment.py'
       - 'data/b12_60_framework_decks.json'
       - 'scripts/b12_60_big_test.py'
       - 'scripts/b12_60_report.py'
