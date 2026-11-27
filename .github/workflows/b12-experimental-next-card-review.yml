@@ -6,6 +6,10 @@ on:
       - experiment/b12-next-card-review
     paths:
       - '.github/workflows/b12-experimental-next-card-review.yml'
+      - 'src/kimarite/rules.py'
+      - 'tests/test_rules.py'
+      - 'tests/test_b12_card_expansion.py'
+      - 'tests/test_v43_new_cards.py'
   workflow_dispatch:
 
 permissions:
