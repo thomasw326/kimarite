@@ -44,3 +44,9 @@
 - Moved experimental 17,700-max40 workflow to .github/workflows/b12-experimental-next-card-review.yml (commit 934f259) with its own branch/path trigger.
 - Main-to-experiment diff now contains only the **new** isolated experimental workflow, not a modification of the historical B12 comparison workflow.
 - Existing efb1328 full CI/smoke success does **not** cover later Salt Throw order or the new test. No merged release or verified Render deployment as of this checkpoint.
+
+## Explicit owner approval — Momentum cap and 70,800-bout run
+- Owner confirmed all reviewed Position boundaries, ringout, Push prevention and resistance mechanics as intended except Momentum overflow. Excess Momentum is lost at ±3; it never becomes Push or causes a ringout. No other card or deck mechanics changed in this correction.
+- Engine e29f239 and regression tests 4736b55; tests cover both seats, edge, Momentum loss, defensive Temporaries and Side-by-Side. Full CI required before large batch.
+- Next max40 run: 60 unchanged frameworks, 1,770 pairings, 20 mirrored repetitions, 70,800 bouts, seed 20261102. Preserve previous artifact 15211795813 and sheet snapshots. New run also includes previously approved Salt Throw order and Grip seat-selection changes, so comparison against 17,700 results is not a pure overflow-only experiment. Compare first five repetitions separately if exact paired attribution is needed, and acknowledge other changes.
+- Do not replace historical results or update current card/wrestler success tables until complete artifact coverage and zero simulation failures verified. Analyze inclusion, actual Exchange plays, prepared Tachiai, top-deck, Kimarite finishing origin, ringout share, framework/matchup changes and card contributions; no further nerfs without owner approval.
