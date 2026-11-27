@@ -1067,7 +1067,7 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
 MILL_AMOUNTS = {
     "Headlong Charge": 2,
     "Explosive Step — Fumikomi": 3,
-    "Tsuppari": 1,
+    "Tsuppari": 2,
     "Tsuki": 1,
     "Shove": 1,
 }
