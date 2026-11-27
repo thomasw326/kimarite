@@ -23,7 +23,7 @@ MIN_KIMARITE = 3
 GENERATED_ONLY = frozenset(("Okuridashi", "Okuritaoshi"))
 _ORIGINAL_POOL = {
     card.name: card for card in (*CARD_POOL, *B9_CARD_POOL, *B11_CARD_POOL, *B12_CARD_POOL)
-    if card.name not in GENERATED_ONLY
+    if card.name not in GENERATED_ONLY and card.name != "Renzoku"
 }
 
 AVAILABLE = _ORIGINAL_POOL | {card.name: card for card in PLAYER_DRAFT_CARD_POOL}

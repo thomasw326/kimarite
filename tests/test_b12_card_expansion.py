@@ -33,7 +33,7 @@ def bout(hand=(), draw=(), opponent_draw=()):
 
 EXPECTED = {
     "Sonkyo": (1, 1, 1),
-    "Renzoku": (0, 3, 0), "Meguri": (0, 2, 1),
+    "Mawashi Reversal": (1, 2, 0), "Meguri": (0, 2, 1),
     "Nokotta!": (1, 0, 2), "Hakkeyoi!": (0, 0, 3),
     "Hazuoshi": (1, 1, 1), "Inashi": (1, 1, 2),
     "Chiri-chozu": (1, 1, 1), "Shikiri": (1, 2, 2),
@@ -479,3 +479,9 @@ def test_mawashi_reversal_requires_grip_lead_for_both_effects(
     assert state.momentum * sign == momentum
     assert state.side_by_side_owner is None
     assert not state.opponent(side).unstable
+
+
+def test_retired_renzoku_preserved_but_not_draftable():
+    assert card_by_name("Renzoku").card_id == 14001
+    assert "Renzoku" not in AVAILABLE
+    assert "Mawashi Reversal" in AVAILABLE

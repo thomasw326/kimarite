@@ -1,37 +1,11 @@
-name: B12 second-pass card-balance 35400-bout comparison
+name: B12 Salt Throw Ankogata Mawashi — 17700 max40 bouts
 
 on:
   push:
     branches:
-      - experiment/b12-shikiri-exchange-plus-play-v1
+      - experiment/b12-next-card-review
     paths:
-      - 'data/b12_60_framework_decks.json'
-      - 'scripts/b12_60_big_test.py'
-      - 'scripts/b12_60_report.py'
-      - 'src/kimarite/temporary.py'
-      - 'tests/test_salt_power_water.py'
-      - 'tests/test_orb_colours.py'
-      - 'tests/test_b12_60_big_test.py'
-      - 'src/kimarite/tachiai.py'
-      - 'src/kimarite/tachiai_effects.py'
-      - 'src/kimarite/kimarite.py'
-      - 'src/kimarite/b11_victory_checks.py'
-      - 'src/kimarite/kimarite_effects.py'
-      - 'src/kimarite/catalog.py'
-      - 'src/kimarite/effects.py'
-      - 'tests/test_b12_card_expansion.py'
-      - 'src/kimarite/effects.py'
-      - 'src/kimarite/b10_card_info.py'
-      - 'tests/test_b12_utchari_tsukiotoshi_thresholds.py'
-      - 'src/kimarite/b10_card_info.py'
-      - 'tests/test_v5_tsuki_kimarite_exchange.py'
-      - 'tests/test_b12_position_ring_oshidashi.py'
-      - 'tests/test_b12_tachiai_push_order.py'
       - '.github/workflows/b12-60-framework-big-test.yml'
-      - 'tests/test_b11_hikiotoshi_exchange_choice.py'
-      - 'tests/test_b11_recent_kimarite_fixes.py'
-      - 'tests/test_b9_cards.py'
-      - 'tests/test_v51_new_kimarite.py'
   workflow_dispatch:
 
 permissions:
@@ -39,7 +13,7 @@ permissions:
 
 jobs:
   smoke:
-    name: Validate 15x4 and smoke both modes
+    name: Validate and smoke max40
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -49,16 +23,14 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install -e '.[dev]'
       - name: Current engine tests and B12 deck validation
-        run: python -m pytest -q tests/test_b12_60_big_test.py tests/test_b12_tachiai_push_order.py tests/test_b12_position_ring_oshidashi.py tests/test_b12_utchari_tsukiotoshi_thresholds.py tests/test_v5_tsuki_kimarite_exchange.py tests/test_tachiai.py tests/test_v44_tachiai.py tests/test_setup.py tests/test_b12_card_expansion.py tests/test_b11_all_kimarite_checks.py
-      - name: Verify original B12 deck snapshot is unchanged
-        run: test "$(git hash-object data/b12_60_framework_decks.json)" = 92618ce1d60ec8591381f045547dbac3f8b056f3
-      - name: Validate 28-card and 40-card rosters
+        run: python -m pytest -q tests/test_b12_60_big_test.py tests/test_b12_tachiai_push_order.py tests/test_b12_position_ring_oshidashi.py tests/test_b12_utchari_tsukiotoshi_thresholds.py tests/test_v5_tsuki_kimarite_exchange.py tests/test_tachiai.py tests/test_v44_tachiai.py tests/test_setup.py tests/test_b12_anti_grip_release.py tests/test_b12_ankogata.py tests/test_salt_power_water.py tests/test_b12_card_expansion.py tests/test_b11_all_kimarite_checks.py
+      - name: Verify exact approved replacement counts
+        run: python -c "import json; f=json.load(open('data/b12_60_framework_decks.json'))['frameworks']; cards=[c for d in f for c in d['base']+d['duplicates']]; assert cards.count('Mawashi Reversal')==11 and 'Renzoku' not in cards"
+      - name: Validate 40-card roster
         run: |
-          python scripts/b12_60_big_test.py --mode base28 --validate-only
           python scripts/b12_60_big_test.py --mode max40 --validate-only
-      - name: Run 30 mirrored smoke pairings per deck mode (each framework participates)
+      - name: Run max40 smoke pairings
         run: |
-          python scripts/b12_60_big_test.py --mode base28 --smoke --output-dir artifacts/b12_smoke
           python scripts/b12_60_big_test.py --mode max40 --smoke --output-dir artifacts/b12_smoke
       - name: Verify smoke reporting end-to-end
         run: python scripts/b12_60_report.py --input-root artifacts/b12_smoke --output-dir artifacts/b12_smoke_report --allow-partial
@@ -78,10 +50,10 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 24
       matrix:
-        mode: [base28, max40]
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        mode: [max40]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -94,7 +66,7 @@ jobs:
           --mode ${{ matrix.mode }}
           --repetitions 5
           --seed 20261102
-          --shards 12
+          --shards 24
           --shard-index ${{ matrix.shard }}
           --output-dir artifacts/b12_shard
       - uses: actions/upload-artifact@v4
@@ -120,10 +92,10 @@ jobs:
           path: artifacts/b12_shards
           merge-multiple: true
       - name: Fail on missing, duplicate or non-mirrored bouts
-        run: python scripts/b12_60_report.py --input-root artifacts/b12_shards --output-dir artifacts/b12_big_test_report --repetitions 5
+        run: python scripts/b12_60_report.py --input-root artifacts/b12_shards --output-dir artifacts/b12_big_test_report --repetitions 5 --mode max40
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-card-rebalance-35400-combined-diagnostics
+          name: b12-salt-ankogata-mawashi-max40-17700-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore
