@@ -32,7 +32,7 @@ CARD_LIBRARY_TEXT = {
   },
   "tsuppari": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai: Shuffle 3 Oshi, 3 Tsuki and 3 Shove into your Draw Pile (9 generated cards). Exchange: Gain 1 Momentum; if another Oshi/Tsuki/Tsuppari/Shove was played this turn, gain 1 Push. Gain 1 Play, draw 1, then Mill 1.",
+    "effect": "Tachiai: Shuffle 3 Oshi, 3 Tsuki and 3 Shove into your Draw Pile (9 generated cards). Exchange: If another Oshi/Tsuki/Tsuppari/Shove was played earlier this turn, gain 1 Push. Gain 1 Play, draw 1, then Mill 2.",
     "notes": ""
   },
   "headlong charge": {
@@ -252,8 +252,8 @@ CARD_LIBRARY_TEXT = {
   },
   "tsukitaoshi": {
     "timing": "Start & End of Turn",
-    "effect": "Momentum 2+ · Cards Played This Turn 4+",
-    "notes": "Exchange: Unconditionally gain 1 additional Play, draw 1, then discard 1 card from hand. Win unchanged: Momentum 2+ and 4+ cards played this turn."
+    "effect": "Position 0+ · Cards Played This Turn 4+",
+    "notes": "Exchange: Unconditionally gain 1 additional Play, draw 1, then discard 1 card from hand. Win: Position 0+ and 4+ cards played this turn."
   },
   "tsuridashi": {
     "timing": "Start & End of Turn",
