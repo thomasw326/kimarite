@@ -445,7 +445,7 @@ def test_explosive_step_gains_push_and_momentum_and_mills_three_on_exchange(rela
     state, _ = bout(hand=[card], draw=[blank_card() for _ in range(3)])
     state.momentum = relative_momentum
     play_card(state, Side.A, card)
-    assert state.position == (2 if relative_momentum == 3 else 1)
+    assert state.position == 1  # Excess Momentum is discarded at the cap.
     assert state.momentum == min(relative_momentum + 1, 3)
     assert not state.fighter_a.draw_pile
     assert sum(c.name == "Blank" for c in state.fighter_a.discard_pile) == 3
