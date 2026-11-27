@@ -149,7 +149,6 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name == "Nekodamashi":
             make_unstable(state, state.opponent_side(side), source_side=side)
         elif name == "Denshamichi":
-            gain_momentum(state, side, 1)
             gain_push(state, side, 1)
         elif name == "Give Ground":
             pass
