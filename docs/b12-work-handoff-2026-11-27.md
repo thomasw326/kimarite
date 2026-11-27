@@ -55,3 +55,6 @@
 - Tsukitaoshi now requires relative Position >= 0 and at least four cards played this turn. Orbs and Exchange unchanged. Engine f8f158a; inspector 70c14ed; victory checklist dc11649; AI progress predicate 2581072; mirrored regression 96fb26c.
 - Retain Tsuppari, Tsukidashi and Oshidashi unchanged at this stage. Owner notes ringout-heavy winning frameworks can inflate inclusion success while competing with Kimarite finish opportunities. Analyze conditional finishing opportunities, not just raw deck win rates.
 - Preserve 70,800-bout no-overflow results (run 46037904715, artifact 15220130235) as pre-Tsukitaoshi-change evidence. No new large batch solely for this change; CI pending.
+
+## Owner-approved Tsuppari review
+- Supersedes earlier retain decision: Exchange mill 2 instead of 1, with all other effects/orbs unchanged. Engine 4dce79a, inspector 993c70c, regression 254f431, terminal descriptions (also Tsukitaoshi) 0e6b951. CI pending; preserve existing 70,800-bout evidence as pre-nerf. Continue Fumikomi review before further simulation.
