@@ -279,7 +279,7 @@ def resolve_prepared_tachiai(
     for side in (Side.A, Side.B):
       for card in cards_by_side[side]:
         name = card.name
-        if name in {"Headlong Charge", "Explosive Step — Fumikomi"}:
+        if name == "Headlong Charge":
             from .effects import mill_cards
             mill_cards(state, side, 2)
     # END APPROVED MILL/RECYCLE V1
