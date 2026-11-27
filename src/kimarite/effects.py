@@ -1067,7 +1067,6 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
 # BEGIN APPROVED MILL/RECYCLE V1
 MILL_AMOUNTS = {
     "Headlong Charge": 2,
-    "Explosive Step — Fumikomi": 3,
     "Tsuppari": 2,
     "Tsuki": 1,
     "Shove": 1,
