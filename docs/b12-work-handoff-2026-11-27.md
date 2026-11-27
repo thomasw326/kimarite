@@ -67,3 +67,6 @@
 
 ## Owner-approved Nokotta! review
 - Exchange: if relative Position is negative, gain 2 Push; otherwise draw 1 card (no Push). Retain printed orbs 1/0/2 and Tachiai printed only. Engine fc25539, inspector 13cb672; mirrored regression added for negative, neutral, positive and edge positions. CI pending; retain pre-change 70,800-bout results. No other changes.
+
+## Owner-approved Belt Slap review
+- Option E: Exchange gain 1 Momentum, then gain 1 Push only if recorded Tachiai Spirit advantage >= 3. Keep orbs 2/0/3 and Tachiai printed only. Engine 55e05c1, inspector ffc2932, terminal d9a92af; mirrored threshold regression updated. CI pending. Preserve 70,800-bout pre-review results, no new batch yet.
