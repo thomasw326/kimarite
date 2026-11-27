@@ -137,7 +137,7 @@ CARD_LIBRARY_TEXT = {
   },
   "immovable": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange — Temporary: Gain 1 Power. Remains until the beginning of your next turn. If it survives and your opponent gained no Push while it remained, gain 2 Momentum.",
+    "effect": "Tachiai: Gain 2 Power. Exchange starts at Position 0. Exchange — Temporary: Gain 1 Power. Remains until the beginning of your next turn. If it survives and your opponent gained no Push while it remained, gain 2 Momentum.",
     "notes": ""
   },
   "henka": {
