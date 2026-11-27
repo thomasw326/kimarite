@@ -61,7 +61,7 @@ def test_sonkyo_and_new_shiko_are_distinct():
     state.fighter_b.power = 4
     state.momentum = 1
     play_card(state, Side.A, state.fighter_a.hand[0])
-    assert (state.position, state.momentum, state.fighter_a.power) == (1, 2, 5)
+    assert (state.position, state.momentum, state.fighter_a.power) == (1, 1, 5)
     assert not state.fighter_a.temporary_zone
     assert [c.name for c in state.fighter_a.discard_pile] == ["Shiko Stomp"]
 
@@ -336,12 +336,12 @@ def test_approved_henka_and_explosive_step_orb_nerfs():
 @pytest.mark.parametrize(
     "position,power_a,power_b,expected_position,expected_momentum,expected_power",
     [
-        (0, 5, 4, 1, 1, 5),    # only existing Power lead -> Push
-        (1, 4, 5, 1, 1, 5),    # Position lead -> Power, but no Power lead -> no Push
-        (1, 5, 4, 2, 1, 6),    # Position lead -> Power, then Power lead -> Push
-        (0, 4, 5, 0, 1, 4),    # no lead -> Momentum only
-        (-1, 4, 5, -1, 1, 4), # no Position lead -> no Power or Push
-        (1, 4, 4, 1, 1, 5),    # Power gained from Position cannot unlock Push
+        (0, 5, 4, 1, 0, 5),    # only existing Power lead -> Push
+        (1, 4, 5, 1, 0, 5),    # Position lead -> Power, but no Power lead -> no Push
+        (1, 5, 4, 2, 0, 6),    # Position lead -> Power, then Power lead -> Push
+        (0, 4, 5, 0, 0, 4),    # no lead -> no reward
+        (-1, 4, 5, -1, 0, 4), # no Position lead -> no Power or Push
+        (1, 4, 4, 1, 0, 5),    # Power gained from Position cannot unlock Push
     ],
 )
 def test_shiko_stomp_independent_pre_play_conditions(
