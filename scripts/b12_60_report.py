@@ -140,10 +140,14 @@ def main():
                         mode, card_name, "top_deck",
                         "selected" if f["top_deck"] == card_name else "not_selected",
                     ), won)
-                    add(role_comparisons, (
-                        mode, card_name, "exchange_play",
-                        "played" if card_name in plays_by_name else "not_played",
-                    ), won)
+                    play_cohort = "played" if card_name in plays_by_name else "not_played"
+                    add(role_comparisons, (mode, card_name, "exchange_play", play_cohort), won)
+                    # Name-level conditional cohorts: exclude the entire wrestler-bout
+                    # for this card if its name was assigned the specified opening role.
+                    if f["prepared_tachiai"] != card_name:
+                        add(role_comparisons, (mode, card_name, "exchange_play_non_tachiai", play_cohort), won)
+                    if f["top_deck"] != card_name:
+                        add(role_comparisons, (mode, card_name, "exchange_play_non_top_deck", play_cohort), won)
                 play_origin_pairs = {(event["card"], event["origin"]) for event in f["plays"]}
                 for card_name in set(f["deck"]):
                     group = "played" if card_name in plays_by_name else "unplayed"
@@ -263,6 +267,30 @@ def main():
                     raise SystemExit(
                         f"Comparison denominator mismatch: {report_mode}/{card_name}/{metric}"
                     )
+            for metric, opening_role in (
+                ("exchange_play_non_tachiai", "prepared_tachiai"),
+                ("exchange_play_non_top_deck", "top_deck"),
+            ):
+                parts = []
+                for category in ("played", "not_played"):
+                    t = {
+                        key: sum(role_comparisons[(m, card_name, metric, category)][key]
+                                 for m in modes)
+                        for key in ("wins", "bouts")
+                    }
+                    parts.append(t)
+                    comparisons.append((metric, category, t))
+                    overall = next(t for met, cat, t in comparisons
+                                   if met == "exchange_play" and cat == category)
+                    if any(t[key] > overall[key] for key in ("wins", "bouts")) or (
+                        t["bouts"] - t["wins"] > overall["bouts"] - overall["wins"]
+                    ):
+                        raise SystemExit(f"Conditional cohort not a subset: {report_mode}/{card_name}/{metric}/{category}")
+                expected = next(t for met, cat, t in comparisons
+                                if met == opening_role and cat == "not_selected")
+                if any(sum(t[key] for t in parts) != expected[key]
+                       for key in ("wins", "bouts")):
+                    raise SystemExit(f"Conditional denominator mismatch: {report_mode}/{card_name}/{metric}")
             for metric, category, counts in comparisons:
                 compare_rows.append(scored_row(
                     {"mode": report_mode, "card": card_name,
@@ -274,6 +302,41 @@ def main():
          "win_rate_percent", "low_sample_n_lt_30"],
         compare_rows,
     )
+    # One row per card and mode with all six deltas and exact cohort counts.
+    # Use unrounded rates for the difference; undefined comparisons stay blank.
+    delta_specs = (
+        ("inclusion", "deck_inclusion", "included", "not_included"),
+        ("played", "exchange_play", "played", "not_played"),
+        ("tachiai", "prepared_tachiai", "selected", "not_selected"),
+        ("top_deck", "top_deck", "selected", "not_selected"),
+        ("non_tachiai_played", "exchange_play_non_tachiai", "played", "not_played"),
+        ("non_top_deck_played", "exchange_play_non_top_deck", "played", "not_played"),
+    )
+    indexed = {(r["mode"], r["card"], r["comparison"], r["cohort"]): r
+               for r in compare_rows}
+    delta_rows = []
+    delta_fields = ["mode", "card"]
+    for label, _, _, _ in delta_specs:
+        delta_fields.extend(f"{label}_{suffix}" for suffix in (
+            "positive_wins", "positive_bouts", "positive_wr_percent",
+            "negative_wins", "negative_bouts", "negative_wr_percent",
+            "delta_pp", "low_sample"))
+    for mode, card in sorted({(r["mode"], r["card"]) for r in compare_rows}):
+        row = {"mode": mode, "card": card}
+        for label, metric, positive, negative in delta_specs:
+            a = indexed[(mode, card, metric, positive)]
+            b = indexed[(mode, card, metric, negative)]
+            for prefix, t in (("positive", a), ("negative", b)):
+                row[f"{label}_{prefix}_wins"] = t["wins"]
+                row[f"{label}_{prefix}_bouts"] = t["bouts"]
+                row[f"{label}_{prefix}_wr_percent"] = t["win_rate_percent"]
+            row[f"{label}_delta_pp"] = (
+                round(100 * (a["wins"] / a["bouts"] - b["wins"] / b["bouts"]), 3)
+                if a["bouts"] and b["bouts"] else ""
+            )
+            row[f"{label}_low_sample"] = min(a["bouts"], b["bouts"]) < 30
+        delta_rows.append(row)
+    write_csv(output / "card_six_deltas.csv", delta_fields, delta_rows)
     dump_store("starting_kimarite_performance.csv", ["mode", "framework", "kimarite"], starting_kim)
     dump_store("card_origin_play_rates.csv", ["mode", "framework", "card", "origin"], deck_kim)
 
