@@ -61,3 +61,6 @@
 
 ## Owner-approved Fumikomi review
 - Exchange: gain 1 Momentum, then gain 1 Push only if not Exhausted (discard count below existing 7-card threshold). Remove milling; interpreted as both Tachiai and Exchange. Retain Tachiai Spirit-win +1 Push and 0/0/2 orbs. Existing conditional Exchange implementation verified; mill removal 519b305 / 0589f7e, inspector and terminal 170d3e1 / a27bdb7, regression tests 70923c5 / 16710a8 / b5c6b4f. CI pending. Preserve 70,800-bout pre-nerf results; no new large batch yet.
+
+## Owner-approved Denshamichi review
+- Option A: remove delayed +1 Momentum; retain immediate +1 Push, Temporary next own turn +1 Push, and disruption granting opponent Okuridashi and reorienting Position toward opponent. Orbs 1/0/2 unchanged, Tachiai printed only. Engine 0426a5c, inspector f3c614c; updated mirrored survival regression and retained disruption tests. CI pending; preserve 70,800-bout pre-change evidence. No new batch yet.
