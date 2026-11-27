@@ -64,3 +64,6 @@
 
 ## Owner-approved Denshamichi review
 - Option A: remove delayed +1 Momentum; retain immediate +1 Push, Temporary next own turn +1 Push, and disruption granting opponent Okuridashi and reorienting Position toward opponent. Orbs 1/0/2 unchanged, Tachiai printed only. Engine 0426a5c, inspector f3c614c; updated mirrored survival regression and retained disruption tests. CI pending; preserve 70,800-bout pre-change evidence. No new batch yet.
+
+## Owner-approved Nokotta! review
+- Exchange: if relative Position is negative, gain 2 Push; otherwise draw 1 card (no Push). Retain printed orbs 1/0/2 and Tachiai printed only. Engine fc25539, inspector 13cb672; mirrored regression added for negative, neutral, positive and edge positions. CI pending; retain pre-change 70,800-bout results. No other changes.
