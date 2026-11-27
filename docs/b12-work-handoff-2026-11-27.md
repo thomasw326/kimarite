@@ -58,3 +58,6 @@
 
 ## Owner-approved Tsuppari review
 - Supersedes earlier retain decision: Exchange mill 2 instead of 1, with all other effects/orbs unchanged. Engine 4dce79a, inspector 993c70c, regression 254f431, terminal descriptions (also Tsukitaoshi) 0e6b951. CI pending; preserve existing 70,800-bout evidence as pre-nerf. Continue Fumikomi review before further simulation.
+
+## Owner-approved Fumikomi review
+- Exchange: gain 1 Momentum, then gain 1 Push only if not Exhausted (discard count below existing 7-card threshold). Remove milling; interpreted as both Tachiai and Exchange. Retain Tachiai Spirit-win +1 Push and 0/0/2 orbs. Existing conditional Exchange implementation verified; mill removal 519b305 / 0589f7e, inspector and terminal 170d3e1 / a27bdb7, regression tests 70923c5 / 16710a8 / b5c6b4f. CI pending. Preserve 70,800-bout pre-nerf results; no new large batch yet.
