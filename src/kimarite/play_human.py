@@ -277,7 +277,7 @@ CARD_LIBRARY_TEXT = {
   },
   "explosive step — fumikomi": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai: If you win Spirit, gain 1 Push. Exchange: Gain 1 Momentum; if your Momentum was 0 or less before play, gain 1 Push. Mill 2 in both phases.",
+    "effect": "Tachiai: If you win Spirit, gain 1 Push. Mill 2. Exchange: Gain 1 Momentum. If not Exhausted (fewer than 7 discards), gain 1 Push. Mill 3.",
     "notes": ""
   },
   "shitatenage": {
