@@ -84,3 +84,10 @@ All 60 use the pre-existing 15 V5 style AI personalities in four-framework block
 
 ## Change ledger
 27 November 2026: static 60-framework review, with no deck alterations and no simulation-based approval.
+## Exact CSV reconciliation and gameplay audit addendum — 27 November 2026
+- Downloaded diagnostic artifact 15211795813 from run 46023449322 and exported the current card-audit tab as CSV.
+- Compared 928 displayed rate/count cells, 347 delta cells, and 174 finish cells against source integer metrics: **zero mismatches in 1,449 checks**.
+- “Other finishes” includes deck and generated origins: Okuridashi 300; Okuritaoshi 23; Yorikiri 203 deck + 28 generated = 231.
+- Win rates span 26.441% (framework 33) to 66.610% in the pre-seat-rule/pre-Salt-order run. Not a basis for a mechanical buff or nerf.
+- Salt Throw ordering correction: 09aa151. New terminal ringout regression: 0d3d173. Post-fix CI remains to be verified independently.
+- Separate evidence-driven per-framework report was generated from source CSV, including low-activation duplicate cards, AI use and starting Kimarite outcomes.
