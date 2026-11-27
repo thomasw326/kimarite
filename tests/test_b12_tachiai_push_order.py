@@ -193,8 +193,9 @@ def test_fumikomi_tachiai_retains_bonus_without_milling():
 
 @pytest.mark.parametrize("hold_side", [Side.A, Side.B])
 @pytest.mark.parametrize("spirit", [-20, -4, 0, 4, 20])
-def test_hold_position_neutralizes_both_directions_and_opening_victories(hold_side, spirit):
-    a_name, b_name = ("Hold Position", "Shove") if hold_side is Side.A else ("Shove", "Hold Position")
+@pytest.mark.parametrize("defensive_card", ["Hold Position", "Immovable"])
+def test_defensive_card_neutralizes_both_directions_and_opening_victories(hold_side, spirit, defensive_card):
+    a_name, b_name = (defensive_card, "Shove") if hold_side is Side.A else ("Shove", defensive_card)
     state, comp = setup(a_power=0, a_spirit=max(0, spirit), a_prepared=a_name,
                         b_power=0, b_spirit=max(0, -spirit), b_prepared=b_name)
     before = state.fighter(hold_side).power
@@ -203,7 +204,7 @@ def test_hold_position_neutralizes_both_directions_and_opening_victories(hold_si
     assert state.winner is None
     assert state.fighter(hold_side).power == before + 2
     assert not state.fighter(hold_side).temporary_zone
-    assert state.fighter(hold_side).draw_pile[-1].name == "Hold Position"
+    assert state.fighter(hold_side).draw_pile[-1].name == defensive_card
 
 
 def test_hold_position_preserves_nonmovement_tachiai_effects():
@@ -215,8 +216,10 @@ def test_hold_position_preserves_nonmovement_tachiai_effects():
     assert state.winner is None
 
 
-def test_immovable_does_not_neutralize_all_opening_movement():
-    state, comp = setup(a_power=0, a_spirit=7, a_prepared="Immovable")
+def test_both_defensive_cards_grant_power_and_neutralize_opening():
+    state, comp = setup(a_power=0, a_spirit=7, a_prepared="Immovable", b_prepared="Hold Position")
+    before = (state.fighter_a.power, state.fighter_b.power)
     resolve_prepared_tachiai(state, comp)
-    assert state.position == 3
+    assert state.position == 0
     assert state.winner is None
+    assert (state.fighter_a.power, state.fighter_b.power) == (before[0] + 2, before[1] + 2)
