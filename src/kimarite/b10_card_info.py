@@ -30,7 +30,7 @@ CARD_TEXT = {
     "Sonkyo": {"timing":"Exchange / Tachiai","effect":"Exchange: enter Temporary Zone to prevent one negative effect and gain 1 additional Play; persists until used instead of expiring each turn. Tachiai: enter your Temporary Zone to prevent one negative effect.","status":"verified"},
     "Renzoku": {"timing":"Exchange / Tachiai","effect":"Exchange: for the remainder of this turn, each card you draw grants 1 Play. Does not draw a card itself.","status":"B12 design"},
     "Meguri": {"timing":"Exchange / Tachiai","effect":"Exchange: draw 2; enter permanent Temporary. Ordinary discards go to the bottom of your Draw Pile instead; if opposing Push moves your Position backwards, Exhaust Meguri.","status":"B12 design"},
-    "Nokotta!": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 2 Push if your Position is negative; otherwise gain 1 Push.","status":"B12 design"},
+    "Nokotta!": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 2 Push if your Position is negative; otherwise draw 1 card.","status":"B12 design"},
     "Hakkeyoi!": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Momentum for each later card you play this turn; enter Temporary. While it lasts, lose 1 Momentum when opponent plays their third card. Expires at start of your next turn.","status":"B12 design"},
     "Hazuoshi": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Push; reduce one opposing Grip level. If Grip was reduced, make opponent Unstable.","status":"B12 design"},
     "Inashi": {"timing":"Exchange / Tachiai","effect":"Exchange: lose 1 Momentum, return a chosen card from your discard to hand, gain 1 Power and become Stable; enter Temporary. Next turn: gain 2 Momentum and discard Inashi.","status":"B12 design"},
