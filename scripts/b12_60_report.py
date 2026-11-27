@@ -58,6 +58,7 @@ def main():
     matchup = defaultdict(tally)
     method = defaultdict(tally)
     assigned = defaultdict(tally)
+    grip_tachiai = defaultdict(tally)
     played = defaultdict(tally)
     included = defaultdict(tally)
     role_comparisons = defaultdict(tally)
@@ -118,6 +119,10 @@ def main():
                 add(matchup, (mode, frm, enemy, side), won)
                 add(method, (mode, frm, win_source, win_method), won)
                 add(assigned, (mode, frm, "prepared_tachiai", f["prepared_tachiai"]), won)
+                if {"Gain Left Grip", "Gain Right Grip"}.issubset(f["deck"]) and f["prepared_tachiai"] in {"Gain Left Grip", "Gain Right Grip"}:
+                    advantage = bout["opening"]["technique_advantage_a"] * (1 if side == "A" else -1)
+                    add(grip_tachiai, (mode, frm, f["starting_kimarite"], enemy, side,
+                                      f["prepared_tachiai"], advantage), won)
                 add(assigned, (mode, frm, "top_deck", f["top_deck"]), won)
                 add(assigned, (mode, frm, "starting_kimarite", f["starting_kimarite"]), won)
                 add(starting_kim, (mode, frm, f["starting_kimarite"]), won)
@@ -220,6 +225,9 @@ def main():
     dump_store("matchup_results.csv", ["mode", "framework", "opponent", "side"], matchup)
     dump_store("victory_methods.csv", ["mode", "framework", "source", "method"], method)
     dump_store("card_assignments.csv", ["mode", "framework", "role", "card"], assigned)
+    dump_store("gain_grip_matched_tachiai.csv",
+               ["mode", "framework", "starting_kimarite", "opponent_framework", "side",
+                "prepared_card", "technique_advantage"], grip_tachiai)
     dump_store("card_played_vs_unplayed.csv", ["mode", "framework", "card", "play_status"], played)
     dump_store("card_inclusion.csv", ["mode", "framework", "card", "copies"], included)
     dump_store("hand_exposure.csv", ["mode", "framework", "card", "type"], exposure)
