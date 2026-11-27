@@ -73,3 +73,7 @@
 
 ## Owner-approved Shiko Stomp review
 - Option B: remove unconditional +1 Momentum. Preserve independent pre-play Position lead -> +1 Power and Power lead -> +1 Push, 1/0/4 orbs and printed-only Tachiai. Engine f5443f5, inspector 67e83ff, updated tests 65e90ab, terminal description 7a825c9 (corrects old Sonkyo text). No Sonkyo or other mechanics changes. CI pending; preserve pre-review 70,800-bout evidence.
+
+## Approved seven-card batch — 35,400 bouts
+- Owner requested regular 35K batch after failed validation. Both 46054265088 and 46054284663 failed only tests/test_v42_approved.py::test_approved_kinematic_finishes (1114 passed); obsolete expectation allowed Tsukitaoshi at -2 Position. Corrected assertion and added neutral-position/negative-Momentum success in 86c57a3; no mechanics changed.
+- Workflow 558e37d uses 60 unchanged frameworks, 1,770 pairs, 10 mirrored repetitions, seed 20261102, 24 shards, max40 only, exactly 35,400 bouts, 1,180 per framework. Full pytest and smoke gates remain. Automatic push trigger now limited to experimental workflow file, avoiding accidental large batches during incremental reviews; manual dispatch retained. Preserve historical workflow and 70,800 baseline, update audit after verified completion.
