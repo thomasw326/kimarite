@@ -178,3 +178,14 @@ def test_power_bonus_of_one_does_not_add_a_block_off_threshold():
     state.fighter_b.power += 1  # Power +1 -> +2: remains one block.
     assert apply_tachiai_power_push(state, comp) == (Side.A, 2)
     assert state.position == 2
+
+
+def test_fumikomi_tachiai_retains_bonus_without_milling():
+    state, comp = setup(a_power=0, a_spirit=1, a_prepared="Explosive Step — Fumikomi")
+    draw = [Card(99100 + i, f"Draw {i}") for i in range(4)]
+    state.fighter_a.draw_pile = list(draw)
+    resolve_prepared_tachiai(state, comp)
+    assert state.position == 2
+    assert state.fighter_a.draw_pile[:4] == draw
+    assert not state.fighter_a.discard_pile
+    assert state.winner is None
