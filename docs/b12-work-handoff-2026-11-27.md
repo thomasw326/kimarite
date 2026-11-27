@@ -38,3 +38,9 @@
 - Historic 60-Framework Reconciliation tab still includes older Renzoku suggestions; retain as superseded history, not the current authoritative deck source.
 - No deck or approved mechanics alterations made beyond Salt Throw sequencing to match previously approved wording.
 - Release gate: confirm post-change CI; ensure experimental workflow does not contaminate release settings; verify deployment parity before any merge. Next balance test must include seat selection and Salt Throw ordering and preserve old snapshot.
+
+## Workflow isolation confirmation
+- Restored .github/workflows/b12-60-framework-big-test.yml to the *exact* main-branch blob f125efd335806a5afaacac742b3296504e046dbf.
+- Moved experimental 17,700-max40 workflow to .github/workflows/b12-experimental-next-card-review.yml (commit 934f259) with its own branch/path trigger.
+- Main-to-experiment diff now contains only the **new** isolated experimental workflow, not a modification of the historical B12 comparison workflow.
+- Existing efb1328 full CI/smoke success does **not** cover later Salt Throw order or the new test. No merged release or verified Render deployment as of this checkpoint.
