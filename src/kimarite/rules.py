@@ -10,24 +10,6 @@ POSITION_MIN = -4
 POSITION_MAX = 4
 
 
-def _cap_for(side: Side) -> int:
-    return TRACK_MAX if side is Side.A else TRACK_MIN
-
-
-def _distance_past_cap(value: int) -> int:
-    if value > TRACK_MAX:
-        return value - TRACK_MAX
-    if value < TRACK_MIN:
-        return TRACK_MIN - value
-    return 0
-
-
-def _track_at_favorable_cap(state: BoutState, side: Side, kind: str) -> bool:
-    # Momentum caps at ±3, while B11 Position extends safely to ±4.
-    cap = (TRACK_MAX if kind == "momentum" else POSITION_MAX) * state.sign(side)
-    return (state.momentum if kind == "momentum" else state.position) == cap
-
-
 def _has_temporary(state: BoutState, side: Side, card_name: str) -> bool:
     return any(
         instance.card.name == card_name
@@ -53,36 +35,15 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
         state.win_source = "ringout"
         state.declare_winner(side, "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi")
         return
-    if kind == "push":
-        excess = 0
-        clamped = max(POSITION_MIN, min(POSITION_MAX, target))
-    else:
-        excess = _distance_past_cap(target)
-        clamped = max(TRACK_MIN, min(TRACK_MAX, target))
-
     if kind == "momentum":
-        state.momentum = clamped
+        # Approved B12 rule: cap Momentum; excess is lost, never Push.
+        state.momentum = max(TRACK_MIN, min(TRACK_MAX, target))
         state.fighter(side).gained_momentum_this_turn = True
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Momentum.")
-        next_kind = "push"
     else:
-        state.position = clamped
+        state.position = max(POSITION_MIN, min(POSITION_MAX, target))
         state.fighter(side).gained_push_this_turn = True
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Push.")
-        next_kind = "momentum"
-
-    if excess == 0:
-        return
-
-    # Overflow converts 1:1. If the destination track is already capped for
-    # the same wrestler, conversion would loop forever; that is an immediate win.
-    if _track_at_favorable_cap(state, side, next_kind):
-        method = "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi"
-        state.win_source = "ringout"
-        state.declare_winner(side, method)
-        return
-
-    _resolve_shared_track_gain(state, side, excess, next_kind)
 
 
 def discard_normally(state: BoutState, side: Side, card) -> None:
