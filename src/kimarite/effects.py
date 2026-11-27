@@ -910,7 +910,10 @@ def _meguri(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 
 
 def _nokotta(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    gain_push(state, side, 2 if state.position * state.sign(side) < 0 else 1)
+    if state.position * state.sign(side) < 0:
+        gain_push(state, side, 2)
+    else:
+        draw_one(state, side)
 
 
 def _hakkeyoi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
