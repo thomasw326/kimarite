@@ -50,3 +50,8 @@
 - Engine e29f239 and regression tests 4736b55; tests cover both seats, edge, Momentum loss, defensive Temporaries and Side-by-Side. Full CI required before large batch.
 - Next max40 run: 60 unchanged frameworks, 1,770 pairings, 20 mirrored repetitions, 70,800 bouts, seed 20261102. Preserve previous artifact 15211795813 and sheet snapshots. New run also includes previously approved Salt Throw order and Grip seat-selection changes, so comparison against 17,700 results is not a pure overflow-only experiment. Compare first five repetitions separately if exact paired attribution is needed, and acknowledge other changes.
 - Do not replace historical results or update current card/wrestler success tables until complete artifact coverage and zero simulation failures verified. Analyze inclusion, actual Exchange plays, prepared Tachiai, top-deck, Kimarite finishing origin, ringout share, framework/matchup changes and card contributions; no further nerfs without owner approval.
+
+## Owner-approved Tsukitaoshi review
+- Tsukitaoshi now requires relative Position >= 0 and at least four cards played this turn. Orbs and Exchange unchanged. Engine f8f158a; inspector 70c14ed; victory checklist dc11649; AI progress predicate 2581072; mirrored regression 96fb26c.
+- Retain Tsuppari, Tsukidashi and Oshidashi unchanged at this stage. Owner notes ringout-heavy winning frameworks can inflate inclusion success while competing with Kimarite finish opportunities. Analyze conditional finishing opportunities, not just raw deck win rates.
+- Preserve 70,800-bout no-overflow results (run 46037904715, artifact 15220130235) as pre-Tsukitaoshi-change evidence. No new large batch solely for this change; CI pending.
