@@ -67,7 +67,7 @@ def test_power_initialization_and_buffs_are_not_double_counted():
     assert state.position == 0
 
 
-def test_hold_position_tachiai_power_buff_blocks_card_push():
+def test_hold_position_tachiai_power_buff_and_neutral_position():
     state, comp = setup(a_power=0, a_spirit=0,
                         a_prepared="Hold Position",
                         b_power=1, b_spirit=0, b_prepared="Shove")
@@ -188,4 +188,35 @@ def test_fumikomi_tachiai_retains_bonus_without_milling():
     assert state.position == 2
     assert state.fighter_a.draw_pile[:4] == draw
     assert not state.fighter_a.discard_pile
+    assert state.winner is None
+
+
+@pytest.mark.parametrize("hold_side", [Side.A, Side.B])
+@pytest.mark.parametrize("spirit", [-20, -4, 0, 4, 20])
+def test_hold_position_neutralizes_both_directions_and_opening_victories(hold_side, spirit):
+    a_name, b_name = ("Hold Position", "Shove") if hold_side is Side.A else ("Shove", "Hold Position")
+    state, comp = setup(a_power=0, a_spirit=max(0, spirit), a_prepared=a_name,
+                        b_power=0, b_spirit=max(0, -spirit), b_prepared=b_name)
+    before = state.fighter(hold_side).power
+    resolve_prepared_tachiai(state, comp)
+    assert state.position == 0
+    assert state.winner is None
+    assert state.fighter(hold_side).power == before + 2
+    assert not state.fighter(hold_side).temporary_zone
+    assert state.fighter(hold_side).draw_pile[-1].name == "Hold Position"
+
+
+def test_hold_position_preserves_nonmovement_tachiai_effects():
+    state, comp = setup(a_power=0, a_spirit=0, a_prepared="Hold Position",
+                        b_power=0, b_spirit=9, b_prepared="Get Underneath")
+    resolve_prepared_tachiai(state, comp)
+    assert state.position == 0
+    assert state.momentum == -1
+    assert state.winner is None
+
+
+def test_immovable_does_not_neutralize_all_opening_movement():
+    state, comp = setup(a_power=0, a_spirit=7, a_prepared="Immovable")
+    resolve_prepared_tachiai(state, comp)
+    assert state.position == 3
     assert state.winner is None
