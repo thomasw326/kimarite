@@ -7,6 +7,7 @@ from .models import BoutState, Card, GripState, Side, Stat
 from .prevention import prevent_negative_effect
 from .rules import (
     effective_total_grip,
+    automatic_grip_hand,
     discard_normally,
     establish_grip,
     gain_flexible_grip,
@@ -491,7 +492,7 @@ def _attempt_two_handed(
     fighter = state.fighter(side)
     chosen = context.choice("grip")
     if chosen not in {"left", "right"}:
-        chosen = "left" if fighter.left_grip <= fighter.right_grip else "right"
+        chosen = automatic_grip_hand(state, side)
     establish_grip(state, side, chosen)
     add_temporary(state, side, card, phase="exchange")
 
@@ -842,7 +843,7 @@ def _maesabaki(state: BoutState, side: Side, card: Card, context: EffectContext)
     if opponent.total_grip:
         if not prevent_negative_effect(state, opponent_side, source=card.name, description="remove one hand's Grip"):
             before = opponent.total_grip
-            reduce_grip(state, opponent_side, amount=2, hand="left" if opponent.left_grip > opponent.right_grip or (opponent.left_grip == opponent.right_grip and side is Side.A) else "right")
+            reduce_grip(state, opponent_side, amount=2, hand=automatic_grip_hand(state, side, reduce=True))
             grip_removed = opponent.total_grip < before
     if opponent.temporary_zone:
         target = _choose_opponent_temporary(state, side, card, context)

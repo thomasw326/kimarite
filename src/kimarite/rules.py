@@ -324,11 +324,19 @@ def effective_total_grip(
     return state.fighter(side).total_grip
 
 
+def automatic_grip_hand(state: BoutState, side: Side, *, reduce: bool = False) -> str:
+    """Choose shallower own/deeper opposing Grip; acting seat breaks ties."""
+    fighter = state.opponent(side) if reduce else state.fighter(side)
+    if fighter.left_grip == fighter.right_grip:
+        return "left" if side is Side.A else "right"
+    if reduce:
+        return "left" if fighter.left_grip > fighter.right_grip else "right"
+    return "left" if fighter.left_grip < fighter.right_grip else "right"
+
+
 def gain_flexible_grip(state: BoutState, side: Side) -> None:
-    """Improve whichever Grip is shallower, left on ties, up to Deep."""
-    fighter = state.fighter(side)
-    hand = "left" if fighter.left_grip <= fighter.right_grip else "right"
-    improve_grip(state, side, hand)
+    """Improve whichever Grip is shallower, acting seat on ties, up to Deep."""
+    improve_grip(state, side, automatic_grip_hand(state, side))
 
 
 def establish_grip(state: BoutState, side: Side, hand: str) -> None:
@@ -378,12 +386,7 @@ def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None 
         else:
             # Deterministic generic reduction: reduce the deeper grip first,
             # then attacker's seat A chooses Left, seat B Right on ties.
-            attr = (
-                "left_grip"
-                if (int(fighter.left_grip) > int(fighter.right_grip) or
-                    (fighter.left_grip == fighter.right_grip and state.opponent_side(side) is Side.A))
-                else "right_grip"
-            )
+            attr = _grip_attr(automatic_grip_hand(state, state.opponent_side(side), reduce=True))
         current = int(getattr(fighter, attr))
         if current > 0:
             next_grip = GripState(current - 1)
