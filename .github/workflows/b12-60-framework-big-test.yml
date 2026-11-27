@@ -1,40 +1,6 @@
 name: B12 anti-Grip experiment — 17700 max40 bouts
 
 on:
-  push:
-    branches:
-      - experiment/b12-grip-counter-max40
-    paths:
-      - 'src/kimarite/rules.py'
-      - 'src/kimarite/legality.py'
-      - 'tests/test_b12_anti_grip_experiment.py'
-      - 'data/b12_60_framework_decks.json'
-      - 'scripts/b12_60_big_test.py'
-      - 'scripts/b12_60_report.py'
-      - 'src/kimarite/temporary.py'
-      - 'tests/test_salt_power_water.py'
-      - 'tests/test_orb_colours.py'
-      - 'tests/test_b12_60_big_test.py'
-      - 'src/kimarite/tachiai.py'
-      - 'src/kimarite/tachiai_effects.py'
-      - 'src/kimarite/kimarite.py'
-      - 'src/kimarite/b11_victory_checks.py'
-      - 'src/kimarite/kimarite_effects.py'
-      - 'src/kimarite/catalog.py'
-      - 'src/kimarite/effects.py'
-      - 'tests/test_b12_card_expansion.py'
-      - 'src/kimarite/effects.py'
-      - 'src/kimarite/b10_card_info.py'
-      - 'tests/test_b12_utchari_tsukiotoshi_thresholds.py'
-      - 'src/kimarite/b10_card_info.py'
-      - 'tests/test_v5_tsuki_kimarite_exchange.py'
-      - 'tests/test_b12_position_ring_oshidashi.py'
-      - 'tests/test_b12_tachiai_push_order.py'
-      - '.github/workflows/b12-60-framework-big-test.yml'
-      - 'tests/test_b11_hikiotoshi_exchange_choice.py'
-      - 'tests/test_b11_recent_kimarite_fixes.py'
-      - 'tests/test_b9_cards.py'
-      - 'tests/test_v51_new_kimarite.py'
   workflow_dispatch:
 
 permissions:

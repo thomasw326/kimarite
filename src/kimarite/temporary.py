@@ -168,6 +168,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             ):
                 reduce_grip(state, opponent_side, amount=2, hand="left")
                 reduce_grip(state, opponent_side, amount=2, hand="right")
+            gain_momentum(state, side, 1)
         elif name == "Ottsuke":
             pass  # Grip prevention expires now.
         elif name == "Morozashi":
