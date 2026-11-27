@@ -104,30 +104,22 @@ def test_belt_slap_uses_recorded_spirit_advantage():
     assert bout.momentum == 1
 
 
-def test_ottsuke_removes_grip_temporary_and_rewards_momentum_only():
-    from kimarite.temporary import add_temporary
-
+def test_ottsuke_reduces_grip_and_prevents_new_grip():
+    from kimarite.rules import improve_grip
+    from kimarite.temporary import add_temporary, resolve_start_of_turn_temporaries
     ottsuke = card_by_name("Ottsuke")
-    morozashi = card_by_name("Morozashi")
     bout = bout_with_hand([ottsuke])
-    bout.fighter_b.left_grip = GripState.GRIP
-    add_temporary(bout, Side.B, morozashi, phase="exchange")
-
-    play_card(
-        bout,
-        Side.A,
-        ottsuke,
-        context=EffectContext(
-            choices={
-                "mode": "remove_card",
-                "card_target": 0,
-            }
-        ),
-    )
-
-    assert not bout.fighter_b.temporary_zone
+    bout.fighter_b.left_grip = GripState.DEEP
+    add_temporary(bout, Side.B, card_by_name("Hold Position"), phase="exchange")
+    play_card(bout, Side.A, ottsuke)
+    assert bout.fighter_b.left_grip is GripState.GRIP
+    assert len(bout.fighter_b.temporary_zone) == 1
     assert bout.momentum == 1
-    assert bout.position == 0
+    improve_grip(bout, Side.B, "right")
+    assert bout.fighter_b.right_grip is GripState.NONE
+    resolve_start_of_turn_temporaries(bout, Side.A)
+    improve_grip(bout, Side.B, "right")
+    assert bout.fighter_b.right_grip is GripState.GRIP
 
 
 def test_draw_effect_with_empty_draw_pile_is_immediate_exhaustion_loss():
@@ -143,23 +135,12 @@ def test_draw_effect_with_empty_draw_pile_is_immediate_exhaustion_loss():
     assert any("attempts to draw" in entry for entry in bout.event_log)
 
 
-def test_ottsuke_records_kimarite_removal():
+def test_ottsuke_preserves_opposing_kimarite():
     ottsuke = card_by_name("Ottsuke")
     tsuridashi = card_by_name("Tsuridashi", prefer_starting_kimarite=True)
     bout = bout_with_hand([ottsuke])
     bout.fighter_b.kimarite_zone = [tsuridashi]
-
-    play_card(
-        bout,
-        Side.A,
-        ottsuke,
-        context=EffectContext(
-            choices={
-                "mode": "remove_card",
-                "card_target": 0,
-            }
-        ),
-    )
-
-    assert bout.kimarite_removals == [(Side.A, "Tsuridashi")]
-    assert bout.fighter_b.kimarite_zone == []
+    play_card(bout, Side.A, ottsuke)
+    assert bout.kimarite_removals == []
+    assert bout.fighter_b.kimarite_zone == [tsuridashi]
+    assert bout.momentum == 1

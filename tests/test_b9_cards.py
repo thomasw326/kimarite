@@ -48,7 +48,7 @@ def test_new_cards_registered_with_orbs():
         "Morotezuki": (3, 0, 0),
         "Kachiage": (3, 0, 0),
         "Nekodamashi": (1, 1, 2),
-        "Maesabaki": (0, 2, 1),
+        "Maesabaki": (0, 2, 2),
         "Deashi": (2, 0, 1),
         "Butsukari": (2, 0, 1),
         "Denshamichi": (1, 0, 2),
@@ -146,16 +146,17 @@ def test_henka_first_incoming_push_prevented():
     assert bout.position == -1
 
 
-def test_kannuki_survives_to_reduce_grips_and_unstable():
+def test_kannuki_survives_to_remove_grips_and_gain_momentum():
     from kimarite.models import GripState
     bout = state()
     bout.fighter_b.left_grip = GripState.DEEP
     bout.fighter_b.right_grip = GripState.GRIP
     effect(bout, "Kannuki")
     resolve_start_of_turn_temporaries(bout, Side.A)
-    assert bout.fighter_b.left_grip is GripState.GRIP
+    assert bout.fighter_b.left_grip is GripState.NONE
     assert bout.fighter_b.right_grip is GripState.NONE
-    assert bout.fighter_b.unstable
+    assert not bout.fighter_b.unstable
+    assert bout.momentum == 1
 
 
 def test_deashi_zero_one_or_two_independent_push():

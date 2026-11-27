@@ -14,6 +14,7 @@ from kimarite.style_builds_v5 import build_style
 
 
 LIVE_ORB_OVERRIDES = {
+    "Ottsuke": (1, 1, 1),
     "Deashi": (2, 0, 1),  # B12-approved Spirit reduction
     "Read the Move": (0, 1, 1),
     "Henka": (0, 2, 0),

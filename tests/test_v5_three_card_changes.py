@@ -28,11 +28,12 @@ def test_headlong_requires_kimarite_to_play_and_sacrifice():
     assert state.momentum == 1
 
 
-def test_ottsuke_can_draw_without_target():
+def test_ottsuke_gains_momentum_without_target():
     state, card = state_for("Ottsuke")
-    state.fighter_b.kimarite_zone.clear()
-    resolve_exchange_effect(state, Side.A, card, EffectContext(choices={"mode": "draw"}))
-    assert len(state.fighter_a.hand) == 2
+    resolve_exchange_effect(state, Side.A, card, EffectContext())
+    assert len(state.fighter_a.hand) == 1
+    assert state.momentum == 1
+    assert any(t.card.name == "Ottsuke" for t in state.fighter_a.temporary_zone)
 
 
 def test_abisetaoshi_current_exchange_and_win_threshold():
