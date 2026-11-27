@@ -72,7 +72,7 @@ CARD_LIBRARY_TEXT = {
   },
   "attempt two-handed grip": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: Establish 1 chosen Grip at Level 1 (without reducing an existing higher Grip). Temporary: Remains until the beginning of your next turn. If it survives, establish both Left and Right Grip at Level 1 (without reducing existing higher Grips). If removed or prevented before then, lose 1 Momentum.",
+    "effect": "Exchange: Establish either Grip. Temporary: Establish both Grips. If disrupted, opponent gains 1 Momentum.",
     "notes": ""
   },
   "attempt deep outside grip": {
