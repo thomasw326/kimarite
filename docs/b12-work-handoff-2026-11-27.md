@@ -82,3 +82,12 @@
 - LOCKED / good to go: Tsukitaoshi, Fumikomi, Denshamichi, Nokotta!, Belt Slap, Shiko Stomp; previously approved grip-removal cards Hazuoshi, Maesabaki, Kannuki, Ottsuke also locked.
 - OPEN: Tsuppari retains implemented mill 2 pending further review; no rollback or additional mechanics change.
 - Run 46054703948 success, all 24 shards and aggregation passed, artifact 15225644265, tested 558e37d. Master catalogue and current audit decision columns updated; audit numerical evidence remains 70,800 pre-nerf baseline until separate reconciliation. No merge or deployment authorized.
+
+
+## Latest approved changes and next 35,400-bout batch
+- Previous six-delta run 46070028986 completed successfully at 1610804; artifact 15232074693. Preserve its results as pre-neutral-Tachiai evidence.
+- Hold Position and Immovable: Tachiai gain 2 Power and Exchange starts at Position 0, regardless of either side's opening Push. Neutralization precedes ringout and Shove opening victory checks; nonmovement effects resolve normally. Both cards retain Exchange effects and orbs. Engine cc6809c / 6176795; regression 59cda4f.
+- Attempt Two-Handed Grip LOCKED: "Exchange: Establish either Grip. Temporary: Establish both Grips. If disrupted, opponent gains 1 Momentum." Existing mechanics unchanged. Establish glossary preserves existing higher Grip. Inspector ad5eda1 / terminal aee900b; sheet lock verified.
+- Gain Left/Right Grip direct engine effects are symmetric, but framework composition and starting Kimarite differ. No mechanics changes or new lock. New report gain_grip_matched_tachiai.csv (f56ec0c) records wins and bouts by framework, starting Kimarite, opponent framework, seat, prepared card, and relative Technique advantage among frameworks containing both. Sparse strata remain possible; association not causation.
+- Latest full CI 46082728303, canonical smoke 46082728285, balance smoke 46082728284 successful at aee900b. New reporter gated by full tests and smoke before 24-shard run.
+- New run uses same 60 max40 decks, seed 20261102, ten mirrored repetitions; 35,400 bouts. No merge/deploy. Preserve previous results and sync sheet only after verified completion.
