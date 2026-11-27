@@ -262,6 +262,9 @@ def lose_position(state: BoutState, side: Side, amount: int, *, source: str = "u
 def make_unstable(state: BoutState, side: Side) -> None:
     """Apply the B9 Unstable condition until this fighter finishes its next turn."""
     fighter = state.fighter(side)
+    if _has_temporary(state, side, "Ankogata"):
+        state.log(f"Ankogata prevents {fighter.wrestler.name} from becoming Unstable.")
+        return
     fighter.unstable = True
     # Recovery follows the target's NEXT completed turn. If inflicted during
     # their own turn, do not recover at that turn's imminent end.
@@ -278,6 +281,9 @@ def gain_power(state: BoutState, side: Side, amount: int) -> None:
 
 def lose_power(state: BoutState, side: Side, amount: int) -> None:
     fighter = state.fighter(side)
+    if amount > 0 and _has_temporary(state, side, "Ankogata"):
+        state.log(f"Ankogata prevents {fighter.wrestler.name} from losing Power.")
+        return
     fighter.power -= amount
     state.log(f"{fighter.wrestler.name} loses {amount} Power.")
 

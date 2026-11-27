@@ -111,7 +111,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         name = instance.card.name
 
         # Sonkyo explicitly does not leave at the start of the owner's turn.
-        if name in {"Sonkyo", "Meguri", "Chiri-chozu", "Shikiri"}:
+        if name in {"Sonkyo", "Meguri", "Chiri-chozu", "Shikiri", "Ankogata"}:
             continue
 
         if name == "Attempt Two-Handed Grip":

@@ -888,15 +888,7 @@ def _spin_away(state: BoutState, side: Side, card: Card, context: EffectContext)
 
 def _ankogata(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_power(state, side, 1)
-    state.fighter(side).unstable = False
-    if state.fighter(side).power >= 6:
-        opponent_side = state.opponent_side(side)
-        opponent = state.opponent(side)
-        for hand in ("left", "right"):
-            if state.fighter(side).power >= 9:
-                reduce_grip(state, opponent_side, amount=2, hand=hand)
-            else:
-                reduce_grip(state, opponent_side, hand=hand)
+    add_temporary(state, side, card, phase="exchange")
 
 
 # B12 expansion: ordinary cards, rituals, fatigue and delayed recoil.
@@ -1106,6 +1098,7 @@ for _name in MILL_AMOUNTS:
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
         "Sonkyo",
+        "Ankogata",
         "Meguri",
         "Hakkeyoi!",
         "Inashi",
