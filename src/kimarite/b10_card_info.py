@@ -7,7 +7,7 @@ CARD_TEXT = {
     "Maesabaki": {"timing":"Exchange / Tachiai","effect":"Exchange: Remove all Grip from one opposing hand. Disrupt one opposing Temporary. If either effect fails, draw 1.","status":"verified"},
     "Deashi": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Push if your current Power exceeds opponent's; gain another 1 Push if you won Tachiai Spirit.","status":"verified"},
     "Butsukari": {"timing":"Exchange / Tachiai","effect":"Exchange: if your Power exceeds opponent's, reduce opponent Power by 2 (subject to prevention); if relative Momentum at least +1, make opponent Unstable. Mill 1 card.","status":"verified"},
-    "Attempt Two-Handed Grip": {"timing":"Exchange / Tachiai","effect":"Exchange: Establish either Left or Right Grip at level 1. Temporary (start of your next turn): establish both Left and Right Grip at level 1. If disrupted, opponent gains 1 Momentum.","status":"verified"},
+    "Attempt Two-Handed Grip": {"timing":"Exchange / Tachiai","effect":"Exchange: Establish either Grip. Temporary: Establish both Grips. If disrupted, opponent gains 1 Momentum.","status":"verified"},
     "Attempt Deep Outside Grip": {"timing":"Exchange / Tachiai","effect":"Exchange: Establish Left Grip. Temporary (start of your next turn): set Left Grip to Deep. If disrupted, opponent gains 1 Momentum.","status":"verified"},
     "Attempt Deep Inside Grip": {"timing":"Exchange / Tachiai","effect":"Exchange: Establish Right Grip. Temporary (start of your next turn): set Right Grip to Deep. If disrupted, opponent gains 1 Momentum.","status":"verified"},
     "Gain Left Grip": {"timing":"Exchange / Tachiai","effect":"Tachiai: establish Left Grip if you win Technique. Exchange: improve Left Grip one level. Temporary: prevent 1 incoming Push, then discard this Temporary. If unused, it expires at the start of your next turn.","status":"verified"},
@@ -95,6 +95,7 @@ GLOSSARY = {
     "Position": "Your location relative to the opponent and the tawara. Positive values favour your side; reaching the ring-out boundary ends the bout.",
     "Momentum": "A signed measure of which wrestler is driving the exchange. Card effects and Kimarite can require relative Momentum.",
     "Power": "Your current physical strength during the bout. Some Kimarite and effects check this value.",
+    "Establish": "Set the specified Grip to level 1 if absent. Existing Grip and Deep Grip are unchanged.",
     "Grip": "Left or right belt control. Each side can be absent, established, or deep.",
     "Unstable": "A vulnerable state applied by card effects. It can affect subsequent actions and finishing conditions.",
     "Kimarite": "A victory technique placed in the Kimarite Zone. It wins when its requirements are satisfied.",
@@ -120,4 +121,6 @@ def card_info(card):
     }
     if card.name == "Power Water":
         info["glossary"] = {"Power Water Cantrips": GLOSSARY["Power Water Cantrips"]}
+    if "establish" in info["description"].lower().split():
+        info.setdefault("glossary", {})["Establish"] = GLOSSARY["Establish"]
     return info
