@@ -835,13 +835,20 @@ def _nekodamashi(state: BoutState, side: Side, card: Card, context: EffectContex
 def _maesabaki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     opponent_side = state.opponent_side(side)
     opponent = state.opponent(side)
+    grip_removed = False
+    temporary_disrupted = False
     if opponent.total_grip:
-        if not prevent_negative_effect(state, opponent_side, source=card.name, description="remove one hand\'s Grip"):
+        if not prevent_negative_effect(state, opponent_side, source=card.name, description="remove one hand's Grip"):
+            before = opponent.total_grip
             reduce_grip(state, opponent_side, amount=2, hand="left" if opponent.left_grip > opponent.right_grip or (opponent.left_grip == opponent.right_grip and side is Side.A) else "right")
+            grip_removed = opponent.total_grip < before
     if opponent.temporary_zone:
         target = _choose_opponent_temporary(state, side, card, context)
         if target is not None and not prevent_negative_effect(state, opponent_side, source=card.name, description="remove Temporary"):
             remove_temporary(state, opponent_side, target, disrupted=True)
+            temporary_disrupted = target not in opponent.temporary_zone
+    if state.winner is None and not (grip_removed and temporary_disrupted):
+        draw_one(state, side)
 
 
 def _deashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:

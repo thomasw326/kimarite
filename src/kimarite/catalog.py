@@ -77,7 +77,7 @@ B9_CARD_POOL: tuple[Card, ...] = (
     Card(12001, "Morotezuki", 3, 0, 0),
     Card(12002, "Kachiage", 3, 0, 0),
     Card(12003, "Nekodamashi", 1, 1, 2),
-    Card(12004, "Maesabaki", 0, 2, 1),
+    Card(12004, "Maesabaki", 0, 2, 2),
     Card(12005, "Deashi", 2, 0, 1),
     Card(12006, "Butsukari", 2, 0, 1),
     Card(12007, "Denshamichi", 1, 0, 2),
