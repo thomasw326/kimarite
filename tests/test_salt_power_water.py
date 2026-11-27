@@ -125,3 +125,16 @@ def test_exhaustion_at_seven_discards():
         assert bout.fighter_a.power == expected_power
         assert bout.winner is None
 
+
+
+def test_salt_throw_bonus_precedes_recycle_and_ringout_stops_followup():
+    salt = card_by_name("Salt Throw")
+    discarded = [Card(300 + i, f"Old {i}") for i in range(7)]
+    bout = make_bout(hand=[salt], discard=discarded)
+    bout.position = 4  # One Push from ringout; no Grip, so Oshidashi.
+    play_card(bout, Side.A, salt)
+    assert bout.winner is Side.A
+    assert bout.win_method == "Oshidashi"
+    assert bout.fighter_a.draw_pile == []
+    assert bout.fighter_a.discard_pile[:7] == discarded
+    assert not any("recycles the discard pile" in line for line in bout.event_log)
