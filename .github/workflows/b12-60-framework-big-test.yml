@@ -1,9 +1,9 @@
-name: B12 second-pass card-balance 35400-bout comparison
+name: B12 release balance — 35400 bouts (48 parallel shards)
 
 on:
   push:
     branches:
-      - experiment/b12-shikiri-exchange-plus-play-v1
+      - experiment/b12-release-balance-2026-11-26
     paths:
       - 'data/b12_60_framework_decks.json'
       - 'scripts/b12_60_big_test.py'
@@ -78,10 +78,10 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 24
       matrix:
         mode: [base28, max40]
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -94,7 +94,7 @@ jobs:
           --mode ${{ matrix.mode }}
           --repetitions 5
           --seed 20261102
-          --shards 12
+          --shards 24
           --shard-index ${{ matrix.shard }}
           --output-dir artifacts/b12_shard
       - uses: actions/upload-artifact@v4
