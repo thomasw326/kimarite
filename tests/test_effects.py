@@ -108,17 +108,20 @@ def test_regain_balance_recovers_negative_momentum():
     assert bout.fighter_a.power == 2
 
 
-def test_belt_slap_uses_recorded_spirit_advantage():
+def test_belt_slap_always_gains_momentum_and_push_requires_spirit_advantage():
     belt = card_by_name("Belt Slap")
-    a = wrestler("A", spirit=3, primary=Stat.SPIRIT, secondary=Stat.POWER)
-    b = wrestler("B", spirit=0)
-    bout = BoutState(FighterState(a, hand=[belt]), FighterState(b))
-    comparison = compare_tachiai(a, b)
-
-    play_card(bout, Side.A, belt, context=EffectContext(comparison=comparison))
-
-    assert bout.position == 1
-    assert bout.momentum == 1
+    for side in (Side.A, Side.B):
+        for advantage in (-3, -1, 0, 2, 3, 4):
+            own = wrestler("Owner", spirit=max(advantage, 0), primary=Stat.SPIRIT, secondary=Stat.POWER)
+            foe = wrestler("Opponent", spirit=max(-advantage, 0), primary=Stat.SPIRIT, secondary=Stat.POWER)
+            a, b = (own, foe) if side is Side.A else (foe, own)
+            bout = BoutState(FighterState(a), FighterState(b), active_side=side)
+            bout.fighter(side).hand = [belt]
+            comparison = compare_tachiai(a, b)
+            play_card(bout, side, belt, context=EffectContext(comparison=comparison))
+            assert bout.position * bout.sign(side) == (1 if advantage >= 3 else 0)
+            assert bout.momentum * bout.sign(side) == 1
+            assert bout.winner is None
 
 
 def test_ottsuke_reduces_grip_and_prevents_new_grip():
