@@ -70,3 +70,6 @@
 
 ## Owner-approved Belt Slap review
 - Option E: Exchange gain 1 Momentum, then gain 1 Push only if recorded Tachiai Spirit advantage >= 3. Keep orbs 2/0/3 and Tachiai printed only. Engine 55e05c1, inspector ffc2932, terminal d9a92af; mirrored threshold regression updated. CI pending. Preserve 70,800-bout pre-review results, no new batch yet.
+
+## Owner-approved Shiko Stomp review
+- Option B: remove unconditional +1 Momentum. Preserve independent pre-play Position lead -> +1 Power and Power lead -> +1 Push, 1/0/4 orbs and printed-only Tachiai. Engine f5443f5, inspector 67e83ff, updated tests 65e90ab, terminal description 7a825c9 (corrects old Sonkyo text). No Sonkyo or other mechanics changes. CI pending; preserve pre-review 70,800-bout evidence.
