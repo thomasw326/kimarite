@@ -87,7 +87,7 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison, cards
         return 0
 
     loser = state.opponent_side(winner)
-    protective = {"Immovable", "Sidestep", "Give Ground"}
+    protective = {"Sidestep", "Give Ground"}
     cards = [c for c in cards_by_side[loser] if c.name in protective]
     if not cards:
         return 0
@@ -98,7 +98,7 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison, cards
             state, winner, source=card.name,
             description="reduce Tachiai Push from the Spirit comparison",
         ):
-            reduction += 1 if card.name in {"Sidestep", "Give Ground"} else 2
+            reduction += 1
     return reduction
 
 
@@ -255,16 +255,16 @@ def resolve_prepared_tachiai(
 
     # Resolve prepared protection against the Spirit component first, then
     # apply the Power defense once to the net of Spirit + both card bonuses.
-    hold_position = any(
-        card.name == "Hold Position"
-        for cards in cards_by_side.values() for card in cards
-    )
-    if hold_position:
+    neutral_cards = [
+        card.name for cards in cards_by_side.values() for card in cards
+        if card.name in {"Hold Position", "Immovable"}
+    ]
+    if neutral_cards:
         # Exchange starts neutral regardless of either side's opening Push.
         # Resolve before movement can trigger a ringout or Shove victory.
         # Non-movement Tachiai effects above still resolve normally.
         state.position = 0
-        state.log("Hold Position sets the opening Position to 0.")
+        state.log(f"{' / '.join(neutral_cards)} sets the opening Position to 0.")
     else:
         reduction = _power_push_reduction(state, comparison, cards_by_side)
         apply_tachiai_power_push(
