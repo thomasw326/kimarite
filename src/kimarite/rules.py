@@ -286,6 +286,10 @@ def grip_benefits_suppressed(state: BoutState, side: Side) -> bool:
     return _has_temporary(state, state.opponent_side(side), "Kannuki")
 
 
+def grip_gain_prevented(state: BoutState, side: Side) -> bool:
+    return _has_temporary(state, state.opponent_side(side), "Ottsuke")
+
+
 def effective_total_grip(
     state: BoutState,
     side: Side,
@@ -323,15 +327,14 @@ def gain_flexible_grip(state: BoutState, side: Side) -> None:
 
 def establish_grip(state: BoutState, side: Side, hand: str) -> None:
     fighter = state.fighter(side)
-    if grip_benefits_suppressed(state, side):
+    if grip_gain_prevented(state, side):
         if not prevent_negative_effect(
             state,
             side,
-            source="Kannuki",
+            source="Ottsuke",
             description="prevent establishing Grip",
         ):
-            state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
-            state.log(f"Kannuki prevents {fighter.wrestler.name} from establishing Grip.")
+            state.log(f"Ottsuke prevents {fighter.wrestler.name} from establishing Grip.")
             return
     attr = _grip_attr(hand)
     current = getattr(fighter, attr)
@@ -342,15 +345,14 @@ def establish_grip(state: BoutState, side: Side, hand: str) -> None:
 
 def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> None:
     fighter = state.fighter(side)
-    if grip_benefits_suppressed(state, side):
+    if grip_gain_prevented(state, side):
         if not prevent_negative_effect(
             state,
             side,
-            source="Kannuki",
+            source="Ottsuke",
             description="prevent improving Grip",
         ):
-            state.fighter(state.opponent_side(side)).opponent_grip_reduced_this_turn = True
-            state.log(f"Kannuki prevents {fighter.wrestler.name} from improving Grip.")
+            state.log(f"Ottsuke prevents {fighter.wrestler.name} from improving Grip.")
             return
     attr = _grip_attr(hand)
     current = int(getattr(fighter, attr))
