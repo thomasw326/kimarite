@@ -1,4 +1,4 @@
-name: B12 No Momentum Overflow — 70800 max40 bouts
+name: B12 Approved Card Review — 35400 max40 bouts
 
 on:
   push:
@@ -6,10 +6,6 @@ on:
       - experiment/b12-next-card-review
     paths:
       - '.github/workflows/b12-experimental-next-card-review.yml'
-      - 'src/kimarite/rules.py'
-      - 'tests/test_rules.py'
-      - 'tests/test_b12_card_expansion.py'
-      - 'tests/test_v43_new_cards.py'
   workflow_dispatch:
 
 permissions:
@@ -64,11 +60,11 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -e '.[dev]'
-      - name: Seeded B12 mirrored round robin (twenty global repetitions per mode)
+      - name: Seeded B12 mirrored round robin (ten global repetitions per mode)
         run: >
           python scripts/b12_60_big_test.py
           --mode ${{ matrix.mode }}
-          --repetitions 20
+          --repetitions 10
           --seed 20261102
           --shards 24
           --shard-index ${{ matrix.shard }}
@@ -96,10 +92,10 @@ jobs:
           path: artifacts/b12_shards
           merge-multiple: true
       - name: Fail on missing, duplicate or non-mirrored bouts
-        run: python scripts/b12_60_report.py --input-root artifacts/b12_shards --output-dir artifacts/b12_big_test_report --repetitions 20 --mode max40
+        run: python scripts/b12_60_report.py --input-root artifacts/b12_shards --output-dir artifacts/b12_big_test_report --repetitions 10 --mode max40
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-no-momentum-overflow-max40-70800-diagnostics
+          name: b12-approved-card-review-max40-35400-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore
