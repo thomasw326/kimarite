@@ -8,7 +8,7 @@ from .tachiai import TachiaiComparison, TachiaiStats, apply_tachiai_power_push
 from .temporary import add_temporary
 
 
-PREPARED_TEMPORARY_TACHIAI = frozenset({"Sonkyo", "Salt Throw", "Nekodamashi", "Chiri-chozu", "Shikiri"})
+PREPARED_TEMPORARY_TACHIAI = frozenset({"Sonkyo", "Nekodamashi", "Chiri-chozu", "Shikiri"})
 REVEAL_FAMILY = frozenset({"Oshi", "Tsuki"})
 
 
@@ -184,9 +184,6 @@ def resolve_prepared_tachiai(
         elif name == "Gain Right Grip":
             if comparison.advantage_for(side, Stat.TECHNIQUE) > 0:
                 establish_grip(state, side, "right")
-
-        elif name == "Salt Throw":
-            resolve_exchange_effect(state, side, card, EffectContext(comparison=comparison))
 
         elif name == "Power Water":
             resolve_exchange_effect(state, side, card, EffectContext(comparison=comparison))

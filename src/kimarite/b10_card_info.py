@@ -26,7 +26,7 @@ CARD_TEXT = {
     "Mawashi Reversal": {"timing":"Exchange / Tachiai","effect":"Exchange: If your usable total Grip is tied with or lower than your opponent's, this card does nothing. If you lead Grip and your Position is negative, flip it to positive at the same distance. If you lead Grip and your Position is 0 or higher, gain 1 Push and 1 Momentum. Tachiai: printed orbs only.","status":"verified"},
     "Sidestep": {"timing":"Exchange / Tachiai","effect":"Tachiai: if opponent won Spirit with positive Spirit difference, gain 1 Momentum. Exchange: enter Side-by-Side and Temporary Zone, storing current Position distance. While side-by-side, Push is suppressed; on survival, resolve orientation from Momentum and make opponent Unstable.","status":"verified"},
     "Spin Away": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 1 Momentum, enter Side-by-Side stance and Temporary Zone. While active, Push is suppressed. At the start of your next turn, resolve orientation according to Momentum. If disrupted, grant opponent Okuritaoshi.","status":"verified"},
-    "Salt Throw": {"timing":"Exchange / Tachiai","effect":"Exchange: move all cards from your Discard Pile to the bottom of your Draw Pile; enter Temporary Zone and gain 1 additional Play. Tachiai: move all discarded cards to the bottom of your draw pile and enter your Temporary Zone. On each later turn, recycle one discarded card; does not expire normally.","status":"verified"},
+    "Salt Throw": {"timing":"Exchange / Tachiai","effect":"Exchange: Return all cards in your discard pile to the bottom of your deck. If Exhausted, gain 1 Momentum and 1 Push. Tachiai: printed orbs only.","status":"verified"},
     "Sonkyo": {"timing":"Exchange / Tachiai","effect":"Exchange: enter Temporary Zone to prevent one negative effect and gain 1 additional Play; persists until used instead of expiring each turn. Tachiai: enter your Temporary Zone to prevent one negative effect.","status":"verified"},
     "Renzoku": {"timing":"Exchange / Tachiai","effect":"Exchange: for the remainder of this turn, each card you draw grants 1 Play. Does not draw a card itself.","status":"B12 design"},
     "Meguri": {"timing":"Exchange / Tachiai","effect":"Exchange: draw 2; enter permanent Temporary. Ordinary discards go to the bottom of your Draw Pile instead; if opposing Push moves your Position backwards, Exhaust Meguri.","status":"B12 design"},
@@ -105,6 +105,7 @@ GLOSSARY = {
     "Draw": "Move a card from your draw pile into your hand according to the current effect.",
     "Discard": "Move a card from your hand to the discard pile.",
     "Recover": "Recover Push gains Push only when your relative Position is negative; Recover Momentum gains Momentum only when your relative Momentum is negative. Neither can take the relevant track above zero.",
+    "Exhausted": "You have at least 7 cards in your discard pile. Check before resolving Salt Throw.",
     "Exhaust": "Remove a card from this bout. A card replayed by Shitatehineri is Exhausted after its normal effects resolve; ongoing Temporary effects resolve or are disrupted before the card leaves play and is Exhausted.",
 }
 def card_info(card):

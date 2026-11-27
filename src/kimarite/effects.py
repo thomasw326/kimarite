@@ -367,13 +367,15 @@ def _salt_throw(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
+    exhausted = len(fighter.discard_pile) >= 7
     if fighter.discard_pile:
         fighter.draw_pile.extend(fighter.discard_pile)
         fighter.discard_pile.clear()
         state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
-    add_temporary(state, side, card, phase="exchange")
-    if context.comparison is None:
-        add_play(state, side, 1)
+    if exhausted:
+        gain_momentum(state, side, 1)
+        if state.winner is None:
+            gain_push(state, side, 1)
 
 
 def _stare_down(
@@ -1103,7 +1105,6 @@ for _name in MILL_AMOUNTS:
 
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
-        "Salt Throw",
         "Sonkyo",
         "Meguri",
         "Hakkeyoi!",
