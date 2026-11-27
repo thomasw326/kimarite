@@ -139,7 +139,7 @@ def _hikiotoshi(state: BoutState, side: Side) -> bool:
 
 
 def _tsukitaoshi(state: BoutState, side: Side) -> bool:
-    return state.fighter(side).cards_played_this_turn >= 4
+    return relative_position(state, side) >= 0 and state.fighter(side).cards_played_this_turn >= 4
 
 
 def _tsuridashi(state: BoutState, side: Side) -> bool:
