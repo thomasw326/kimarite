@@ -173,9 +173,10 @@ def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 
 def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    gain_push(state, side, 1)
-    if state.winner is None:
-        gain_momentum(state, side, 1)
+    gain_momentum(state, side, 1)
+    fighter = state.fighter(side)
+    if state.winner is None and len(fighter.discard_pile) < fighter.exhaustion_threshold:
+        gain_push(state, side, 1)
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
