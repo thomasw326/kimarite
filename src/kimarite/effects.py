@@ -369,14 +369,16 @@ def _salt_throw(
 ) -> None:
     fighter = state.fighter(side)
     exhausted = len(fighter.discard_pile) >= 7
-    if fighter.discard_pile:
-        fighter.draw_pile.extend(fighter.discard_pile)
-        fighter.discard_pile.clear()
-        state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
+    # Resolve the approved Exhausted bonus before recycling. The condition
+    # is evaluated on the pre-recycle pile; a terminal win stops further effects.
     if exhausted:
         gain_momentum(state, side, 1)
         if state.winner is None:
             gain_push(state, side, 1)
+    if state.winner is None and fighter.discard_pile:
+        fighter.draw_pile.extend(fighter.discard_pile)
+        fighter.discard_pile.clear()
+        state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
 
 
 def _stare_down(
