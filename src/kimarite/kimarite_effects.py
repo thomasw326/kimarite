@@ -172,13 +172,13 @@ def resolve_kimarite_play_effect(state: BoutState, side: Side, card: Card, conte
                 state, opponent_side, source=card.name,
                 description="lose 1 Power for Position disadvantage",
             ):
-                lose_power(state, opponent_side, 1)
+                lose_power(state, opponent_side, 1, source_side=side)
         if no_grip(state, opponent_side):
             if not prevent_negative_effect(
                 state, opponent_side, source=card.name,
                 description="lose 1 Power for having no Grip",
             ):
-                lose_power(state, opponent_side, 1)
+                lose_power(state, opponent_side, 1, source_side=side)
 
     elif card.name == "Kimetaoshi":
         from .effects import mill_cards

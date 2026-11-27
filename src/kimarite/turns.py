@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from .kimarite import satisfied_kimarite
 from .models import BoutState, Card, Side, Stat
-from .rules import effective_total_grip, gain_momentum, grip_benefits_suppressed, lose_power
+from .rules import effective_total_grip, gain_momentum, grip_benefits_suppressed
 from .selection import ai_look_keep, keep_and_bottom, look_from_top
 from .tachiai import TachiaiComparison, technique_access
 from .temporary import resolve_start_of_turn_temporaries
@@ -118,10 +118,8 @@ def apply_start_of_turn_exhaustion(state: BoutState, side: Side) -> None:
     other_grip = effective_total_grip(state, state.opponent_side(side))
     grip_protected = own_grip > 0 and own_grip >= other_grip
     if len(fighter.discard_pile) >= fighter.exhaustion_threshold and not grip_protected:
-        power_before = fighter.power
-        lose_power(state, side, 1)
-        if fighter.power < power_before:
-            state.log(f"{fighter.wrestler.name} loses 1 Power to Exhaustion.")
+        fighter.power -= 1
+        state.log(f"{fighter.wrestler.name} loses 1 Power to Exhaustion.")
 
     if fighter.power < 0:
         state.declare_winner(state.opponent_side(side), "Power")

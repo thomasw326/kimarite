@@ -259,10 +259,10 @@ def lose_position(state: BoutState, side: Side, amount: int, *, source: str = "u
     gain_position(state, state.opponent_side(side), amount)
 
 
-def make_unstable(state: BoutState, side: Side) -> None:
+def make_unstable(state: BoutState, side: Side, *, source_side: Side | None = None) -> None:
     """Apply the B9 Unstable condition until this fighter finishes its next turn."""
     fighter = state.fighter(side)
-    if _has_temporary(state, side, "Ankogata"):
+    if source_side is state.opponent_side(side) and _has_temporary(state, side, "Ankogata"):
         state.log(f"Ankogata prevents {fighter.wrestler.name} from becoming Unstable.")
         return
     fighter.unstable = True
@@ -279,9 +279,9 @@ def gain_power(state: BoutState, side: Side, amount: int) -> None:
     state.log(f"{fighter.wrestler.name} gains {amount} Power.")
 
 
-def lose_power(state: BoutState, side: Side, amount: int) -> None:
+def lose_power(state: BoutState, side: Side, amount: int, *, source_side: Side | None = None) -> None:
     fighter = state.fighter(side)
-    if amount > 0 and _has_temporary(state, side, "Ankogata"):
+    if amount > 0 and source_side is state.opponent_side(side) and _has_temporary(state, side, "Ankogata"):
         state.log(f"Ankogata prevents {fighter.wrestler.name} from losing Power.")
         return
     fighter.power -= amount

@@ -263,7 +263,7 @@ def _harite(state: BoutState, side: Side, card: Card, context: EffectContext) ->
         discarded = opponent.hand.pop(roll % len(opponent.hand))
         discard_normally(state, state.opponent_side(side), discarded)
         state.log(f"{opponent.wrestler.name} discards {discarded.name} to Harite.")
-    lose_power(state, opponent_side, 1)
+    lose_power(state, opponent_side, 1, source_side=side)
     mill_cards(state, opponent_side, 2)
 
 
@@ -585,7 +585,7 @@ def _choose_opponent_temporary(
 
 
 def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    make_unstable(state, state.opponent_side(side))
+    make_unstable(state, state.opponent_side(side), source_side=side)
     opponent = state.opponent(side)
     if opponent.hand:
         # Deterministic pseudo-random discard preserves reproducible batch seeds.
@@ -648,7 +648,7 @@ def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> N
     if state.winner is None:
         gain_momentum(state, side, 1)
     if state.winner is None:
-        make_unstable(state, state.opponent_side(side))
+        make_unstable(state, state.opponent_side(side), source_side=side)
         draw_one(state, side)
         if state.winner is None:
             # Rank the complete hand after drawing, rather than always losing the new card.
@@ -818,7 +818,7 @@ def _crushing_pressure(state: BoutState, side: Side, card: Card, context: Effect
             raise IllegalPlay("Crushing Pressure requires Power 7+ and Power Advantage 3+.")
         gain_momentum(state, side, 1)
         if state.winner is None and not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose 1 Power"):
-            lose_power(state, state.opponent_side(side), 1)
+            lose_power(state, state.opponent_side(side), 1, source_side=side)
     else:
         draw_one(state, side)
 
@@ -830,7 +830,7 @@ def _morotezuki(state: BoutState, side: Side, card: Card, context: EffectContext
 
 
 def _nekodamashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    make_unstable(state, state.opponent_side(side))
+    make_unstable(state, state.opponent_side(side), source_side=side)
     add_temporary(state, side, card, phase="exchange")
 
 
@@ -868,9 +868,9 @@ def _deashi(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 def _butsukari(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if state.fighter(side).power > state.opponent(side).power:
         if not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose Power"):
-            lose_power(state, state.opponent_side(side), 2)
+            lose_power(state, state.opponent_side(side), 2, source_side=side)
     if state.momentum * state.sign(side) >= 1:
-        make_unstable(state, state.opponent_side(side))
+        make_unstable(state, state.opponent_side(side), source_side=side)
     mill_cards(state, side, 1)
 
 
@@ -925,7 +925,7 @@ def _hazuoshi(state: BoutState, side: Side, card: Card, context: EffectContext) 
     ):
         reduce_grip(state, opponent_side)
         if opponent.total_grip < before:
-            make_unstable(state, opponent_side)
+            make_unstable(state, opponent_side, source_side=side)
 
 
 def _inashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:

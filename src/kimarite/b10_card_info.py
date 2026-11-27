@@ -60,7 +60,7 @@ CARD_TEXT = {
     "Read the Move": {"timing":"Exchange / Tachiai","effect":"Exchange: choose to draw 1 card, or disrupt one opponent Temporary to gain 1 Momentum; draw if opponent has no Temporary.","status":"verified"},
     "Kachiage": {"timing":"Exchange / Tachiai","effect":"Exchange: gain 2 Power; disrupt one opponent Temporary card if present.","status":"verified"},
     "Nodowa": {"timing":"Exchange / Tachiai","effect":"Tachiai: gain 2 Power and reduce opponent's Technique look by 2 unless protected. Exchange: make opponent Unstable, discard one random card from their hand if possible, and mill 1 of their draw pile.","status":"verified"},
-    "Ankogata": {"timing":"Exchange / Tachiai","effect":"Exchange: Gain 1 Power. Permanent Temporary: You cannot lose Power or become Unstable while this card is in play.","status":"verified"},
+    "Ankogata": {"timing":"Exchange / Tachiai","effect":"Exchange: Gain 1 Power. Permanent Temporary: Opponent's card effects cannot reduce your Power or make you Unstable.","status":"verified"},
     "Morotezuki": {"timing":"Exchange / Tachiai","effect":"Exchange: each card played after Morotezuki during the same turn generates 1 Push, even if its own effect otherwise does not move Position.","status":"verified"},
     "Power Water": {"timing":"Exchange / Tachiai","effect":"Tachiai or Exchange: shuffle 6 Power Water Cantrips into draw pile, then gain 1 additional Play.","status":"verified"},
     "Power Water Cantrip": {"timing":"Exchange / Tachiai","effect":"Exchange: choose 1 discarded card to return to your hand; return up to 2 newest remaining discarded cards to the bottom of your Draw Pile; gain 1 Play.","status":"verified"},

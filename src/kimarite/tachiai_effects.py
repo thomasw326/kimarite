@@ -164,7 +164,7 @@ def resolve_prepared_tachiai(
         elif name in REVEAL_FAMILY or name in {"Sonkyo", "Chiri-chozu", "Shikiri"}:
             pass
         elif name == "Nekodamashi":
-            make_unstable(state, opponent_side)
+            make_unstable(state, opponent_side, source_side=side)
             add_temporary(state, side, card, phase="pre-bout")
 
         elif name == "Nodowa":
