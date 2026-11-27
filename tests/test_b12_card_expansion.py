@@ -122,11 +122,23 @@ def test_kimetaoshi_uses_ten_discard_and_power_lead_four():
     assert not kimarite_is_satisfied(state, Side.A, card_by_name("Kimetaoshi"))
 
 
-def test_nokotta_backward_gains_two_push():
-    state, _ = bout(hand=[card_by_name("Nokotta!")])
-    state.position = -2
-    play_card(state, Side.A, state.fighter_a.hand[0])
-    assert state.position == 0
+@pytest.mark.parametrize("owner", [Side.A, Side.B])
+@pytest.mark.parametrize("relative_position", [-4, -2, -1, 0, 1, 4])
+def test_nokotta_backward_gains_two_push_otherwise_draws(owner, relative_position):
+    card = card_by_name("Nokotta!")
+    state, blank = bout()
+    fighter = state.fighter(owner)
+    fighter.hand = [card]
+    fighter.draw_pile = [blank]
+    state.active_side = owner
+    sign = state.sign(owner)
+    state.position = sign * relative_position
+    play_card(state, owner, card)
+    assert state.position * sign == relative_position + (2 if relative_position < 0 else 0)
+    assert fighter.hand == ([] if relative_position < 0 else [blank])
+    assert fighter.draw_pile == ([blank] if relative_position < 0 else [])
+    assert state.winner is None
+    assert state.momentum == 0
 
 
 def test_hazuoshi_only_disrupts_after_two_preceding_cards():
