@@ -1,6 +1,11 @@
-name: B12 anti-Grip experiment — 17700 max40 bouts
+name: B12 anti-Grip v2 — 17700 max40 bouts
 
 on:
+  push:
+    branches:
+      - experiment/b12-grip-counter-max40
+    paths:
+      - '.github/workflows/b12-60-framework-big-test.yml'
   workflow_dispatch:
 
 permissions:
