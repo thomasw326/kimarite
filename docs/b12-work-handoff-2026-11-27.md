@@ -77,3 +77,8 @@
 ## Approved seven-card batch — 35,400 bouts
 - Owner requested regular 35K batch after failed validation. Both 46054265088 and 46054284663 failed only tests/test_v42_approved.py::test_approved_kinematic_finishes (1114 passed); obsolete expectation allowed Tsukitaoshi at -2 Position. Corrected assertion and added neutral-position/negative-Momentum success in 86c57a3; no mechanics changed.
 - Workflow 558e37d uses 60 unchanged frameworks, 1,770 pairs, 10 mirrored repetitions, seed 20261102, 24 shards, max40 only, exactly 35,400 bouts, 1,180 per framework. Full pytest and smoke gates remain. Automatic push trigger now limited to experimental workflow file, avoiding accidental large batches during incremental reviews; manual dispatch retained. Preserve historical workflow and 70,800 baseline, update audit after verified completion.
+
+## Owner lock decision after 35,400-bout validation
+- LOCKED / good to go: Tsukitaoshi, Fumikomi, Denshamichi, Nokotta!, Belt Slap, Shiko Stomp; previously approved grip-removal cards Hazuoshi, Maesabaki, Kannuki, Ottsuke also locked.
+- OPEN: Tsuppari retains implemented mill 2 pending further review; no rollback or additional mechanics change.
+- Run 46054703948 success, all 24 shards and aggregation passed, artifact 15225644265, tested 558e37d. Master catalogue and current audit decision columns updated; audit numerical evidence remains 70,800 pre-nerf baseline until separate reconciliation. No merge or deployment authorized.
