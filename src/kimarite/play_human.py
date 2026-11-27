@@ -87,7 +87,7 @@ CARD_LIBRARY_TEXT = {
   },
   "shiko stomp": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai / Exchange: Enter a persistent Temporary. When an opponent effect would negatively affect you or something you control, prevent that effect and discard Sonkyo. It does not expire at the beginning of your turn.",
+    "effect": "Tachiai: Printed orbs only. Exchange: If leading Position before play, gain 1 Power. If leading Power before play, gain 1 Push. Both conditions check the pre-play state independently.",
     "notes": ""
   },
   "salt throw": {
