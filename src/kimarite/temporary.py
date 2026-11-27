@@ -3,7 +3,7 @@ from __future__ import annotations
 from .models import BoutState, Card, GripState, Side, TemporaryInstance
 from .catalog import card_by_name
 from .prevention import prevent_negative_effect
-from .rules import establish_grip, gain_momentum, gain_power, gain_push, make_unstable, lose_momentum, lose_position, reduce_grip, trigger_ritual_draw
+from .rules import improve_grip, establish_grip, gain_momentum, gain_power, gain_push, make_unstable, lose_momentum, lose_position, reduce_grip, trigger_ritual_draw
 
 
 def add_temporary(
@@ -123,11 +123,9 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             establish_grip(state, side, "left")
             establish_grip(state, side, "right")
         elif name == "Attempt Deep Outside Grip":
-            fighter.left_grip = GripState.DEEP
-            state.log(f"{fighter.wrestler.name}'s Left Grip becomes DEEP.")
+            improve_grip(state, side, "left", amount=2)
         elif name == "Attempt Deep Inside Grip":
-            fighter.right_grip = GripState.DEEP
-            state.log(f"{fighter.wrestler.name}'s Right Grip becomes DEEP.")
+            improve_grip(state, side, "right", amount=2)
         elif name == "Tsuri":
             from .rules import effective_total_grip
             if fighter.power >= 5 and effective_total_grip(state, side) >= 2:
@@ -166,11 +164,12 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
                 state,
                 opponent_side,
                 source="Kannuki",
-                description="reduce both Grips by 1 level",
+                description="remove all Grip",
             ):
-                reduce_grip(state, opponent_side, hand="left")
-                reduce_grip(state, opponent_side, hand="right")
-            make_unstable(state, opponent_side)
+                reduce_grip(state, opponent_side, amount=2, hand="left")
+                reduce_grip(state, opponent_side, amount=2, hand="right")
+        elif name == "Ottsuke":
+            pass  # Grip prevention expires now.
         elif name == "Morozashi":
             gain_push(state, side, 1)
             if state.winner is None:

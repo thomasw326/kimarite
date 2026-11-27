@@ -734,92 +734,13 @@ GRIP_REFERENCING_KIMARITE = frozenset({
 
 def _ottsuke(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     opponent_side = state.opponent_side(side)
-    opponent = state.opponent(side)
-
-    grips = []
-    if opponent.left_grip is not GripState.NONE:
-        grips.append("left")
-    if opponent.right_grip is not GripState.NONE:
-        grips.append("right")
-
-    temp_targets = [
-        instance
-        for instance in opponent.temporary_zone
-        if instance.card.name in GRIP_REFERENCING_TEMPORARIES
-    ]
-    kimarite_targets = [
-        target
-        for target in opponent.kimarite_zone
-        if target.name in GRIP_REFERENCING_KIMARITE
-    ]
-
-    modes = []
-    if grips:
-        modes.append("reduce_grip")
-    if temp_targets or kimarite_targets:
-        modes.append("remove_card")
-    modes.append("draw")
-
-    mode = modes[0] if len(modes) == 1 else context.choice("mode")
-    if mode not in modes:
-        raise ChoiceRequired(card.name, "mode", modes)
-
-    if mode == "draw":
-        draw_one(state, side)
-        return
-
-    if mode == "reduce_grip":
-        chosen = grips[0] if len(grips) == 1 else context.choice("grip")
-        if chosen not in grips:
-            raise ChoiceRequired(card.name, "grip", grips)
-        if not prevent_negative_effect(
-            state,
-            opponent_side,
-            source="Ottsuke",
-            description=f"reduce {chosen.title()} Grip",
-        ):
-            reduce_grip(state, opponent_side, hand=chosen)
-        return
-
-    targets = [
-        ("temporary", i, instance.card.name)
-        for i, instance in enumerate(temp_targets)
-    ] + [
-        ("kimarite", i, target.name)
-        for i, target in enumerate(kimarite_targets)
-    ]
-    if len(targets) == 1:
-        target_type, target_index, target_name = targets[0]
-    else:
-        choice = context.choice("card_target")
-        options = list(range(len(targets)))
-        if choice not in options:
-            raise ChoiceRequired(card.name, "card_target", options)
-        target_type, target_index, target_name = targets[choice]
-
-    if prevent_negative_effect(
-        state,
-        opponent_side,
-        source="Ottsuke",
-        description=f"remove {target_name}",
+    if state.opponent(side).total_grip and not prevent_negative_effect(
+        state, opponent_side, source=card.name, description="reduce Grip"
     ):
-        return
-
-    if target_type == "temporary":
-        remove_temporary(
-            state,
-            opponent_side,
-            temp_targets[target_index],
-            disrupted=True,
-        )
-    else:
-        target = kimarite_targets[target_index]
-        opponent.kimarite_zone.remove(target)
-        opponent.discard_pile.append(target)
-        state.kimarite_removals.append((side, target.name))
-        state.log(f"Ottsuke removes {target.name} from the opponent Kimarite Zone.")
-
+        reduce_grip(state, opponent_side)
     gain_momentum(state, side, 1)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
 
 
 def _morozashi(
@@ -915,8 +836,8 @@ def _maesabaki(state: BoutState, side: Side, card: Card, context: EffectContext)
     opponent_side = state.opponent_side(side)
     opponent = state.opponent(side)
     if opponent.total_grip:
-        if not prevent_negative_effect(state, opponent_side, source=card.name, description="reduce Grip"):
-            reduce_grip(state, opponent_side)
+        if not prevent_negative_effect(state, opponent_side, source=card.name, description="remove one hand\'s Grip"):
+            reduce_grip(state, opponent_side, amount=2, hand="left" if opponent.left_grip > opponent.right_grip or (opponent.left_grip == opponent.right_grip and side is Side.A) else "right")
     if opponent.temporary_zone:
         target = _choose_opponent_temporary(state, side, card, context)
         if target is not None and not prevent_negative_effect(state, opponent_side, source=card.name, description="remove Temporary"):
@@ -995,14 +916,15 @@ def _hazuoshi(state: BoutState, side: Side, card: Card, context: EffectContext) 
     gain_push(state, side, 1)
     if state.winner is not None:
         return
-    if state.fighter(side).cards_played_this_turn >= 3:
-        opponent_side = state.opponent_side(side)
-        if not prevent_negative_effect(
-            state, opponent_side, source=card.name,
-            description="become Unstable and reduce Grip",
-        ):
+    opponent_side = state.opponent_side(side)
+    opponent = state.opponent(side)
+    before = opponent.total_grip
+    if before and not prevent_negative_effect(
+        state, opponent_side, source=card.name, description="reduce Grip and become Unstable"
+    ):
+        reduce_grip(state, opponent_side)
+        if opponent.total_grip < before:
             make_unstable(state, opponent_side)
-            reduce_grip(state, opponent_side, 1)
 
 
 def _inashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -1197,6 +1119,7 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Henka",
         "Sidestep",
         "Kannuki",
+        "Ottsuke",
         "Nekodamashi",
         "Denshamichi",
         "Spin Away",

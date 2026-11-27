@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from .models import BoutState, Card, GripState, Side
-from .rules import effective_total_grip, grip_benefits_suppressed
+from .rules import effective_total_grip, grip_gain_prevented
 
 
 def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
@@ -14,10 +14,10 @@ def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
     if card not in fighter.hand or fighter.plays_remaining <= 0:
         return False
 
-    # Kannuki prevents Grip-building cards from being committed to the board.
+    # Ottsuke prevents Grip-building cards from being committed to the board.
     # Blocking only their immediate Grip effect lets delayed attempts resolve
-    # after Kannuki expires, which is not the intended counterplay.
-    if grip_benefits_suppressed(state, side) and card.name in {
+    # after Ottsuke expires, which is not the intended counterplay.
+    if grip_gain_prevented(state, side) and card.name in {
         "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate",
         "Attempt Two-Handed Grip", "Attempt Deep Outside Grip",
         "Attempt Deep Inside Grip", "Morozashi",

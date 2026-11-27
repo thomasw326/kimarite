@@ -47,6 +47,7 @@ def main():
     p.add_argument("--output-dir", default="artifacts/b12_report")
     p.add_argument("--repetitions", type=int, default=1)
     p.add_argument("--allow-partial", action="store_true")
+    p.add_argument("--mode", choices=["base28", "max40"], default=None)
     args = p.parse_args()
     output = Path(args.output_dir)
     files = sorted(Path(args.input_root).rglob("bouts_*.jsonl"))
@@ -195,7 +196,7 @@ def main():
         raise SystemExit("repetitions must be positive")
     if not args.allow_partial:
         expected = 3540 * args.repetitions
-        for mode in ("base28", "max40"):
+        for mode in ((args.mode,) if args.mode else ("base28", "max40")):
             if len(seen_global_ids[mode]) != expected:
                 raise SystemExit(f"{mode}: {len(seen_global_ids[mode])}/{expected} expected bouts")
             if seen_global_ids[mode] != set(range(expected)):
@@ -323,7 +324,7 @@ def main():
               ["mode", "framework", "metric", "advantage", "won", "bouts"], tachiai_rows)
 
     summary = {
-        "source_sha256": next(iter(source_hashes)), "bouts_total": total,
+        "source_sha256": next(iter(source_hashes)), "bouts_total": sum(len(ids) for ids in seen_global_ids.values()),
         "modes": {mode: {"requested": status[(mode, "requested")],
                          "completed": status[(mode, "completed")],
                          "failed": status[(mode, "failed")],
