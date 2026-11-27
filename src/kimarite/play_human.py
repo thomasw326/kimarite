@@ -107,7 +107,7 @@ CARD_LIBRARY_TEXT = {
   },
   "belt slap": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: Gain 1 Push. If you won Spirit in the Tachiai by 3 or more, gain 1 Momentum.",
+    "effect": "Exchange: Gain 1 Momentum. If you won Spirit in the Tachiai by 3 or more, gain 1 Push.",
     "notes": ""
   },
   "tsuri": {
