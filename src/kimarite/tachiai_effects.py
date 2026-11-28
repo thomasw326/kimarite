@@ -283,15 +283,6 @@ def resolve_prepared_tachiai(
             state.declare_winner(side, "Shove")
             return
 
-    # BEGIN APPROVED MILL/RECYCLE V1
-    # Prepared explosive cards pay their Tachiai mill cost after opening effects.
-    for side in (Side.A, Side.B):
-      for card in cards_by_side[side]:
-        name = card.name
-        if name == "Headlong Charge":
-            from .effects import mill_cards
-            mill_cards(state, side, 2)
-    # END APPROVED MILL/RECYCLE V1
 
     # Kubinage explicitly mills during Tachiai as well as Exchange, based on
     # the fighters' effective Power after the opening comparison effects.
