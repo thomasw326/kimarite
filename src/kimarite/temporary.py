@@ -131,7 +131,8 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             from .rules import effective_total_grip
             owner_grip = effective_total_grip(state, side)
             other_grip = effective_total_grip(state, state.opponent_side(side))
-            gain_momentum(state, side, 2 if owner_grip > other_grip else 1)
+            if owner_grip > other_grip:
+                gain_momentum(state, side, 2)
         elif name == "Gaburi":
             if fighter.power > state.opponent(side).power:
                 created = card_by_name("Yorikiri")
