@@ -112,3 +112,9 @@
 - LOCKED (23): Maesabaki; Gain Left Grip; Immovable; Attempt Two-Handed Grip; Ottsuke; Kannuki; Regain Balance; Tsukitaoshi; Attempt Deep Outside Grip; Tsuri; Ankogata; Denshamichi; Hold Position; Belt Slap; Explosive Step — Fumikomi; Hazuoshi; Nokotta!; Gain Right Grip; Shiko Stomp; Butsukari; Henka; Kachiage; Tsuppari.
 - Tsuppari 2/0/1: Tachiai shuffle 3 Oshi, 3 Tsuki and 3 Shove into draw pile. Exchange: conditional +1 Push after earlier Oshi/Tsuki/Tsuppari/Shove; draw 1 if bout continues. No additional Play or mill. Owner explicitly locks draw-only version.
 - Oshi, Tsuki, Morotezuki, Morozashi, Uwate, Shitate and Yori retain reviewed/unlocked status; promotion does not lock them. Future experiments should branch from current main. Prior experimental branch and artifacts retained. Render parity not verified.
+
+## Owner review — 25 locked cards
+- Deashi LOCKED unchanged (2/0/1; independent +1 Push for current Power lead and Tachiai Spirit win).
+- Salt Throw LOCKED unchanged (1/1/3; Exhausted bonus +1 Momentum/+1 Push before recycling discard pile to bottom; printed-only Tachiai).
+- Give Ground REVIEWED, NOT LOCKED, unchanged (0/2/1; lose 1 Position, gain 1 Momentum and 1 Power, draw 1).
+- Total 25 locked and 8 reviewed/unlocked; all three already implemented on main. No mechanical changes authorized by this decision.
