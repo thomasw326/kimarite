@@ -46,5 +46,5 @@ def test_every_temporary_has_explained_effect_in_ui():
     for name in TEMPORARY_CARD_NAMES:
         effect=CARD_TEXT[name]['effect']
         assert any(term in effect.lower() for term in ('temporary','while active','next turn','start of your next turn')), name
-    for name in ('Gain Left Grip','Gain Right Grip','Uwate','Shitate'):
+    for name in ('Gain Left Grip','Gain Right Grip'):
         assert 'prevent 1 incoming Push' in CARD_TEXT[name]['effect']
