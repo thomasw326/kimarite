@@ -257,8 +257,8 @@ CARD_LIBRARY_TEXT = {
   },
   "tsuridashi": {
     "timing": "Start & End of Turn",
-    "effect": "Total Grip 3+ · Position 0+ · Power 5+",
-    "notes": "Win: Total Grip 3+, Position 0+, Power 5+, checked start and end of turns. Exchange: gain 1 Power, plus another if Momentum 2+. Power 5+ added to reinforce strength required to lift an opponent."
+    "effect": "Usable Grip 3+ · Power 6+",
+    "notes": "Win: usable Grip 3+ and Power 6+, checked start and end of turns. Exchange: gain 1 Power, plus another if Momentum 2+."
   },
   "kotenage": {
     "timing": "Start & End of Turn",
