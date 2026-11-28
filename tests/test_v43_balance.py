@@ -59,15 +59,21 @@ def test_oshi_push_play_draw():
     assert s.position == 1
 
 
-def test_tsuridashi_needs_nonnegative_position():
-    s = bout()
-    s.fighter_a.left_grip = GripState.DEEP
-    s.fighter_a.right_grip = GripState.GRIP
-    s.fighter_a.power = 6
-    s.position = -1
-    assert not kimarite_is_satisfied(s, Side.A, card_by_name("Tsuridashi"))
-    s.position = 0
-    assert kimarite_is_satisfied(s, Side.A, card_by_name("Tsuridashi"))
+def test_tsuridashi_ignores_position_but_requires_power_and_grip():
+    for side in (Side.A, Side.B):
+        s = bout()
+        f = s.fighter(side)
+        f.left_grip = GripState.DEEP
+        f.right_grip = GripState.GRIP
+        f.power = 6
+        for position in (-4, -1, 0, 3):
+            s.position = position * s.sign(side)
+            assert kimarite_is_satisfied(s, side, card_by_name("Tsuridashi"))
+        f.power = 5
+        assert not kimarite_is_satisfied(s, side, card_by_name("Tsuridashi"))
+        f.power = 6
+        f.right_grip = GripState.NONE
+        assert not kimarite_is_satisfied(s, side, card_by_name("Tsuridashi"))
 
 
 def test_sidestep_prevents_both_players_push():
