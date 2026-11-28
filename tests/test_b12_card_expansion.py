@@ -41,10 +41,11 @@ EXPECTED = {
     "Kubinage": (2, 0, 1), "Kimedashi": (2, 0, 1),
     "Kimetaoshi": (3, 0, 0),
     "Reckless Charge": (0, 0, 3), "Sheer Grit": (0, 0, 3),
+    "Pull the Chair": (0, 2, 1),
 }
 
 
-def test_fifteen_names_and_orbs_registered_for_draft_and_engine():
+def test_expansion_names_and_orbs_registered_for_draft_and_engine():
     for name, orbs in EXPECTED.items():
         card = card_by_name(name)
         assert (card.power, card.technique, card.spirit) == orbs
@@ -500,3 +501,59 @@ def test_retired_renzoku_preserved_but_not_draftable():
     assert card_by_name("Renzoku").card_id == 14001
     assert "Renzoku" not in AVAILABLE
     assert "Mawashi Reversal" in AVAILABLE
+
+
+@pytest.mark.parametrize("side", [Side.A, Side.B])
+@pytest.mark.parametrize("relative_momentum", [-1, 0, 1])
+def test_pull_the_chair_exchange_and_surviving_temporary(side, relative_momentum):
+    card = card_by_name("Pull the Chair")
+    first, second = Card(98001, "First draw"), Card(98002, "Second draw")
+    state, _ = bout()
+    state.active_side = side
+    owner = state.fighter(side)
+    foe = state.opponent(side)
+    owner.hand = [card]
+    owner.draw_pile = [first, second]
+    state.position = state.sign(side)
+    play_card(state, side, card)
+    assert state.momentum * state.sign(side) == -1
+    assert state.position * state.sign(side) == 1
+    assert foe.unstable
+    assert owner.hand == [first]
+    assert [x.card for x in owner.temporary_zone] == [card]
+    foe.unstable = False
+    state.momentum = relative_momentum * state.sign(side)
+    resolve_start_of_turn_temporaries(state, side)
+    assert foe.unstable is (relative_momentum < 0)
+    assert owner.hand == [first, second]
+    assert not owner.temporary_zone
+    assert card in owner.discard_pile
+    assert state.position * state.sign(side) == 1
+    assert state.momentum * state.sign(side) == relative_momentum
+
+
+def test_pull_the_chair_disruption_cancels_delayed_draw_and_unstable():
+    card = card_by_name("Pull the Chair")
+    first, second = Card(98001, "First draw"), Card(98002, "Second draw")
+    state, _ = bout(hand=[card], draw=[first, second])
+    play_card(state, Side.A, card)
+    remove_temporary(state, Side.A, state.fighter_a.temporary_zone[0], disrupted=True)
+    state.fighter_b.unstable = False
+    resolve_start_of_turn_temporaries(state, Side.A)
+    assert state.fighter_a.hand == [first]
+    assert state.fighter_a.draw_pile == [second]
+    assert not state.fighter_b.unstable
+    assert not state.fighter_a.unstable
+    assert state.momentum == -1
+
+
+def test_pull_the_chair_preserves_pre_expansion_draft_history():
+    from kimarite.b11_player_draft import options_for, validate_draft
+    starting = []
+    for seed in range(10):
+        picks = []
+        while len(picks) < 28:
+            offer = options_for(starting, picks, seed, pre_chair=True)
+            assert "Pull the Chair" not in offer
+            picks.append(offer[0])
+        assert validate_draft(starting, picks, seed) == picks

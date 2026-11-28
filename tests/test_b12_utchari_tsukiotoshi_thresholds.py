@@ -23,7 +23,7 @@ def test_utchari_requires_minus_four_and_momentum_gain_this_turn(state, side):
     assert not kimarite_is_satisfied(state, side, card)
 
 @pytest.mark.parametrize("side", [Side.A, Side.B])
-def test_tsukiotoshi_requires_two_momentum_other_conditions_unchanged(state, side):
+def test_tsukiotoshi_requires_three_momentum_other_conditions_unchanged(state, side):
     card = card_by_name("Tsukiotoshi")
     attacker, defender = state.fighter(side), state.opponent(side)
     attacker.power, defender.power = 3, 7
@@ -33,6 +33,8 @@ def test_tsukiotoshi_requires_two_momentum_other_conditions_unchanged(state, sid
     state.momentum = state.sign(side)
     assert not kimarite_is_satisfied(state, side, card)
     state.momentum = 2 * state.sign(side)
+    assert not kimarite_is_satisfied(state, side, card)
+    state.momentum = 3 * state.sign(side)
     assert kimarite_is_satisfied(state, side, card)
     attacker.left_grip = GripState.GRIP
     assert not kimarite_is_satisfied(state, side, card)

@@ -256,7 +256,7 @@ def test_kirikaeshi_requires_two_momentum_and_stability():
 
 def test_tsukiotoshi_requires_unstable_opponent():
     bout = state(power_a=3, power_b=8)
-    bout.momentum = 2
+    bout.momentum = 3
     card = card_by_name("Tsukiotoshi")
     assert not kimarite_is_satisfied(bout, Side.A, card)
     bout.fighter_b.unstable = True

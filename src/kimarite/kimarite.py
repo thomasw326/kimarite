@@ -75,7 +75,7 @@ def _katasukashi(state: BoutState, side: Side) -> bool:
 
 
 def _tsukiotoshi(state: BoutState, side: Side) -> bool:
-    return (no_grip(state, side) and relative_momentum(state, side) >= 2 and power_advantage(state, side) <= -3
+    return (no_grip(state, side) and relative_momentum(state, side) >= 3 and power_advantage(state, side) <= -3
             and state.opponent(side).unstable)
 
 
@@ -143,7 +143,7 @@ def _tsukitaoshi(state: BoutState, side: Side) -> bool:
 
 
 def _tsuridashi(state: BoutState, side: Side) -> bool:
-    return (effective_total_grip(state, side) >= 3 and relative_position(state, side) >= 0 and state.fighter(side).power >= 6)
+    return (effective_total_grip(state, side) >= 3 and state.fighter(side).power >= 6)
 
 
 def _kotenage(state: BoutState, side: Side) -> bool:

@@ -23,13 +23,14 @@ MIN_KIMARITE = 3
 GENERATED_ONLY = frozenset(("Okuridashi", "Okuritaoshi"))
 _ORIGINAL_POOL = {
     card.name: card for card in (*CARD_POOL, *B9_CARD_POOL, *B11_CARD_POOL, *B12_CARD_POOL)
-    if card.name not in GENERATED_ONLY
+    if card.name not in GENERATED_ONLY and card.name != "Pull the Chair"
 }
 
 _PRE_RETIREMENT_POOL = _ORIGINAL_POOL | {card.name: card for card in PLAYER_DRAFT_CARD_POOL}
-AVAILABLE = {name: card for name, card in _PRE_RETIREMENT_POOL.items() if name != "Renzoku"}
+_PRE_CHAIR_POOL = {name: card for name, card in _PRE_RETIREMENT_POOL.items() if name != "Renzoku"}
+AVAILABLE = _PRE_CHAIR_POOL | {"Pull the Chair": card_by_name("Pull the Chair")}
 # Previously owned cards remain playable; retired cards are never newly offered.
-OWNED_CARD_POOL = _PRE_RETIREMENT_POOL
+OWNED_CARD_POOL = _PRE_RETIREMENT_POOL | AVAILABLE
 
 
 def validate_starting_cards(starting: list[str]) -> None:
@@ -43,7 +44,7 @@ def validate_starting_cards(starting: list[str]) -> None:
         raise ValueError("Starting deck exceeds eight Kimarite.")
 
 
-def options_for(starting: list[str], picks: list[str], seed: int, *, legacy: bool = False, pre_retirement: bool = False) -> list[str]:
+def options_for(starting: list[str], picks: list[str], seed: int, *, legacy: bool = False, pre_retirement: bool = False, pre_chair: bool = False) -> list[str]:
     """A reproducible three-card choice, conditional on the CURRENT deck."""
     validate_starting_cards(starting)
     if not isinstance(picks, list) or any(not isinstance(n, str) for n in picks):
@@ -59,7 +60,7 @@ def options_for(starting: list[str], picks: list[str], seed: int, *, legacy: boo
         raise ValueError("Draft exceeds eight Kimarite.")
     # Below three Kimarite, force a three-Kimarite offer before mixed picks.
     only_kimarite = kimarite < MIN_KIMARITE
-    pool = _ORIGINAL_POOL if legacy else (_PRE_RETIREMENT_POOL if pre_retirement else AVAILABLE)
+    pool = _ORIGINAL_POOL if legacy else (_PRE_RETIREMENT_POOL if pre_retirement else (_PRE_CHAIR_POOL if pre_chair else AVAILABLE))
     remaining = [
         n for n, card in pool.items() if n not in owned
         and (card.is_kimarite if only_kimarite else
@@ -80,7 +81,8 @@ def validate_draft(starting: list[str], picks: list[str], seed: int) -> list[str
     for i, name in enumerate(picks):
         if (name not in options_for(starting, picks[:i], seed)
                 and name not in options_for(starting, picks[:i], seed, legacy=True)
-                and name not in options_for(starting, picks[:i], seed, pre_retirement=True)):
+                and name not in options_for(starting, picks[:i], seed, pre_retirement=True)
+                and name not in options_for(starting, picks[:i], seed, pre_chair=True)):
             raise ValueError(f"Invalid draft choice at pick {i + 1}.")
     deck = [*starting, *picks]
     if sum(OWNED_CARD_POOL[n].is_kimarite for n in deck) < MIN_KIMARITE:

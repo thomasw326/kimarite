@@ -828,6 +828,16 @@ def _morotezuki(state: BoutState, side: Side, card: Card, context: EffectContext
     state.log("Morotezuki primes subsequent card plays for +1 Push each.")
 
 
+def _pull_the_chair(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+    lose_momentum(state, side, 1)
+    if state.winner is not None:
+        return
+    make_unstable(state, state.opponent_side(side), source_side=side)
+    draw_one(state, side)
+    if state.winner is None:
+        add_temporary(state, side, card, phase="exchange")
+
+
 def _nekodamashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     make_unstable(state, state.opponent_side(side), source_side=side)
     add_temporary(state, side, card, phase="exchange")
@@ -997,6 +1007,7 @@ def _sheer_grit(state: BoutState, side: Side, card: Card, context: EffectContext
 EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
     "Morotezuki": _morotezuki,
     "Nekodamashi": _nekodamashi,
+    "Pull the Chair": _pull_the_chair,
     "Maesabaki": _maesabaki,
     "Deashi": _deashi,
     "Butsukari": _butsukari,
@@ -1118,6 +1129,7 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Kannuki",
         "Ottsuke",
         "Nekodamashi",
+        "Pull the Chair",
         "Denshamichi",
         "Spin Away",
         "Morozashi",
