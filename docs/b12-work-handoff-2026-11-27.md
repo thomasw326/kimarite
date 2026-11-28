@@ -118,3 +118,8 @@
 - Salt Throw LOCKED unchanged (1/1/3; Exhausted bonus +1 Momentum/+1 Push before recycling discard pile to bottom; printed-only Tachiai).
 - Give Ground REVIEWED, NOT LOCKED, unchanged (0/2/1; lose 1 Position, gain 1 Momentum and 1 Power, draw 1).
 - Total 25 locked and 8 reviewed/unlocked; all three already implemented on main. No mechanical changes authorized by this decision.
+
+## Owner review — 27 locked cards
+- Gaburi LOCKED unchanged (1/2/1); Exchange improve shallower Grip if no usable Grip, otherwise +1 Momentum; next-turn Temporary creates Yorikiri if own Power exceeds opponent's.
+- Reckless Charge LOCKED unchanged (0/0/3); Exchange +2 Push and +1 Momentum, next-turn recoil -1 Position and -1 Momentum; disruption causes immediate recoil.
+- Total 27 locked, 8 reviewed/unlocked. Both already implemented on main; no mechanical changes.
