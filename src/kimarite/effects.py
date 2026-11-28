@@ -295,7 +295,6 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
     fighter = state.fighter(side)
     deep_before_play = fighter.left_grip is GripState.DEEP
     improve_grip(state, side, "left")
-    add_temporary(state, side, card, phase="exchange")
     if state.winner is not None:
         return
 
@@ -350,7 +349,6 @@ def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -
         gain_push(state, side, 2)
     else:
         improve_grip(state, side, "right")
-    add_temporary(state, side, card, phase="exchange")
 
 
 def _shiko_stomp(
@@ -718,8 +716,6 @@ def _power_water_cantrip(
 GRIP_REFERENCING_TEMPORARIES = frozenset({
     "Gain Left Grip",
     "Gain Right Grip",
-    "Uwate",
-    "Shitate",
     "Attempt Two-Handed Grip",
     "Attempt Deep Outside Grip",
     "Attempt Deep Inside Grip",
@@ -1114,8 +1110,6 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Gaburi",
         "Gain Left Grip",
         "Gain Right Grip",
-        "Uwate",
-        "Shitate",
         "Attempt Two-Handed Grip",
         "Attempt Deep Outside Grip",
         "Attempt Deep Inside Grip",
