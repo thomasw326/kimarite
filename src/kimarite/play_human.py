@@ -117,7 +117,7 @@ CARD_LIBRARY_TEXT = {
   },
   "yori": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: If you have no usable Grip, gain 1 Grip instead; otherwise, gain 1 Push. Temporary: Remains until the beginning of your next turn. If it survives, gain 3 Momentum if your Total Grip is greater than your opponent's Total Grip; otherwise, gain 1 Momentum.",
+    "effect": "Exchange: If you have no usable Grip, improve your shallower Grip. Otherwise, gain 1 Push. Temporary: At the start of your next turn, if your total usable Grip exceeds your opponent's, gain 2 Momentum.",
     "notes": ""
   },
   "gaburi": {
