@@ -79,7 +79,7 @@
         "Sonkyo",
         "Salt Throw",
         "Meguri",
-        "Give Ground",
+        "Pull the Chair",
         "Shove",
         "Regain Balance",
         "Driving Force — Power Payoff",
@@ -103,7 +103,7 @@
         "Salt Throw",
         "Tottari",
         "Driving Force — Power Payoff",
-        "Give Ground"
+        "Pull the Chair"
       ],
       "style_proxy": "Mountain"
     },
@@ -239,21 +239,21 @@
         "Inashi",
         "Kannuki",
         "Deashi",
-        "Shikiri"
+        "Nokotta!"
       ],
       "duplicates": [
+        "Hold Position",
+        "Immovable",
         "Tsuridashi",
-        "Yoritaoshi",
         "Tsuri",
         "Gain Left Grip",
         "Uwate",
-        "Power Water",
+        "Yoritaoshi",
         "Meguri",
         "Kachiage",
         "Crushing Pressure — Power Crusher",
         "Ottsuke",
-        "Regain Balance",
-        "Sonkyo"
+        "Regain Balance"
       ],
       "style_proxy": "The Arsenal"
     },
@@ -629,7 +629,7 @@
         "Driving Force — Power Payoff",
         "Nokotta!",
         "Salt Throw",
-        "Give Ground",
+        "Pull the Chair",
         "Hold Position",
         "Immovable",
         "Regain Balance",
@@ -1460,7 +1460,7 @@
     {
       "id": "30",
       "identity": "Big-man three-window all-rounder",
-      "starting_kimarite": "Oshidashi",
+      "starting_kimarite": "Oshitaoshi",
       "base": [
         "Oshidashi",
         "Yorikiri",
@@ -1492,17 +1492,17 @@
         "Shiko Stomp"
       ],
       "duplicates": [
-        "Oshidashi",
-        "Yorikiri",
-        "Stare Down",
+        "Ankogata",
+        "Immovable",
         "Kachiage",
-        "Nodowa",
-        "Harite",
+        "Oshitaoshi",
+        "Yoritaoshi",
         "Hold Position",
-        "Shove",
+        "Stare Down",
+        "Nodowa",
+        "Driving Force — Power Payoff",
         "Deashi",
         "Gain Left Grip",
-        "Yori",
         "Tsuri"
       ],
       "style_proxy": "Power Grappler"
@@ -1586,31 +1586,31 @@
         "Sonkyo",
         "Salt Throw",
         "Meguri",
-        "Read the Move",
-        "Regain Balance",
-        "Henka",
-        "Gaburi"
+        "Hazuoshi",
+        "Nokotta!",
+        "Pull the Chair",
+        "Shove"
       ],
       "duplicates": [
+        "Pull the Chair",
+        "Hold Position",
+        "Shove",
+        "Nokotta!",
         "Hikiotoshi",
         "Hatakikomi",
-        "Gain Right Grip",
-        "Yori",
-        "Tsuri",
-        "Hold Position",
+        "Hazuoshi",
         "Immovable",
-        "Shitate",
+        "Gain Right Grip",
+        "Tsuri",
         "Kachiage",
-        "Nekodamashi",
-        "Inashi",
-        "Sonkyo"
+        "Shitate"
       ],
       "style_proxy": "Power Grappler"
     },
     {
       "id": "33",
       "identity": "Technique-first front-foot Power",
-      "starting_kimarite": "Oshidashi",
+      "starting_kimarite": "Oshitaoshi",
       "base": [
         "Oshidashi",
         "Yoritaoshi",
@@ -1644,7 +1644,7 @@
       "duplicates": [
         "Hold Position",
         "Immovable",
-        "Oshidashi",
+        "Oshitaoshi",
         "Yoritaoshi",
         "Gain Right Grip",
         "Ottsuke",
@@ -1842,18 +1842,18 @@
         "Hold Position"
       ],
       "duplicates": [
+        "Gain Right Grip",
+        "Shitate",
+        "Attempt Deep Inside Grip",
+        "Shitatehineri",
+        "Hold Position",
         "Shitatedashinage",
         "Uwatenage",
         "Gain Left Grip",
-        "Gain Right Grip",
         "Attempt Deep Outside Grip",
-        "Attempt Deep Inside Grip",
         "Uwate",
-        "Shitate",
         "Nekodamashi",
-        "Chiri-chozu",
-        "Meguri",
-        "Sonkyo"
+        "Meguri"
       ],
       "style_proxy": "The Technician"
     },
@@ -2786,7 +2786,7 @@
         "Use the Tawara",
         "Denshamichi",
         "Kachiage",
-        "Pull",
+        "Pull the Chair",
         "Hold Position",
         "Salt Throw",
         "Spin Away"
