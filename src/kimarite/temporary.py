@@ -178,7 +178,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
                 lose_momentum(state, side, 1)
         elif name == "Hakkeyoi!":
             pass  # Expires now; the opponent's third-card trigger is immediate.
-        elif name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
+        elif name in {"Gain Left Grip", "Gain Right Grip"}:
             pass
         elif name in {"Sidestep", "Spin Away"}:
             distance = state.side_by_side_distance
