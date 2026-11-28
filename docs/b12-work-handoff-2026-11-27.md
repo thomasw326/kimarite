@@ -123,3 +123,7 @@
 - Gaburi LOCKED unchanged (1/2/1); Exchange improve shallower Grip if no usable Grip, otherwise +1 Momentum; next-turn Temporary creates Yorikiri if own Power exceeds opponent's.
 - Reckless Charge LOCKED unchanged (0/0/3); Exchange +2 Push and +1 Momentum, next-turn recoil -1 Position and -1 Momentum; disruption causes immediate recoil.
 - Total 27 locked, 8 reviewed/unlocked. Both already implemented on main; no mechanical changes.
+
+## Ordinary card review checkpoint — 28 approved locks
+- Harite LOCKED by owner, pending validation/promotion. Orbs 3/0/1. Tachiai: opponent loses 1 Power and mills 2 cards; no hand discard. Exchange: opponent discards 1 random hand card, loses 1 Power and mills 2 cards. Preserve Sonkyo whole-effect prevention, Ankogata Power-only prevention and Meguri discard routing.
+- Since draw-only Tsuppari batch 46105211460: Read the Move 0/1/2 (+1 Spirit), Headlong Charge remove mill in both phases (opening bonus Push remains in net opening Push before Power resistance), Harite split effect. No other ordinary cards approved for locking. 27 locks on main plus Harite approved experimental lock; 8 reviewed/unlocked. No new batch yet.
