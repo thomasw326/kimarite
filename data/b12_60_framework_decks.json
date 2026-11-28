@@ -1534,26 +1534,26 @@
         "Sonkyo",
         "Regain Balance",
         "Salt Throw",
-        "Power Water",
+        "Hazuoshi",
         "Stare Down",
-        "Nekodamashi",
+        "Nokotta!",
         "Deashi",
         "Shove",
         "Kimedashi"
       ],
       "duplicates": [
-        "Tottari",
-        "Nodowa",
-        "Harite",
-        "Ankogata",
-        "Kachiage",
         "Hold Position",
         "Immovable",
+        "Nokotta!",
+        "Shove",
+        "Hazuoshi",
+        "Tottari",
         "Kannuki",
         "Ottsuke",
         "Maesabaki",
-        "Shikiri",
-        "Shove"
+        "Driving Force — Power Payoff",
+        "Harite",
+        "Kachiage"
       ],
       "style_proxy": "Power Grappler"
     },
@@ -1627,7 +1627,7 @@
         "Immovable",
         "Power Water",
         "Meguri",
-        "Shikiri",
+        "Nokotta!",
         "Stare Down",
         "Kachiage",
         "Nodowa",
@@ -1636,7 +1636,7 @@
         "Shove",
         "Regain Balance",
         "Butsukari",
-        "Inashi",
+        "Hazuoshi",
         "Sonkyo",
         "Salt Throw",
         "Yori"
@@ -1644,16 +1644,16 @@
       "duplicates": [
         "Hold Position",
         "Immovable",
+        "Nokotta!",
+        "Shove",
+        "Hazuoshi",
+        "Driving Force — Power Payoff",
         "Oshitaoshi",
         "Yoritaoshi",
-        "Gain Right Grip",
-        "Ottsuke",
-        "Maesabaki",
-        "Stare Down",
-        "Kachiage",
-        "Driving Force — Power Payoff",
         "Deashi",
-        "Shove"
+        "Gain Right Grip",
+        "Maesabaki",
+        "Ottsuke"
       ],
       "style_proxy": "Unorthodox Powerhouse"
     },
@@ -2260,10 +2260,10 @@
     {
       "id": "46",
       "identity": "Reactive survivor / endurance generalist",
-      "starting_kimarite": "Oshidashi",
+      "starting_kimarite": "Kotenage",
       "base": [
-        "Oshidashi",
-        "Yorikiri",
+        "Katasukashi",
+        "Tottari",
         "Utchari",
         "Hikiotoshi",
         "Kotenage",
@@ -2292,18 +2292,18 @@
         "Get Underneath"
       ],
       "duplicates": [
-        "Shove",
+        "Kotenage",
+        "Maesabaki",
         "Nokotta!",
+        "Shove",
+        "Hazuoshi",
+        "Meguri",
+        "Hikiotoshi",
         "Ottsuke",
         "Read the Move",
-        "Maesabaki",
-        "Sonkyo",
         "Salt Throw",
-        "Meguri",
         "Regain Balance",
-        "Nekodamashi",
-        "Hazuoshi",
-        "Power Water"
+        "Sonkyo"
       ],
       "style_proxy": "Opportunist"
     },
