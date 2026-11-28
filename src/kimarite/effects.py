@@ -243,7 +243,6 @@ def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) 
         gain_push(state, side, 1)
     if state.winner is None:
         add_play(state, side, 1)
-        draw_one(state, side)
 
 
 
@@ -1064,7 +1063,6 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
 # BEGIN APPROVED MILL/RECYCLE V1
 MILL_AMOUNTS = {
     "Headlong Charge": 2,
-    "Tsuppari": 2,
     "Tsuki": 1,
     "Shove": 1,
 }
