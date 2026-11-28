@@ -1,9 +1,9 @@
-name: B12 Grip Payoff Review — 35400 max40 bouts
+name: B12 Tsuppari Injury Ablation — 35400 max40 bouts
 
 on:
   push:
     branches:
-      - experiment/b12-next-card-review
+      - experiment/b12-tsuppari-injury
     paths:
       - '.github/workflows/b12-experimental-next-card-review.yml'
   workflow_dispatch:
@@ -26,6 +26,24 @@ jobs:
         run: python -m pytest -q
       - name: Verify exact approved replacement counts
         run: python -c "import json; f=json.load(open('data/b12_60_framework_decks.json'))['frameworks']; cards=[c for d in f for c in d['base']+d['duplicates']]; assert cards.count('Mawashi Reversal')==11 and 'Renzoku' not in cards"
+      - name: Verify Injury substitution and inert effect
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          from b12_60_big_test import load_designs, physical_card
+          from kimarite.effects import EXCHANGE_EFFECTS
+          from kimarite.catalog import card_by_name
+          rows = load_designs('max40')
+          assert len(rows) == 60
+          for row in rows:
+              assert row['cards'] == ['Injury' if n == 'Tsuppari' else n for n in row['base'] + row['duplicates']]
+          assert sum(r['cards'].count('Injury') for r in rows) == 25
+          assert sum('Injury' in r['cards'] for r in rows) == 16
+          a, b = physical_card('Injury'), card_by_name('Tsuppari')
+          assert (a.power, a.technique, a.spirit, a.is_kimarite) == (b.power, b.technique, b.spirit, b.is_kimarite)
+          assert EXCHANGE_EFFECTS['Injury'](None, None, a, None) is None
+          PY
       - name: Validate 40-card roster
         run: |
           python scripts/b12_60_big_test.py --mode max40 --validate-only
@@ -96,6 +114,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-grip-payoff-max40-35400-diagnostics
+          name: b12-tsuppari-injury-max40-35400-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore
