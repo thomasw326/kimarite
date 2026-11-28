@@ -187,7 +187,7 @@ CARD_LIBRARY_TEXT = {
   },
   "morozashi": {
     "timing": "Tachiai / Exchange",
-    "effect": "Requires one Level 1 Grip. Gain other Grip at Level 1; protect Grips while Temporary remains. If it survives to your next turn, gain 1 Push (not Momentum).",
+    "effect": "Exchange: Requires at least one Grip. Establish whichever Grip is missing. Temporary: Prevent your Grips from being reduced while active. At the start of your next turn, if you have both Grips, gain 1 Push and 1 Momentum.",
     "notes": ""
   },
   "yorikiri": {
