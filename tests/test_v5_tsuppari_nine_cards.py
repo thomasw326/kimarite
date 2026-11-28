@@ -21,3 +21,23 @@ def test_prepared_tsuppari_adds_nine_cards():
     assert len(generated) == 9
     assert Counter(c.name for c in generated) == {"Oshi": 3, "Tsuki": 3, "Shove": 3}
     assert len({c.card_id for c in generated}) == 9
+
+
+def test_exchange_tsuppari_refunds_play_without_draw_or_mill():
+    from kimarite.models import Side
+    from kimarite.playing import play_card
+    for prior in (None, "Oshi", "Tsuki", "Tsuppari", "Shove"):
+        tsuppari = card_by_name("Tsuppari")
+        blank = Card(95001, "Test Blank")
+        a = Wrestler("A", 2, 2, 2, card_by_name("Oshidashi"), blank, blank)
+        b = Wrestler("B", 2, 2, 2, card_by_name("Oshidashi"), blank, blank)
+        state = BoutState(FighterState(a, hand=[tsuppari], draw_pile=[blank, blank, blank]), FighterState(b))
+        state.fighter_a.plays_remaining = 1
+        if prior:
+            state.fighter_a.played_this_turn.append(card_by_name(prior))
+        play_card(state, Side.A, tsuppari)
+        assert state.fighter_a.plays_remaining == 1
+        assert not state.fighter_a.hand
+        assert state.fighter_a.draw_pile == [blank, blank, blank]
+        assert state.fighter_a.discard_pile == [tsuppari]
+        assert state.position == (1 if prior else 0)
