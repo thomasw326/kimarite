@@ -32,7 +32,7 @@ CARD_LIBRARY_TEXT = {
   },
   "tsuppari": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai: Shuffle 3 Oshi, 3 Tsuki and 3 Shove into your Draw Pile (9 generated cards). Exchange: If another Oshi/Tsuki/Tsuppari/Shove was played earlier this turn, gain 1 Push. Gain 1 Play.",
+    "effect": "Tachiai: Shuffle 3 Oshi, 3 Tsuki and 3 Shove into your Draw Pile (9 generated cards). Exchange: If another Oshi/Tsuki/Tsuppari/Shove was played earlier this turn, gain 1 Push. Draw 1 card.",
     "notes": ""
   },
   "headlong charge": {
