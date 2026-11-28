@@ -247,8 +247,8 @@ CARD_LIBRARY_TEXT = {
   },
   "tsukiotoshi": {
     "timing": "Start & End of Turn",
-    "effect": "Gained Momentum this turn · (Position −3 OR Momentum −2)",
-    "notes": "Exchange: If your Position is negative, draw 1 card. CURRENT WIN: gained Momentum during your own current turn AND (Position exactly −3 OR Momentum exactly −2). Momentum gained during the opponent's turn does not count. FUTURE BUFF CANDIDATE ONLY if underpowered: change Position condition to Position ≤ −2; keep Momentum exactly −2 and current-turn Momentum-gain requirement unchanged. Momentum −2 after gaining Momentum indicates recovery from −3 (assuming a +1 gain)."
+    "effect": "No Grip · Momentum ≥ +3 · Power disadvantage ≥ 3 · Opponent Unstable",
+    "notes": "Exchange: gain 1 additional Play."
   },
   "tsukitaoshi": {
     "timing": "Start & End of Turn",
