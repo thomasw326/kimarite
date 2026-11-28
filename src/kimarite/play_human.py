@@ -47,7 +47,7 @@ CARD_LIBRARY_TEXT = {
   },
   "harite": {
     "timing": "Tachiai / Exchange",
-    "effect": "Gain 1 Power. Opponent loses 1 Power.",
+    "effect": "Tachiai: Your opponent loses 1 Power and mills 2 cards. Exchange: Your opponent discards 1 random card from their hand, loses 1 Power and mills 2 cards.",
     "notes": ""
   },
   "gain left grip": {
