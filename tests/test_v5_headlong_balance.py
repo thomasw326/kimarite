@@ -41,6 +41,7 @@ def test_headlong_decline_grants_no_bonus_and_discards_prepared_card():
     assert state.headlong_decisions == [(Side.A, "Tachiai", "decline", None)]
     assert "Headlong Charge" not in [c.name for c in state.fighter_a.draw_pile]
     assert "Headlong Charge" in [c.name for c in state.fighter_a.discard_pile]
+    assert len(state.fighter_a.draw_pile) == 3
 
 
 def test_headlong_sacrifice_grants_momentum_and_push_only():
@@ -53,3 +54,31 @@ def test_headlong_sacrifice_grants_momentum_and_push_only():
     assert "Oshidashi" in [c.name for c in state.fighter_a.discard_pile]
     # The sacrifice adds +1 Momentum and +1 Push to the standard opening.
     assert state.momentum == 1
+    assert len(state.fighter_a.draw_pile) == 3
+    assert state.position == 2
+
+
+def test_headlong_bonus_is_blocked_by_opening_power():
+    state, comparison = _bout("Headlong Charge")
+    state.fighter_b.power = state.fighter_a.power + 4
+    resolve_prepared_tachiai(state, comparison, sacrifice_choices={Side.A: 0})
+    assert state.position == 0
+    assert state.momentum == 1
+
+
+def test_headlong_exchange_does_not_mill():
+    from kimarite.playing import play_card
+    from kimarite.effects import EffectContext
+    state, comparison = _bout("Headlong Charge")
+    charge = card_by_name("Headlong Charge")
+    state.fighter_a.hand = [charge]
+    before = list(state.fighter_a.draw_pile)
+    play_card(state, Side.A, charge, context=EffectContext(choices={"sacrifice_kimarite": 0}))
+    assert state.fighter_a.draw_pile == before
+    assert state.position == 1
+    assert state.momentum == 1
+
+
+def test_read_the_move_printed_orbs():
+    card = card_by_name("Read the Move")
+    assert (card.power, card.technique, card.spirit) == (0, 1, 2)
