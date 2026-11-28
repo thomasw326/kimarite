@@ -142,7 +142,7 @@ CARD_LIBRARY_TEXT = {
   },
   "henka": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai: If your Technique exceeds your opponent's Spirit, gain 1 Momentum, make your opponent Unstable, and start Exchange at Position 0. Exchange: enter Temporary Zone; prevent first 1 incoming Push while active. If it survives until next turn, gain 1 Momentum and make opponent Unstable. If disrupted, you become Unstable.",
+    "effect": "Tachiai: If your Technique exceeds your opponent's Spirit, gain 1 Momentum, make your opponent Unstable, and start Exchange at Position 0. Exchange — Temporary: At the start of your next turn, gain 1 Momentum and make your opponent Unstable. If disrupted, you become Unstable.",
     "notes": ""
   },
   "pull": {
