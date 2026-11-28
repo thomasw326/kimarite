@@ -16,7 +16,7 @@ from kimarite.style_builds_v5 import build_style
 LIVE_ORB_OVERRIDES = {
     "Ottsuke": (1, 1, 1),
     "Deashi": (2, 0, 1),  # B12-approved Spirit reduction
-    "Read the Move": (0, 1, 1),
+    "Read the Move": (0, 1, 2),
     "Henka": (0, 2, 0),
     "Explosive Step — Fumikomi": (0, 0, 2),
 }  # Approved live printings supersede the frozen V5.1 manifest.
@@ -50,8 +50,8 @@ def test_release_catalog_orbs():
     for row in MANIFEST["cards"]:
         card = next(card for card in CARD_POOL if card.name == row["name"])
         if row["name"] == "Read the Move":
-            # Current B11 print differs from the frozen V5.1 snapshot.
-            assert (card.power, card.technique, card.spirit) == (0, 1, 1)
+            # Owner-approved B12 print differs from the frozen V5.1 snapshot.
+            assert (card.power, card.technique, card.spirit) == (0, 1, 2)
             continue
         if row["type"] == "Non-Kimarite":
             expected = tuple(row["orbs"][key] for key in ("power", "technique", "spirit"))
