@@ -17,6 +17,10 @@ from pathlib import Path
 import kimarite.style_ai_v5 as style_ai
 from kimarite.b11_player_draft import AVAILABLE, GENERATED_ONLY, MAX_KIMARITE, MIN_KIMARITE
 from kimarite.catalog import card_by_name
+from kimarite.effects import EXCHANGE_EFFECTS
+
+# Experiment-only blank card; no Tachiai handler or combo identity.
+EXCHANGE_EFFECTS["Injury"] = lambda state, side, card, context: None
 from kimarite.models import BoutState, Card, FighterState, Side, Stat, Wrestler
 from kimarite.styles_v5 import STYLES
 from kimarite.tachiai import compare_tachiai, first_exchange_side
@@ -56,7 +60,7 @@ def load_designs(mode: str) -> list[dict]:
         kim_count = sum(card_by_name(name).is_kimarite for name in base)
         if not MIN_KIMARITE <= kim_count <= MAX_KIMARITE:
             raise ValueError(f"{row['id']}: invalid Kimarite count {kim_count}")
-        row["cards"] = base + (dupes if mode == "max40" else [])
+        row["cards"] = ["Injury" if name == "Tsuppari" else name for name in base + (dupes if mode == "max40" else [])]
         row["name"] = f"{row['id']} — {row['identity']}"
     return frameworks
 
@@ -71,6 +75,8 @@ def make_seed(master: int, pair_index: int, repeat: int, framework: str) -> int:
 
 
 def physical_card(name: str) -> Card:
+    if name == "Injury":
+        return Card(5, "Injury", 2, 0, 1)
     card = card_by_name(name)
     # Physical instances are individually allocated rather than sharing
     # catalogue objects. Their rules/card_id remain untouched.
