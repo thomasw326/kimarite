@@ -156,7 +156,7 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     for instance in list(defender.temporary_zone):
         if amount <= 0:
             break
-        if instance.card.name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
+        if instance.card.name in {"Gain Left Grip", "Gain Right Grip"}:
             defender.temporary_zone.remove(instance)
             (defender.exhaust_pile if instance.exhaust_on_leave else defender.discard_pile).append(instance.card)
             state.temporary_outcomes.append((defending_side, instance.card.name, "protected"))
