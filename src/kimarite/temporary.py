@@ -166,9 +166,10 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name == "Ottsuke":
             pass  # Grip prevention expires now.
         elif name == "Morozashi":
-            gain_push(state, side, 1)
-            if state.winner is None:
-                gain_momentum(state, side, 1)
+            if fighter.left_grip is not GripState.NONE and fighter.right_grip is not GripState.NONE:
+                gain_push(state, side, 1)
+                if state.winner is None:
+                    gain_momentum(state, side, 1)
         elif name == "Inashi":
             gain_momentum(state, side, 2)
         elif name == "Reckless Charge":
