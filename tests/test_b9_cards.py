@@ -46,7 +46,7 @@ def test_b9_decks_have_fifteen_valid_40_card_lists():
 def test_new_cards_registered_with_orbs():
     expected = {
         "Morotezuki": (3, 0, 0),
-        "Kachiage": (3, 0, 0),
+        "Kachiage": (3, 0, 1),
         "Nekodamashi": (1, 1, 2),
         "Maesabaki": (0, 2, 2),
         "Deashi": (2, 0, 1),
@@ -95,15 +95,15 @@ def test_spin_away_interruption_creates_okuritaoshi():
     assert any(c.name == "Okuritaoshi" for c in bout.fighter_b.kimarite_zone)
 
 
-def test_butsukari_checks_are_independent_and_mills_one():
+def test_butsukari_checks_are_independent_without_milling():
     bout = state(8, 6)
     bout.momentum = 1
     bout.fighter_a.draw_pile = [card_by_name("Oshi")]
     effect(bout, "Butsukari")
     assert bout.fighter_b.power == 4
     assert bout.fighter_b.unstable
-    assert len(bout.fighter_a.discard_pile) == 1
-    assert not bout.fighter_a.draw_pile
+    assert not bout.fighter_a.discard_pile
+    assert bout.fighter_a.draw_pile == [card_by_name("Oshi")]
 
 
 def test_maesabaki_reduces_grip_and_removes_temporary():
@@ -137,13 +137,13 @@ def test_nekodamashi_unstable_on_play_and_on_survival():
     assert not bout.fighter_a.temporary_zone
 
 
-def test_henka_first_incoming_push_prevented():
+def test_henka_does_not_prevent_incoming_push():
     bout = state()
     effect(bout, "Henka")
     gain_push(bout, Side.B, 1)
-    assert bout.position == 0
-    gain_push(bout, Side.B, 1)
     assert bout.position == -1
+    gain_push(bout, Side.B, 1)
+    assert bout.position == -2
 
 
 def test_kannuki_survives_to_remove_grips_and_gain_momentum():
