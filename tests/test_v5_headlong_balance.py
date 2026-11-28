@@ -93,7 +93,8 @@ def test_harite_tachiai_preserves_opponent_hand():
     resolve_prepared_tachiai(state, comparison)
     assert state.fighter_b.hand == [held]
     assert state.fighter_b.power == power - 1
-    assert state.fighter_b.draw_pile == before[2:]
+    # Opposing prepared ordinary card returns to the bottom after opening.
+    assert state.fighter_b.draw_pile == before[2:] + [state.fighter_b.wrestler.prepared_tachiai_card]
     assert state.fighter_b.discard_pile == before[:2]
 
 
