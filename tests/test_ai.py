@@ -86,10 +86,11 @@ def test_equal_grip_removal_uses_attacker_seat():
         assert (victim.right_grip is GripState.NONE) == (expected == "right")
 
 
-def test_ai_grip_tie_break_honours_finish_threat_before_seat():
+def test_ai_grip_tie_break_honours_seat_even_with_finish_threat():
     from kimarite.ai import _best_grip_to_reduce
     for attacking in (Side.A, Side.B):
-        for threat, expected in (("Uwatenage", "left"), ("Shitatenage", "right")):
+        for threat in ("Uwatenage", "Shitatenage"):
+            expected = "left" if attacking is Side.A else "right"
             bout = BoutState(FighterState(wrestler("A")), FighterState(wrestler("B")))
             target = bout.opponent(attacking)
             target.left_grip = GripState.DEEP

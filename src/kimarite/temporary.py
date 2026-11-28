@@ -111,12 +111,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         name = instance.card.name
 
         # Sonkyo explicitly does not leave at the start of the owner's turn.
-        if name in {"Sonkyo", "Meguri", "Chiri-chozu", "Shikiri"}:
-            continue
-        if name == "Salt Throw":
-            if fighter.discard_pile:
-                fighter.draw_pile.append(fighter.discard_pile.pop())
-                state.log(f"{fighter.wrestler.name} recycles one card with Salt Throw.")
+        if name in {"Sonkyo", "Meguri", "Chiri-chozu", "Shikiri", "Ankogata"}:
             continue
 
         if name == "Attempt Two-Handed Grip":
@@ -136,7 +131,8 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             from .rules import effective_total_grip
             owner_grip = effective_total_grip(state, side)
             other_grip = effective_total_grip(state, state.opponent_side(side))
-            gain_momentum(state, side, 2 if owner_grip > other_grip else 1)
+            if owner_grip > other_grip:
+                gain_momentum(state, side, 2)
         elif name == "Gaburi":
             if fighter.power > state.opponent(side).power:
                 created = card_by_name("Yorikiri")
@@ -150,11 +146,10 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
                 gain_momentum(state, side, 2)
         elif name == "Henka":
             gain_momentum(state, side, 1)
-            make_unstable(state, state.opponent_side(side))
+            make_unstable(state, state.opponent_side(side), source_side=side)
         elif name == "Nekodamashi":
-            make_unstable(state, state.opponent_side(side))
+            make_unstable(state, state.opponent_side(side), source_side=side)
         elif name == "Denshamichi":
-            gain_momentum(state, side, 1)
             gain_push(state, side, 1)
         elif name == "Give Ground":
             pass
@@ -172,9 +167,10 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
         elif name == "Ottsuke":
             pass  # Grip prevention expires now.
         elif name == "Morozashi":
-            gain_push(state, side, 1)
-            if state.winner is None:
-                gain_momentum(state, side, 1)
+            if fighter.left_grip is not GripState.NONE and fighter.right_grip is not GripState.NONE:
+                gain_push(state, side, 1)
+                if state.winner is None:
+                    gain_momentum(state, side, 1)
         elif name == "Inashi":
             gain_momentum(state, side, 2)
         elif name == "Reckless Charge":
@@ -183,7 +179,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
                 lose_momentum(state, side, 1)
         elif name == "Hakkeyoi!":
             pass  # Expires now; the opponent's third-card trigger is immediate.
-        elif name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
+        elif name in {"Gain Left Grip", "Gain Right Grip"}:
             pass
         elif name in {"Sidestep", "Spin Away"}:
             distance = state.side_by_side_distance
@@ -200,7 +196,7 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
                     "takes the favorable orientation."
                 )
                 if name == "Sidestep":
-                    make_unstable(state, state.opponent_side(side))
+                    make_unstable(state, state.opponent_side(side), source_side=side)
         else:
             raise KeyError(f"No start-of-turn Temporary resolution for {name!r}.")
 

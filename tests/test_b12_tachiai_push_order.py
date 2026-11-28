@@ -67,7 +67,7 @@ def test_power_initialization_and_buffs_are_not_double_counted():
     assert state.position == 0
 
 
-def test_hold_position_tachiai_power_buff_blocks_card_push():
+def test_hold_position_tachiai_power_buff_and_neutral_position():
     state, comp = setup(a_power=0, a_spirit=0,
                         a_prepared="Hold Position",
                         b_power=1, b_spirit=0, b_prepared="Shove")
@@ -178,3 +178,48 @@ def test_power_bonus_of_one_does_not_add_a_block_off_threshold():
     state.fighter_b.power += 1  # Power +1 -> +2: remains one block.
     assert apply_tachiai_power_push(state, comp) == (Side.A, 2)
     assert state.position == 2
+
+
+def test_fumikomi_tachiai_retains_bonus_without_milling():
+    state, comp = setup(a_power=0, a_spirit=1, a_prepared="Explosive Step — Fumikomi")
+    draw = [Card(99100 + i, f"Draw {i}") for i in range(4)]
+    state.fighter_a.draw_pile = list(draw)
+    resolve_prepared_tachiai(state, comp)
+    assert state.position == 2
+    assert state.fighter_a.draw_pile[:4] == draw
+    assert not state.fighter_a.discard_pile
+    assert state.winner is None
+
+
+@pytest.mark.parametrize("hold_side", [Side.A, Side.B])
+@pytest.mark.parametrize("spirit", [-20, -4, 0, 4, 20])
+@pytest.mark.parametrize("defensive_card", ["Hold Position", "Immovable"])
+def test_defensive_card_neutralizes_both_directions_and_opening_victories(hold_side, spirit, defensive_card):
+    a_name, b_name = (defensive_card, "Shove") if hold_side is Side.A else ("Shove", defensive_card)
+    state, comp = setup(a_power=0, a_spirit=max(0, spirit), a_prepared=a_name,
+                        b_power=0, b_spirit=max(0, -spirit), b_prepared=b_name)
+    before = state.fighter(hold_side).power
+    resolve_prepared_tachiai(state, comp)
+    assert state.position == 0
+    assert state.winner is None
+    assert state.fighter(hold_side).power == before + 2
+    assert not state.fighter(hold_side).temporary_zone
+    assert state.fighter(hold_side).draw_pile[-1].name == defensive_card
+
+
+def test_hold_position_preserves_nonmovement_tachiai_effects():
+    state, comp = setup(a_power=0, a_spirit=0, a_prepared="Hold Position",
+                        b_power=0, b_spirit=9, b_prepared="Get Underneath")
+    resolve_prepared_tachiai(state, comp)
+    assert state.position == 0
+    assert state.momentum == -1
+    assert state.winner is None
+
+
+def test_both_defensive_cards_grant_power_and_neutralize_opening():
+    state, comp = setup(a_power=0, a_spirit=7, a_prepared="Immovable", b_prepared="Hold Position")
+    before = (state.fighter_a.power, state.fighter_b.power)
+    resolve_prepared_tachiai(state, comp)
+    assert state.position == 0
+    assert state.winner is None
+    assert (state.fighter_a.power, state.fighter_b.power) == (before[0] + 2, before[1] + 2)

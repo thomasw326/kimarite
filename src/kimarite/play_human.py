@@ -32,7 +32,7 @@ CARD_LIBRARY_TEXT = {
   },
   "tsuppari": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai: Shuffle 3 Oshi, 3 Tsuki and 3 Shove into your Draw Pile (9 generated cards). Exchange: Gain 1 Momentum; if another Oshi/Tsuki/Tsuppari/Shove was played this turn, gain 1 Push. Gain 1 Play, draw 1, then Mill 1.",
+    "effect": "Tachiai: Shuffle 3 Oshi, 3 Tsuki and 3 Shove into your Draw Pile (9 generated cards). Exchange: If another Oshi/Tsuki/Tsuppari/Shove was played earlier this turn, gain 1 Push. Draw 1 card.",
     "notes": ""
   },
   "headlong charge": {
@@ -72,7 +72,7 @@ CARD_LIBRARY_TEXT = {
   },
   "attempt two-handed grip": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: Establish 1 chosen Grip at Level 1 (without reducing an existing higher Grip). Temporary: Remains until the beginning of your next turn. If it survives, establish both Left and Right Grip at Level 1 (without reducing existing higher Grips). If removed or prevented before then, lose 1 Momentum.",
+    "effect": "Exchange: Establish either Grip. Temporary: Establish both Grips. If disrupted, opponent gains 1 Momentum.",
     "notes": ""
   },
   "attempt deep outside grip": {
@@ -87,7 +87,7 @@ CARD_LIBRARY_TEXT = {
   },
   "shiko stomp": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai / Exchange: Enter a persistent Temporary. When an opponent effect would negatively affect you or something you control, prevent that effect and discard Sonkyo. It does not expire at the beginning of your turn.",
+    "effect": "Tachiai: Printed orbs only. Exchange: If leading Position before play, gain 1 Power. If leading Power before play, gain 1 Push. Both conditions check the pre-play state independently.",
     "notes": ""
   },
   "salt throw": {
@@ -107,7 +107,7 @@ CARD_LIBRARY_TEXT = {
   },
   "belt slap": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: Gain 1 Push. If you won Spirit in the Tachiai by 3 or more, gain 1 Momentum.",
+    "effect": "Exchange: Gain 1 Momentum. If you won Spirit in the Tachiai by 3 or more, gain 1 Push.",
     "notes": ""
   },
   "tsuri": {
@@ -117,7 +117,7 @@ CARD_LIBRARY_TEXT = {
   },
   "yori": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: If you have no usable Grip, gain 1 Grip instead; otherwise, gain 1 Push. Temporary: Remains until the beginning of your next turn. If it survives, gain 3 Momentum if your Total Grip is greater than your opponent's Total Grip; otherwise, gain 1 Momentum.",
+    "effect": "Exchange: If you have no usable Grip, improve your shallower Grip. Otherwise, gain 1 Push. Temporary: At the start of your next turn, if your total usable Grip exceeds your opponent's, gain 2 Momentum.",
     "notes": ""
   },
   "gaburi": {
@@ -132,17 +132,17 @@ CARD_LIBRARY_TEXT = {
   },
   "hold position": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange — Temporary: Your opponent cannot gain Push while Hold Position remains. Remains until the beginning of your next turn. If it survives, gain 1 Momentum and 1 Power.",
+    "effect": "Tachiai: Gain 2 Power. Exchange starts at Position 0. Exchange — Temporary: Your opponent cannot gain Push while Hold Position remains. Remains until the beginning of your next turn. If it survives, gain 1 Momentum and 1 Power.",
     "notes": ""
   },
   "immovable": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange — Temporary: Gain 1 Power. Remains until the beginning of your next turn. If it survives and your opponent gained no Push while it remained, gain 2 Momentum.",
+    "effect": "Tachiai: Gain 2 Power. Exchange starts at Position 0. Exchange — Temporary: Gain 1 Power. Remains until the beginning of your next turn. If it survives and your opponent gained no Push while it remained, gain 2 Momentum.",
     "notes": ""
   },
   "henka": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai: If your Technique is greater than your opponent's Spirit, the bout begins at Position 0, regardless of Tachiai Push. Exchange: Draw 1 card.",
+    "effect": "Tachiai: If your Technique exceeds your opponent's Spirit, gain 1 Momentum, make your opponent Unstable, and start Exchange at Position 0. Exchange — Temporary: At the start of your next turn, gain 1 Momentum and make your opponent Unstable. If disrupted, you become Unstable.",
     "notes": ""
   },
   "pull": {
@@ -167,7 +167,7 @@ CARD_LIBRARY_TEXT = {
   },
   "regain balance": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: Draw 1 card. If your Momentum is negative, gain 2 Momentum and 2 Power.",
+    "effect": "Exchange: Draw 1 card. If your Momentum is negative, gain 1 Momentum and 2 Power.",
     "notes": ""
   },
   "sidestep": {
@@ -187,7 +187,7 @@ CARD_LIBRARY_TEXT = {
   },
   "morozashi": {
     "timing": "Tachiai / Exchange",
-    "effect": "Requires one Level 1 Grip. Gain other Grip at Level 1; protect Grips while Temporary remains. If it survives to your next turn, gain 1 Push (not Momentum).",
+    "effect": "Exchange: Requires at least one Grip. Establish whichever Grip is missing. Temporary: At the start of your next turn, if you have both Grips, gain 1 Push and 1 Momentum.",
     "notes": ""
   },
   "yorikiri": {
@@ -252,8 +252,8 @@ CARD_LIBRARY_TEXT = {
   },
   "tsukitaoshi": {
     "timing": "Start & End of Turn",
-    "effect": "Momentum 2+ · Cards Played This Turn 4+",
-    "notes": "Exchange: Unconditionally gain 1 additional Play, draw 1, then discard 1 card from hand. Win unchanged: Momentum 2+ and 4+ cards played this turn."
+    "effect": "Position 0+ · Cards Played This Turn 4+",
+    "notes": "Exchange: Unconditionally gain 1 additional Play, draw 1, then discard 1 card from hand. Win: Position 0+ and 4+ cards played this turn."
   },
   "tsuridashi": {
     "timing": "Start & End of Turn",
@@ -277,7 +277,7 @@ CARD_LIBRARY_TEXT = {
   },
   "explosive step — fumikomi": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai: If you win Spirit, gain 1 Push. Exchange: Gain 1 Momentum; if your Momentum was 0 or less before play, gain 1 Push. Mill 2 in both phases.",
+    "effect": "Tachiai: If you win Spirit, gain 1 Push. Exchange: Gain 1 Momentum. If not Exhausted (fewer than 7 discards), gain 1 Push.",
     "notes": ""
   },
   "shitatenage": {

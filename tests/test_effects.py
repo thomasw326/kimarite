@@ -38,7 +38,7 @@ def test_tsuppari_chains_after_oshi():
     oshi = card_by_name("Oshi")
     tsuppari = card_by_name("Tsuppari")
     bout = bout_with_hand([oshi, tsuppari, Card(8999, "Cost")])
-    bout.fighter_a.draw_pile = [Card(8101, "Draw A"), Card(8102, "Draw B"), Card(8103, "Draw C"), Card(8104, "Draw D")]
+    bout.fighter_a.draw_pile = [Card(8101, "Draw A"), Card(8102, "Draw B"), Card(8103, "Draw C"), Card(8104, "Draw D"), Card(8105, "Draw E")]
 
     play_card(bout, Side.A, oshi)
     play_card(bout, Side.A, tsuppari)
@@ -47,7 +47,24 @@ def test_tsuppari_chains_after_oshi():
     assert bout.momentum == 0
     assert bout.position == 2
     assert [c.name for c in bout.fighter_a.played_this_turn] == ["Oshi", "Tsuppari"]
-    assert bout.fighter_a.plays_remaining == 2
+    assert bout.fighter_a.plays_remaining == 1
+    assert bout.winner is None
+    assert [c.name for c in bout.fighter_a.draw_pile] == ["Draw D", "Draw E"]
+    assert [c.name for c in bout.fighter_a.hand] == ["Draw A", "Draw C"]
+    assert [c.name for c in bout.fighter_a.discard_pile] == ["Cost", "Draw B", "Oshi", "Tsuppari"]
+
+
+def test_tsuppari_standalone_draws_without_refund_or_mill():
+    card = card_by_name("Tsuppari")
+    bout = bout_with_hand([card])
+    bout.fighter_a.draw_pile = [Card(8201, "Draw"), Card(8202, "Mill A"), Card(8203, "Mill B"), Card(8204, "Keep")]
+    play_card(bout, Side.A, card)
+    assert bout.position == 0
+    assert bout.momentum == 0
+    assert bout.fighter_a.plays_remaining == 1
+    assert [c.name for c in bout.fighter_a.hand] == ["Draw"]
+    assert [c.name for c in bout.fighter_a.discard_pile] == ["Tsuppari"]
+    assert [c.name for c in bout.fighter_a.draw_pile] == ["Mill A", "Mill B", "Keep"]
     assert bout.winner is None
 
 
@@ -91,17 +108,20 @@ def test_regain_balance_recovers_negative_momentum():
     assert bout.fighter_a.power == 2
 
 
-def test_belt_slap_uses_recorded_spirit_advantage():
+def test_belt_slap_always_gains_momentum_and_push_requires_spirit_advantage():
     belt = card_by_name("Belt Slap")
-    a = wrestler("A", spirit=3, primary=Stat.SPIRIT, secondary=Stat.POWER)
-    b = wrestler("B", spirit=0)
-    bout = BoutState(FighterState(a, hand=[belt]), FighterState(b))
-    comparison = compare_tachiai(a, b)
-
-    play_card(bout, Side.A, belt, context=EffectContext(comparison=comparison))
-
-    assert bout.position == 1
-    assert bout.momentum == 1
+    for side in (Side.A, Side.B):
+        for advantage in (-3, -1, 0, 2, 3, 4):
+            own = wrestler("Owner", spirit=max(advantage, 0), primary=Stat.SPIRIT, secondary=Stat.POWER)
+            foe = wrestler("Opponent", spirit=max(-advantage, 0), primary=Stat.SPIRIT, secondary=Stat.POWER)
+            a, b = (own, foe) if side is Side.A else (foe, own)
+            bout = BoutState(FighterState(a), FighterState(b), active_side=side)
+            bout.fighter(side).hand = [belt]
+            comparison = compare_tachiai(a, b)
+            play_card(bout, side, belt, context=EffectContext(comparison=comparison))
+            assert bout.position * bout.sign(side) == (1 if advantage >= 3 else 0)
+            assert bout.momentum * bout.sign(side) == 1
+            assert bout.winner is None
 
 
 def test_ottsuke_reduces_grip_and_prevents_new_grip():

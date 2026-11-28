@@ -10,24 +10,6 @@ POSITION_MIN = -4
 POSITION_MAX = 4
 
 
-def _cap_for(side: Side) -> int:
-    return TRACK_MAX if side is Side.A else TRACK_MIN
-
-
-def _distance_past_cap(value: int) -> int:
-    if value > TRACK_MAX:
-        return value - TRACK_MAX
-    if value < TRACK_MIN:
-        return TRACK_MIN - value
-    return 0
-
-
-def _track_at_favorable_cap(state: BoutState, side: Side, kind: str) -> bool:
-    # Momentum caps at ±3, while B11 Position extends safely to ±4.
-    cap = (TRACK_MAX if kind == "momentum" else POSITION_MAX) * state.sign(side)
-    return (state.momentum if kind == "momentum" else state.position) == cap
-
-
 def _has_temporary(state: BoutState, side: Side, card_name: str) -> bool:
     return any(
         instance.card.name == card_name
@@ -53,36 +35,15 @@ def _resolve_shared_track_gain(state: BoutState, side: Side, amount: int, kind: 
         state.win_source = "ringout"
         state.declare_winner(side, "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi")
         return
-    if kind == "push":
-        excess = 0
-        clamped = max(POSITION_MIN, min(POSITION_MAX, target))
-    else:
-        excess = _distance_past_cap(target)
-        clamped = max(TRACK_MIN, min(TRACK_MAX, target))
-
     if kind == "momentum":
-        state.momentum = clamped
+        # Approved B12 rule: cap Momentum; excess is lost, never Push.
+        state.momentum = max(TRACK_MIN, min(TRACK_MAX, target))
         state.fighter(side).gained_momentum_this_turn = True
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Momentum.")
-        next_kind = "push"
     else:
-        state.position = clamped
+        state.position = max(POSITION_MIN, min(POSITION_MAX, target))
         state.fighter(side).gained_push_this_turn = True
         state.log(f"{state.fighter(side).wrestler.name} gains {amount} Push.")
-        next_kind = "momentum"
-
-    if excess == 0:
-        return
-
-    # Overflow converts 1:1. If the destination track is already capped for
-    # the same wrestler, conversion would loop forever; that is an immediate win.
-    if _track_at_favorable_cap(state, side, next_kind):
-        method = "Yorikiri" if total_grip(state, side) > 0 else "Oshidashi"
-        state.win_source = "ringout"
-        state.declare_winner(side, method)
-        return
-
-    _resolve_shared_track_gain(state, side, excess, next_kind)
 
 
 def discard_normally(state: BoutState, side: Side, card) -> None:
@@ -195,23 +156,12 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     for instance in list(defender.temporary_zone):
         if amount <= 0:
             break
-        if instance.card.name in {"Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate"}:
+        if instance.card.name in {"Gain Left Grip", "Gain Right Grip"}:
             defender.temporary_zone.remove(instance)
             (defender.exhaust_pile if instance.exhaust_on_leave else defender.discard_pile).append(instance.card)
             state.temporary_outcomes.append((defending_side, instance.card.name, "protected"))
             state.log(f"{instance.card.name} prevents 1 incoming Push.")
             amount -= 1
-    if amount <= 0:
-        return
-
-    # B9 Henka: protect exactly one incoming Push while active.
-    for temporary in defender.temporary_zone:
-        if amount <= 0:
-            break
-        if temporary.card.name == "Henka" and not getattr(temporary, "henka_prevention_used", False):
-            temporary.henka_prevention_used = True
-            amount -= 1
-            state.log("Henka prevents the first 1 incoming Push.")
     if amount <= 0:
         return
 
@@ -259,9 +209,12 @@ def lose_position(state: BoutState, side: Side, amount: int, *, source: str = "u
     gain_position(state, state.opponent_side(side), amount)
 
 
-def make_unstable(state: BoutState, side: Side) -> None:
+def make_unstable(state: BoutState, side: Side, *, source_side: Side | None = None) -> None:
     """Apply the B9 Unstable condition until this fighter finishes its next turn."""
     fighter = state.fighter(side)
+    if source_side is state.opponent_side(side) and _has_temporary(state, side, "Ankogata"):
+        state.log(f"Ankogata prevents {fighter.wrestler.name} from becoming Unstable.")
+        return
     fighter.unstable = True
     # Recovery follows the target's NEXT completed turn. If inflicted during
     # their own turn, do not recover at that turn's imminent end.
@@ -276,8 +229,11 @@ def gain_power(state: BoutState, side: Side, amount: int) -> None:
     state.log(f"{fighter.wrestler.name} gains {amount} Power.")
 
 
-def lose_power(state: BoutState, side: Side, amount: int) -> None:
+def lose_power(state: BoutState, side: Side, amount: int, *, source_side: Side | None = None) -> None:
     fighter = state.fighter(side)
+    if amount > 0 and source_side is state.opponent_side(side) and _has_temporary(state, side, "Ankogata"):
+        state.log(f"Ankogata prevents {fighter.wrestler.name} from losing Power.")
+        return
     fighter.power -= amount
     state.log(f"{fighter.wrestler.name} loses {amount} Power.")
 
@@ -318,11 +274,19 @@ def effective_total_grip(
     return state.fighter(side).total_grip
 
 
+def automatic_grip_hand(state: BoutState, side: Side, *, reduce: bool = False) -> str:
+    """Choose shallower own/deeper opposing Grip; acting seat breaks ties."""
+    fighter = state.opponent(side) if reduce else state.fighter(side)
+    if fighter.left_grip == fighter.right_grip:
+        return "left" if side is Side.A else "right"
+    if reduce:
+        return "left" if fighter.left_grip > fighter.right_grip else "right"
+    return "left" if fighter.left_grip < fighter.right_grip else "right"
+
+
 def gain_flexible_grip(state: BoutState, side: Side) -> None:
-    """Improve whichever Grip is shallower, left on ties, up to Deep."""
-    fighter = state.fighter(side)
-    hand = "left" if fighter.left_grip <= fighter.right_grip else "right"
-    improve_grip(state, side, hand)
+    """Improve whichever Grip is shallower, acting seat on ties, up to Deep."""
+    improve_grip(state, side, automatic_grip_hand(state, side))
 
 
 def establish_grip(state: BoutState, side: Side, hand: str) -> None:
@@ -363,21 +327,13 @@ def improve_grip(state: BoutState, side: Side, hand: str, amount: int = 1) -> No
 
 def reduce_grip(state: BoutState, side: Side, amount: int = 1, hand: str | None = None) -> None:
     fighter = state.fighter(side)
-    if _has_temporary(state, side, "Morozashi"):
-        state.log(f"Morozashi prevents {fighter.wrestler.name}'s Grip from being reduced.")
-        return
     for _ in range(amount):
         if hand is not None:
             attr = _grip_attr(hand)
         else:
             # Deterministic generic reduction: reduce the deeper grip first,
             # then attacker's seat A chooses Left, seat B Right on ties.
-            attr = (
-                "left_grip"
-                if (int(fighter.left_grip) > int(fighter.right_grip) or
-                    (fighter.left_grip == fighter.right_grip and state.opponent_side(side) is Side.A))
-                else "right_grip"
-            )
+            attr = _grip_attr(automatic_grip_hand(state, state.opponent_side(side), reduce=True))
         current = int(getattr(fighter, attr))
         if current > 0:
             next_grip = GripState(current - 1)

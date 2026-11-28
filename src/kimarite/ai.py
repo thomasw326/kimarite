@@ -7,7 +7,7 @@ from .effects import ChoiceRequired, EffectContext, IllegalPlay
 from .kimarite import satisfied_kimarite
 from .models import BoutState, Card, GripState, Side
 from .playing import play_card
-from .rules import effective_total_grip
+from .rules import automatic_grip_hand, effective_total_grip
 from .tachiai import TachiaiComparison
 
 
@@ -39,19 +39,7 @@ def _card_priority(card: Card, state: BoutState, side: Side) -> tuple[int, int, 
 
 
 def _best_grip_to_reduce(state: BoutState, side: Side) -> str:
-    opponent = state.opponent(side)
-    if int(opponent.left_grip) > int(opponent.right_grip):
-        return "left"
-    if int(opponent.right_grip) > int(opponent.left_grip):
-        return "right"
-    # On equal levels, disrupt a threatened deep-hand finisher first.
-    threatened = {card.name for card in opponent.kimarite_zone}
-    if "Uwatenage" in threatened and "Shitatenage" not in threatened:
-        return "left"
-    if "Shitatenage" in threatened and "Uwatenage" not in threatened:
-        return "right"
-    # Stable across the bout: seat A targets left, seat B targets right.
-    return "left" if side is Side.A else "right"
+    return automatic_grip_hand(state, side, reduce=True)
 
 
 def _best_hand_index(state: BoutState, side: Side, *, prefer_discard: bool) -> int:
@@ -451,7 +439,7 @@ def kimarite_progress(state: BoutState, side: Side, card: Card) -> float:
     elif card.name == "Hikiotoshi":
         parts = [_at_most(momentum, -2), _nonnegative(position), _at_least(grip, 1)]
     elif card.name == "Tsukitaoshi":
-        parts = [_at_least(momentum, 2), _at_least(fighter.cards_played_this_turn, 3)]
+        parts = [_nonnegative(position), _at_least(fighter.cards_played_this_turn, 4)]
     elif card.name == "Tsuridashi":
         parts = [_at_least(grip, 3), _nonnegative(position), _at_least(fighter.power, 6)]
     elif card.name == "Kotenage":

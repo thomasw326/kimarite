@@ -33,7 +33,7 @@ def bout(hand=(), draw=(), opponent_draw=()):
 
 EXPECTED = {
     "Sonkyo": (1, 1, 1),
-    "Renzoku": (0, 3, 0), "Meguri": (0, 2, 1),
+    "Mawashi Reversal": (1, 2, 0), "Meguri": (0, 2, 1),
     "Nokotta!": (1, 0, 2), "Hakkeyoi!": (0, 0, 3),
     "Hazuoshi": (1, 1, 1), "Inashi": (1, 1, 2),
     "Chiri-chozu": (1, 1, 1), "Shikiri": (1, 2, 2),
@@ -61,7 +61,7 @@ def test_sonkyo_and_new_shiko_are_distinct():
     state.fighter_b.power = 4
     state.momentum = 1
     play_card(state, Side.A, state.fighter_a.hand[0])
-    assert (state.position, state.momentum, state.fighter_a.power) == (1, 2, 5)
+    assert (state.position, state.momentum, state.fighter_a.power) == (1, 1, 5)
     assert not state.fighter_a.temporary_zone
     assert [c.name for c in state.fighter_a.discard_pile] == ["Shiko Stomp"]
 
@@ -122,11 +122,23 @@ def test_kimetaoshi_uses_ten_discard_and_power_lead_four():
     assert not kimarite_is_satisfied(state, Side.A, card_by_name("Kimetaoshi"))
 
 
-def test_nokotta_backward_gains_two_push():
-    state, _ = bout(hand=[card_by_name("Nokotta!")])
-    state.position = -2
-    play_card(state, Side.A, state.fighter_a.hand[0])
-    assert state.position == 0
+@pytest.mark.parametrize("owner", [Side.A, Side.B])
+@pytest.mark.parametrize("relative_position", [-4, -2, -1, 0, 1, 4])
+def test_nokotta_backward_gains_two_push_otherwise_draws(owner, relative_position):
+    card = card_by_name("Nokotta!")
+    state, blank = bout()
+    fighter = state.fighter(owner)
+    fighter.hand = [card]
+    fighter.draw_pile = [blank]
+    state.active_side = owner
+    sign = state.sign(owner)
+    state.position = sign * relative_position
+    play_card(state, owner, card)
+    assert state.position * sign == relative_position + (2 if relative_position < 0 else 0)
+    assert fighter.hand == ([] if relative_position < 0 else [blank])
+    assert fighter.draw_pile == ([blank] if relative_position < 0 else [])
+    assert state.winner is None
+    assert state.momentum == 0
 
 
 def test_hazuoshi_only_disrupts_after_two_preceding_cards():
@@ -324,12 +336,12 @@ def test_approved_henka_and_explosive_step_orb_nerfs():
 @pytest.mark.parametrize(
     "position,power_a,power_b,expected_position,expected_momentum,expected_power",
     [
-        (0, 5, 4, 1, 1, 5),    # only existing Power lead -> Push
-        (1, 4, 5, 1, 1, 5),    # Position lead -> Power, but no Power lead -> no Push
-        (1, 5, 4, 2, 1, 6),    # Position lead -> Power, then Power lead -> Push
-        (0, 4, 5, 0, 1, 4),    # no lead -> Momentum only
-        (-1, 4, 5, -1, 1, 4), # no Position lead -> no Power or Push
-        (1, 4, 4, 1, 1, 5),    # Power gained from Position cannot unlock Push
+        (0, 5, 4, 1, 0, 5),    # only existing Power lead -> Push
+        (1, 4, 5, 1, 0, 5),    # Position lead -> Power, but no Power lead -> no Push
+        (1, 5, 4, 2, 0, 6),    # Position lead -> Power, then Power lead -> Push
+        (0, 4, 5, 0, 0, 4),    # no lead -> no reward
+        (-1, 4, 5, -1, 0, 4), # no Position lead -> no Power or Push
+        (1, 4, 4, 1, 0, 5),    # Power gained from Position cannot unlock Push
     ],
 )
 def test_shiko_stomp_independent_pre_play_conditions(
@@ -386,14 +398,14 @@ def test_get_underneath_search_not_repeated_without_another_kimarite():
     assert [c.name for c in state.fighter_b.kimarite_zone] == ["Yorikiri"]
     assert (state.position, state.momentum) == (2, 2)
 
-def test_butsukari_power_lead_loses_two_power_and_mills_one():
+def test_butsukari_power_lead_loses_two_power_without_milling():
     state, _ = bout(hand=[card_by_name("Butsukari")],
                     draw=[blank_card(), blank_card()])
     state.fighter_a.power = 5
     state.fighter_b.power = 3
     play_card(state, Side.A, state.fighter_a.hand[0])
     assert state.fighter_b.power == 1
-    assert len(state.fighter_a.draw_pile) == 1
+    assert len(state.fighter_a.draw_pile) == 2
     assert not state.fighter_b.unstable
 
 
@@ -406,7 +418,7 @@ def test_butsukari_without_power_lead_keeps_power_loss_conditional():
     play_card(state, Side.A, state.fighter_a.hand[0])
     assert state.fighter_b.power == 3
     assert state.fighter_b.unstable
-    assert len(state.fighter_a.draw_pile) == 1
+    assert len(state.fighter_a.draw_pile) == 2
 
 @pytest.mark.parametrize("discard_count,expected_unstable", [
     (0, False), (6, False), (7, True), (8, True),
@@ -440,15 +452,18 @@ def test_get_underneath_tachiai_no_exhaustion_penalty():
     assert not state.fighter_a.unstable
 
 @pytest.mark.parametrize("relative_momentum", [-3, -1, 0, 1, 3])
-def test_explosive_step_gains_push_and_momentum_and_mills_three_on_exchange(relative_momentum):
+@pytest.mark.parametrize("discard_count", [0, 6, 7, 8])
+def test_explosive_step_momentum_and_non_exhausted_push_without_mill(relative_momentum, discard_count):
     card = card_by_name("Explosive Step — Fumikomi")
-    state, _ = bout(hand=[card], draw=[blank_card() for _ in range(3)])
+    draw = [blank_card() for _ in range(3)]
+    state, _ = bout(hand=[card], draw=list(draw))
+    state.fighter_a.discard_pile = [blank_card() for _ in range(discard_count)]
     state.momentum = relative_momentum
     play_card(state, Side.A, card)
-    assert state.position == (2 if relative_momentum == 3 else 1)
+    assert state.position == (1 if discard_count < 7 else 0)
     assert state.momentum == min(relative_momentum + 1, 3)
-    assert not state.fighter_a.draw_pile
-    assert sum(c.name == "Blank" for c in state.fighter_a.discard_pile) == 3
+    assert state.fighter_a.draw_pile == draw
+    assert sum(c.name == "Blank" for c in state.fighter_a.discard_pile) == discard_count
     assert state.winner is None
 
 
@@ -479,3 +494,9 @@ def test_mawashi_reversal_requires_grip_lead_for_both_effects(
     assert state.momentum * sign == momentum
     assert state.side_by_side_owner is None
     assert not state.opponent(side).unstable
+
+
+def test_retired_renzoku_preserved_but_not_draftable():
+    assert card_by_name("Renzoku").card_id == 14001
+    assert "Renzoku" not in AVAILABLE
+    assert "Mawashi Reversal" in AVAILABLE

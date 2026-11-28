@@ -68,14 +68,14 @@ def test_seat_mirroring_keeps_each_identity_deck_fixed():
     assert a.fighter(side_a).draw_pile == b.fighter(side_b).draw_pile
     assert a.opponent(side_a).draw_pile == b.opponent(side_b).draw_pile
 
-def test_henka_prevents_only_first_point_of_incoming_push():
+def test_henka_does_not_prevent_incoming_push_in_r20():
     from kimarite.rules import gain_push
     state, _ = sample()
     add_temporary(state, Side.A, Card(629, "Henka", 0, 4, 0), phase="exchange")
     gain_push(state, Side.B, 2)
-    assert state.position == -1
-    gain_push(state, Side.B, 1)
     assert state.position == -2
+    gain_push(state, Side.B, 1)
+    assert state.position == -3
 
 
 def test_paid_rear_conversion_is_not_optional():

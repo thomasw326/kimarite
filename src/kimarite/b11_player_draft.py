@@ -26,21 +26,24 @@ _ORIGINAL_POOL = {
     if card.name not in GENERATED_ONLY
 }
 
-AVAILABLE = _ORIGINAL_POOL | {card.name: card for card in PLAYER_DRAFT_CARD_POOL}
+_PRE_RETIREMENT_POOL = _ORIGINAL_POOL | {card.name: card for card in PLAYER_DRAFT_CARD_POOL}
+AVAILABLE = {name: card for name, card in _PRE_RETIREMENT_POOL.items() if name != "Renzoku"}
+# Previously owned cards remain playable; retired cards are never newly offered.
+OWNED_CARD_POOL = _PRE_RETIREMENT_POOL
 
 
 def validate_starting_cards(starting: list[str]) -> None:
     if not isinstance(starting, list) or len(starting) > TARGET_SIZE:
         raise ValueError("Starting deck must contain 0–28 cards.")
-    if any(not isinstance(name, str) or name not in AVAILABLE for name in starting):
+    if any(not isinstance(name, str) or name not in OWNED_CARD_POOL for name in starting):
         raise ValueError("Starting deck contains an unavailable card.")
     if any(count > 2 for count in Counter(starting).values()):
         raise ValueError("Inherited starting cards may contain at most two copies per card.")
-    if sum(AVAILABLE[name].is_kimarite for name in starting) > MAX_KIMARITE:
+    if sum(OWNED_CARD_POOL[name].is_kimarite for name in starting) > MAX_KIMARITE:
         raise ValueError("Starting deck exceeds eight Kimarite.")
 
 
-def options_for(starting: list[str], picks: list[str], seed: int, *, legacy: bool = False) -> list[str]:
+def options_for(starting: list[str], picks: list[str], seed: int, *, legacy: bool = False, pre_retirement: bool = False) -> list[str]:
     """A reproducible three-card choice, conditional on the CURRENT deck."""
     validate_starting_cards(starting)
     if not isinstance(picks, list) or any(not isinstance(n, str) for n in picks):
@@ -49,14 +52,14 @@ def options_for(starting: list[str], picks: list[str], seed: int, *, legacy: boo
     if len(owned) >= TARGET_SIZE:
         return []
     if (len(set(picks)) != len(picks) or set(picks) & set(starting)
-            or any(n not in AVAILABLE for n in owned)):
+            or any(n not in OWNED_CARD_POOL for n in owned)):
         raise ValueError("Draft contains unavailable or repeated cards.")
-    kimarite = sum(AVAILABLE[n].is_kimarite for n in owned)
+    kimarite = sum(OWNED_CARD_POOL[n].is_kimarite for n in owned)
     if kimarite > MAX_KIMARITE:
         raise ValueError("Draft exceeds eight Kimarite.")
     # Below three Kimarite, force a three-Kimarite offer before mixed picks.
     only_kimarite = kimarite < MIN_KIMARITE
-    pool = _ORIGINAL_POOL if legacy else AVAILABLE
+    pool = _ORIGINAL_POOL if legacy else (_PRE_RETIREMENT_POOL if pre_retirement else AVAILABLE)
     remaining = [
         n for n, card in pool.items() if n not in owned
         and (card.is_kimarite if only_kimarite else
@@ -76,10 +79,11 @@ def validate_draft(starting: list[str], picks: list[str], seed: int) -> list[str
     # Saved drafts may have accepted an offer from before the pool expanded.
     for i, name in enumerate(picks):
         if (name not in options_for(starting, picks[:i], seed)
-                and name not in options_for(starting, picks[:i], seed, legacy=True)):
+                and name not in options_for(starting, picks[:i], seed, legacy=True)
+                and name not in options_for(starting, picks[:i], seed, pre_retirement=True)):
             raise ValueError(f"Invalid draft choice at pick {i + 1}.")
     deck = [*starting, *picks]
-    if sum(AVAILABLE[n].is_kimarite for n in deck) < MIN_KIMARITE:
+    if sum(OWNED_CARD_POOL[n].is_kimarite for n in deck) < MIN_KIMARITE:
         raise ValueError("Completed deck requires at least three Kimarite.")
     return deck
 
@@ -115,7 +119,7 @@ def deal_block(deck: list[str], seed: int, ids: list[str] | None = None,
     from .b10_card_info import card_info
     if not isinstance(deck, list) or len(deck) < 9:
         raise ValueError("A block requires at least nine cards.")
-    if any(name not in AVAILABLE for name in deck):
+    if any(name not in OWNED_CARD_POOL for name in deck):
         raise ValueError("Unknown card in player deck.")
     if ids is None:
         ids = [f"original:{i}" for i in range(len(deck))]

@@ -39,3 +39,19 @@ def test_display_conditions_agree_with_engine_on_sampled_states():
                     expected = kimarite_is_satisfied(state, Side.A, card_by_name(name))
                     actual = all(x["met"] for x in victory_checks(state, Side.A, name))
                     assert actual == expected, (name, momentum, position, power, actual, expected)
+
+
+def test_tsukitaoshi_requires_nonnegative_relative_position_and_four_cards():
+    blank = Card(99903, "Blank")
+    card = card_by_name("Tsukitaoshi")
+    for side, sign in ((Side.A, 1), (Side.B, -1)):
+        for position in (-4, -1, 0, 1, 4):
+            for plays in (3, 4, 5):
+                for momentum in (-3, 0, 3):
+                    a = FighterState(Wrestler("A", 0, 0, 0, blank, blank, blank))
+                    b = FighterState(Wrestler("B", 0, 0, 0, blank, blank, blank))
+                    state = BoutState(a, b, momentum=momentum * sign, position=position * sign)
+                    state.fighter(side).cards_played_this_turn = plays
+                    expected = position >= 0 and plays >= 4
+                    assert kimarite_is_satisfied(state, side, card) == expected
+                    assert all(x["met"] for x in victory_checks(state, side, card.name)) == expected

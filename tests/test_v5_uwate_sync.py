@@ -24,7 +24,7 @@ def test_uwate_without_deep_grip_looks_and_draws():
     assert state.fighter_a.plays_remaining == 1
     assert [c.name for c in state.fighter_a.hand] == ["Shove"]
     assert [c.name for c in state.fighter_a.draw_pile] == ["Tsuri"]
-    assert [c.card.name for c in state.fighter_a.temporary_zone] == ["Uwate"]
+    assert not state.fighter_a.temporary_zone
 
 
 def test_uwate_deep_grip_plays_selected_card_free():
@@ -36,4 +36,4 @@ def test_uwate_deep_grip_plays_selected_card_free():
     assert state.fighter_a.plays_remaining == 1
     assert state.fighter_a.cards_played_this_turn == 2
     assert state.card_plays == [(Side.A, "Uwate"), (Side.A, "Shove")]
-    assert [c.card.name for c in state.fighter_a.temporary_zone] == ["Uwate"]
+    assert not state.fighter_a.temporary_zone

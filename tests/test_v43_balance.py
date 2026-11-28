@@ -39,6 +39,8 @@ def test_hikiotoshi_draw_no_grip():
 
 def test_morozashi_survival_push_and_momentum():
     s = bout()
+    s.fighter_a.left_grip = GripState.GRIP
+    s.fighter_a.right_grip = GripState.GRIP
     add_temporary(s, Side.A, card_by_name("Morozashi"), phase="exchange")
     resolve_start_of_turn_temporaries(s, Side.A)
     assert s.position == 1
@@ -112,3 +114,47 @@ def test_shiko_stomp_exchange_refunds_play_and_protects():
     play_card(s, Side.A, shiko)
     assert s.fighter_a.plays_remaining == 2
     assert any(t.card.name == "Sonkyo" for t in s.fighter_a.temporary_zone)
+
+
+def test_morozashi_single_deep_grip_no_reward():
+    s = bout()
+    s.fighter_a.left_grip = GripState.DEEP
+    add_temporary(s, Side.A, card_by_name("Morozashi"), phase="exchange")
+    resolve_start_of_turn_temporaries(s, Side.A)
+    assert (s.position, s.momentum) == (0, 0)
+
+
+def test_morozashi_can_play_under_ottsuke():
+    from kimarite.playing import play_card
+    s = bout()
+    card = card_by_name("Morozashi")
+    s.fighter_a.hand = [card]
+    s.fighter_a.left_grip = GripState.GRIP
+    add_temporary(s, Side.B, card_by_name("Ottsuke"), phase="exchange")
+    play_card(s, Side.A, card)
+    assert s.fighter_a.right_grip is GripState.NONE
+    assert any(t.card.name == "Morozashi" for t in s.fighter_a.temporary_zone)
+    resolve_start_of_turn_temporaries(s, Side.A)
+    assert (s.position, s.momentum) == (0, 0)
+
+
+def test_morozashi_does_not_protect_grips():
+    from kimarite.rules import reduce_grip
+    s = bout()
+    s.fighter_a.left_grip = GripState.GRIP
+    s.fighter_a.right_grip = GripState.GRIP
+    add_temporary(s, Side.A, card_by_name("Morozashi"), phase="exchange")
+    reduce_grip(s, Side.A, hand="left")
+    assert s.fighter_a.left_grip is GripState.NONE
+    resolve_start_of_turn_temporaries(s, Side.A)
+    assert (s.position, s.momentum) == (0, 0)
+
+
+def test_yori_only_rewards_grip_lead():
+    for own, other, expected in [(GripState.GRIP, GripState.GRIP, 0), (GripState.GRIP, GripState.DEEP, 0), (GripState.DEEP, GripState.GRIP, 2)]:
+        s = bout()
+        s.fighter_a.left_grip = own
+        s.fighter_b.left_grip = other
+        add_temporary(s, Side.A, card_by_name("Yori"), phase="exchange")
+        resolve_start_of_turn_temporaries(s, Side.A)
+        assert s.momentum == expected

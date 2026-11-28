@@ -7,6 +7,7 @@ from .models import BoutState, Card, GripState, Side, Stat
 from .prevention import prevent_negative_effect
 from .rules import (
     effective_total_grip,
+    automatic_grip_hand,
     discard_normally,
     establish_grip,
     gain_flexible_grip,
@@ -172,9 +173,10 @@ def _shove(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
 
 
 def _explosive_step(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    gain_push(state, side, 1)
-    if state.winner is None:
-        gain_momentum(state, side, 1)
+    gain_momentum(state, side, 1)
+    fighter = state.fighter(side)
+    if state.winner is None and len(fighter.discard_pile) < fighter.exhaustion_threshold:
+        gain_push(state, side, 1)
 
 
 def _tsuki(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -240,7 +242,6 @@ def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) 
     if chained and state.winner is None:
         gain_push(state, side, 1)
     if state.winner is None:
-        add_play(state, side, 1)
         draw_one(state, side)
 
 
@@ -263,7 +264,7 @@ def _harite(state: BoutState, side: Side, card: Card, context: EffectContext) ->
         discarded = opponent.hand.pop(roll % len(opponent.hand))
         discard_normally(state, state.opponent_side(side), discarded)
         state.log(f"{opponent.wrestler.name} discards {discarded.name} to Harite.")
-    lose_power(state, opponent_side, 1)
+    lose_power(state, opponent_side, 1, source_side=side)
     mill_cards(state, opponent_side, 2)
 
 
@@ -293,7 +294,6 @@ def _uwate(state: BoutState, side: Side, card: Card, context: EffectContext) -> 
     fighter = state.fighter(side)
     deep_before_play = fighter.left_grip is GripState.DEEP
     improve_grip(state, side, "left")
-    add_temporary(state, side, card, phase="exchange")
     if state.winner is not None:
         return
 
@@ -348,7 +348,6 @@ def _shitate(state: BoutState, side: Side, card: Card, context: EffectContext) -
         gain_push(state, side, 2)
     else:
         improve_grip(state, side, "right")
-    add_temporary(state, side, card, phase="exchange")
 
 
 def _shiko_stomp(
@@ -367,13 +366,17 @@ def _salt_throw(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
     fighter = state.fighter(side)
-    if fighter.discard_pile:
+    exhausted = len(fighter.discard_pile) >= 7
+    # Resolve the approved Exhausted bonus before recycling. The condition
+    # is evaluated on the pre-recycle pile; a terminal win stops further effects.
+    if exhausted:
+        gain_momentum(state, side, 1)
+        if state.winner is None:
+            gain_push(state, side, 1)
+    if state.winner is None and fighter.discard_pile:
         fighter.draw_pile.extend(fighter.discard_pile)
         fighter.discard_pile.clear()
         state.log(f"{fighter.wrestler.name} recycles the discard pile with Salt Throw.")
-    add_temporary(state, side, card, phase="exchange")
-    if context.comparison is None:
-        add_play(state, side, 1)
 
 
 def _stare_down(
@@ -386,9 +389,9 @@ def _stare_down(
 def _belt_slap(
     state: BoutState, side: Side, card: Card, context: EffectContext
 ) -> None:
-    gain_push(state, side, 1)
-    if tachiai_advantage(context, side, Stat.SPIRIT) >= 3:
-        gain_momentum(state, side, 1)
+    gain_momentum(state, side, 1)
+    if state.winner is None and tachiai_advantage(context, side, Stat.SPIRIT) >= 3:
+        gain_push(state, side, 1)
 
 
 def _tsuri(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -489,7 +492,7 @@ def _attempt_two_handed(
     fighter = state.fighter(side)
     chosen = context.choice("grip")
     if chosen not in {"left", "right"}:
-        chosen = "left" if fighter.left_grip <= fighter.right_grip else "right"
+        chosen = automatic_grip_hand(state, side)
     establish_grip(state, side, chosen)
     add_temporary(state, side, card, phase="exchange")
 
@@ -583,7 +586,7 @@ def _choose_opponent_temporary(
 
 
 def _nodowa(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    make_unstable(state, state.opponent_side(side))
+    make_unstable(state, state.opponent_side(side), source_side=side)
     opponent = state.opponent(side)
     if opponent.hand:
         # Deterministic pseudo-random discard preserves reproducible batch seeds.
@@ -646,7 +649,7 @@ def _pull(state: BoutState, side: Side, card: Card, context: EffectContext) -> N
     if state.winner is None:
         gain_momentum(state, side, 1)
     if state.winner is None:
-        make_unstable(state, state.opponent_side(side))
+        make_unstable(state, state.opponent_side(side), source_side=side)
         draw_one(state, side)
         if state.winner is None:
             # Rank the complete hand after drawing, rather than always losing the new card.
@@ -712,8 +715,6 @@ def _power_water_cantrip(
 GRIP_REFERENCING_TEMPORARIES = frozenset({
     "Gain Left Grip",
     "Gain Right Grip",
-    "Uwate",
-    "Shitate",
     "Attempt Two-Handed Grip",
     "Attempt Deep Outside Grip",
     "Attempt Deep Inside Grip",
@@ -816,7 +817,7 @@ def _crushing_pressure(state: BoutState, side: Side, card: Card, context: Effect
             raise IllegalPlay("Crushing Pressure requires Power 7+ and Power Advantage 3+.")
         gain_momentum(state, side, 1)
         if state.winner is None and not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose 1 Power"):
-            lose_power(state, state.opponent_side(side), 1)
+            lose_power(state, state.opponent_side(side), 1, source_side=side)
     else:
         draw_one(state, side)
 
@@ -828,7 +829,7 @@ def _morotezuki(state: BoutState, side: Side, card: Card, context: EffectContext
 
 
 def _nekodamashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    make_unstable(state, state.opponent_side(side))
+    make_unstable(state, state.opponent_side(side), source_side=side)
     add_temporary(state, side, card, phase="exchange")
 
 
@@ -840,7 +841,7 @@ def _maesabaki(state: BoutState, side: Side, card: Card, context: EffectContext)
     if opponent.total_grip:
         if not prevent_negative_effect(state, opponent_side, source=card.name, description="remove one hand's Grip"):
             before = opponent.total_grip
-            reduce_grip(state, opponent_side, amount=2, hand="left" if opponent.left_grip > opponent.right_grip or (opponent.left_grip == opponent.right_grip and side is Side.A) else "right")
+            reduce_grip(state, opponent_side, amount=2, hand=automatic_grip_hand(state, side, reduce=True))
             grip_removed = opponent.total_grip < before
     if opponent.temporary_zone:
         target = _choose_opponent_temporary(state, side, card, context)
@@ -866,10 +867,9 @@ def _deashi(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 def _butsukari(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     if state.fighter(side).power > state.opponent(side).power:
         if not prevent_negative_effect(state, state.opponent_side(side), source=card.name, description="lose Power"):
-            lose_power(state, state.opponent_side(side), 2)
+            lose_power(state, state.opponent_side(side), 2, source_side=side)
     if state.momentum * state.sign(side) >= 1:
-        make_unstable(state, state.opponent_side(side))
-    mill_cards(state, side, 1)
+        make_unstable(state, state.opponent_side(side), source_side=side)
 
 
 def _denshamichi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -886,15 +886,7 @@ def _spin_away(state: BoutState, side: Side, card: Card, context: EffectContext)
 
 def _ankogata(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
     gain_power(state, side, 1)
-    state.fighter(side).unstable = False
-    if state.fighter(side).power >= 6:
-        opponent_side = state.opponent_side(side)
-        opponent = state.opponent(side)
-        for hand in ("left", "right"):
-            if state.fighter(side).power >= 9:
-                reduce_grip(state, opponent_side, amount=2, hand=hand)
-            else:
-                reduce_grip(state, opponent_side, hand=hand)
+    add_temporary(state, side, card, phase="exchange")
 
 
 # B12 expansion: ordinary cards, rituals, fatigue and delayed recoil.
@@ -912,7 +904,10 @@ def _meguri(state: BoutState, side: Side, card: Card, context: EffectContext) ->
 
 
 def _nokotta(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
-    gain_push(state, side, 2 if state.position * state.sign(side) < 0 else 1)
+    if state.position * state.sign(side) < 0:
+        gain_push(state, side, 2)
+    else:
+        draw_one(state, side)
 
 
 def _hakkeyoi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -931,7 +926,7 @@ def _hazuoshi(state: BoutState, side: Side, card: Card, context: EffectContext) 
     ):
         reduce_grip(state, opponent_side)
         if opponent.total_grip < before:
-            make_unstable(state, opponent_side)
+            make_unstable(state, opponent_side, source_side=side)
 
 
 def _inashi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
@@ -972,7 +967,6 @@ def _aggressive_shiko_stomp(state: BoutState, side: Side, card: Card, context: E
     # create an otherwise unavailable Push on the same play.
     has_position_lead = state.position * state.sign(side) > 0
     has_power_lead = state.fighter(side).power > state.opponent(side).power
-    gain_momentum(state, side, 1)
     if state.winner is not None:
         return
     if has_position_lead:
@@ -1069,8 +1063,6 @@ EXCHANGE_EFFECTS: dict[str, ExchangeEffect] = {
 # BEGIN APPROVED MILL/RECYCLE V1
 MILL_AMOUNTS = {
     "Headlong Charge": 2,
-    "Explosive Step — Fumikomi": 3,
-    "Tsuppari": 1,
     "Tsuki": 1,
     "Shove": 1,
 }
@@ -1103,8 +1095,8 @@ for _name in MILL_AMOUNTS:
 
 TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
     {
-        "Salt Throw",
         "Sonkyo",
+        "Ankogata",
         "Meguri",
         "Hakkeyoi!",
         "Inashi",
@@ -1116,8 +1108,6 @@ TEMPORARY_CARD_NAMES: frozenset[str] = frozenset(
         "Gaburi",
         "Gain Left Grip",
         "Gain Right Grip",
-        "Uwate",
-        "Shitate",
         "Attempt Two-Handed Grip",
         "Attempt Deep Outside Grip",
         "Attempt Deep Inside Grip",

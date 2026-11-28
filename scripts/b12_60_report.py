@@ -47,6 +47,7 @@ def main():
     p.add_argument("--output-dir", default="artifacts/b12_report")
     p.add_argument("--repetitions", type=int, default=1)
     p.add_argument("--allow-partial", action="store_true")
+    p.add_argument("--mode", choices=["base28", "max40"], default=None)
     args = p.parse_args()
     output = Path(args.output_dir)
     files = sorted(Path(args.input_root).rglob("bouts_*.jsonl"))
@@ -57,6 +58,7 @@ def main():
     matchup = defaultdict(tally)
     method = defaultdict(tally)
     assigned = defaultdict(tally)
+    grip_tachiai = defaultdict(tally)
     played = defaultdict(tally)
     included = defaultdict(tally)
     role_comparisons = defaultdict(tally)
@@ -117,6 +119,10 @@ def main():
                 add(matchup, (mode, frm, enemy, side), won)
                 add(method, (mode, frm, win_source, win_method), won)
                 add(assigned, (mode, frm, "prepared_tachiai", f["prepared_tachiai"]), won)
+                if {"Gain Left Grip", "Gain Right Grip"}.issubset(f["deck"]) and f["prepared_tachiai"] in {"Gain Left Grip", "Gain Right Grip"}:
+                    advantage = bout["opening"]["technique_advantage_a"] * (1 if side == "A" else -1)
+                    add(grip_tachiai, (mode, frm, f["starting_kimarite"], enemy, side,
+                                      f["prepared_tachiai"], advantage), won)
                 add(assigned, (mode, frm, "top_deck", f["top_deck"]), won)
                 add(assigned, (mode, frm, "starting_kimarite", f["starting_kimarite"]), won)
                 add(starting_kim, (mode, frm, f["starting_kimarite"]), won)
@@ -139,10 +145,14 @@ def main():
                         mode, card_name, "top_deck",
                         "selected" if f["top_deck"] == card_name else "not_selected",
                     ), won)
-                    add(role_comparisons, (
-                        mode, card_name, "exchange_play",
-                        "played" if card_name in plays_by_name else "not_played",
-                    ), won)
+                    play_cohort = "played" if card_name in plays_by_name else "not_played"
+                    add(role_comparisons, (mode, card_name, "exchange_play", play_cohort), won)
+                    # Name-level conditional cohorts: exclude the entire wrestler-bout
+                    # for this card if its name was assigned the specified opening role.
+                    if f["prepared_tachiai"] != card_name:
+                        add(role_comparisons, (mode, card_name, "exchange_play_non_tachiai", play_cohort), won)
+                    if f["top_deck"] != card_name:
+                        add(role_comparisons, (mode, card_name, "exchange_play_non_top_deck", play_cohort), won)
                 play_origin_pairs = {(event["card"], event["origin"]) for event in f["plays"]}
                 for card_name in set(f["deck"]):
                     group = "played" if card_name in plays_by_name else "unplayed"
@@ -195,7 +205,7 @@ def main():
         raise SystemExit("repetitions must be positive")
     if not args.allow_partial:
         expected = 3540 * args.repetitions
-        for mode in ("base28", "max40"):
+        for mode in ((args.mode,) if args.mode else ("base28", "max40")):
             if len(seen_global_ids[mode]) != expected:
                 raise SystemExit(f"{mode}: {len(seen_global_ids[mode])}/{expected} expected bouts")
             if seen_global_ids[mode] != set(range(expected)):
@@ -215,6 +225,9 @@ def main():
     dump_store("matchup_results.csv", ["mode", "framework", "opponent", "side"], matchup)
     dump_store("victory_methods.csv", ["mode", "framework", "source", "method"], method)
     dump_store("card_assignments.csv", ["mode", "framework", "role", "card"], assigned)
+    dump_store("gain_grip_matched_tachiai.csv",
+               ["mode", "framework", "starting_kimarite", "opponent_framework", "side",
+                "prepared_card", "technique_advantage"], grip_tachiai)
     dump_store("card_played_vs_unplayed.csv", ["mode", "framework", "card", "play_status"], played)
     dump_store("card_inclusion.csv", ["mode", "framework", "card", "copies"], included)
     dump_store("hand_exposure.csv", ["mode", "framework", "card", "type"], exposure)
@@ -262,6 +275,30 @@ def main():
                     raise SystemExit(
                         f"Comparison denominator mismatch: {report_mode}/{card_name}/{metric}"
                     )
+            for metric, opening_role in (
+                ("exchange_play_non_tachiai", "prepared_tachiai"),
+                ("exchange_play_non_top_deck", "top_deck"),
+            ):
+                parts = []
+                for category in ("played", "not_played"):
+                    t = {
+                        key: sum(role_comparisons[(m, card_name, metric, category)][key]
+                                 for m in modes)
+                        for key in ("wins", "bouts")
+                    }
+                    parts.append(t)
+                    comparisons.append((metric, category, t))
+                    overall = next(t for met, cat, t in comparisons
+                                   if met == "exchange_play" and cat == category)
+                    if any(t[key] > overall[key] for key in ("wins", "bouts")) or (
+                        t["bouts"] - t["wins"] > overall["bouts"] - overall["wins"]
+                    ):
+                        raise SystemExit(f"Conditional cohort not a subset: {report_mode}/{card_name}/{metric}/{category}")
+                expected = next(t for met, cat, t in comparisons
+                                if met == opening_role and cat == "not_selected")
+                if any(sum(t[key] for t in parts) != expected[key]
+                       for key in ("wins", "bouts")):
+                    raise SystemExit(f"Conditional denominator mismatch: {report_mode}/{card_name}/{metric}")
             for metric, category, counts in comparisons:
                 compare_rows.append(scored_row(
                     {"mode": report_mode, "card": card_name,
@@ -273,6 +310,41 @@ def main():
          "win_rate_percent", "low_sample_n_lt_30"],
         compare_rows,
     )
+    # One row per card and mode with all six deltas and exact cohort counts.
+    # Use unrounded rates for the difference; undefined comparisons stay blank.
+    delta_specs = (
+        ("inclusion", "deck_inclusion", "included", "not_included"),
+        ("played", "exchange_play", "played", "not_played"),
+        ("tachiai", "prepared_tachiai", "selected", "not_selected"),
+        ("top_deck", "top_deck", "selected", "not_selected"),
+        ("non_tachiai_played", "exchange_play_non_tachiai", "played", "not_played"),
+        ("non_top_deck_played", "exchange_play_non_top_deck", "played", "not_played"),
+    )
+    indexed = {(r["mode"], r["card"], r["comparison"], r["cohort"]): r
+               for r in compare_rows}
+    delta_rows = []
+    delta_fields = ["mode", "card"]
+    for label, _, _, _ in delta_specs:
+        delta_fields.extend(f"{label}_{suffix}" for suffix in (
+            "positive_wins", "positive_bouts", "positive_wr_percent",
+            "negative_wins", "negative_bouts", "negative_wr_percent",
+            "delta_pp", "low_sample"))
+    for mode, card in sorted({(r["mode"], r["card"]) for r in compare_rows}):
+        row = {"mode": mode, "card": card}
+        for label, metric, positive, negative in delta_specs:
+            a = indexed[(mode, card, metric, positive)]
+            b = indexed[(mode, card, metric, negative)]
+            for prefix, t in (("positive", a), ("negative", b)):
+                row[f"{label}_{prefix}_wins"] = t["wins"]
+                row[f"{label}_{prefix}_bouts"] = t["bouts"]
+                row[f"{label}_{prefix}_wr_percent"] = t["win_rate_percent"]
+            row[f"{label}_delta_pp"] = (
+                round(100 * (a["wins"] / a["bouts"] - b["wins"] / b["bouts"]), 3)
+                if a["bouts"] and b["bouts"] else ""
+            )
+            row[f"{label}_low_sample"] = min(a["bouts"], b["bouts"]) < 30
+        delta_rows.append(row)
+    write_csv(output / "card_six_deltas.csv", delta_fields, delta_rows)
     dump_store("starting_kimarite_performance.csv", ["mode", "framework", "kimarite"], starting_kim)
     dump_store("card_origin_play_rates.csv", ["mode", "framework", "card", "origin"], deck_kim)
 
@@ -323,7 +395,7 @@ def main():
               ["mode", "framework", "metric", "advantage", "won", "bouts"], tachiai_rows)
 
     summary = {
-        "source_sha256": next(iter(source_hashes)), "bouts_total": total,
+        "source_sha256": next(iter(source_hashes)), "bouts_total": sum(len(ids) for ids in seen_global_ids.values()),
         "modes": {mode: {"requested": status[(mode, "requested")],
                          "completed": status[(mode, "completed")],
                          "failed": status[(mode, "failed")],

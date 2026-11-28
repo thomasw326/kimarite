@@ -137,28 +137,28 @@ def test_b7_oshi_requires_discard_and_draws_and_mills_through_real_play():
     assert any(p.card.name == "Oshi" for p in candidate_plays(choose, Side.A, compared))
 
 
-def test_explosive_step_gains_push_and_momentum_and_mills_three():
+def test_explosive_step_gains_push_and_momentum_without_milling():
     s = new_state("Explosive Step — Fumikomi")
     play_named(s, "Explosive Step — Fumikomi")
-    assert (s.position, s.momentum, len(s.fighter_a.draw_pile)) == (1, 1, 3)
+    assert (s.position, s.momentum, len(s.fighter_a.draw_pile)) == (1, 1, 6)
     good = new_state("Explosive Step — Fumikomi")
     good.momentum = 1
     play_named(good, "Explosive Step — Fumikomi")
-    assert (good.position, good.momentum, len(good.fighter_a.draw_pile)) == (1, 2, 3)
+    assert (good.position, good.momentum, len(good.fighter_a.draw_pile)) == (1, 2, 6)
 
 
-def test_b7_salt_throw_gets_one_play_in_exchange_but_not_tachiai():
+def test_salt_throw_no_extra_play_or_temporary_in_either_phase():
     s = new_state("Salt Throw")
     play_named(s, "Salt Throw")
-    assert s.fighter_a.plays_remaining == 2
-    assert [x.card.name for x in s.fighter_a.temporary_zone] == ["Salt Throw"]
+    assert s.fighter_a.plays_remaining == 1
+    assert not s.fighter_a.temporary_zone
 
     t = new_state("Salt Throw")
     compared = compare_tachiai(t.fighter_a.wrestler, t.fighter_b.wrestler)
     before = t.fighter_a.plays_remaining
     resolve_prepared_tachiai(t, compared)
     assert t.fighter_a.plays_remaining == before
-    assert any(x.card.name == "Salt Throw" for x in t.fighter_a.temporary_zone)
+    assert not any(x.card.name == "Salt Throw" for x in t.fighter_a.temporary_zone)
 
 
 def test_b7_power_water_generates_six_cards_and_extra_play_in_exchange_and_tachiai():
@@ -338,5 +338,7 @@ def test_salt_throw_exchange_recycles_any_discard_count(discard_count):
     resolve_exchange_effect(s, Side.A, card_by_name("Salt Throw"), EffectContext())
     assert s.fighter_a.draw_pile == original_draw + discarded
     assert not s.fighter_a.discard_pile
-    assert s.fighter_a.plays_remaining == 3
-    assert [t.card.name for t in s.fighter_a.temporary_zone] == ["Salt Throw"]
+    assert s.fighter_a.plays_remaining == 2
+    assert not s.fighter_a.temporary_zone
+    assert s.position == int(discard_count >= 7)
+    assert s.momentum == int(discard_count >= 7)

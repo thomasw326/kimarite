@@ -8,7 +8,7 @@ from .tachiai import TachiaiComparison, TachiaiStats, apply_tachiai_power_push
 from .temporary import add_temporary
 
 
-PREPARED_TEMPORARY_TACHIAI = frozenset({"Sonkyo", "Salt Throw", "Nekodamashi", "Chiri-chozu", "Shikiri"})
+PREPARED_TEMPORARY_TACHIAI = frozenset({"Sonkyo", "Nekodamashi", "Chiri-chozu", "Shikiri"})
 REVEAL_FAMILY = frozenset({"Oshi", "Tsuki"})
 
 
@@ -87,7 +87,7 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison, cards
         return 0
 
     loser = state.opponent_side(winner)
-    protective = {"Hold Position", "Immovable", "Sidestep", "Give Ground"}
+    protective = {"Sidestep", "Give Ground"}
     cards = [c for c in cards_by_side[loser] if c.name in protective]
     if not cards:
         return 0
@@ -98,7 +98,7 @@ def _power_push_reduction(state: BoutState, comparison: TachiaiComparison, cards
             state, winner, source=card.name,
             description="reduce Tachiai Push from the Spirit comparison",
         ):
-            reduction += 1 if card.name in {"Sidestep", "Give Ground"} else 2
+            reduction += 1
     return reduction
 
 
@@ -148,7 +148,7 @@ def resolve_prepared_tachiai(
     # Power must protect against Spirit Push AND prepared-card bonus Push.
     extra_push = {Side.A: 0, Side.B: 0}
     momentum_delta = {Side.A: 0, Side.B: 0}
-    reset_position = False
+    neutral_cards = []
 
     for side in (Side.A, Side.B):
       for card in cards_by_side[side]:
@@ -164,7 +164,7 @@ def resolve_prepared_tachiai(
         elif name in REVEAL_FAMILY or name in {"Sonkyo", "Chiri-chozu", "Shikiri"}:
             pass
         elif name == "Nekodamashi":
-            make_unstable(state, opponent_side)
+            make_unstable(state, opponent_side, source_side=side)
             add_temporary(state, side, card, phase="pre-bout")
 
         elif name == "Nodowa":
@@ -184,9 +184,6 @@ def resolve_prepared_tachiai(
         elif name == "Gain Right Grip":
             if comparison.advantage_for(side, Stat.TECHNIQUE) > 0:
                 establish_grip(state, side, "right")
-
-        elif name == "Salt Throw":
-            resolve_exchange_effect(state, side, card, EffectContext(comparison=comparison))
 
         elif name == "Power Water":
             resolve_exchange_effect(state, side, card, EffectContext(comparison=comparison))
@@ -229,7 +226,9 @@ def resolve_prepared_tachiai(
             if not getattr(state, "r20_active", False) and (
                 comparison.wrestler_a.technique if side is Side.A else comparison.wrestler_b.technique
             ) > _opponent_stats(comparison, side).spirit:
-                reset_position = True
+                neutral_cards.append(name)
+                momentum_delta[side] += 1
+                make_unstable(state, opponent_side, source_side=side)
 
         elif name == "Get Underneath":
             momentum_delta[side] += 1
@@ -258,10 +257,21 @@ def resolve_prepared_tachiai(
 
     # Resolve prepared protection against the Spirit component first, then
     # apply the Power defense once to the net of Spirit + both card bonuses.
-    reduction = _power_push_reduction(state, comparison, cards_by_side)
-    apply_tachiai_power_push(
-        state, comparison, reduction=reduction, extra_push=extra_push
+    neutral_cards.extend(
+        card.name for cards in cards_by_side.values() for card in cards
+        if card.name in {"Hold Position", "Immovable"}
     )
+    if neutral_cards:
+        # Exchange starts neutral regardless of either side's opening Push.
+        # Resolve before movement can trigger a ringout or Shove victory.
+        # Non-movement Tachiai effects above still resolve normally.
+        state.position = 0
+        state.log(f"{' / '.join(neutral_cards)} sets the opening Position to 0.")
+    else:
+        reduction = _power_push_reduction(state, comparison, cards_by_side)
+        apply_tachiai_power_push(
+            state, comparison, reduction=reduction, extra_push=extra_push
+        )
 
     if state.winner is not None:
         return
@@ -273,16 +283,12 @@ def resolve_prepared_tachiai(
             state.declare_winner(side, "Shove")
             return
 
-    if reset_position:
-        state.position = 0
-        state.log("Henka resets the opening Position to 0.")
-
     # BEGIN APPROVED MILL/RECYCLE V1
     # Prepared explosive cards pay their Tachiai mill cost after opening effects.
     for side in (Side.A, Side.B):
       for card in cards_by_side[side]:
         name = card.name
-        if name in {"Headlong Charge", "Explosive Step — Fumikomi"}:
+        if name == "Headlong Charge":
             from .effects import mill_cards
             mill_cards(state, side, 2)
     # END APPROVED MILL/RECYCLE V1
