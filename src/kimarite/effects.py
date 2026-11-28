@@ -246,16 +246,16 @@ def _tsuppari(state: BoutState, side: Side, card: Card, context: EffectContext) 
 
 
 
-def _harite(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
+def _harite(state: BoutState, side: Side, card: Card, context: EffectContext, *, tachiai: bool = False) -> None:
     """Discard a random opponent card, reduce their Power and mill two cards."""
     opponent_side = state.opponent_side(side)
     if prevent_negative_effect(
         state, opponent_side, source="Harite",
-        description="discard 1, lose 1 Power and mill 2",
+        description="lose 1 Power and mill 2" if tachiai else "discard 1, lose 1 Power and mill 2",
     ):
         return
     opponent = state.opponent(side)
-    if opponent.hand:
+    if not tachiai and opponent.hand:
         import hashlib
         signature = repr((state.turn_number, side.value,
                           tuple(c.card_id for c in opponent.hand),
