@@ -167,7 +167,7 @@ CARD_LIBRARY_TEXT = {
   },
   "regain balance": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: Draw 1 card. If your Momentum is negative, gain 2 Momentum and 2 Power.",
+    "effect": "Exchange: Draw 1 card. If your Momentum is negative, gain 1 Momentum and 2 Power.",
     "notes": ""
   },
   "sidestep": {
