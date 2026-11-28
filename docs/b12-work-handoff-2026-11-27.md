@@ -94,3 +94,5 @@
 
 ## Owner approval after neutral Tachiai batch
 - Run 46083420835 completed successfully at 8385d90; artifact 15237619826. Owner locks Hold Position, Immovable, Gain Left Grip, Gain Right Grip. Owner considers Grip Tachiai discrepancy deck construction / Kimarite related and does not request further card-level investigation. This is an accepted design judgment, not a proven causal attribution. Preserve all four mechanics. Audit and catalogue lock updates applied; numerical audit still reflects prior batch pending reconciliation. No merge or deploy.
+
+- Regain Balance LOCKED by owner. Wording: Exchange: Draw 1 card. If your Momentum is negative, gain 1 Momentum and 2 Power. Engine unchanged; terminal stale +2 Momentum corrected to actual +1. Inspector 1a1d9f5, terminal 2d73c34. Audit and catalogue lock verified.
