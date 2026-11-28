@@ -148,7 +148,7 @@ def resolve_prepared_tachiai(
     # Power must protect against Spirit Push AND prepared-card bonus Push.
     extra_push = {Side.A: 0, Side.B: 0}
     momentum_delta = {Side.A: 0, Side.B: 0}
-    reset_position = False
+    neutral_cards = []
 
     for side in (Side.A, Side.B):
       for card in cards_by_side[side]:
@@ -226,7 +226,9 @@ def resolve_prepared_tachiai(
             if not getattr(state, "r20_active", False) and (
                 comparison.wrestler_a.technique if side is Side.A else comparison.wrestler_b.technique
             ) > _opponent_stats(comparison, side).spirit:
-                reset_position = True
+                neutral_cards.append(name)
+                momentum_delta[side] += 1
+                make_unstable(state, opponent_side, source_side=side)
 
         elif name == "Get Underneath":
             momentum_delta[side] += 1
@@ -255,10 +257,10 @@ def resolve_prepared_tachiai(
 
     # Resolve prepared protection against the Spirit component first, then
     # apply the Power defense once to the net of Spirit + both card bonuses.
-    neutral_cards = [
+    neutral_cards.extend(
         card.name for cards in cards_by_side.values() for card in cards
         if card.name in {"Hold Position", "Immovable"}
-    ]
+    )
     if neutral_cards:
         # Exchange starts neutral regardless of either side's opening Push.
         # Resolve before movement can trigger a ringout or Shove victory.
@@ -280,10 +282,6 @@ def resolve_prepared_tachiai(
             state.win_source = "Shove Tachiai"
             state.declare_winner(side, "Shove")
             return
-
-    if reset_position:
-        state.position = 0
-        state.log("Henka resets the opening Position to 0.")
 
     # BEGIN APPROVED MILL/RECYCLE V1
     # Prepared explosive cards pay their Tachiai mill cost after opening effects.
