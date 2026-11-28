@@ -187,7 +187,7 @@ CARD_LIBRARY_TEXT = {
   },
   "morozashi": {
     "timing": "Tachiai / Exchange",
-    "effect": "Exchange: Requires at least one Grip. Establish whichever Grip is missing. Temporary: Prevent your Grips from being reduced while active. At the start of your next turn, if you have both Grips, gain 1 Push and 1 Momentum.",
+    "effect": "Exchange: Requires at least one Grip. Establish whichever Grip is missing. Temporary: At the start of your next turn, if you have both Grips, gain 1 Push and 1 Momentum.",
     "notes": ""
   },
   "yorikiri": {
