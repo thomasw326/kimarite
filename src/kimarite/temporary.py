@@ -149,9 +149,9 @@ def resolve_start_of_turn_temporaries(state: BoutState, side: Side) -> None:
             make_unstable(state, state.opponent_side(side), source_side=side)
         elif name == "Pull the Chair":
             from .effects import draw_one
-            if state.momentum * state.sign(side) < 0:
-                make_unstable(state, state.opponent_side(side), source_side=side)
             draw_one(state, side)
+            if state.winner is None and state.momentum * state.sign(side) < 0:
+                make_unstable(state, state.opponent_side(side), source_side=side)
         elif name == "Nekodamashi":
             make_unstable(state, state.opponent_side(side), source_side=side)
         elif name == "Denshamichi":
