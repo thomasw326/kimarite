@@ -20,7 +20,7 @@ def can_play_card(state: BoutState, side: Side, card: Card) -> bool:
     if grip_gain_prevented(state, side) and card.name in {
         "Gain Left Grip", "Gain Right Grip", "Uwate", "Shitate",
         "Attempt Two-Handed Grip", "Attempt Deep Outside Grip",
-        "Attempt Deep Inside Grip", "Morozashi",
+        "Attempt Deep Inside Grip",
     }:
         return False
 
