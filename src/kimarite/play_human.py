@@ -37,7 +37,7 @@ CARD_LIBRARY_TEXT = {
   },
   "headlong charge": {
     "timing": "Tachiai / Exchange",
-    "effect": "Tachiai / Exchange: Discard 1 of your Kimarite in play; gain 1 Momentum and 1 Push. Mill 2. Cannot play in Exchange without a Kimarite to sacrifice. Prepared copy is discarded after Tachiai.",
+    "effect": "Tachiai: Optionally sacrifice a Kimarite to gain 1 Momentum and 1 Push (part of net opening Push). Exchange: Sacrifice a Kimarite to gain 1 Momentum and 1 Push. Cannot play in Exchange without a Kimarite to sacrifice. Prepared copy is discarded after Tachiai.",
     "notes": ""
   },
   "nodowa": {
