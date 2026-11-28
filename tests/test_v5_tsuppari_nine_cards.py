@@ -23,7 +23,7 @@ def test_prepared_tsuppari_adds_nine_cards():
     assert len({c.card_id for c in generated}) == 9
 
 
-def test_exchange_tsuppari_refunds_play_without_draw_or_mill():
+def test_exchange_tsuppari_draws_without_refunding_play_or_milling():
     from kimarite.models import Side
     from kimarite.playing import play_card
     for prior in (None, "Oshi", "Tsuki", "Tsuppari", "Shove"):
@@ -36,8 +36,8 @@ def test_exchange_tsuppari_refunds_play_without_draw_or_mill():
         if prior:
             state.fighter_a.played_this_turn.append(card_by_name(prior))
         play_card(state, Side.A, tsuppari)
-        assert state.fighter_a.plays_remaining == 1
-        assert not state.fighter_a.hand
-        assert state.fighter_a.draw_pile == [blank, blank, blank]
+        assert state.fighter_a.plays_remaining == 0
+        assert state.fighter_a.hand == [blank]
+        assert state.fighter_a.draw_pile == [blank, blank]
         assert state.fighter_a.discard_pile == [tsuppari]
         assert state.position == (1 if prior else 0)
