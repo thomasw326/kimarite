@@ -96,3 +96,9 @@
 - Run 46083420835 completed successfully at 8385d90; artifact 15237619826. Owner locks Hold Position, Immovable, Gain Left Grip, Gain Right Grip. Owner considers Grip Tachiai discrepancy deck construction / Kimarite related and does not request further card-level investigation. This is an accepted design judgment, not a proven causal attribution. Preserve all four mechanics. Audit and catalogue lock updates applied; numerical audit still reflects prior batch pending reconciliation. No merge or deploy.
 
 - Regain Balance LOCKED by owner. Wording: Exchange: Draw 1 card. If your Momentum is negative, gain 1 Momentum and 2 Power. Engine unchanged; terminal stale +2 Momentum corrected to actual +1. Inspector 1a1d9f5, terminal 2d73c34. Audit and catalogue lock verified.
+
+## Next card review batch
+- Live audit classification verified: 19 locked cards. Owner manual locks Attempt Deep Outside Grip, Ankogata, Tsuri retained, plus prior 16. No changes to their mechanics. Tsuri AI/deck priority and bonus hit-rate instrumentation remain follow-up work.
+- Henka experimental: existing Technique > opposing Spirit condition now grants 1 Momentum, opposing Unstable (normal prevention), and neutral opening before ringout/Shove checks; Exchange no longer prevents Push, delayed reward and disruption retained. Existing r20 guard retained. Engine 575cc68 / 6b961c4; inspector b3f1e8d; terminal 712f88e.
+- Kachiage 3/0/1 (add Spirit); Morotezuki wording only; Butsukari remove mill 1, retain independent Power/Momentum conditions. Commits dfddb9f, 8bb2a4d, 68b48b1. Updated old regression expectations ae7700d / 37c1d47. Full validation gate required before simulation.
+- Owner explicitly requests next 35,400 max40 batch, same seed and unchanged decks, six deltas and existing diagnostics. Preserve previous artifacts and manual lock classifications. No merge/deploy.
