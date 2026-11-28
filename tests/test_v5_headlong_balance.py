@@ -82,3 +82,32 @@ def test_headlong_exchange_does_not_mill():
 def test_read_the_move_printed_orbs():
     card = card_by_name("Read the Move")
     assert (card.power, card.technique, card.spirit) == (0, 1, 2)
+
+
+def test_harite_tachiai_preserves_opponent_hand():
+    state, comparison = _bout("Harite")
+    held = Card(95001, "Held")
+    state.fighter_b.hand = [held]
+    power = state.fighter_b.power
+    before = list(state.fighter_b.draw_pile)
+    resolve_prepared_tachiai(state, comparison)
+    assert state.fighter_b.hand == [held]
+    assert state.fighter_b.power == power - 1
+    assert state.fighter_b.draw_pile == before[2:]
+    assert state.fighter_b.discard_pile == before[:2]
+
+
+def test_harite_exchange_still_discards_hand_and_mills():
+    from kimarite.playing import play_card
+    state, comparison = _bout("Harite")
+    card = card_by_name("Harite")
+    held = Card(95002, "Held")
+    state.fighter_a.hand = [card]
+    state.fighter_b.hand = [held]
+    power = state.fighter_b.power
+    before = list(state.fighter_b.draw_pile)
+    play_card(state, Side.A, card)
+    assert not state.fighter_b.hand
+    assert state.fighter_b.power == power - 1
+    assert state.fighter_b.draw_pile == before[2:]
+    assert state.fighter_b.discard_pile == [held] + before[:2]
