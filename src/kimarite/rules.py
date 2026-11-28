@@ -165,17 +165,6 @@ def gain_push(state: BoutState, side: Side, amount: int) -> None:
     if amount <= 0:
         return
 
-    # B9 Henka: protect exactly one incoming Push while active.
-    for temporary in defender.temporary_zone:
-        if amount <= 0:
-            break
-        if temporary.card.name == "Henka" and not getattr(temporary, "henka_prevention_used", False):
-            temporary.henka_prevention_used = True
-            amount -= 1
-            state.log("Henka prevents the first 1 incoming Push.")
-    if amount <= 0:
-        return
-
     # Sidestep only breaks after Push has survived prevention/suppression.
     _break_sidestep_from_push(state, side)
 
