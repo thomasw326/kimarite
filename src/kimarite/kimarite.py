@@ -75,7 +75,7 @@ def _katasukashi(state: BoutState, side: Side) -> bool:
 
 
 def _tsukiotoshi(state: BoutState, side: Side) -> bool:
-    return (no_grip(state, side) and relative_momentum(state, side) >= 2 and power_advantage(state, side) <= -3
+    return (no_grip(state, side) and relative_momentum(state, side) >= 3 and power_advantage(state, side) <= -3
             and state.opponent(side).unstable)
 
 
