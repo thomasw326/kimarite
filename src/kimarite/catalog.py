@@ -113,6 +113,7 @@ B12_CARD_POOL: tuple[Card, ...] = (
     Card(14012, "Kimetaoshi", 3, 0, 0, True),
     Card(14013, "Reckless Charge", 0, 0, 3),
     Card(14014, "Sheer Grit", 0, 0, 3),
+    Card(14016, "Pull the Chair", 0, 2, 1),
 )
 
 # Starting Kimarite are game definitions, not necessarily present in the
