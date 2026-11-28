@@ -49,12 +49,12 @@ def test_tsuppari_chains_after_oshi():
     assert [c.name for c in bout.fighter_a.played_this_turn] == ["Oshi", "Tsuppari"]
     assert bout.fighter_a.plays_remaining == 2
     assert bout.winner is None
-    assert bout.fighter_a.draw_pile == []
-    assert [c.name for c in bout.fighter_a.hand] == ["Draw A", "Draw C"]
-    assert [c.name for c in bout.fighter_a.discard_pile] == ["Cost", "Draw B", "Oshi", "Draw D", "Draw E", "Tsuppari"]
+    assert [c.name for c in bout.fighter_a.draw_pile] == ["Draw C", "Draw D", "Draw E"]
+    assert [c.name for c in bout.fighter_a.hand] == ["Draw A"]
+    assert [c.name for c in bout.fighter_a.discard_pile] == ["Cost", "Draw B", "Oshi", "Tsuppari"]
 
 
-def test_tsuppari_standalone_draws_one_and_mills_two():
+def test_tsuppari_standalone_refunds_play_without_cycling():
     card = card_by_name("Tsuppari")
     bout = bout_with_hand([card])
     bout.fighter_a.draw_pile = [Card(8201, "Draw"), Card(8202, "Mill A"), Card(8203, "Mill B"), Card(8204, "Keep")]
@@ -62,9 +62,9 @@ def test_tsuppari_standalone_draws_one_and_mills_two():
     assert bout.position == 0
     assert bout.momentum == 0
     assert bout.fighter_a.plays_remaining == 2
-    assert [c.name for c in bout.fighter_a.hand] == ["Draw"]
-    assert [c.name for c in bout.fighter_a.discard_pile] == ["Mill A", "Mill B", "Tsuppari"]
-    assert [c.name for c in bout.fighter_a.draw_pile] == ["Keep"]
+    assert not bout.fighter_a.hand
+    assert [c.name for c in bout.fighter_a.discard_pile] == ["Tsuppari"]
+    assert [c.name for c in bout.fighter_a.draw_pile] == ["Draw", "Mill A", "Mill B", "Keep"]
     assert bout.winner is None
 
 
