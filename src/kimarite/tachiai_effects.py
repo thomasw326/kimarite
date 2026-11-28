@@ -142,7 +142,7 @@ def resolve_prepared_tachiai(
             gain_power(state, side, 2)
         elif name == "Harite":
             from .effects import _harite
-            _harite(state, side, card, EffectContext())
+            _harite(state, side, card, EffectContext(), tachiai=True)
 
     # Collect card bonuses before applying any Tachiai Push: the defender's
     # Power must protect against Spirit Push AND prepared-card bonus Push.
