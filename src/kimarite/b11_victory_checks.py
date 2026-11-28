@@ -46,7 +46,7 @@ def victory_checks(state, side, name):
         "Oshitaoshi": [("Momentum advantage","momentum",">=",2),("Position advantage","position",">=",1),("Power","power",">=",8)],
         "Yoritaoshi": [("Effective Grip","grip",">=",1),("Position advantage","position",">=",2),("Power advantage","power_advantage",">=",2)],
         "Katasukashi": [("Opponent Grip","enemy_raw_grip","=",0),("Momentum advantage","momentum",">=",2),("Hand advantage","hand_diff",">=",4)],
-        "Tsukiotoshi": [("Own Grip","raw_grip","=",0),("Momentum advantage","momentum",">=",2),("Power advantage","power_advantage","<=",-3),("Opponent unstable","foe_unstable","=",True)],
+        "Tsukiotoshi": [("Own Grip","raw_grip","=",0),("Momentum advantage","momentum",">=",3),("Power advantage","power_advantage","<=",-3),("Opponent unstable","foe_unstable","=",True)],
         "Tottari": [("Own Grip","raw_grip","=",0),("Opponent Grip reduced this turn","grip_reduced","=",True),("Opponent discard count","enemy_discard",">=",7)],
         "Uwatenage": [("Deep Left Grip","left","=","DEEP"),("Effective Grip","grip",">=",1),("Momentum advantage","momentum",">=",1),("Position advantage","position",">=",0)],
         "Shitatenage": [("Effective Grip","grip",">=",1),("Deep Right Grip","right","=","DEEP"),("Momentum advantage","momentum",">=",1),("Position advantage","position",">=",0)],
