@@ -91,3 +91,6 @@
 - Gain Left/Right Grip direct engine effects are symmetric, but framework composition and starting Kimarite differ. No mechanics changes or new lock. New report gain_grip_matched_tachiai.csv (f56ec0c) records wins and bouts by framework, starting Kimarite, opponent framework, seat, prepared card, and relative Technique advantage among frameworks containing both. Sparse strata remain possible; association not causation.
 - Latest full CI 46082728303, canonical smoke 46082728285, balance smoke 46082728284 successful at aee900b. New reporter gated by full tests and smoke before 24-shard run.
 - New run uses same 60 max40 decks, seed 20261102, ten mirrored repetitions; 35,400 bouts. No merge/deploy. Preserve previous results and sync sheet only after verified completion.
+
+## Owner approval after neutral Tachiai batch
+- Run 46083420835 completed successfully at 8385d90; artifact 15237619826. Owner locks Hold Position, Immovable, Gain Left Grip, Gain Right Grip. Owner considers Grip Tachiai discrepancy deck construction / Kimarite related and does not request further card-level investigation. This is an accepted design judgment, not a proven causal attribution. Preserve all four mechanics. Audit and catalogue lock updates applied; numerical audit still reflects prior batch pending reconciliation. No merge or deploy.
