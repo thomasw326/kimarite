@@ -4,7 +4,7 @@ import csv
 import json
 import random
 from collections import Counter
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from b12_60_big_test import (load_designs, run_one, source_checksum, AVAILABLE,
     GENERATED_ONLY, MIN_KIMARITE, MAX_KIMARITE, card_by_name)
@@ -86,7 +86,6 @@ def main():
     generations=1 if args.smoke else args.generations
     mutations=2 if args.smoke else args.mutations
     total_screening=generations*(len(parents)+mutations)*len(opponents)*2
-    completed_screening=0
     print(f"Starting: {generations} generations, {mutations} mutations/generation, {total_screening} screening bouts",flush=True)
     with ProcessPoolExecutor(max_workers=args.workers) as ex:
         for gen in range(1,generations+1):
@@ -104,17 +103,11 @@ def main():
             candidates=parents+children
             # New common seed every generation; independent validation below.
             print(f"Generation {gen}/{generations}: evaluating {len(candidates)} candidates",flush=True)
-            futures={ex.submit(evaluate,(d,opponents,args.seed+gen,1,100)):d for d in candidates}
-            results={}
-            for future in as_completed(futures):
-                d=futures[future]
-                score=future.result()
-                results[d["id"]]=score
-                completed_screening+=score["bouts"]
-                print(f"Generation {gen}/{generations} | candidate {len(results)}/{len(candidates)} | {d['id']}: {score['wins']}/{score['bouts']} ({score['win_rate']:.1%}) | screening {completed_screening}/{total_screening} ({completed_screening/total_screening:.1%})",flush=True)
+            scores=list(ex.map(evaluate,[(d,opponents,args.seed+gen,1,100) for d in candidates]))
+            results=dict(zip([d["id"] for d in candidates],scores))
             selected=sorted(candidates,key=lambda d:(-results[d["id"]]["wins"],d["id"]))[:4]
             for d in candidates:
-                row={"generation":gen,"deck_id":d["id"],"selected":d in selected,**results[d["id"]]}
+                row={"generation":gen,"deck_id":d["id"],"selected":d in selected,"deck":d,**results[d["id"]]}
                 if d["id"] in metadata:
                     parent,kind=metadata[d["id"]]
                     row.update(parent=parent["id"],kind=kind,parent_win_rate=results[parent["id"]]["win_rate"],
@@ -124,25 +117,14 @@ def main():
                         duplicates_added=sorted(set(d["duplicates"])-set(parent["duplicates"])),
                         duplicates_removed=sorted(set(parent["duplicates"])-set(d["duplicates"])))
                 log.append(row)
-            for d in selected:
-                if d["id"] in metadata:
-                    parent,kind=metadata[d["id"]]
-                    print(f"Selected {d['id']} from {parent['id']} ({kind}): base +{sorted(set(d['base'])-set(parent['base']))} -{sorted(set(parent['base'])-set(d['base']))}; duplicates +{sorted(set(d['duplicates'])-set(parent['duplicates']))} -{sorted(set(parent['duplicates'])-set(d['duplicates']))}",flush=True)
             parents=selected
             (out/"screening.json").write_text(json.dumps(log,indent=2))
             (out/"finalists.json").write_text(json.dumps(parents,indent=2))
-            print(f"Generation {gen}: "+", ".join(f"{d['id']} {results[d['id']]['win_rate']:.1%}" for d in parents),flush=True)
+            print(f"Generation {gen}/{generations} complete",flush=True)
         validation=list({key(d):d for d in originals+parents}.values())
         repeats=1 if args.smoke else args.validation_repeats
         print(f"Independent validation: {len(validation)} decks, {len(opponents)*2*repeats} bouts each",flush=True)
-        futures={ex.submit(evaluate,(d,opponents,args.seed+100000,repeats,100)):i for i,d in enumerate(validation)}
-        scores=[None]*len(validation)
-        done=0
-        for future in as_completed(futures):
-            i=futures[future]
-            scores[i]=future.result()
-            done+=1
-            print(f"Validation {done}/{len(validation)} | {validation[i]['id']}: {scores[i]['win_rate']:.1%}",flush=True)
+        scores=list(ex.map(evaluate,[(d,opponents,args.seed+100000,repeats,100) for d in validation]))
     (out/"validation.json").write_text(json.dumps({"source_sha256":source_checksum(),"seed":args.seed,"smoke":args.smoke,"results":[{"deck":d,**s} for d,s in zip(validation,scores)]},indent=2))
     rows=[r for r in log if "parent" in r]
     cols=["generation","deck_id","parent","kind","selected","wins","bouts","win_rate","parent_win_rate","delta","added","removed","duplicates_added","duplicates_removed"]
