@@ -875,7 +875,6 @@ def _butsukari(state: BoutState, side: Side, card: Card, context: EffectContext)
             lose_power(state, state.opponent_side(side), 2, source_side=side)
     if state.momentum * state.sign(side) >= 1:
         make_unstable(state, state.opponent_side(side), source_side=side)
-    mill_cards(state, side, 1)
 
 
 def _denshamichi(state: BoutState, side: Side, card: Card, context: EffectContext) -> None:
