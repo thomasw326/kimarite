@@ -1,9 +1,9 @@
-name: B12 Tsuppari Draw Only Review — 35400 max40 bouts
+name: B12 Ordinary Card Review — 35400 max40 bouts
 
 on:
   push:
     branches:
-      - experiment/b12-next-card-review
+      - experiment/b12-post-promotion-review
     paths:
       - '.github/workflows/b12-experimental-next-card-review.yml'
   workflow_dispatch:
@@ -96,6 +96,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-tsuppari-draw-only-max40-35400-diagnostics
+          name: b12-ordinary-card-review-max40-35400-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore
