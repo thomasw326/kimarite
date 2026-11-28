@@ -1,4 +1,4 @@
-name: B12 Grip Payoff Review — 35400 max40 bouts
+name: B12 Tsuppari No Cycling Review — 35400 max40 bouts
 
 on:
   push:
@@ -96,6 +96,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: b12-grip-payoff-max40-35400-diagnostics
+          name: b12-tsuppari-no-cycling-max40-35400-diagnostics
           path: artifacts/b12_big_test_report/
           if-no-files-found: ignore
