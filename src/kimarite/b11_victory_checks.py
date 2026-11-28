@@ -55,7 +55,7 @@ def victory_checks(state, side, name):
         "Hatakikomi": [("Momentum advantage","momentum","<=",-2),("Power","power",">=",6),("Opponent unstable","foe_unstable","=",True)],
         "Hikiotoshi": [("Momentum advantage","momentum","<=",-2),("Position advantage","position",">=",0),("Effective Grip","grip",">=",1)],
         "Tsukitaoshi": [("Position advantage","position",">=",0),("Cards played this turn","plays",">=",4)],
-        "Tsuridashi": [("Effective Grip","grip",">=",3),("Position advantage","position",">=",0),("Power","power",">=",6)],
+        "Tsuridashi": [("Effective Grip","grip",">=",3),("Power","power",">=",6)],
         "Kotenage": [("Opponent effective Grip","enemy_grip","=",0),("Momentum advantage","momentum",">=",1),("Cards in hand","hand",">=",5)],
         "Abisetaoshi": [("Effective Grip","grip",">=",2),("Power","power",">=",10),("Momentum advantage","momentum",">=",1)],
         "Kirikaeshi": [("Power advantage","power_advantage","<=",-3),("Own stable","stable","=",True),("Opponent unstable","foe_unstable","=",True),("Momentum advantage","momentum",">=",2)],
